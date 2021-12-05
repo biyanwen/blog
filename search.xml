@@ -48,6 +48,75 @@
       </tags>
   </entry>
   <entry>
+    <title>Git-submodule 统一配置简明教程</title>
+    <url>/blog/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
+<p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
+<p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
+<span id="more"></span>
+
+<p>﻿# Git-submodule 统一配置简明教程</p>
+<h2 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h2><p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
+<h2 id="2-为什么选用-git-submodule"><a href="#2-为什么选用-git-submodule" class="headerlink" title="2. 为什么选用 git-submodule"></a>2. 为什么选用 git-submodule</h2><p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
+<p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
+<h2 id="3-如果你需要集成-git-submodule-应该如何做"><a href="#3-如果你需要集成-git-submodule-应该如何做" class="headerlink" title="3. 如果你需要集成  git-submodule 应该如何做"></a>3. 如果你需要集成  git-submodule 应该如何做</h2><h3 id="3-1-检查项目中的同名模块"><a href="#3-1-检查项目中的同名模块" class="headerlink" title="3.1 检查项目中的同名模块"></a>3.1 检查项目中的同名模块</h3><p>  git-submodule 是不允许两个或两个以上的模块存在相同名字的情况发生，所以要先做检查。</p>
+<h3 id="3-2-使用-git-submodule-添加子模块"><a href="#3-2-使用-git-submodule-添加子模块" class="headerlink" title="3.2 使用  git-submodule 添加子模块"></a>3.2 使用  git-submodule 添加子模块</h3><p>执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule add -b $&#123;分支名字&#125; $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
+
+<p>命令详细解析：</p>
+<ul>
+<li>git ：调用 git 可执行程序；</li>
+<li>submodule add ： 添加  git-submodule 子模块；</li>
+<li>-b ${分支名字}：将子模块的哪个分支作为当前项目的字目录，如果不写默认是主模块；</li>
+<li>${git仓库地址} ：子模块项目地址；</li>
+</ul>
+<p>以现货为例，最终命令如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule add -b prod/dev http://[xxx].git</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-拉取子模块代码"><a href="#3-3-拉取子模块代码" class="headerlink" title="3.3 拉取子模块代码"></a>3.3 拉取子模块代码</h3><p>当执行完 3.2 步骤之后我们会发现项目中多个一个空文件夹，没错是它空的， submodule add 命令不会直接将代码也拉取下来，第一次需要我们主动些。</p>
+<p>执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule update --init --recursive</span><br></pre></td></tr></table></figure>
+
+<p>执行完这条命令后子模块的代码就被拉取下来了。</p>
+<p>如果之后子模块代码有更新了怎么办？当然再执行一次上面的命令就可以了，不过这样略显麻烦，git 当然不会有这么智障的操作，如果子模块有更新了，我们在主模块使用 <strong>git pull</strong> 也应该可以将最新代码拉取下拉，为此，需要你执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
+
+<p>这样，每次在主模块执行 git pull 的时候，都会去拉取子模块的最新代码。</p>
+<h3 id="3-4-切换子模块分支"><a href="#3-4-切换子模块分支" class="headerlink" title="3.4 切换子模块分支"></a>3.4 切换子模块分支</h3><p>这一步是可选的，是否需要这么做需要你看看你的子模块是否成功关联了对应分支。</p>
+<p>可使用如下命令查看：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git status</span><br></pre></td></tr></table></figure>
+
+<p>会显示子模块目前所在分支，如果出现  <strong>HEAD detached from</strong> 等提示语就表示没有成功关联到指定分支，那么你需要按照下面的步骤进行操作。</p>
+<p>这一步可能让你迷惑，什么？在 3.2 步不是已经指定子模块的分支了吗？对没错，你是指定了，但是他只是让主模块保存了指定分支的最后一次提交的 commit id。并没有真正关联到对应模块。</p>
+<p>这个时候就需要你自己切换分支，可执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git checkout xxx</span><br></pre></td></tr></table></figure>
+
+<p>xxx 为要切换分支的名字，当然你用各种 git 图形化工具操作也是一样的。</p>
+<h2 id="4-如果你要-clone-一个集成了-git-submodule-的项目应该如何做"><a href="#4-如果你要-clone-一个集成了-git-submodule-的项目应该如何做" class="headerlink" title="4. 如果你要 clone 一个集成了  git-submodule 的项目应该如何做"></a>4. 如果你要 clone 一个集成了  git-submodule 的项目应该如何做</h2><p>推荐使用如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git clone --recurse-submodules $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 clone 的时候加上 –recurse-submodules 参数，这样就会将子模块的内容都拉取下来。</p>
+<p>然后执行 3.4 步骤的操作，选取子模块分支。</p>
+<p>再执行如下命令，保证每次 git pull 的时候都能获取子模块最新代码。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-在子模块上提交代码"><a href="#5-在子模块上提交代码" class="headerlink" title="5. 在子模块上提交代码"></a>5. 在子模块上提交代码</h2><p>子模块就跟其他 git 项目一样，你是可以直接更改代码并提交的，但是这里有一点需要注意，就是如果你在子模块上提交了代码，那么在主模块上也要提交一次，也就是说<strong>要提交两次代码</strong>，这是至关重要的，如果你没有这么做，有可能会让其他人的子模块无法正常工作。</p>
+<p>例如你在子模块提交代码后，在主模块查看 git 状态时会有如下提示：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">modified:   xxx（模块名） (new commits)</span><br></pre></td></tr></table></figure>
+
+<p>你必须要将这个代码提交到主模块的 git 仓库，这个更改其实是记录着子模块最新提交的 commit id 。用来做版本管理的。</p>
+<h2 id="6-其他"><a href="#6-其他" class="headerlink" title="6. 其他"></a>6. 其他</h2><p>如果想深入了解，可以参考以下文档。</p>
+<p><a href="https://git-scm.com/docs/git-submodule">参数文档</a></p>
+<p><a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">使用文档</a></p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Git</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java内存区域</title>
     <url>/blog/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/</url>
     <content><![CDATA[<h1 id="Java内存区域"><a href="#Java内存区域" class="headerlink" title="Java内存区域"></a>Java内存区域</h1><span id="more"></span>
@@ -189,72 +258,238 @@
       </tags>
   </entry>
   <entry>
-    <title>Git-submodule 统一配置简明教程</title>
-    <url>/blog/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</url>
-    <content><![CDATA[<p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
-<p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
-<p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
-<span id="more"></span>
+    <title>Java内存模型与线程</title>
+    <url>/blog/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/</url>
+    <content><![CDATA[<h1 id="Java内存模型与线程"><a href="#Java内存模型与线程" class="headerlink" title="Java内存模型与线程"></a>Java内存模型与线程</h1><span id="more"></span>
 
-<p>﻿# Git-submodule 统一配置简明教程</p>
-<h2 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h2><p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
-<h2 id="2-为什么选用-git-submodule"><a href="#2-为什么选用-git-submodule" class="headerlink" title="2. 为什么选用 git-submodule"></a>2. 为什么选用 git-submodule</h2><p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
-<p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
-<h2 id="3-如果你需要集成-git-submodule-应该如何做"><a href="#3-如果你需要集成-git-submodule-应该如何做" class="headerlink" title="3. 如果你需要集成  git-submodule 应该如何做"></a>3. 如果你需要集成  git-submodule 应该如何做</h2><h3 id="3-1-检查项目中的同名模块"><a href="#3-1-检查项目中的同名模块" class="headerlink" title="3.1 检查项目中的同名模块"></a>3.1 检查项目中的同名模块</h3><p>  git-submodule 是不允许两个或两个以上的模块存在相同名字的情况发生，所以要先做检查。</p>
-<h3 id="3-2-使用-git-submodule-添加子模块"><a href="#3-2-使用-git-submodule-添加子模块" class="headerlink" title="3.2 使用  git-submodule 添加子模块"></a>3.2 使用  git-submodule 添加子模块</h3><p>执行如下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule add -b $&#123;分支名字&#125; $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
-
-<p>命令详细解析：</p>
+<h2 id="Java内存模型"><a href="#Java内存模型" class="headerlink" title="Java内存模型"></a>Java内存模型</h2><p>内存模型一词可以理解为在特定的操作协议下，对特定的内存或高速缓存进行读写访问的过程抽象；<br>在jdk5发布后Java内存模型才终于成熟、完善起来</p>
+<h3 id="主内存与工作内存"><a href="#主内存与工作内存" class="headerlink" title="主内存与工作内存"></a>主内存与工作内存</h3><p>Java内存模型的主要目的是定义程序中各种变量的访问规则，即关注在虚拟机中把变量值存储到内存和从内存中取出变量值这样的底层细节（这里的变量特指实例字段、静态字段、构成数组对象的元素，不包括局部变量与方法参数，因为后者是线程私有的）</p>
 <ul>
-<li>git ：调用 git 可执行程序；</li>
-<li>submodule add ： 添加  git-submodule 子模块；</li>
-<li>-b ${分支名字}：将子模块的哪个分支作为当前项目的字目录，如果不写默认是主模块；</li>
-<li>${git仓库地址} ：子模块项目地址；</li>
+<li><p>主内存</p>
+<p>Java模型规定了所有变量都存储在主内存中，线程间变量值的传递均需要通过主内存来完成</p>
+<ul>
+<li>对应Java堆总对象实例数据</li>
 </ul>
-<p>以现货为例，最终命令如下：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule add -b prod/dev http://[xxx].git</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-3-拉取子模块代码"><a href="#3-3-拉取子模块代码" class="headerlink" title="3.3 拉取子模块代码"></a>3.3 拉取子模块代码</h3><p>当执行完 3.2 步骤之后我们会发现项目中多个一个空文件夹，没错是它空的， submodule add 命令不会直接将代码也拉取下来，第一次需要我们主动些。</p>
-<p>执行如下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule update --init --recursive</span><br></pre></td></tr></table></figure>
-
-<p>执行完这条命令后子模块的代码就被拉取下来了。</p>
-<p>如果之后子模块代码有更新了怎么办？当然再执行一次上面的命令就可以了，不过这样略显麻烦，git 当然不会有这么智障的操作，如果子模块有更新了，我们在主模块使用 <strong>git pull</strong> 也应该可以将最新代码拉取下拉，为此，需要你执行如下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
-
-<p>这样，每次在主模块执行 git pull 的时候，都会去拉取子模块的最新代码。</p>
-<h3 id="3-4-切换子模块分支"><a href="#3-4-切换子模块分支" class="headerlink" title="3.4 切换子模块分支"></a>3.4 切换子模块分支</h3><p>这一步是可选的，是否需要这么做需要你看看你的子模块是否成功关联了对应分支。</p>
-<p>可使用如下命令查看：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git status</span><br></pre></td></tr></table></figure>
-
-<p>会显示子模块目前所在分支，如果出现  <strong>HEAD detached from</strong> 等提示语就表示没有成功关联到指定分支，那么你需要按照下面的步骤进行操作。</p>
-<p>这一步可能让你迷惑，什么？在 3.2 步不是已经指定子模块的分支了吗？对没错，你是指定了，但是他只是让主模块保存了指定分支的最后一次提交的 commit id。并没有真正关联到对应模块。</p>
-<p>这个时候就需要你自己切换分支，可执行如下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git checkout xxx</span><br></pre></td></tr></table></figure>
-
-<p>xxx 为要切换分支的名字，当然你用各种 git 图形化工具操作也是一样的。</p>
-<h2 id="4-如果你要-clone-一个集成了-git-submodule-的项目应该如何做"><a href="#4-如果你要-clone-一个集成了-git-submodule-的项目应该如何做" class="headerlink" title="4. 如果你要 clone 一个集成了  git-submodule 的项目应该如何做"></a>4. 如果你要 clone 一个集成了  git-submodule 的项目应该如何做</h2><p>推荐使用如下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git clone --recurse-submodules $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在 clone 的时候加上 –recurse-submodules 参数，这样就会将子模块的内容都拉取下来。</p>
-<p>然后执行 3.4 步骤的操作，选取子模块分支。</p>
-<p>再执行如下命令，保证每次 git pull 的时候都能获取子模块最新代码。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
-
-<h2 id="5-在子模块上提交代码"><a href="#5-在子模块上提交代码" class="headerlink" title="5. 在子模块上提交代码"></a>5. 在子模块上提交代码</h2><p>子模块就跟其他 git 项目一样，你是可以直接更改代码并提交的，但是这里有一点需要注意，就是如果你在子模块上提交了代码，那么在主模块上也要提交一次，也就是说<strong>要提交两次代码</strong>，这是至关重要的，如果你没有这么做，有可能会让其他人的子模块无法正常工作。</p>
-<p>例如你在子模块提交代码后，在主模块查看 git 状态时会有如下提示：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">modified:   xxx（模块名） (new commits)</span><br></pre></td></tr></table></figure>
-
-<p>你必须要将这个代码提交到主模块的 git 仓库，这个更改其实是记录着子模块最新提交的 commit id 。用来做版本管理的。</p>
-<h2 id="6-其他"><a href="#6-其他" class="headerlink" title="6. 其他"></a>6. 其他</h2><p>如果想深入了解，可以参考以下文档。</p>
-<p><a href="https://git-scm.com/docs/git-submodule">参数文档</a></p>
-<p><a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">使用文档</a></p>
+</li>
+<li><p>工作内存</p>
+<p>每条线程都有自己的工作内存，线程私有，里面保存了被该线程使用的变量的主内存副本，线程对变量的所有操作都必须在工作内存中进行，而不能直接读写主内存中的数据。</p>
+<ul>
+<li>对应虚拟机栈中的部分区域</li>
+</ul>
+</li>
+</ul>
+<h3 id="内存间交互操作"><a href="#内存间交互操作" class="headerlink" title="内存间交互操作"></a>内存间交互操作</h3><p>一个变量如何从主内存拷贝到工作内存，如何从工作内存同步回主内存</p>
+<ul>
+<li><p>8种操作</p>
+<p>虚拟机保证每一种操作都是原子的</p>
+<ul>
+<li><p>lock锁定</p>
+<p>作用于主内存的变量，它把一个变量标识为一条线程独占的状态</p>
+</li>
+<li><p>unlock 解锁</p>
+<p>作用于主内存的变量，他把一个处于锁定状态的变量释放出来，释放后的变量才可以被其他线程锁定</p>
+</li>
+<li><p>read 读取</p>
+<p>作用于主内存的变量，它把一个变量的值从主内存传输到线程的工作内存中</p>
+</li>
+<li><p>load 载入</p>
+<p>作用于工作内存的变量，它把read操作得到的变量值放入工作内存的变量副本中</p>
+</li>
+<li><p>use 使用</p>
+<p>作用于工作内存的变量，它把工作内存中的一个变量值传递给执行引擎，每当虚拟机遇到一个需要使用变量的值的字节码执行时将会执行这个操作</p>
+</li>
+<li><p>assign 赋值</p>
+<p>作用于工作内存的变量，它把一个从执行引擎接受的值赋给工作内存的变量，每当虚拟机遇到一个给变量赋值的字节码执行时执行这个操作</p>
+</li>
+<li><p>store 存储</p>
+<p>作用于工作内存的变量，它把工作内存中的一个变量的值传送到主内存中</p>
+</li>
+<li><p>write 写入</p>
+<p>作用于主内存的变量，它把store操作得到的变量值放入主内存的变量中</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="volatile关键字"><a href="#volatile关键字" class="headerlink" title="volatile关键字"></a>volatile关键字</h3><p>Java虚拟机提供的最轻量级的同步机制</p>
+<ul>
+<li><p>特性</p>
+<ul>
+<li><p>1、保证此变量堆所有线程的可见性</p>
+<p>可见性：当一个线程修改了这个变量的值会立刻同步到主内存中，让其他线程立即得知</p>
+</li>
+<li><p>2、禁止指令重排序优化</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="针对long和double型变量的特殊规则"><a href="#针对long和double型变量的特殊规则" class="headerlink" title="针对long和double型变量的特殊规则"></a>针对long和double型变量的特殊规则</h3><p>这两个数据类型是64位的，在模型中特别定义了一条宽松的规定：允许虚拟机将没有被volatile修饰的64位数据的读写操作划分为两次32位的操作来进行</p>
+<h3 id="原子性、可见性与有序性"><a href="#原子性、可见性与有序性" class="headerlink" title="原子性、可见性与有序性"></a>原子性、可见性与有序性</h3><p>Java内存模型是围绕着在并发过程中如何处理原子性、可见性和有序性这三个特征来建立的</p>
+<ul>
+<li><p>原子性</p>
+<p>基本数据类型的访问、读写都是具备原子性的，如果需要更大范围的原子性保证，Java模型还提供了lock和unlock操作来满足需求</p>
+</li>
+<li><p>可见性</p>
+<p>Java内存模型是通过在变量修改后将新值同步回主内存，在变量读取前从主内存刷新变量值这种依赖主内存作为传递媒介的方式来实现可见性的；volatile、同步锁、final都可实现可见性</p>
+</li>
+<li><p>有序性</p>
+<p>如果在本线程内观察，所有操作都是有序的，如果在一个线程中观察另一个线程，所有的操作都是无序的，前半句是指“线程内似表现为串行的语义”，后半句是指“指令重排序”现象和“工作内存与主内存同步延迟”现象</p>
+</li>
+</ul>
+<h3 id="先行发生原则"><a href="#先行发生原则" class="headerlink" title="先行发生原则"></a>先行发生原则</h3><p>是Java内存模型中定义的两项操作之间的偏序关系，比如操作A先行发生于操作B，就是说在发生B操作之前，操作A产生的影响能被操作B观察到，“影响”包括修改了内存中共享变量的值、发送了消息、调用了方法等</p>
+<h2 id="Java与线程"><a href="#Java与线程" class="headerlink" title="Java与线程"></a>Java与线程</h2><h3 id="线程的实现"><a href="#线程的实现" class="headerlink" title="线程的实现"></a>线程的实现</h3><ul>
+<li><p>内核实现（1：1 实现）</p>
+<p>直接由操作系统内核支持的线程，这种线程由内核来完成线程切换、内核通过操纵调度器对线程进行调度，并负责将线程的任务映射到各个处理器上</p>
+<ul>
+<li>优势：即使某个线程被阻塞了，也不会影响整个进行的工作</li>
+<li>劣势：数量有限，每个进程都要消耗内核资源</li>
+</ul>
+</li>
+<li><p>使用用户线程实现（1：N 实现）</p>
+<p>一个线程如果不是内核线程就都认为是用户线程</p>
+<ul>
+<li>优势：快速且低消耗，不需要系统内核支援</li>
+<li>劣势：没有系统内核支援，所有线程操作都需要用户程序自己处理</li>
+</ul>
+</li>
+<li><p>用户线程加轻量级进程混合实现（N:M 实现）</p>
+<p>内核线程与用户线程一起使用的实现方式</p>
+</li>
+<li><p>Java线程的实现</p>
+<ul>
+<li>基于内核实现（1：1实现）</li>
+</ul>
+</li>
+</ul>
+<h3 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a>线程调度</h3><p>系统为线程分配处理器使用权的过程</p>
+<ul>
+<li><p>协同式线程调度</p>
+<p>线程执行时间由线程本身控制，线程把自己的工作做完后要主动通知系统切换到另一个线程上去</p>
+<ul>
+<li>优势：实现简单，切换操作对线程自己式可知的所以没有线程同步问题</li>
+<li>劣势：线程执行时间不可控，如果一个线程一直不通知系统进行线程切换会导致程序阻塞</li>
+</ul>
+</li>
+<li><p>抢占式线程调度</p>
+<ul>
+<li><p>每个线程将由系统来分配执行时间，不由线程本身决定</p>
+<ul>
+<li>优势：不会因为一个线程导致系统阻塞</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="状态转换"><a href="#状态转换" class="headerlink" title="状态转换"></a>状态转换</h3><p>在任意一个时间点中，一个线程只能有且只有其中一种状态，并且可以通过特定的方法在不同状态之间转换</p>
+<ul>
+<li><p>新建（New）</p>
+<p>创建后尚未启动的线程处于这种状态</p>
+</li>
+<li><p>运行（Runnable）</p>
+<p>包括系统线程状态中的Running和Ready，有可能正在执行，也有可能正在等待系统为它分配执行时间</p>
+</li>
+<li><p>无限期等待（Waiting）</p>
+<p>这个状态的线程不会被分配处理器执行时间，它们等待被其他线程显式唤醒</p>
+<ul>
+<li>1、没有设置Timeout参数的Object::wait()方法</li>
+<li>2、没有设置Timeout参数的Thread::join()方法</li>
+<li>3、LockSupport::park()方法</li>
+</ul>
+</li>
+<li><p>限期等待（Timed Waiting）</p>
+<p>无需其他线程显式唤醒，在一定时间后会被系统唤醒</p>
+<ul>
+<li>1、设置Timeout参数的Object::wait()方法</li>
+<li>2、设置Timeout参数的Thread::join()方法</li>
+<li>3、LockSupport::parkNanos()方法</li>
+<li>4、LockSupport::parkUntil()方法</li>
+</ul>
+</li>
+<li><p>阻塞</p>
+<p>这个状态是在等待着获取到一个排它锁</p>
+</li>
+<li><p>结束</p>
+<p>已经终止线程的线程状态，线程已经结束运行</p>
+</li>
+</ul>
+<h2 id="Java与协程"><a href="#Java与协程" class="headerlink" title="Java与协程"></a>Java与协程</h2><h3 id="内核线程的局限性"><a href="#内核线程的局限性" class="headerlink" title="内核线程的局限性"></a>内核线程的局限性</h3><ul>
+<li>劣势：调度成本高，需要频繁在用户态与核心态之间转换</li>
+</ul>
+<h3 id="协程"><a href="#协程" class="headerlink" title="协程"></a>协程</h3><p>应用自己模拟多线程的做法，属于用户线程</p>
+<ul>
+<li>优势：轻量</li>
+<li>劣势：需要应用层面增加很多工作内容</li>
+</ul>
+<h2 id="线程安全与锁优化"><a href="#线程安全与锁优化" class="headerlink" title="线程安全与锁优化"></a>线程安全与锁优化</h2><h3 id="线程安全"><a href="#线程安全" class="headerlink" title="线程安全"></a>线程安全</h3><p>当多个线程访问一个对象时，如果不用考虑这些线程在运行时环境下的调度和交替执行，也不需要进行额外的同步，或者在调度方进行任何其他的协调操作，调用这个对象的行为都可以获得正确的结果，那就称这个对象是线程安全的</p>
+<ul>
+<li><p>Java语言中的线程安全</p>
+<ul>
+<li><p>不可变</p>
+<p>不可变的对象一定是线程安全的</p>
+</li>
+<li><p>绝对线程安全</p>
+<p>不管运行时环境如何，调用者都不需要任何额外的同步措施，因为这个条件很苛刻，导致Java api中标注自己是线程安全的类，大多数都不符合这个要求</p>
+</li>
+<li><p>相对线程安全</p>
+<p>通常意义上所讲的线程安全，它保证对这个对象单次的操作是线程安全的，不需要进行额外的保障措施，但是对于一些特定顺序的连续调用就可能需要在调用端使用额外的同步手段来保证调用的正确性</p>
+</li>
+<li><p>线程兼容</p>
+<p>对象本身不是线程安全的，但是可以通过在调用端正确使用同步手段来保证对象在并发环境中可以安全的调用；我们通常说一个类不是线程安全的通常就是指这种情况</p>
+</li>
+<li><p>线程对立</p>
+<p>不管是否使用同步措施在多线程环境中都是不安全的；这种情况应尽量避免</p>
+</li>
+</ul>
+</li>
+<li><p>线程安全的实现方法</p>
+<ul>
+<li><p>1、互斥同步</p>
+<p>是一种最常见也是最主要的并发正确性保障手段，指在多个线程并发访问共享数据时，保证共享数据在同一个时刻只能被一条线程使用，最基本的互斥同步手段就是同步锁</p>
+<ul>
+<li><p>同步锁</p>
+<p>jdk6以上版本的jdk中 性能已经不是选择这两个锁的决定性因素</p>
+<ul>
+<li><p>synchronized</p>
+<p>更简单</p>
+</li>
+<li><p>lock</p>
+<p>更灵活</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>2、非阻塞同步</p>
+<p>基于冲突检测的乐观并发策略，如果有共享数据被争用就进行补偿措施，最常用的补偿措施就是不断重试，直到出现没有竞争的共享数据为止。</p>
+<ul>
+<li><p>CAS</p>
+<ul>
+<li>优势：性能好</li>
+<li>劣势：不能处理ABA问题</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>3、无同步方案</p>
+<ul>
+<li><p>可重入代码</p>
+<p>又称纯代码，指可以在代码执行的任何时刻中断它，转而去执行另外一段代码，而在控制权返回后原来的程序不会出现任何错误，也不会对结果有所影响</p>
+<ul>
+<li>1、不依赖全局变量</li>
+<li>2、不依赖存储在堆上的数据和公用的系统资源</li>
+<li>3、用到的状态量都由参数中传入，不调用非可重入的方法</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 ]]></content>
       <categories>
         <category>技术</category>
       </categories>
       <tags>
-        <tag>Git</tag>
+        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
@@ -753,241 +988,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java内存模型与线程</title>
-    <url>/blog/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/</url>
-    <content><![CDATA[<h1 id="Java内存模型与线程"><a href="#Java内存模型与线程" class="headerlink" title="Java内存模型与线程"></a>Java内存模型与线程</h1><span id="more"></span>
-
-<h2 id="Java内存模型"><a href="#Java内存模型" class="headerlink" title="Java内存模型"></a>Java内存模型</h2><p>内存模型一词可以理解为在特定的操作协议下，对特定的内存或高速缓存进行读写访问的过程抽象；<br>在jdk5发布后Java内存模型才终于成熟、完善起来</p>
-<h3 id="主内存与工作内存"><a href="#主内存与工作内存" class="headerlink" title="主内存与工作内存"></a>主内存与工作内存</h3><p>Java内存模型的主要目的是定义程序中各种变量的访问规则，即关注在虚拟机中把变量值存储到内存和从内存中取出变量值这样的底层细节（这里的变量特指实例字段、静态字段、构成数组对象的元素，不包括局部变量与方法参数，因为后者是线程私有的）</p>
-<ul>
-<li><p>主内存</p>
-<p>Java模型规定了所有变量都存储在主内存中，线程间变量值的传递均需要通过主内存来完成</p>
-<ul>
-<li>对应Java堆总对象实例数据</li>
-</ul>
-</li>
-<li><p>工作内存</p>
-<p>每条线程都有自己的工作内存，线程私有，里面保存了被该线程使用的变量的主内存副本，线程对变量的所有操作都必须在工作内存中进行，而不能直接读写主内存中的数据。</p>
-<ul>
-<li>对应虚拟机栈中的部分区域</li>
-</ul>
-</li>
-</ul>
-<h3 id="内存间交互操作"><a href="#内存间交互操作" class="headerlink" title="内存间交互操作"></a>内存间交互操作</h3><p>一个变量如何从主内存拷贝到工作内存，如何从工作内存同步回主内存</p>
-<ul>
-<li><p>8种操作</p>
-<p>虚拟机保证每一种操作都是原子的</p>
-<ul>
-<li><p>lock锁定</p>
-<p>作用于主内存的变量，它把一个变量标识为一条线程独占的状态</p>
-</li>
-<li><p>unlock 解锁</p>
-<p>作用于主内存的变量，他把一个处于锁定状态的变量释放出来，释放后的变量才可以被其他线程锁定</p>
-</li>
-<li><p>read 读取</p>
-<p>作用于主内存的变量，它把一个变量的值从主内存传输到线程的工作内存中</p>
-</li>
-<li><p>load 载入</p>
-<p>作用于工作内存的变量，它把read操作得到的变量值放入工作内存的变量副本中</p>
-</li>
-<li><p>use 使用</p>
-<p>作用于工作内存的变量，它把工作内存中的一个变量值传递给执行引擎，每当虚拟机遇到一个需要使用变量的值的字节码执行时将会执行这个操作</p>
-</li>
-<li><p>assign 赋值</p>
-<p>作用于工作内存的变量，它把一个从执行引擎接受的值赋给工作内存的变量，每当虚拟机遇到一个给变量赋值的字节码执行时执行这个操作</p>
-</li>
-<li><p>store 存储</p>
-<p>作用于工作内存的变量，它把工作内存中的一个变量的值传送到主内存中</p>
-</li>
-<li><p>write 写入</p>
-<p>作用于主内存的变量，它把store操作得到的变量值放入主内存的变量中</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="volatile关键字"><a href="#volatile关键字" class="headerlink" title="volatile关键字"></a>volatile关键字</h3><p>Java虚拟机提供的最轻量级的同步机制</p>
-<ul>
-<li><p>特性</p>
-<ul>
-<li><p>1、保证此变量堆所有线程的可见性</p>
-<p>可见性：当一个线程修改了这个变量的值会立刻同步到主内存中，让其他线程立即得知</p>
-</li>
-<li><p>2、禁止指令重排序优化</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="针对long和double型变量的特殊规则"><a href="#针对long和double型变量的特殊规则" class="headerlink" title="针对long和double型变量的特殊规则"></a>针对long和double型变量的特殊规则</h3><p>这两个数据类型是64位的，在模型中特别定义了一条宽松的规定：允许虚拟机将没有被volatile修饰的64位数据的读写操作划分为两次32位的操作来进行</p>
-<h3 id="原子性、可见性与有序性"><a href="#原子性、可见性与有序性" class="headerlink" title="原子性、可见性与有序性"></a>原子性、可见性与有序性</h3><p>Java内存模型是围绕着在并发过程中如何处理原子性、可见性和有序性这三个特征来建立的</p>
-<ul>
-<li><p>原子性</p>
-<p>基本数据类型的访问、读写都是具备原子性的，如果需要更大范围的原子性保证，Java模型还提供了lock和unlock操作来满足需求</p>
-</li>
-<li><p>可见性</p>
-<p>Java内存模型是通过在变量修改后将新值同步回主内存，在变量读取前从主内存刷新变量值这种依赖主内存作为传递媒介的方式来实现可见性的；volatile、同步锁、final都可实现可见性</p>
-</li>
-<li><p>有序性</p>
-<p>如果在本线程内观察，所有操作都是有序的，如果在一个线程中观察另一个线程，所有的操作都是无序的，前半句是指“线程内似表现为串行的语义”，后半句是指“指令重排序”现象和“工作内存与主内存同步延迟”现象</p>
-</li>
-</ul>
-<h3 id="先行发生原则"><a href="#先行发生原则" class="headerlink" title="先行发生原则"></a>先行发生原则</h3><p>是Java内存模型中定义的两项操作之间的偏序关系，比如操作A先行发生于操作B，就是说在发生B操作之前，操作A产生的影响能被操作B观察到，“影响”包括修改了内存中共享变量的值、发送了消息、调用了方法等</p>
-<h2 id="Java与线程"><a href="#Java与线程" class="headerlink" title="Java与线程"></a>Java与线程</h2><h3 id="线程的实现"><a href="#线程的实现" class="headerlink" title="线程的实现"></a>线程的实现</h3><ul>
-<li><p>内核实现（1：1 实现）</p>
-<p>直接由操作系统内核支持的线程，这种线程由内核来完成线程切换、内核通过操纵调度器对线程进行调度，并负责将线程的任务映射到各个处理器上</p>
-<ul>
-<li>优势：即使某个线程被阻塞了，也不会影响整个进行的工作</li>
-<li>劣势：数量有限，每个进程都要消耗内核资源</li>
-</ul>
-</li>
-<li><p>使用用户线程实现（1：N 实现）</p>
-<p>一个线程如果不是内核线程就都认为是用户线程</p>
-<ul>
-<li>优势：快速且低消耗，不需要系统内核支援</li>
-<li>劣势：没有系统内核支援，所有线程操作都需要用户程序自己处理</li>
-</ul>
-</li>
-<li><p>用户线程加轻量级进程混合实现（N:M 实现）</p>
-<p>内核线程与用户线程一起使用的实现方式</p>
-</li>
-<li><p>Java线程的实现</p>
-<ul>
-<li>基于内核实现（1：1实现）</li>
-</ul>
-</li>
-</ul>
-<h3 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a>线程调度</h3><p>系统为线程分配处理器使用权的过程</p>
-<ul>
-<li><p>协同式线程调度</p>
-<p>线程执行时间由线程本身控制，线程把自己的工作做完后要主动通知系统切换到另一个线程上去</p>
-<ul>
-<li>优势：实现简单，切换操作对线程自己式可知的所以没有线程同步问题</li>
-<li>劣势：线程执行时间不可控，如果一个线程一直不通知系统进行线程切换会导致程序阻塞</li>
-</ul>
-</li>
-<li><p>抢占式线程调度</p>
-<ul>
-<li><p>每个线程将由系统来分配执行时间，不由线程本身决定</p>
-<ul>
-<li>优势：不会因为一个线程导致系统阻塞</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="状态转换"><a href="#状态转换" class="headerlink" title="状态转换"></a>状态转换</h3><p>在任意一个时间点中，一个线程只能有且只有其中一种状态，并且可以通过特定的方法在不同状态之间转换</p>
-<ul>
-<li><p>新建（New）</p>
-<p>创建后尚未启动的线程处于这种状态</p>
-</li>
-<li><p>运行（Runnable）</p>
-<p>包括系统线程状态中的Running和Ready，有可能正在执行，也有可能正在等待系统为它分配执行时间</p>
-</li>
-<li><p>无限期等待（Waiting）</p>
-<p>这个状态的线程不会被分配处理器执行时间，它们等待被其他线程显式唤醒</p>
-<ul>
-<li>1、没有设置Timeout参数的Object::wait()方法</li>
-<li>2、没有设置Timeout参数的Thread::join()方法</li>
-<li>3、LockSupport::park()方法</li>
-</ul>
-</li>
-<li><p>限期等待（Timed Waiting）</p>
-<p>无需其他线程显式唤醒，在一定时间后会被系统唤醒</p>
-<ul>
-<li>1、设置Timeout参数的Object::wait()方法</li>
-<li>2、设置Timeout参数的Thread::join()方法</li>
-<li>3、LockSupport::parkNanos()方法</li>
-<li>4、LockSupport::parkUntil()方法</li>
-</ul>
-</li>
-<li><p>阻塞</p>
-<p>这个状态是在等待着获取到一个排它锁</p>
-</li>
-<li><p>结束</p>
-<p>已经终止线程的线程状态，线程已经结束运行</p>
-</li>
-</ul>
-<h2 id="Java与协程"><a href="#Java与协程" class="headerlink" title="Java与协程"></a>Java与协程</h2><h3 id="内核线程的局限性"><a href="#内核线程的局限性" class="headerlink" title="内核线程的局限性"></a>内核线程的局限性</h3><ul>
-<li>劣势：调度成本高，需要频繁在用户态与核心态之间转换</li>
-</ul>
-<h3 id="协程"><a href="#协程" class="headerlink" title="协程"></a>协程</h3><p>应用自己模拟多线程的做法，属于用户线程</p>
-<ul>
-<li>优势：轻量</li>
-<li>劣势：需要应用层面增加很多工作内容</li>
-</ul>
-<h2 id="线程安全与锁优化"><a href="#线程安全与锁优化" class="headerlink" title="线程安全与锁优化"></a>线程安全与锁优化</h2><h3 id="线程安全"><a href="#线程安全" class="headerlink" title="线程安全"></a>线程安全</h3><p>当多个线程访问一个对象时，如果不用考虑这些线程在运行时环境下的调度和交替执行，也不需要进行额外的同步，或者在调度方进行任何其他的协调操作，调用这个对象的行为都可以获得正确的结果，那就称这个对象是线程安全的</p>
-<ul>
-<li><p>Java语言中的线程安全</p>
-<ul>
-<li><p>不可变</p>
-<p>不可变的对象一定是线程安全的</p>
-</li>
-<li><p>绝对线程安全</p>
-<p>不管运行时环境如何，调用者都不需要任何额外的同步措施，因为这个条件很苛刻，导致Java api中标注自己是线程安全的类，大多数都不符合这个要求</p>
-</li>
-<li><p>相对线程安全</p>
-<p>通常意义上所讲的线程安全，它保证对这个对象单次的操作是线程安全的，不需要进行额外的保障措施，但是对于一些特定顺序的连续调用就可能需要在调用端使用额外的同步手段来保证调用的正确性</p>
-</li>
-<li><p>线程兼容</p>
-<p>对象本身不是线程安全的，但是可以通过在调用端正确使用同步手段来保证对象在并发环境中可以安全的调用；我们通常说一个类不是线程安全的通常就是指这种情况</p>
-</li>
-<li><p>线程对立</p>
-<p>不管是否使用同步措施在多线程环境中都是不安全的；这种情况应尽量避免</p>
-</li>
-</ul>
-</li>
-<li><p>线程安全的实现方法</p>
-<ul>
-<li><p>1、互斥同步</p>
-<p>是一种最常见也是最主要的并发正确性保障手段，指在多个线程并发访问共享数据时，保证共享数据在同一个时刻只能被一条线程使用，最基本的互斥同步手段就是同步锁</p>
-<ul>
-<li><p>同步锁</p>
-<p>jdk6以上版本的jdk中 性能已经不是选择这两个锁的决定性因素</p>
-<ul>
-<li><p>synchronized</p>
-<p>更简单</p>
-</li>
-<li><p>lock</p>
-<p>更灵活</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>2、非阻塞同步</p>
-<p>基于冲突检测的乐观并发策略，如果有共享数据被争用就进行补偿措施，最常用的补偿措施就是不断重试，直到出现没有竞争的共享数据为止。</p>
-<ul>
-<li><p>CAS</p>
-<ul>
-<li>优势：性能好</li>
-<li>劣势：不能处理ABA问题</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>3、无同步方案</p>
-<ul>
-<li><p>可重入代码</p>
-<p>又称纯代码，指可以在代码执行的任何时刻中断它，转而去执行另外一段代码，而在控制权返回后原来的程序不会出现任何错误，也不会对结果有所影响</p>
-<ul>
-<li>1、不依赖全局变量</li>
-<li>2、不依赖存储在堆上的数据和公用的系统资源</li>
-<li>3、用到的状态量都由参数中传入，不调用非可重入的方法</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>常见的Web应用攻击手段</title>
     <url>/blog/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</url>
     <content><![CDATA[<h1 id="常见的Web应用攻击手段"><a href="#常见的Web应用攻击手段" class="headerlink" title="常见的Web应用攻击手段"></a>常见的Web应用攻击手段</h1><span id="more"></span>
@@ -1162,6 +1162,94 @@
       </tags>
   </entry>
   <entry>
+    <title>虚拟机字节码执行引擎</title>
+    <url>/blog/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/</url>
+    <content><![CDATA[<h1 id="虚拟机字节码执行引擎"><a href="#虚拟机字节码执行引擎" class="headerlink" title="虚拟机字节码执行引擎"></a>虚拟机字节码执行引擎</h1><p>虚拟机字节码执行引擎是java虚拟机核心组成部分之一，所有java虚拟机的执行引擎输入、输出都是一致的：输入的是字节码二进制流，处理过程是字节码解析执行的等效过程，输出的是执行结果。</p>
+<span id="more"></span>
+
+<h2 id="运行时栈帧结构"><a href="#运行时栈帧结构" class="headerlink" title="运行时栈帧结构"></a>运行时栈帧结构</h2><p>java虚拟机以方法作为最基本的执行单元，栈帧则是用于支持虚拟机进行方法调用和方法执行背后的数据结构，它也是虚拟机运行时数据区中的虚拟机栈的栈元素。栈帧存储了方法的局部变量表、操作数栈、动态连接和方法返回地址等信息，栈帧需要分配多少内存编译期已经确定，并不会收到程序运行期变量数据的影响；以java程序的角度来看，同一时刻、同一线程里面，在调用堆栈的所有方法都同时处于执行状态，但在活动线程中，只有位于栈顶的方法才是在运行的，被称为当前栈帧，执行引擎所运行的字节码执行都只针对当前栈帧进行操作。</p>
+<h3 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h3><p>是一组变量值的存储空间，属于线程私有，用于存放方法参数和方法内部定义的局部变量，在java程序被编译为class文件时就在方法的Code属性的max_locals数据项中确定了该方法所需分配的局部变量表的最大容量，它以变量槽为最小单位，它允许变量槽的长度可以随着处理器、操作系统或虚拟机实现的不同而发生变化</p>
+<ul>
+<li><p>工作机制</p>
+<ul>
+<li>当一个方法被调用时，java虚拟机会使用局部变量表来完成参数值到参数变量的传递过程，即实参到形参的传递。如果执行的是实例方法，那局部变量表的第0位索引的变量槽默认是用于传递方法所属对象实例的引用，可以用this表示，其余参数按照顺序排列，而且局部变量表是可以重用的</li>
+</ul>
+</li>
+</ul>
+<h3 id="操作数栈"><a href="#操作数栈" class="headerlink" title="操作数栈"></a>操作数栈</h3><p>常被称为操作栈，是一个后入先出栈，它的最大深度在编译的时候已经确定</p>
+<ul>
+<li><p>工作机制</p>
+<ul>
+<li>当一个方法刚刚执行的时候，这个方法的操作数栈是空的，在方法的执行过程中会有各种字节码执行往操作数栈中写入和提取内容（入栈出栈的元素是局部变量表中的局部变量）</li>
+</ul>
+</li>
+</ul>
+<h3 id="栈帧信息"><a href="#栈帧信息" class="headerlink" title="栈帧信息"></a>栈帧信息</h3><ul>
+<li><p>动态链接</p>
+<p>每个栈帧都包含一个指向运行时常量池中该栈帧所属方法的引用，持有这个过程是为了支持方法调用过程中的动态连接（就是将符号引用转为直接引用）</p>
+</li>
+<li><p>方法返回地址</p>
+<p>方法退出之后都必须返回到最初方法被调用时的位置</p>
+</li>
+<li><p>附加信息</p>
+<p>可以返回一些java虚拟机没有描述的信息</p>
+</li>
+</ul>
+<h2 id="方法调用"><a href="#方法调用" class="headerlink" title="方法调用"></a>方法调用</h2><p>方法调用并不等于方法中的代码被执行，方法调用阶段唯一的任务就是确定被调用方法的版本（即调用哪一个方法），暂时还未涉及方法内部的具体运行过程</p>
+<h3 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h3><p>所有方法调用的目标方法在Class文件中都是一个常量池中的符号引用，在类加载的解析阶段，会将一部分符号引用转化为直接引用，前提是方法在程序真正运行之前就有一个可确定的调用版本，并且在运行期不可改变，这类方法的调用被称为解析；符合“编译期可知，运行期不可变”要求的方法主要静包括态方法和私有方法，这两类都不可能重写出其他版本</p>
+<ul>
+<li><p>非虚方法</p>
+<p>私有方法、实例构造器、静态方法、父类方法，被final修饰的方法 这5中方法调用会在类加载的时候就可以把符号引用解析为该方法的直接引用。这些方法统称为“非虚方法”</p>
+<ul>
+<li><p>解析调用</p>
+<ul>
+<li>是个静态过程，在编译期就完全确定，在类加载阶段就会将符号引用转变为直接引用</li>
+</ul>
+</li>
+<li><p>分派调用</p>
+<ul>
+<li><p>静态分派</p>
+<ul>
+<li>主要表现为重载，虚拟机在重载时是通过参数的静态类型而不是实际类型作为判定依据的</li>
+</ul>
+</li>
+<li><p>动态分派</p>
+<ul>
+<li>主要表现为重写，在运行期间根据实际类型确定方法执行版本的分派过程叫做动态分派</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="动态类型语言支持"><a href="#动态类型语言支持" class="headerlink" title="动态类型语言支持"></a>动态类型语言支持</h2><h3 id="动态类型语言"><a href="#动态类型语言" class="headerlink" title="动态类型语言"></a>动态类型语言</h3><p>类型检查的主体过程是在运行期而不是编译期进行的</p>
+<h3 id="java-lang-invoke包"><a href="#java-lang-invoke包" class="headerlink" title="java.lang.invoke包"></a>java.lang.invoke包</h3><p>主要目的是在之前单纯依靠符号引用来确定调用的目标方法这条路外提供一种新的动态确定目标方法的机制，称为方法句柄</p>
+<ul>
+<li><p>方法句柄和反射的区别</p>
+<ul>
+<li>1、反射是在模拟java代码层次的方法调用，方法句柄是在模拟字节码层次的方法调用</li>
+<li>2、反射是重量级的，方法句柄是轻量级的</li>
+<li>3、方法句柄可以享受虚拟机的优化策略，因为它是模拟字节码层面的方法调用</li>
+</ul>
+</li>
+</ul>
+<h2 id="基于栈的字节码解释执行引擎"><a href="#基于栈的字节码解释执行引擎" class="headerlink" title="基于栈的字节码解释执行引擎"></a>基于栈的字节码解释执行引擎</h2><p>主要功能是配合虚拟机执行方法里面的字节码指令的</p>
+<h3 id="解释执行"><a href="#解释执行" class="headerlink" title="解释执行"></a>解释执行</h3><p>java现在已经不能单纯归类于解释执行或者是编译执行，因为两者都有</p>
+<h3 id="基于栈的指令集与基于寄存器的指令集"><a href="#基于栈的指令集与基于寄存器的指令集" class="headerlink" title="基于栈的指令集与基于寄存器的指令集"></a>基于栈的指令集与基于寄存器的指令集</h3><p>javac编译器输出的字节码指令流是一种基于栈的指令集架构</p>
+<ul>
+<li>栈：优点： 1、可移植，因为寄存器由硬件直接提供，程序直接依赖这些硬件寄存器则不可避免的受硬件的约束；2、代码相对更紧凑、编译器实现更加简单。缺点：1、理论上执行速度相对慢一些</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+        <tag>字节码</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>网站架构模式</title>
     <url>/blog/%E7%BD%91%E7%AB%99%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F/</url>
     <content><![CDATA[<h1 id="网站架构模式"><a href="#网站架构模式" class="headerlink" title="网站架构模式"></a>网站架构模式</h1><p>大型互联网公司为了实现网站的高性能、高可用、易伸缩、可扩展、安全等各种技术架构目标，提出了很多解决方案，而这些方案又被更多网站重复使用，从而逐渐形成大型网站架构模式，下面对常见的模式进行总结。</p>
@@ -1262,154 +1350,6 @@
 </ul>
 <h2 id="7、冗余"><a href="#7、冗余" class="headerlink" title="7、冗余"></a>7、冗余</h2><p>沉余包括服务器冗余运行，数据冗余备份。网站需要不间断的提供服务，因此必须保证在有服务器宕机的情况下可以将服务和数据转移到其他机器上，以保证服务的高可用和数据的不丢失</p>
 <h2 id="8、自动化"><a href="#8、自动化" class="headerlink" title="8、自动化"></a>8、自动化</h2><p>包括但不限于以下部分：<br>1、自动化代码管理；2、自动化测试；3、自动化安全检测；4、自动化部署；<br>5、自动化监控 等等。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>虚拟机字节码执行引擎</title>
-    <url>/blog/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/</url>
-    <content><![CDATA[<h1 id="虚拟机字节码执行引擎"><a href="#虚拟机字节码执行引擎" class="headerlink" title="虚拟机字节码执行引擎"></a>虚拟机字节码执行引擎</h1><p>虚拟机字节码执行引擎是java虚拟机核心组成部分之一，所有java虚拟机的执行引擎输入、输出都是一致的：输入的是字节码二进制流，处理过程是字节码解析执行的等效过程，输出的是执行结果。</p>
-<span id="more"></span>
-
-<h2 id="运行时栈帧结构"><a href="#运行时栈帧结构" class="headerlink" title="运行时栈帧结构"></a>运行时栈帧结构</h2><p>java虚拟机以方法作为最基本的执行单元，栈帧则是用于支持虚拟机进行方法调用和方法执行背后的数据结构，它也是虚拟机运行时数据区中的虚拟机栈的栈元素。栈帧存储了方法的局部变量表、操作数栈、动态连接和方法返回地址等信息，栈帧需要分配多少内存编译期已经确定，并不会收到程序运行期变量数据的影响；以java程序的角度来看，同一时刻、同一线程里面，在调用堆栈的所有方法都同时处于执行状态，但在活动线程中，只有位于栈顶的方法才是在运行的，被称为当前栈帧，执行引擎所运行的字节码执行都只针对当前栈帧进行操作。</p>
-<h3 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h3><p>是一组变量值的存储空间，属于线程私有，用于存放方法参数和方法内部定义的局部变量，在java程序被编译为class文件时就在方法的Code属性的max_locals数据项中确定了该方法所需分配的局部变量表的最大容量，它以变量槽为最小单位，它允许变量槽的长度可以随着处理器、操作系统或虚拟机实现的不同而发生变化</p>
-<ul>
-<li><p>工作机制</p>
-<ul>
-<li>当一个方法被调用时，java虚拟机会使用局部变量表来完成参数值到参数变量的传递过程，即实参到形参的传递。如果执行的是实例方法，那局部变量表的第0位索引的变量槽默认是用于传递方法所属对象实例的引用，可以用this表示，其余参数按照顺序排列，而且局部变量表是可以重用的</li>
-</ul>
-</li>
-</ul>
-<h3 id="操作数栈"><a href="#操作数栈" class="headerlink" title="操作数栈"></a>操作数栈</h3><p>常被称为操作栈，是一个后入先出栈，它的最大深度在编译的时候已经确定</p>
-<ul>
-<li><p>工作机制</p>
-<ul>
-<li>当一个方法刚刚执行的时候，这个方法的操作数栈是空的，在方法的执行过程中会有各种字节码执行往操作数栈中写入和提取内容（入栈出栈的元素是局部变量表中的局部变量）</li>
-</ul>
-</li>
-</ul>
-<h3 id="栈帧信息"><a href="#栈帧信息" class="headerlink" title="栈帧信息"></a>栈帧信息</h3><ul>
-<li><p>动态链接</p>
-<p>每个栈帧都包含一个指向运行时常量池中该栈帧所属方法的引用，持有这个过程是为了支持方法调用过程中的动态连接（就是将符号引用转为直接引用）</p>
-</li>
-<li><p>方法返回地址</p>
-<p>方法退出之后都必须返回到最初方法被调用时的位置</p>
-</li>
-<li><p>附加信息</p>
-<p>可以返回一些java虚拟机没有描述的信息</p>
-</li>
-</ul>
-<h2 id="方法调用"><a href="#方法调用" class="headerlink" title="方法调用"></a>方法调用</h2><p>方法调用并不等于方法中的代码被执行，方法调用阶段唯一的任务就是确定被调用方法的版本（即调用哪一个方法），暂时还未涉及方法内部的具体运行过程</p>
-<h3 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h3><p>所有方法调用的目标方法在Class文件中都是一个常量池中的符号引用，在类加载的解析阶段，会将一部分符号引用转化为直接引用，前提是方法在程序真正运行之前就有一个可确定的调用版本，并且在运行期不可改变，这类方法的调用被称为解析；符合“编译期可知，运行期不可变”要求的方法主要静包括态方法和私有方法，这两类都不可能重写出其他版本</p>
-<ul>
-<li><p>非虚方法</p>
-<p>私有方法、实例构造器、静态方法、父类方法，被final修饰的方法 这5中方法调用会在类加载的时候就可以把符号引用解析为该方法的直接引用。这些方法统称为“非虚方法”</p>
-<ul>
-<li><p>解析调用</p>
-<ul>
-<li>是个静态过程，在编译期就完全确定，在类加载阶段就会将符号引用转变为直接引用</li>
-</ul>
-</li>
-<li><p>分派调用</p>
-<ul>
-<li><p>静态分派</p>
-<ul>
-<li>主要表现为重载，虚拟机在重载时是通过参数的静态类型而不是实际类型作为判定依据的</li>
-</ul>
-</li>
-<li><p>动态分派</p>
-<ul>
-<li>主要表现为重写，在运行期间根据实际类型确定方法执行版本的分派过程叫做动态分派</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="动态类型语言支持"><a href="#动态类型语言支持" class="headerlink" title="动态类型语言支持"></a>动态类型语言支持</h2><h3 id="动态类型语言"><a href="#动态类型语言" class="headerlink" title="动态类型语言"></a>动态类型语言</h3><p>类型检查的主体过程是在运行期而不是编译期进行的</p>
-<h3 id="java-lang-invoke包"><a href="#java-lang-invoke包" class="headerlink" title="java.lang.invoke包"></a>java.lang.invoke包</h3><p>主要目的是在之前单纯依靠符号引用来确定调用的目标方法这条路外提供一种新的动态确定目标方法的机制，称为方法句柄</p>
-<ul>
-<li><p>方法句柄和反射的区别</p>
-<ul>
-<li>1、反射是在模拟java代码层次的方法调用，方法句柄是在模拟字节码层次的方法调用</li>
-<li>2、反射是重量级的，方法句柄是轻量级的</li>
-<li>3、方法句柄可以享受虚拟机的优化策略，因为它是模拟字节码层面的方法调用</li>
-</ul>
-</li>
-</ul>
-<h2 id="基于栈的字节码解释执行引擎"><a href="#基于栈的字节码解释执行引擎" class="headerlink" title="基于栈的字节码解释执行引擎"></a>基于栈的字节码解释执行引擎</h2><p>主要功能是配合虚拟机执行方法里面的字节码指令的</p>
-<h3 id="解释执行"><a href="#解释执行" class="headerlink" title="解释执行"></a>解释执行</h3><p>java现在已经不能单纯归类于解释执行或者是编译执行，因为两者都有</p>
-<h3 id="基于栈的指令集与基于寄存器的指令集"><a href="#基于栈的指令集与基于寄存器的指令集" class="headerlink" title="基于栈的指令集与基于寄存器的指令集"></a>基于栈的指令集与基于寄存器的指令集</h3><p>javac编译器输出的字节码指令流是一种基于栈的指令集架构</p>
-<ul>
-<li>栈：优点： 1、可移植，因为寄存器由硬件直接提供，程序直接依赖这些硬件寄存器则不可避免的受硬件的约束；2、代码相对更紧凑、编译器实现更加简单。缺点：1、理论上执行速度相对慢一些</li>
-</ul>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Jvm</tag>
-        <tag>字节码</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>集群环境下如何管理Session</title>
-    <url>/blog/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</url>
-    <content><![CDATA[<h1 id="集群环境下如何管理Session"><a href="#集群环境下如何管理Session" class="headerlink" title="集群环境下如何管理Session"></a>集群环境下如何管理Session</h1><span id="more"></span>
-
-<h2 id="1-Session复制"><a href="#1-Session复制" class="headerlink" title="1.Session复制"></a>1.Session复制</h2><p>应用服务器开启Web容器的Session复制功能，在集群中的几台服务器之间同步Session对象，使得每台服务器上都保存所有用户的Session信息，这样任何一台机器宕机都不会导致Session数据的丢失，而服务器使用Session时，也只需要在本机获取即可</p>
-<h3 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h3><ul>
-<li>1.方案简单</li>
-<li>2.获取Session速度块</li>
-</ul>
-<h3 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h3><ul>
-<li><p>1.只能在集群规模较小的情况下使用</p>
-<p>如果集群规模大，会导致大量复制Session，会占用网络和服务器大量资源；<br>并且如果出现大量用户同时访问服务的情况可能会出现内存不够用的问题</p>
-</li>
-</ul>
-<h2 id="2-Session绑定"><a href="#2-Session绑定" class="headerlink" title="2.Session绑定"></a>2.Session绑定</h2><p>即Session绑定在某台特定服务器上，保证Session总能在这台服务器上获取。这种方法又被称作会话黏滞，负载均衡服务器总是将来源于同一IP的请求分发到同一台服务器上（也可以根据Cookie信息将同一个用户的请求总是分发到同一台服务器上，当然这时负载均衡服务器必须工作在HTTP协议层上）</p>
-<h3 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h3><ul>
-<li><p>不具备高可用的特性</p>
-<p>如果绑定Session的服务器宕机了就会造成Session丢失</p>
-</li>
-</ul>
-<h2 id="3-利用Cookie记录Session"><a href="#3-利用Cookie记录Session" class="headerlink" title="3.利用Cookie记录Session"></a>3.利用Cookie记录Session</h2><p>将Session记录在Cookie中，每次请求服务器的时候，将Session放在请求中发送给服务器，服务器处理完请求后再将修改过的Session响应给客户端。</p>
-<h3 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h3><ul>
-<li>简单易用，可用性高，支持应用服务器的线性伸缩</li>
-</ul>
-<h3 id="缺点：-2"><a href="#缺点：-2" class="headerlink" title="缺点："></a>缺点：</h3><ul>
-<li>1.信息记录有限，因为Cookie有大小限制</li>
-<li>2.影响性能，每次请求响应都需要传输Cookie</li>
-<li>3.受用户行为影响，如果用户关闭Cookie，访问就会不正常</li>
-</ul>
-<h2 id="4-Session服务器"><a href="#4-Session服务器" class="headerlink" title="4.Session服务器"></a>4.Session服务器</h2><p>可用性高、伸缩性好、性能也不错，对信息大小又没有限制的服务器集群Session管理方案。<br>利用独立部署的Session服务器（集群）统一管理Session，应用服务器每次读写Session时，都访问Session服务器。<br>这种解决方案事实上是将应用服务器的状态分离。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>项目如何分包</title>
-    <url>/blog/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</url>
-    <content><![CDATA[<h1 id="项目如何分包"><a href="#项目如何分包" class="headerlink" title="项目如何分包"></a>项目如何分包</h1><p>在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。</p>
-<span id="more"></span>
-
-<h2 id="1、按照类型方式划分"><a href="#1、按照类型方式划分" class="headerlink" title="1、按照类型方式划分"></a>1、按照类型方式划分</h2><p>例如将所有的接口放入一个包、Controller类放入一个包等等。</p>
-<p>优点：从类型看更为清晰</p>
-<p>缺点：不利于模块化开发，因为会将同一个功能的多个类分散在不同的包中</p>
-<h2 id="2、按照功能方式划分"><a href="#2、按照功能方式划分" class="headerlink" title="2、按照功能方式划分"></a>2、按照功能方式划分</h2><p>将同一个功能的所有类放在同一个包中。</p>
-<p>优点：高内聚，便于模块化开发</p>
-<p>缺点：同一包内类型混乱</p>
-<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>将功能耦合度高的类按照功能进行划分，而功能耦合度低的或者供多个功能使用的类按照类型进行划分。</p>
 ]]></content>
       <categories>
         <category>技术</category>
@@ -1591,6 +1531,66 @@
       <tags>
         <tag>Jvm</tag>
         <tag>类加载</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>集群环境下如何管理Session</title>
+    <url>/blog/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</url>
+    <content><![CDATA[<h1 id="集群环境下如何管理Session"><a href="#集群环境下如何管理Session" class="headerlink" title="集群环境下如何管理Session"></a>集群环境下如何管理Session</h1><span id="more"></span>
+
+<h2 id="1-Session复制"><a href="#1-Session复制" class="headerlink" title="1.Session复制"></a>1.Session复制</h2><p>应用服务器开启Web容器的Session复制功能，在集群中的几台服务器之间同步Session对象，使得每台服务器上都保存所有用户的Session信息，这样任何一台机器宕机都不会导致Session数据的丢失，而服务器使用Session时，也只需要在本机获取即可</p>
+<h3 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>1.方案简单</li>
+<li>2.获取Session速度块</li>
+</ul>
+<h3 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li><p>1.只能在集群规模较小的情况下使用</p>
+<p>如果集群规模大，会导致大量复制Session，会占用网络和服务器大量资源；<br>并且如果出现大量用户同时访问服务的情况可能会出现内存不够用的问题</p>
+</li>
+</ul>
+<h2 id="2-Session绑定"><a href="#2-Session绑定" class="headerlink" title="2.Session绑定"></a>2.Session绑定</h2><p>即Session绑定在某台特定服务器上，保证Session总能在这台服务器上获取。这种方法又被称作会话黏滞，负载均衡服务器总是将来源于同一IP的请求分发到同一台服务器上（也可以根据Cookie信息将同一个用户的请求总是分发到同一台服务器上，当然这时负载均衡服务器必须工作在HTTP协议层上）</p>
+<h3 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li><p>不具备高可用的特性</p>
+<p>如果绑定Session的服务器宕机了就会造成Session丢失</p>
+</li>
+</ul>
+<h2 id="3-利用Cookie记录Session"><a href="#3-利用Cookie记录Session" class="headerlink" title="3.利用Cookie记录Session"></a>3.利用Cookie记录Session</h2><p>将Session记录在Cookie中，每次请求服务器的时候，将Session放在请求中发送给服务器，服务器处理完请求后再将修改过的Session响应给客户端。</p>
+<h3 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>简单易用，可用性高，支持应用服务器的线性伸缩</li>
+</ul>
+<h3 id="缺点：-2"><a href="#缺点：-2" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li>1.信息记录有限，因为Cookie有大小限制</li>
+<li>2.影响性能，每次请求响应都需要传输Cookie</li>
+<li>3.受用户行为影响，如果用户关闭Cookie，访问就会不正常</li>
+</ul>
+<h2 id="4-Session服务器"><a href="#4-Session服务器" class="headerlink" title="4.Session服务器"></a>4.Session服务器</h2><p>可用性高、伸缩性好、性能也不错，对信息大小又没有限制的服务器集群Session管理方案。<br>利用独立部署的Session服务器（集群）统一管理Session，应用服务器每次读写Session时，都访问Session服务器。<br>这种解决方案事实上是将应用服务器的状态分离。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>项目如何分包</title>
+    <url>/blog/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</url>
+    <content><![CDATA[<h1 id="项目如何分包"><a href="#项目如何分包" class="headerlink" title="项目如何分包"></a>项目如何分包</h1><p>在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。</p>
+<span id="more"></span>
+
+<h2 id="1、按照类型方式划分"><a href="#1、按照类型方式划分" class="headerlink" title="1、按照类型方式划分"></a>1、按照类型方式划分</h2><p>例如将所有的接口放入一个包、Controller类放入一个包等等。</p>
+<p>优点：从类型看更为清晰</p>
+<p>缺点：不利于模块化开发，因为会将同一个功能的多个类分散在不同的包中</p>
+<h2 id="2、按照功能方式划分"><a href="#2、按照功能方式划分" class="headerlink" title="2、按照功能方式划分"></a>2、按照功能方式划分</h2><p>将同一个功能的所有类放在同一个包中。</p>
+<p>优点：高内聚，便于模块化开发</p>
+<p>缺点：同一包内类型混乱</p>
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>将功能耦合度高的类按照功能进行划分，而功能耦合度低的或者供多个功能使用的类按照类型进行划分。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
