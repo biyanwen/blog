@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"biyanwen.github.io","root":"/blog/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="java高并发程序设计高并发是 java 开发必备知识，本篇文章整理出在高并发程序设计中常用的工具。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java高并发程序设计">
+<meta property="og:url" content="https://biyanwen.github.io/blog/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/index.html">
+<meta property="og:site_name" content="博客">
+<meta property="og:description" content="java高并发程序设计高并发是 java 开发必备知识，本篇文章整理出在高并发程序设计中常用的工具。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-12-05T04:21:18.434Z">
+<meta property="article:modified_time" content="2021-12-05T06:36:29.157Z">
+<meta property="article:author" content="Byw">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="多线程">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://biyanwen.github.io/blog/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>java高并发程序设计 | 博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/blog/atom.xml" title="博客" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">道阻且长，行则将至</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/blog/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">13</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/blog/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">1</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">18</span></a>
+
+  </li>
+        <li class="menu-item menu-item-rss">
+
+    <a href="/blog/atom.xml" rel="section"><i class="fa fa-rss fa-fw"></i>RSS</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/biyanwen" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://biyanwen.github.io/blog/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/tx.jpg">
+      <meta itemprop="name" content="Byw">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          java高并发程序设计
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-12-05 12:21:18 / 修改时间：14:36:29" itemprop="dateCreated datePublished" datetime="2021-12-05T12:21:18+08:00">2021-12-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="java高并发程序设计"><a href="#java高并发程序设计" class="headerlink" title="java高并发程序设计"></a>java高并发程序设计</h1><p>高并发是 java 开发必备知识，本篇文章整理出在高并发程序设计中常用的工具。</p>
+<span id="more"></span>
+
+<h2 id="java并发包"><a href="#java并发包" class="headerlink" title="java并发包"></a>java并发包</h2><h3 id="同步控制"><a href="#同步控制" class="headerlink" title="同步控制"></a>同步控制</h3><ul>
+<li><p>重入锁</p>
+<p>重入锁使用java.util.concurrent.locks.ReentrantLock类来实现。<br>锁实现包含的三要素：1、原子装填，使用了CAS操作。 2、等待列队，所有没有请求到锁的线程会进入等待列队进行等待。  3、阻塞原语 park()和unpark() 用来挂起和恢复线程。</p>
+<ul>
+<li><p>特性</p>
+<ul>
+<li><p>中断响应</p>
+<p>可以避免死锁，程序在等待锁的时候可以根据需要取消对锁的请求。<br>学习链接：<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/yyd19921214/article/details/49737061?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param">https://blog.csdn.net/yyd19921214/article/details/49737061?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param</a></p>
+<ul>
+<li><p>什么是线程中断</p>
+<p>学习链接：<a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306580767211554">https://www.liaoxuefeng.com/wiki/1252599548343744/1306580767211554</a></p>
+</li>
+<li><p>如何使用此功能</p>
+<p>使用lockInterruptible()方法可以获得拥有此功能的锁</p>
+</li>
+</ul>
+</li>
+<li><p>公平锁</p>
+<p>公平锁会按照时间的先后顺序分配锁，但是性能低下，所以大多数情况下锁的申请都是非公平的。</p>
+</li>
+<li><p>锁申请等待限时</p>
+<p>可以避免死锁，因为可以设置等待时间。可以通过tryLock()方法使用此功能。</p>
+</li>
+</ul>
+</li>
+<li><p>搭档 Condition</p>
+<p>通过lock接口的 newCondition()方法可以生成一个与当前重入锁绑定的Condition实例，利用这个实例可以让线程在合适的时间等待，或者在某一个特定的时刻得到通知继续执行。</p>
+</li>
+</ul>
+</li>
+<li><p>信号量 Semaphore</p>
+<p>Semaphore(信号量)是java.util.concurrent下的一个工具类.用来控制可同时访问特定资源的线程数.内部是通过维护父类(AQS)的 int state值实现。<br>学习链接：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/27314456">https://zhuanlan.zhihu.com/p/27314456</a></p>
+</li>
+<li><p>ReadWriteLock 读写锁</p>
+<p>可以有效帮助减少锁竞争，提升系统性能。主要应用于读操作的次数远远大于写操作的次数。<br>学习链接：<a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306581002092578">https://www.liaoxuefeng.com/wiki/1252599548343744/1306581002092578</a></p>
+</li>
+<li><p>倒计数器 CountDownLatch</p>
+<p>使用的多线程控制工具类，通常用来控制线程等待，它可以让某一个线程等待直到倒计数器结束再开始执行，它是一次性的，打开之后就不能关上了。<br>应用场景：在一个行为执行前需要执行很多前置步骤。<br>学习链接：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/962bc7225ce8">https://www.jianshu.com/p/962bc7225ce8</a></p>
+</li>
+<li><p>循环栅栏 CyclicBarrier</p>
+<p>字面意思回环栅栏，通过它可以实现让一组线程等待至某个状态之后再全部同时执行。<br>叫做回环是因为当所有等待线程都被释放以后，CyclicBarrier可以被重用；跟 CountDownLatch功能类似，但是更灵活、更强大、更复杂。<br>学习链接：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/4ef4bbf01811">https://www.jianshu.com/p/4ef4bbf01811</a></p>
+</li>
+<li><p>线程阻塞工具类 LockSupport</p>
+<p>LockSupport 是一个线程阻塞工具，可以让线程在任意位置阻塞；<br>应用实例：一个节点线程获取不到锁时，会阻塞自己，调用的就是LockSupport的park()方法，返回只有两种方式，前一个节点线程释放锁时unpark()了当前节点，或者当前节点线程被中断返回。</p>
+</li>
+<li><p>限流工具 Guava的RateLimiter</p>
+<p>应用或者组件都有访问上限，如果突破这个上限不仅会影响其性能，更可能会导致其崩溃，因此，对请求进行限流是必要的。<br>学习链接：<a target="_blank" rel="noopener" href="https://juejin.im/post/6844903783432978439">https://juejin.im/post/6844903783432978439</a></p>
+<ul>
+<li><p>漏桶算法</p>
+<p>利用缓存，当有请求进入系统时无论请求速率如何，都先在缓存区内保存，然后以固定的流苏流出缓存区进行处理。</p>
+</li>
+<li><p>令牌桶算法</p>
+<p>桶中存放的不是请求而是令牌，处理程序只有拿到令牌后才能对请求进行处理，如果没有令牌可能被丢弃也可能等待可用令牌</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="线程复用：线程池"><a href="#线程复用：线程池" class="headerlink" title="线程复用：线程池"></a>线程复用：线程池</h3><ul>
+<li><p>Executor框架</p>
+<ul>
+<li><p>Executors类</p>
+<ul>
+<li><p>newFixedThreadPool()</p>
+<p>返回一个固定线程数量的线程池，待执行任务保存在队列中</p>
+</li>
+<li><p>newSingleThreadExecutor()</p>
+<p>返回只有一个线程的线程池，待执行任务保存在队列中</p>
+</li>
+<li><p>newCachedThreadPool()</p>
+<p>返回一个可根据实际情况调整线程数量的线程池</p>
+</li>
+<li><p>newScheduledThreadPool()</p>
+<p>返回ScheduleExecutorService对象，可以执行线程的数量</p>
+</li>
+<li><p>newSingleThreadScheduledExector()</p>
+<p>返回ScheduledExectorService对象，只有一个线程，可以设置执行任务相关的时间参数</p>
+</li>
+<li><p>。。。。</p>
+</li>
+</ul>
+</li>
+<li><p>自定义线程创建 ThreadFactory</p>
+</li>
+<li><p>扩展线程池 ThreadPoolExector</p>
+<p>提供了 beforeExecute()、afterExecute()和terminated() 三个接口用来对线程池进行控制</p>
+</li>
+<li><p>输出异常堆栈</p>
+<ul>
+<li><p>使用execute()方法</p>
+<p>submit()会忽略系统抛出的异常</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>分而治之 Fork/Join框架</p>
+<p>学习链接：<a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/article/1146802219354112">https://www.liaoxuefeng.com/article/1146802219354112</a></p>
+</li>
+<li><p>Guava对线程池的扩展</p>
+<ul>
+<li><p>DirectExecutor线程池</p>
+<p>它并没有真的创建或者使用额外线程，它总是将任务在当前线程中直接执行。这个设计主要是为了完成业务的抽象工作，可以使用同一的编码风格处理同步和异步调用，进而简化设计。</p>
+</li>
+<li><p>Daemon线程池</p>
+<p>将普通线程池转为Daemon线程池，可以随着系统（也可以叫主线程）执行完成后一起销毁</p>
+</li>
+<li><p>Future模型的扩展</p>
+<p>Future模式核心思想是异步调用，线程会在等待结果返回的过程中执行其他业务，从而充分利用这段时间</p>
+<ul>
+<li><p>ListeningExecutorService</p>
+<p>调用 MoreExecutors.listeningDecorator 方法将一个普通线程池包装为一个包含通知同能的Future线程池</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="java并发容器"><a href="#java并发容器" class="headerlink" title="java并发容器"></a>java并发容器</h2><h3 id="并发集合"><a href="#并发集合" class="headerlink" title="并发集合"></a>并发集合</h3><ul>
+<li><p>ConcurrentHashMap</p>
+<p>高效的并发,线程安全的HashMap</p>
+</li>
+<li><p>CopyOnWriteArrayList</p>
+<p>线程安全的ArrayList 适合读多写少的场合，性能远好于Vector。<br>读取不加锁，写入也不会阻塞读取操作，只有写入和写入会加锁，因为在写入操作时会进行一次自我复制</p>
+</li>
+<li><p>ConcurrentLinkedQueue</p>
+<p>高效并发队列，链表实现可以看作是线程安全的LinkedList，是高并发环境中性能最好的队列</p>
+</li>
+<li><p>BlokingQueue</p>
+<p>阻塞队列，适合做数据共享通道。非常适合作为“生产和–消费者”模式的数据同步工具，在队列为空的时候会让读取阻塞，而当队列满了后会让存储操作阻塞</p>
+</li>
+<li><p>ConcurrentSkipListMap</p>
+<p>跳表实现，一种可以用来快速查找的数据结构。</p>
+<ul>
+<li><p>高性能</p>
+<p>类似平衡树，区别是对平衡树的插入和删除往往很可能导致平衡树进行一次全局调整，而跳表只需要对整个数据结构的局部进行操作即可。这样就可以控制锁的粒度。</p>
+</li>
+<li><p>随机算法</p>
+<p>跳表本质是同时维护了多个链表，并且链表是分层的，底层的链表维护了跳表内所有的元素，每上面一层链表都是下面一层链表的子集，一个元素插入哪些层是随机的。<br>查找操作时跳跃式的，跳表内所有链表的元素都是排序的，查找时会从顶层开始，一旦发现被查找的元素大于当前链表中的取值就会转入下一层继续查找。</p>
+<ul>
+<li>疑问：为什么插入是随机的 但是查找可以按照顺序查找呢？</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="JMH进行性能测试"><a href="#JMH进行性能测试" class="headerlink" title="JMH进行性能测试"></a>JMH进行性能测试</h2><p>学习链接：<a target="_blank" rel="noopener" href="https://www.xncoding.com/2018/01/07/java/jmh.html">https://www.xncoding.com/2018/01/07/java/jmh.html</a></p>
+<h2 id="锁优化"><a href="#锁优化" class="headerlink" title="锁优化"></a>锁优化</h2><h3 id="提高性能的建议"><a href="#提高性能的建议" class="headerlink" title="提高性能的建议"></a>提高性能的建议</h3><ul>
+<li><p>1、减少锁的持有时间</p>
+<p>尽量不要在同步代码块中做耗时的操作，并且只在必要时进行同步</p>
+</li>
+<li><p>2、减小锁的粒度</p>
+<p>需要同步的代码块要尽量小</p>
+</li>
+<li><p>3、用读写分离锁替换独占锁</p>
+</li>
+<li><p>4、锁分离</p>
+<p>是读写锁的上层思想，可以将功能进行拆分，并根据每个功能的实际需求进行定制化的操作</p>
+</li>
+<li><p>5、锁粗化</p>
+<p>对同一个锁不断进行请求和释放的操作时便会把所有的锁操作整合成对锁的一次请求，从而减少对锁的请求同步的次数</p>
+</li>
+</ul>
+<h3 id="java虚拟机对锁的优化"><a href="#java虚拟机对锁的优化" class="headerlink" title="java虚拟机对锁的优化"></a>java虚拟机对锁的优化</h3><ul>
+<li><p>锁偏向</p>
+<p>是一种针对加锁操作的优化。<br>核心思想：如果一个线程获得了锁，那么锁就进入偏向模式，当这个线程再次请求锁时无须再做任何同步操作。<br>但是在锁竞争比较激烈的场合其效果不佳，因为可能每次请求锁的都不是同一个线程，所以不建议在竞争激烈的环境下启用</p>
+</li>
+<li><p>轻量级锁</p>
+<p>它只是简单地将对象头部作为指针指向持有锁的线程堆栈的内部，来判断一个线程是否持有对象锁。如果加锁失败就会转为重量级锁。<br>学习链接：<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/53826114">https://www.zhihu.com/question/53826114</a></p>
+</li>
+<li><p>自旋锁</p>
+<p>虚拟机会让当前线程做几个空循环，在经过若干次循环后如果可以得到锁，那么就会顺利进入临界区，如果不能获得锁会在操作系统层面挂起</p>
+</li>
+<li><p>锁消除</p>
+<p>虚拟机在编译过程中会去除不可能存在共享资源竞争的锁，通过这种措施可以节省毫无意义的请求锁时间。<br>之所以有这一操作，一方面是防止用户的错误使用。 另一方面用户在使用jdk提供的api时，api内部实现可能使用了同步锁</p>
+</li>
+</ul>
+<h3 id="ThreadLocal"><a href="#ThreadLocal" class="headerlink" title="ThreadLocal"></a>ThreadLocal</h3><p>本质是通过增加资源来保证所有对象的线程安全，会为每一个线程保存一份资源的副本，这样就不会产生竞争，但是用完要及时清理资源，不然容易发生内存泄漏。<br>学习链接：<a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306581251653666">https://www.liaoxuefeng.com/wiki/1252599548343744/1306581251653666</a></p>
+<h3 id="无锁"><a href="#无锁" class="headerlink" title="无锁"></a>无锁</h3><p>乐观锁的思想，它会假设对资源的访问是没有冲突的，无锁的策略使用CAS的技术来鉴别线程冲突，一旦检测到冲突产生就重试当前操作直到没有冲突为止。</p>
+<ul>
+<li><p>CAS</p>
+<p>乐观锁，并没有真的是使用同步锁，当多个线程同时使用CAS操作一个变量时只有一个会胜出，并成功更新，其余均会失败。失败的线程不会被挂起，仅是被告知失败，并且允许再次尝试，也允许放弃操作。</p>
+</li>
+<li><p>安全整数 AtomicInteger</p>
+<p>线程安全的整数，使用CAS操作</p>
+</li>
+<li><p>无锁的对象引用 AtomicReference</p>
+<p>保证修改对象引用时的线程安全性</p>
+<ul>
+<li>缺点：无法解决ABA问题</li>
+</ul>
+</li>
+<li><p>带时间戳的对象引用 AtomicStampedReference</p>
+<ul>
+<li>优势：通过时间戳解决ABA问题</li>
+</ul>
+</li>
+<li><p>无锁数组 AtomicIntegerArray</p>
+</li>
+<li><p>让普通变量也享受原子操作 AtomicIntegerFieldUpdater</p>
+<p>可以对int、long和普通对象引用进行CAS修改；<br>注意事项：<br> 变量必须public 因为底层使用了反射获取变量的值<br>必须被volatile修饰<br>不支持static修饰的变量，因为会通过对象实例中的偏移量直接进行赋值</p>
+</li>
+<li><p>数据交换通道 SynchronousQueue</p>
+<p>学习链接：<a target="_blank" rel="noopener" href="https://blog.csdn.net/zmx729618/article/details/52980158">https://blog.csdn.net/zmx729618/article/details/52980158</a></p>
+</li>
+</ul>
+<h2 id="实用工具"><a href="#实用工具" class="headerlink" title="实用工具"></a>实用工具</h2><h3 id="Disruptor-框架"><a href="#Disruptor-框架" class="headerlink" title="Disruptor 框架"></a>Disruptor 框架</h3><p>高效无锁内存队列 可以用来实现高性能的 生产者–消费者模式</p>
+<h3 id="Akka框架"><a href="#Akka框架" class="headerlink" title="Akka框架"></a>Akka框架</h3><p>帮助构建高并发程序</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Byw
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://biyanwen.github.io/blog/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/" title="java高并发程序设计">https://biyanwen.github.io/blog/java高并发程序设计/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/Java/" rel="tag"># Java</a>
+              <a href="/blog/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag"># 多线程</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/" rel="prev" title="项目如何分包">
+      <i class="fa fa-chevron-left"></i> 项目如何分包
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/blog/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/" rel="next" title="虚拟机字节码执行引擎">
+      虚拟机字节码执行引擎 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.</span> <span class="nav-text">java高并发程序设计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#java%E5%B9%B6%E5%8F%91%E5%8C%85"><span class="nav-number">1.1.</span> <span class="nav-text">java并发包</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E6%8E%A7%E5%88%B6"><span class="nav-number">1.1.1.</span> <span class="nav-text">同步控制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E5%A4%8D%E7%94%A8%EF%BC%9A%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="nav-number">1.1.2.</span> <span class="nav-text">线程复用：线程池</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java%E5%B9%B6%E5%8F%91%E5%AE%B9%E5%99%A8"><span class="nav-number">1.2.</span> <span class="nav-text">java并发容器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E9%9B%86%E5%90%88"><span class="nav-number">1.2.1.</span> <span class="nav-text">并发集合</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JMH%E8%BF%9B%E8%A1%8C%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95"><span class="nav-number">1.3.</span> <span class="nav-text">JMH进行性能测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%81%E4%BC%98%E5%8C%96"><span class="nav-number">1.4.</span> <span class="nav-text">锁优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E9%AB%98%E6%80%A7%E8%83%BD%E7%9A%84%E5%BB%BA%E8%AE%AE"><span class="nav-number">1.4.1.</span> <span class="nav-text">提高性能的建议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AF%B9%E9%94%81%E7%9A%84%E4%BC%98%E5%8C%96"><span class="nav-number">1.4.2.</span> <span class="nav-text">java虚拟机对锁的优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ThreadLocal"><span class="nav-number">1.4.3.</span> <span class="nav-text">ThreadLocal</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E9%94%81"><span class="nav-number">1.4.4.</span> <span class="nav-text">无锁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%94%A8%E5%B7%A5%E5%85%B7"><span class="nav-number">1.5.</span> <span class="nav-text">实用工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Disruptor-%E6%A1%86%E6%9E%B6"><span class="nav-number">1.5.1.</span> <span class="nav-text">Disruptor 框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Akka%E6%A1%86%E6%9E%B6"><span class="nav-number">1.5.2.</span> <span class="nav-text">Akka框架</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Byw"
+      src="/blog/images/tx.jpg">
+  <p class="site-author-name" itemprop="name">Byw</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Byw</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">54k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">1:30</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/pisces.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/blog/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'd5c54e89d7198df839ea',
+      clientSecret: '69ce2481da8effcaecc6adb2d893c4b600405e10',
+      repo        : 'blog',
+      owner       : 'biyanwen',
+      admin       : ['biyanwen'],
+      id          : 'bdd2728b267f6c6b506a1f2426a34681',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

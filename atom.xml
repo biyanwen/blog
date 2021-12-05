@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>博客</title>
+  <icon>https://biyanwen.github.io/blog/icon.png</icon>
+  <subtitle>道阻且长，行则将至</subtitle>
+  <link href="https://biyanwen.github.io/blog/atom.xml" rel="self"/>
+  
+  <link href="https://biyanwen.github.io/blog/"/>
+  <updated>2021-12-05T07:14:14.428Z</updated>
+  <id>https://biyanwen.github.io/blog/</id>
+  
+  <author>
+    <name>Byw</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>CountDownLatch，CyclicBarrier，Semaphore及AQS介绍</title>
+    <link href="https://biyanwen.github.io/blog/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/"/>
+    <id>https://biyanwen.github.io/blog/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/</id>
+    <published>2021-12-05T07:10:31.558Z</published>
+    <updated>2021-12-05T07:14:14.428Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;CountDownLatch，CyclicBarrier，Semaphore及AQS介绍&quot;&gt;&lt;a href=&quot;#CountDownLatch，CyclicBarrier，Semaphore及AQS介绍&quot; class=&quot;headerlink&quot; title=&quot;CountDownLatch，CyclicBarrier，Semaphore及AQS介绍&quot;&gt;&lt;/a&gt;CountDownLatch，CyclicBarrier，Semaphore及AQS介绍&lt;/h1&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Java" scheme="https://biyanwen.github.io/blog/tags/Java/"/>
+    
+    <category term="多线程" scheme="https://biyanwen.github.io/blog/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
+    
+    <category term="源码阅读" scheme="https://biyanwen.github.io/blog/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>分布式锁</title>
+    <link href="https://biyanwen.github.io/blog/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/"/>
+    <id>https://biyanwen.github.io/blog/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/</id>
+    <published>2021-12-05T06:57:16.379Z</published>
+    <updated>2021-12-05T07:08:43.446Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Java" scheme="https://biyanwen.github.io/blog/tags/Java/"/>
+    
+    <category term="分布式" scheme="https://biyanwen.github.io/blog/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
+    
+    <category term="多线程" scheme="https://biyanwen.github.io/blog/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
+    <link href="https://biyanwen.github.io/blog/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/"/>
+    <id>https://biyanwen.github.io/blog/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</id>
+    <published>2021-12-05T06:47:29.126Z</published>
+    <updated>2021-12-05T07:03:24.592Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;【通过抓包学网络】TCP三次握手与四次挥手&quot;&gt;&lt;a href=&quot;#【通过抓包学网络】TCP三次握手与四次挥手&quot; class=&quot;headerlink&quot; title=&quot;【通过抓包学网络】TCP三次握手与四次挥手&quot;&gt;&lt;/a&gt;【通过抓包学网络】TCP三次握手与四次挥手&lt;/h1&gt;&lt;p&gt;本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章&lt;a href=&quot;https://blog.csdn.net/qq_43005544/article/details/116504407&quot;&gt;wireshark 简易教程&lt;/a&gt;&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Wireshark" scheme="https://biyanwen.github.io/blog/tags/Wireshark/"/>
+    
+    <category term="网络" scheme="https://biyanwen.github.io/blog/tags/%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Wireshark 简明教程</title>
+    <link href="https://biyanwen.github.io/blog/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/"/>
+    <id>https://biyanwen.github.io/blog/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</id>
+    <published>2021-12-05T06:42:55.422Z</published>
+    <updated>2021-12-05T06:46:53.512Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;Wireshark-简明教程&quot;&gt;&lt;a href=&quot;#Wireshark-简明教程&quot; class=&quot;headerlink&quot; title=&quot;Wireshark 简明教程&quot;&gt;&lt;/a&gt;Wireshark 简明教程&lt;/h1&gt;&lt;p&gt;Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Wireshark" scheme="https://biyanwen.github.io/blog/tags/Wireshark/"/>
+    
+    <category term="网络" scheme="https://biyanwen.github.io/blog/tags/%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Git-submodule 统一配置简明教程</title>
+    <link href="https://biyanwen.github.io/blog/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/"/>
+    <id>https://biyanwen.github.io/blog/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</id>
+    <published>2021-12-05T06:41:25.950Z</published>
+    <updated>2021-12-05T07:06:03.597Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。&lt;/p&gt;
+&lt;p&gt;git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。&lt;/p&gt;
+&lt;p&gt;之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Git" scheme="https://biyanwen.github.io/blog/tags/Git/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>【Mybatis源码解读】jdbc包</title>
+    <link href="https://biyanwen.github.io/blog/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/"/>
+    <id>https://biyanwen.github.io/blog/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</id>
+    <published>2021-12-05T06:30:01.964Z</published>
+    <updated>2021-12-05T06:35:43.720Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;【Mybatis源码解读】jdbc包&quot;&gt;&lt;a href=&quot;#【Mybatis源码解读】jdbc包&quot; class=&quot;headerlink&quot; title=&quot;【Mybatis源码解读】jdbc包&quot;&gt;&lt;/a&gt;【Mybatis源码解读】jdbc包&lt;/h1&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Mybatis" scheme="https://biyanwen.github.io/blog/tags/Mybatis/"/>
+    
+    <category term="源码阅读" scheme="https://biyanwen.github.io/blog/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>常见的Web应用攻击手段</title>
+    <link href="https://biyanwen.github.io/blog/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/"/>
+    <id>https://biyanwen.github.io/blog/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</id>
+    <published>2021-12-05T06:24:20.623Z</published>
+    <updated>2021-12-05T06:25:37.045Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;常见的Web应用攻击手段&quot;&gt;&lt;a href=&quot;#常见的Web应用攻击手段&quot; class=&quot;headerlink&quot; title=&quot;常见的Web应用攻击手段&quot;&gt;&lt;/a&gt;常见的Web应用攻击手段&lt;/h1&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="架构" scheme="https://biyanwen.github.io/blog/tags/%E6%9E%B6%E6%9E%84/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>集群环境下如何管理Session</title>
+    <link href="https://biyanwen.github.io/blog/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/"/>
+    <id>https://biyanwen.github.io/blog/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</id>
+    <published>2021-12-05T06:21:36.434Z</published>
+    <updated>2021-12-05T06:36:58.156Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;集群环境下如何管理Session&quot;&gt;&lt;a href=&quot;#集群环境下如何管理Session&quot; class=&quot;headerlink&quot; title=&quot;集群环境下如何管理Session&quot;&gt;&lt;/a&gt;集群环境下如何管理Session&lt;/h1&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="架构" scheme="https://biyanwen.github.io/blog/tags/%E6%9E%B6%E6%9E%84/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>网站的高性能架构</title>
+    <link href="https://biyanwen.github.io/blog/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/"/>
+    <id>https://biyanwen.github.io/blog/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/</id>
+    <published>2021-12-05T06:20:42.235Z</published>
+    <updated>2021-12-05T06:37:10.437Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;网站的高性能架构&quot;&gt;&lt;a href=&quot;#网站的高性能架构&quot; class=&quot;headerlink&quot; title=&quot;网站的高性能架构&quot;&gt;&lt;/a&gt;网站的高性能架构&lt;/h1&gt;&lt;p&gt;网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="架构" scheme="https://biyanwen.github.io/blog/tags/%E6%9E%B6%E6%9E%84/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>网站典型故障案例</title>
+    <link href="https://biyanwen.github.io/blog/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/"/>
+    <id>https://biyanwen.github.io/blog/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/</id>
+    <published>2021-12-05T06:18:51.996Z</published>
+    <updated>2021-12-05T06:37:26.745Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;网站典型故障案例&quot;&gt;&lt;a href=&quot;#网站典型故障案例&quot; class=&quot;headerlink&quot; title=&quot;网站典型故障案例&quot;&gt;&lt;/a&gt;网站典型故障案例&lt;/h1&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="架构" scheme="https://biyanwen.github.io/blog/tags/%E6%9E%B6%E6%9E%84/"/>
+    
+    <category term="问题记录" scheme="https://biyanwen.github.io/blog/tags/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java内存模型与线程</title>
+    <link href="https://biyanwen.github.io/blog/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/"/>
+    <id>https://biyanwen.github.io/blog/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/</id>
+    <published>2021-12-05T06:16:49.258Z</published>
+    <updated>2021-12-05T06:18:44.534Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;Java内存模型与线程&quot;&gt;&lt;a href=&quot;#Java内存模型与线程&quot; class=&quot;headerlink&quot; title=&quot;Java内存模型与线程&quot;&gt;&lt;/a&gt;Java内存模型与线程&lt;/h1&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Java" scheme="https://biyanwen.github.io/blog/tags/Java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java内存区域</title>
+    <link href="https://biyanwen.github.io/blog/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/"/>
+    <id>https://biyanwen.github.io/blog/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/</id>
+    <published>2021-12-05T06:15:11.402Z</published>
+    <updated>2021-12-05T06:16:35.988Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;Java内存区域&quot;&gt;&lt;a href=&quot;#Java内存区域&quot; class=&quot;headerlink&quot; title=&quot;Java内存区域&quot;&gt;&lt;/a&gt;Java内存区域&lt;/h1&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Jvm" scheme="https://biyanwen.github.io/blog/tags/Jvm/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>垃圾收集器与内存分配策略</title>
+    <link href="https://biyanwen.github.io/blog/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/"/>
+    <id>https://biyanwen.github.io/blog/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/</id>
+    <published>2021-12-05T06:13:31.866Z</published>
+    <updated>2021-12-05T06:15:01.283Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;垃圾收集器与内存分配策略&quot;&gt;&lt;a href=&quot;#垃圾收集器与内存分配策略&quot; class=&quot;headerlink&quot; title=&quot;垃圾收集器与内存分配策略&quot;&gt;&lt;/a&gt;垃圾收集器与内存分配策略&lt;/h1&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Jvm" scheme="https://biyanwen.github.io/blog/tags/Jvm/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>虚拟机类加载机制</title>
+    <link href="https://biyanwen.github.io/blog/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/"/>
+    <id>https://biyanwen.github.io/blog/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/</id>
+    <published>2021-12-05T06:12:44.443Z</published>
+    <updated>2021-12-05T06:32:54.639Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;虚拟机类加载机制&quot;&gt;&lt;a href=&quot;#虚拟机类加载机制&quot; class=&quot;headerlink&quot; title=&quot;虚拟机类加载机制&quot;&gt;&lt;/a&gt;虚拟机类加载机制&lt;/h1&gt;&lt;p&gt;java虚拟机把描述类的数据从Class文件加载到内存，并堆数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这个过程被称作虚拟机的类加载机制&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Jvm" scheme="https://biyanwen.github.io/blog/tags/Jvm/"/>
+    
+    <category term="类加载" scheme="https://biyanwen.github.io/blog/tags/%E7%B1%BB%E5%8A%A0%E8%BD%BD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>虚拟机字节码执行引擎</title>
+    <link href="https://biyanwen.github.io/blog/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/"/>
+    <id>https://biyanwen.github.io/blog/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/</id>
+    <published>2021-12-05T06:09:58.727Z</published>
+    <updated>2021-12-05T06:12:09.479Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;虚拟机字节码执行引擎&quot;&gt;&lt;a href=&quot;#虚拟机字节码执行引擎&quot; class=&quot;headerlink&quot; title=&quot;虚拟机字节码执行引擎&quot;&gt;&lt;/a&gt;虚拟机字节码执行引擎&lt;/h1&gt;&lt;p&gt;虚拟机字节码执行引擎是java虚拟机核心组成部分之一，所有java虚拟机的执行引擎输入、输出都是一致的：输入的是字节码二进制流，处理过程是字节码解析执行的等效过程，输出的是执行结果。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Jvm" scheme="https://biyanwen.github.io/blog/tags/Jvm/"/>
+    
+    <category term="字节码" scheme="https://biyanwen.github.io/blog/tags/%E5%AD%97%E8%8A%82%E7%A0%81/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>java高并发程序设计</title>
+    <link href="https://biyanwen.github.io/blog/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/"/>
+    <id>https://biyanwen.github.io/blog/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/</id>
+    <published>2021-12-05T04:21:18.434Z</published>
+    <updated>2021-12-05T06:36:29.157Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;java高并发程序设计&quot;&gt;&lt;a href=&quot;#java高并发程序设计&quot; class=&quot;headerlink&quot; title=&quot;java高并发程序设计&quot;&gt;&lt;/a&gt;java高并发程序设计&lt;/h1&gt;&lt;p&gt;高并发是 java 开发必备知识，本篇文章整理出在高并发程序设计中常用的工具。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Java" scheme="https://biyanwen.github.io/blog/tags/Java/"/>
+    
+    <category term="多线程" scheme="https://biyanwen.github.io/blog/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>项目如何分包</title>
+    <link href="https://biyanwen.github.io/blog/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/"/>
+    <id>https://biyanwen.github.io/blog/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</id>
+    <published>2021-12-05T03:55:50.836Z</published>
+    <updated>2021-12-05T06:37:48.886Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;项目如何分包&quot;&gt;&lt;a href=&quot;#项目如何分包&quot; class=&quot;headerlink&quot; title=&quot;项目如何分包&quot;&gt;&lt;/a&gt;项目如何分包&lt;/h1&gt;&lt;p&gt;在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="架构" scheme="https://biyanwen.github.io/blog/tags/%E6%9E%B6%E6%9E%84/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>网站架构模式</title>
+    <link href="https://biyanwen.github.io/blog/%E7%BD%91%E7%AB%99%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F/"/>
+    <id>https://biyanwen.github.io/blog/%E7%BD%91%E7%AB%99%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F/</id>
+    <published>2021-12-02T05:13:15.874Z</published>
+    <updated>2021-12-05T06:37:34.535Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;网站架构模式&quot;&gt;&lt;a href=&quot;#网站架构模式&quot; class=&quot;headerlink&quot; title=&quot;网站架构模式&quot;&gt;&lt;/a&gt;网站架构模式&lt;/h1&gt;&lt;p&gt;大型互联网公司为了实现网站的高性能、高可用、易伸缩、可扩展、安全等各种技术架构目标，提出了很多解决方案，而这些方案又被更多网站重复使用，从而逐渐形成大型网站架构模式，下面对常见的模式进行总结。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyanwen.github.io/blog/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="架构" scheme="https://biyanwen.github.io/blog/tags/%E6%9E%B6%E6%9E%84/"/>
+    
+  </entry>
+  
+</feed>

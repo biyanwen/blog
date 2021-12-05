@@ -1,31 +1,1024 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Hello World</title>
-    <url>/blog/2021/11/29/hello-world/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+    <title>分布式锁</title>
+    <url>/blog/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/</url>
+    <content><![CDATA[<p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
+<span id="more"></span>
 
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+<h1 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h1><h2 id="为什么需要分布式锁"><a href="#为什么需要分布式锁" class="headerlink" title="为什么需要分布式锁"></a>为什么需要分布式锁</h2><p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
+<h2 id="2-常用分布式锁"><a href="#2-常用分布式锁" class="headerlink" title="2. 常用分布式锁"></a>2. 常用分布式锁</h2><h3 id="2-1-Redis实现分布式锁"><a href="#2-1-Redis实现分布式锁" class="headerlink" title="2.1 Redis实现分布式锁"></a>2.1 Redis实现分布式锁</h3><h4 id="2-1-1-Redis实现分布式锁原理"><a href="#2-1-1-Redis实现分布式锁原理" class="headerlink" title="2.1.1 Redis实现分布式锁原理"></a>2.1.1 Redis实现分布式锁原理</h4><p>Redis实现分布式锁主要是使用Redis提供的setnx命令，setnx 是『SET if Not eXists』(如果不存在，则 SET)的简写。 命令格式：SETNX key value；使用：只在键 key 不存在的情况下，将键 key 的值设置为 value 。若键 key 已经存在， 则 SETNX 命令不做任何动作。返回值：命令在设置成功时返回 1 ，设置失败时返回 0 ，Redis保证setnx的原子性，所以如果setnx返回1就说明获取到锁，如果0就说明获取锁失败。</p>
+<h4 id="2-1-2-Redis实现分布式锁潜在问题"><a href="#2-1-2-Redis实现分布式锁潜在问题" class="headerlink" title="2.1.2 Redis实现分布式锁潜在问题"></a>2.1.2 Redis实现分布式锁潜在问题</h4><p>主要问题就是<strong>超时</strong>，例如当业务执行时间大于key的过期时间就可能产生并发问题，同时也可能将其他线程持有的锁误删。</p>
+<h4 id="2-1-2-超时问题解决方案"><a href="#2-1-2-超时问题解决方案" class="headerlink" title="2.1.2 超时问题解决方案"></a>2.1.2 超时问题解决方案</h4><p>解决方案就是<strong>自动续期</strong>，当线程成功获得锁后就开启一个WatchDog监听当前线程，如果key超时之前不能完成业务逻辑那就将key的过期时间延长，同时如果持有锁的服务宕机就不自动续期，让Redis将key删除，当然这个功能已经有现成的实现方式了，就是<strong>Redisson</strong>。</p>
+<h4 id="2-1-3-利用Redisson实现Redis分布式锁"><a href="#2-1-3-利用Redisson实现Redis分布式锁" class="headerlink" title="2.1.3 利用Redisson实现Redis分布式锁"></a>2.1.3 利用Redisson实现Redis分布式锁</h4><p>首先引入Redisson依赖</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;!-- https:<span class="comment">//mvnrepository.com/artifact/org.redisson/redisson --&gt;</span></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.redisson&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;redisson&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">3.15</span><span class="number">.1</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>实现方式</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> RedissonClient redissonClient;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">    	<span class="comment">//添加Redis配置信息</span></span><br><span class="line">        Config config = <span class="keyword">new</span> Config();</span><br><span class="line">        config.useSingleServer().setAddress(<span class="string">&quot;redis://127.0.0.1:6379&quot;</span>);</span><br><span class="line">        redissonClient = Redisson.create(config);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread myThread1 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread2 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread3 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread4 = <span class="keyword">new</span> MyThread();</span><br><span class="line"></span><br><span class="line">        myThread1.start();</span><br><span class="line">        myThread2.start();</span><br><span class="line">        myThread3.start();</span><br><span class="line">        myThread4.start();</span><br><span class="line"></span><br><span class="line">        myThread1.join();</span><br><span class="line">        myThread2.join();</span><br><span class="line">        myThread3.join();</span><br><span class="line">        myThread4.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        	<span class="comment">//初始化锁对象</span></span><br><span class="line">            RLock watchDogLock = redissonClient.getLock(<span class="string">&quot;watchDogLock&quot;</span>);</span><br><span class="line">            <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">            	<span class="comment">//利用Redisson的API成功获取锁时Redisson会自动启动WatchDog监听当前线程，底层实现是通过Lua脚本。</span></span><br><span class="line">                <span class="keyword">boolean</span> success = watchDogLock.tryLock();</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 是否成功获取锁：&quot;</span> + success);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (success) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 开始执行业务逻辑&quot;</span>);</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                        System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 业务执行成功，进行解锁&quot;</span>);</span><br><span class="line">                        watchDogLock.unlock();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 获取锁失败&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-2-Zookeeper实现分布式锁"><a href="#2-2-Zookeeper实现分布式锁" class="headerlink" title="2.2 Zookeeper实现分布式锁"></a>2.2 Zookeeper实现分布式锁</h3><h4 id="2-2-1-Zookeeper实现分布式锁原理"><a href="#2-2-1-Zookeeper实现分布式锁原理" class="headerlink" title="2.2.1  Zookeeper实现分布式锁原理"></a>2.2.1  Zookeeper实现分布式锁原理</h4><ol>
+<li><strong>数据结构</strong>：Zookeeper内部维护一个树形的数据结构，用户可以根据其提供的Api创建或者删除节点，并且Zookeeper会为每个节点生成一个不会重复并且根据创建顺序由小到大排列的序号。</li>
+<li><strong>永久节点和临时节点</strong>：永久节点除非手动删除，不然不会自动删除；临时节点会在客户端断开一段时间后自动删除，如果客户端没有断开链接，或者没有手动删除就会一直存在，同时永久节点下面可以创建临时节点，但是临时节点下面不能创建永久节点。</li>
+<li><strong>Watch机制</strong>：子节点可以在上一个节点创建一个监听器，同时传入一个回调方法，当前一个节点改变时（例如，删除，更新）会收到通知，并且执行回调方法。</li>
+</ol>
+<p>就是因为临时节点的特性，所以Zookeeper不会遇到和Redis相同的问题，如果客户端运行正常运行就不会删除临时节点，也就不会释放锁，如果客户端宕机那临时节点就会在客户端断开一段时间后自动删除。</p>
+<h4 id="2-2-2-Zookeeper分布式锁工作流程"><a href="#2-2-2-Zookeeper分布式锁工作流程" class="headerlink" title="2.2.2 Zookeeper分布式锁工作流程"></a>2.2.2 Zookeeper分布式锁工作流程</h4><ol>
+<li>当需要对资源进行加锁时，实际上就是在父节点之下创建一个临时顺序节点。</li>
+<li>客户端A来对资源加锁，首先判断当前创建的节点是否为最小节点，如果是，那么加锁成功，后续加锁线程阻塞等待。</li>
+<li>此时，客户端B也来尝试加锁，由于客户端A已经加锁成功，所以客户端B发现自己的节点并不是最小节点，就会去取到上一个节点，并且对上一节点注册监听。</li>
+<li>当客户端A操作完成，释放锁的操作就是删除这个节点，这样就可以触发监听事件，客户端B就会得到通知，同样，客户端B判断自己是否为最小节点，如果是，那么则加锁成功。</li>
+</ol>
+<h4 id="2-2-3-代码示例"><a href="#2-2-3-代码示例" class="headerlink" title="2.2.3 代码示例"></a>2.2.3 代码示例</h4><p>代码使用了Curator包，这个包封装了底层Zookeeper的操作，使用起来更加方便，可以有效减少样板代码。</p>
+<p>首先引入依赖</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;!-- https:<span class="comment">//mvnrepository.com/artifact/org.apache.curator/curator-recipes --&gt;</span></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.curator&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;curator-recipes&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">5.1</span><span class="number">.0</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>代码示例</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> CuratorFramework ZK_CLIENT;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">    	<span class="comment">//初始化Zookeeper配置</span></span><br><span class="line">        String zkServerAddress = <span class="string">&quot;127.0.0.1:12181&quot;</span>;</span><br><span class="line">        ExponentialBackoffRetry retryPolicy = <span class="keyword">new</span> ExponentialBackoffRetry(<span class="number">1000</span>, <span class="number">3</span>, <span class="number">5000</span>);</span><br><span class="line">        ZK_CLIENT = CuratorFrameworkFactory.builder()</span><br><span class="line">                .connectString(zkServerAddress)</span><br><span class="line">                .sessionTimeoutMs(<span class="number">5000</span>)</span><br><span class="line">                .connectionTimeoutMs(<span class="number">5000</span>)</span><br><span class="line">                .retryPolicy(retryPolicy)</span><br><span class="line">                .build();</span><br><span class="line">        ZK_CLIENT.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String LOCK_PATH = <span class="string">&quot;/myLock&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//创建锁对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> InterProcessMutex LOCK = <span class="keyword">new</span> InterProcessMutex(ZK_CLIENT, LOCK_PATH);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread myThread1 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread2 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread3 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread4 = <span class="keyword">new</span> MyThread();</span><br><span class="line"></span><br><span class="line">        myThread1.start();</span><br><span class="line">        myThread2.start();</span><br><span class="line">        myThread3.start();</span><br><span class="line">        myThread4.start();</span><br><span class="line"></span><br><span class="line">        myThread1.join();</span><br><span class="line">        myThread2.join();</span><br><span class="line">        myThread3.join();</span><br><span class="line">        myThread4.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                	<span class="comment">//加锁</span></span><br><span class="line">                    LOCK.acquire();</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 获取到锁&quot;</span>);</span><br><span class="line">                    Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 释放锁&quot;</span>);</span><br><span class="line">                        <span class="comment">//解锁</span></span><br><span class="line">                        LOCK.release();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-总结"><a href="#3-总结" class="headerlink" title="3 总结"></a>3 总结</h2><p>Redis和Zookeeper都能够实现分布式锁，但是他们之间有相同点和不同点，使用的时候需要根据需求来选择。<br><strong>相同点</strong>：由于工具封装的都比较好，实现起来都很简单。</p>
+<p><strong>不同点</strong>：</p>
+<ol>
+<li><strong>可靠性</strong>：Zookeeper可靠性高于Redis，因为Zookeeper的实现方式而言，本身就是保证数据一致性的，可靠性更高，而Redis不是数据强一致性的，某些极端场景下还是可能会存在问题。</li>
+<li><strong>性能</strong>：Redis性能比Zookeeper好，因为Zookeeper需要频繁创建和删除节点，性能略低。</li>
+</ol>
 ]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>分布式</tag>
+        <tag>多线程</tag>
+      </tags>
   </entry>
   <entry>
-    <title>heihei</title>
-    <url>/blog/2021/12/02/heihei/</url>
-    <content><![CDATA[]]></content>
+    <title>Git-submodule 统一配置简明教程</title>
+    <url>/blog/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
+<p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
+<p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
+<span id="more"></span>
+
+<p>﻿# Git-submodule 统一配置简明教程</p>
+<h2 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h2><p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
+<h2 id="2-为什么选用-git-submodule"><a href="#2-为什么选用-git-submodule" class="headerlink" title="2. 为什么选用 git-submodule"></a>2. 为什么选用 git-submodule</h2><p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
+<p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
+<h2 id="3-如果你需要集成-git-submodule-应该如何做"><a href="#3-如果你需要集成-git-submodule-应该如何做" class="headerlink" title="3. 如果你需要集成  git-submodule 应该如何做"></a>3. 如果你需要集成  git-submodule 应该如何做</h2><h3 id="3-1-检查项目中的同名模块"><a href="#3-1-检查项目中的同名模块" class="headerlink" title="3.1 检查项目中的同名模块"></a>3.1 检查项目中的同名模块</h3><p>  git-submodule 是不允许两个或两个以上的模块存在相同名字的情况发生，所以要先做检查。</p>
+<h3 id="3-2-使用-git-submodule-添加子模块"><a href="#3-2-使用-git-submodule-添加子模块" class="headerlink" title="3.2 使用  git-submodule 添加子模块"></a>3.2 使用  git-submodule 添加子模块</h3><p>执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule add -b $&#123;分支名字&#125; $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
+
+<p>命令详细解析：</p>
+<ul>
+<li>git ：调用 git 可执行程序；</li>
+<li>submodule add ： 添加  git-submodule 子模块；</li>
+<li>-b ${分支名字}：将子模块的哪个分支作为当前项目的字目录，如果不写默认是主模块；</li>
+<li>${git仓库地址} ：子模块项目地址；</li>
+</ul>
+<p>以现货为例，最终命令如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule add -b prod/dev http://[xxx].git</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-拉取子模块代码"><a href="#3-3-拉取子模块代码" class="headerlink" title="3.3 拉取子模块代码"></a>3.3 拉取子模块代码</h3><p>当执行完 3.2 步骤之后我们会发现项目中多个一个空文件夹，没错是它空的， submodule add 命令不会直接将代码也拉取下来，第一次需要我们主动些。</p>
+<p>执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule update --init --recursive</span><br></pre></td></tr></table></figure>
+
+<p>执行完这条命令后子模块的代码就被拉取下来了。</p>
+<p>如果之后子模块代码有更新了怎么办？当然再执行一次上面的命令就可以了，不过这样略显麻烦，git 当然不会有这么智障的操作，如果子模块有更新了，我们在主模块使用 <strong>git pull</strong> 也应该可以将最新代码拉取下拉，为此，需要你执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
+
+<p>这样，每次在主模块执行 git pull 的时候，都会去拉取子模块的最新代码。</p>
+<h3 id="3-4-切换子模块分支"><a href="#3-4-切换子模块分支" class="headerlink" title="3.4 切换子模块分支"></a>3.4 切换子模块分支</h3><p>这一步是可选的，是否需要这么做需要你看看你的子模块是否成功关联了对应分支。</p>
+<p>可使用如下命令查看：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git status</span><br></pre></td></tr></table></figure>
+
+<p>会显示子模块目前所在分支，如果出现  <strong>HEAD detached from</strong> 等提示语就表示没有成功关联到指定分支，那么你需要按照下面的步骤进行操作。</p>
+<p>这一步可能让你迷惑，什么？在 3.2 步不是已经指定子模块的分支了吗？对没错，你是指定了，但是他只是让主模块保存了指定分支的最后一次提交的 commit id。并没有真正关联到对应模块。</p>
+<p>这个时候就需要你自己切换分支，可执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git checkout xxx</span><br></pre></td></tr></table></figure>
+
+<p>xxx 为要切换分支的名字，当然你用各种 git 图形化工具操作也是一样的。</p>
+<h2 id="4-如果你要-clone-一个集成了-git-submodule-的项目应该如何做"><a href="#4-如果你要-clone-一个集成了-git-submodule-的项目应该如何做" class="headerlink" title="4. 如果你要 clone 一个集成了  git-submodule 的项目应该如何做"></a>4. 如果你要 clone 一个集成了  git-submodule 的项目应该如何做</h2><p>推荐使用如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git clone --recurse-submodules $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 clone 的时候加上 –recurse-submodules 参数，这样就会将子模块的内容都拉取下来。</p>
+<p>然后执行 3.4 步骤的操作，选取子模块分支。</p>
+<p>再执行如下命令，保证每次 git pull 的时候都能获取子模块最新代码。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-在子模块上提交代码"><a href="#5-在子模块上提交代码" class="headerlink" title="5. 在子模块上提交代码"></a>5. 在子模块上提交代码</h2><p>子模块就跟其他 git 项目一样，你是可以直接更改代码并提交的，但是这里有一点需要注意，就是如果你在子模块上提交了代码，那么在主模块上也要提交一次，也就是说<strong>要提交两次代码</strong>，这是至关重要的，如果你没有这么做，有可能会让其他人的子模块无法正常工作。</p>
+<p>例如你在子模块提交代码后，在主模块查看 git 状态时会有如下提示：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">modified:   xxx（模块名） (new commits)</span><br></pre></td></tr></table></figure>
+
+<p>你必须要将这个代码提交到主模块的 git 仓库，这个更改其实是记录着子模块最新提交的 commit id 。用来做版本管理的。</p>
+<h2 id="6-其他"><a href="#6-其他" class="headerlink" title="6. 其他"></a>6. 其他</h2><p>如果想深入了解，可以参考以下文档。</p>
+<p><a href="https://git-scm.com/docs/git-submodule">参数文档</a></p>
+<p><a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">使用文档</a></p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Git</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java内存区域</title>
+    <url>/blog/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/</url>
+    <content><![CDATA[<h1 id="Java内存区域"><a href="#Java内存区域" class="headerlink" title="Java内存区域"></a>Java内存区域</h1><span id="more"></span>
+
+<h2 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h2><h3 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h3><ul>
+<li>当前线程所执行的字节码的行号指示器，用来选取下一条需要执行的字节码指令</li>
+<li>线程私有</li>
+<li>唯一一个不会出现OOM的区域</li>
+</ul>
+<h3 id="虚拟机栈"><a href="#虚拟机栈" class="headerlink" title="虚拟机栈"></a>虚拟机栈</h3><ul>
+<li><p>线程私有</p>
+</li>
+<li><p>每个方法执行时都会创建对应的栈帧入栈，执行完毕后出栈，栈帧用于存储局部变量表、操作数栈、动态连接、方法出口等信息</p>
+</li>
+<li><p>局部变量表</p>
+<ul>
+<li>用来存储基本数据类型、对象引用等信息</li>
+</ul>
+</li>
+</ul>
+<h3 id="本地方法栈"><a href="#本地方法栈" class="headerlink" title="本地方法栈"></a>本地方法栈</h3><ul>
+<li>线程私有</li>
+<li>虚拟机使用到的本地（Native)方法服务（可以是C、C++等语言提供的服务）</li>
+</ul>
+<h3 id="java堆"><a href="#java堆" class="headerlink" title="java堆"></a>java堆</h3><ul>
+<li><p>线程共享</p>
+</li>
+<li><p>唯一目的就是存放对象实例，是内存中最大的一块</p>
+</li>
+<li><p>拥有常量池（jdk1.7 从永久代移动到堆）</p>
+<ul>
+<li><p>字符串常量池</p>
+</li>
+<li><p>运行时常量池</p>
+<p>运行时常量池是方法区的一部分</p>
+<ul>
+<li>存放编译期生成的各种字面量与符号引用</li>
+</ul>
+</li>
+<li><p>Class常量池</p>
+<p>运行时常量池是在类加载完成之后，将每个class常量池中的符号引用值转存到运行时常量池中，也就是说，每个class都有一个运行时常量池，类在解析之后，将符号引用替换成直接引用，与全局常量池中的引用值保持一致</p>
+<ul>
+<li>静态变量（jdk1.7 从永久代移动到堆 跟Class对象在一起）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="方法区-元空间"><a href="#方法区-元空间" class="headerlink" title="方法区/元空间"></a>方法区/元空间</h3><p>jdk7以前也被称为永久代，之后永久代的概念被舍弃,并提出元空间的概念。方法区就在元空间上（元空间和永久代都是方法区的具体实现，类似接口和实现类）</p>
+<ul>
+<li><p>线程共享</p>
+</li>
+<li><p>存储已被虚拟机加载的类型信息、即时编译器编译后的代码缓存数据等等（也叫元数据 包括类的方法代码，变量名，方法名，访问权限，返回值等等都是在方法区的）才是存在方法区的【存疑 】）</p>
+</li>
+<li><p>此区域的垃圾回收主要针对常量池和对类型的卸载</p>
+<p>类型卸载：简单来说就是清理加载到内存中的Class 除非是故意设计不然这种情况发生的概率很低，因为Class是由ClassLoader加载进来的 而java虚拟机不会主动放弃ClassLoader 而Class又被ClassLoader引用，所以永远是“可达”的。</p>
+</li>
+</ul>
+<h3 id="直接内存-堆外内存"><a href="#直接内存-堆外内存" class="headerlink" title="直接内存(堆外内存)"></a>直接内存(堆外内存)</h3><ul>
+<li>直接使用物理内存不受到堆大小的限制，但受本地总内存的限制</li>
+<li>优点：提高性能，避免在java堆和native堆来回复制数据</li>
+<li>缺点：如果直接内存发生OOM排查难度较高</li>
+</ul>
+<h2 id="HotSpot虚拟机对象探秘"><a href="#HotSpot虚拟机对象探秘" class="headerlink" title="HotSpot虚拟机对象探秘"></a>HotSpot虚拟机对象探秘</h2><h3 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h3><ul>
+<li><p>1、类加载：先去常量池找类的符号引用并检查是否已加载</p>
+</li>
+<li><p>2、分配内存</p>
+<ul>
+<li><p>分配方法</p>
+<ul>
+<li><p>2.1 指针碰撞</p>
+<ul>
+<li>堆内存规整时使用，已使用和未使用的内存划分到两边，分配内存时指针向空闲空间移动</li>
+</ul>
+</li>
+<li><p>2.2 空间列表</p>
+<ul>
+<li>堆内存不规整时使用，维护一个内存使用情况列表，分配内存时跟据表数据选取内存空间</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>解决并发安全问题</p>
+<ul>
+<li>同步处理，例如CAS</li>
+<li>预先在堆中为每个线程分配一块内存，只有用完后分配新内存的时候再同步处理</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>3、执行构造函数<init>()</p>
+</li>
+</ul>
+<h3 id="对象内存布局"><a href="#对象内存布局" class="headerlink" title="对象内存布局"></a>对象内存布局</h3><ul>
+<li><p>对象头</p>
+<ul>
+<li>1、存储对象自身运行时数据，如哈希码、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等等</li>
+<li>2、类型指针，虚拟机通过这个指针来确定对象是哪个类的实例</li>
+<li>3、如果是数组还有一块区域记录数组长度，因为虚拟机无法通过元数据推断数组的大小</li>
+</ul>
+</li>
+<li><p>实例数据</p>
+<ul>
+<li>对象真正存储的有效信息，即代码中定义的各种类型的字段内容</li>
+</ul>
+</li>
+<li><p>对齐填充</p>
+<ul>
+<li>占位符的作用，因为对象的大小必须是8字节的整数倍，但实例数据可能不是 所以用它来补全</li>
+</ul>
+</li>
+</ul>
+<h3 id="对象的访问定位"><a href="#对象的访问定位" class="headerlink" title="对象的访问定位"></a>对象的访问定位</h3><ul>
+<li><p>句柄访问</p>
+<ul>
+<li><p>Java堆中划分出一块内存做句柄池，局部变量表中存储句柄地址，句柄中存储对象实例数据与类型数据的内存地址</p>
+<ul>
+<li>优点：如果对象被移动指挥改变句柄中的实例数据指针</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>直接指针访问</p>
+<ul>
+<li><p>堆中对象的内存布局需要存储对应类型数据的地址，局部变量表中存储的是对象地址</p>
+<ul>
+<li>优点：速度快，因为节省了一次定位指针的时间开销</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java内存模型与线程</title>
+    <url>/blog/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/</url>
+    <content><![CDATA[<h1 id="Java内存模型与线程"><a href="#Java内存模型与线程" class="headerlink" title="Java内存模型与线程"></a>Java内存模型与线程</h1><span id="more"></span>
+
+<h2 id="Java内存模型"><a href="#Java内存模型" class="headerlink" title="Java内存模型"></a>Java内存模型</h2><p>内存模型一词可以理解为在特定的操作协议下，对特定的内存或高速缓存进行读写访问的过程抽象；<br>在jdk5发布后Java内存模型才终于成熟、完善起来</p>
+<h3 id="主内存与工作内存"><a href="#主内存与工作内存" class="headerlink" title="主内存与工作内存"></a>主内存与工作内存</h3><p>Java内存模型的主要目的是定义程序中各种变量的访问规则，即关注在虚拟机中把变量值存储到内存和从内存中取出变量值这样的底层细节（这里的变量特指实例字段、静态字段、构成数组对象的元素，不包括局部变量与方法参数，因为后者是线程私有的）</p>
+<ul>
+<li><p>主内存</p>
+<p>Java模型规定了所有变量都存储在主内存中，线程间变量值的传递均需要通过主内存来完成</p>
+<ul>
+<li>对应Java堆总对象实例数据</li>
+</ul>
+</li>
+<li><p>工作内存</p>
+<p>每条线程都有自己的工作内存，线程私有，里面保存了被该线程使用的变量的主内存副本，线程对变量的所有操作都必须在工作内存中进行，而不能直接读写主内存中的数据。</p>
+<ul>
+<li>对应虚拟机栈中的部分区域</li>
+</ul>
+</li>
+</ul>
+<h3 id="内存间交互操作"><a href="#内存间交互操作" class="headerlink" title="内存间交互操作"></a>内存间交互操作</h3><p>一个变量如何从主内存拷贝到工作内存，如何从工作内存同步回主内存</p>
+<ul>
+<li><p>8种操作</p>
+<p>虚拟机保证每一种操作都是原子的</p>
+<ul>
+<li><p>lock锁定</p>
+<p>作用于主内存的变量，它把一个变量标识为一条线程独占的状态</p>
+</li>
+<li><p>unlock 解锁</p>
+<p>作用于主内存的变量，他把一个处于锁定状态的变量释放出来，释放后的变量才可以被其他线程锁定</p>
+</li>
+<li><p>read 读取</p>
+<p>作用于主内存的变量，它把一个变量的值从主内存传输到线程的工作内存中</p>
+</li>
+<li><p>load 载入</p>
+<p>作用于工作内存的变量，它把read操作得到的变量值放入工作内存的变量副本中</p>
+</li>
+<li><p>use 使用</p>
+<p>作用于工作内存的变量，它把工作内存中的一个变量值传递给执行引擎，每当虚拟机遇到一个需要使用变量的值的字节码执行时将会执行这个操作</p>
+</li>
+<li><p>assign 赋值</p>
+<p>作用于工作内存的变量，它把一个从执行引擎接受的值赋给工作内存的变量，每当虚拟机遇到一个给变量赋值的字节码执行时执行这个操作</p>
+</li>
+<li><p>store 存储</p>
+<p>作用于工作内存的变量，它把工作内存中的一个变量的值传送到主内存中</p>
+</li>
+<li><p>write 写入</p>
+<p>作用于主内存的变量，它把store操作得到的变量值放入主内存的变量中</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="volatile关键字"><a href="#volatile关键字" class="headerlink" title="volatile关键字"></a>volatile关键字</h3><p>Java虚拟机提供的最轻量级的同步机制</p>
+<ul>
+<li><p>特性</p>
+<ul>
+<li><p>1、保证此变量堆所有线程的可见性</p>
+<p>可见性：当一个线程修改了这个变量的值会立刻同步到主内存中，让其他线程立即得知</p>
+</li>
+<li><p>2、禁止指令重排序优化</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="针对long和double型变量的特殊规则"><a href="#针对long和double型变量的特殊规则" class="headerlink" title="针对long和double型变量的特殊规则"></a>针对long和double型变量的特殊规则</h3><p>这两个数据类型是64位的，在模型中特别定义了一条宽松的规定：允许虚拟机将没有被volatile修饰的64位数据的读写操作划分为两次32位的操作来进行</p>
+<h3 id="原子性、可见性与有序性"><a href="#原子性、可见性与有序性" class="headerlink" title="原子性、可见性与有序性"></a>原子性、可见性与有序性</h3><p>Java内存模型是围绕着在并发过程中如何处理原子性、可见性和有序性这三个特征来建立的</p>
+<ul>
+<li><p>原子性</p>
+<p>基本数据类型的访问、读写都是具备原子性的，如果需要更大范围的原子性保证，Java模型还提供了lock和unlock操作来满足需求</p>
+</li>
+<li><p>可见性</p>
+<p>Java内存模型是通过在变量修改后将新值同步回主内存，在变量读取前从主内存刷新变量值这种依赖主内存作为传递媒介的方式来实现可见性的；volatile、同步锁、final都可实现可见性</p>
+</li>
+<li><p>有序性</p>
+<p>如果在本线程内观察，所有操作都是有序的，如果在一个线程中观察另一个线程，所有的操作都是无序的，前半句是指“线程内似表现为串行的语义”，后半句是指“指令重排序”现象和“工作内存与主内存同步延迟”现象</p>
+</li>
+</ul>
+<h3 id="先行发生原则"><a href="#先行发生原则" class="headerlink" title="先行发生原则"></a>先行发生原则</h3><p>是Java内存模型中定义的两项操作之间的偏序关系，比如操作A先行发生于操作B，就是说在发生B操作之前，操作A产生的影响能被操作B观察到，“影响”包括修改了内存中共享变量的值、发送了消息、调用了方法等</p>
+<h2 id="Java与线程"><a href="#Java与线程" class="headerlink" title="Java与线程"></a>Java与线程</h2><h3 id="线程的实现"><a href="#线程的实现" class="headerlink" title="线程的实现"></a>线程的实现</h3><ul>
+<li><p>内核实现（1：1 实现）</p>
+<p>直接由操作系统内核支持的线程，这种线程由内核来完成线程切换、内核通过操纵调度器对线程进行调度，并负责将线程的任务映射到各个处理器上</p>
+<ul>
+<li>优势：即使某个线程被阻塞了，也不会影响整个进行的工作</li>
+<li>劣势：数量有限，每个进程都要消耗内核资源</li>
+</ul>
+</li>
+<li><p>使用用户线程实现（1：N 实现）</p>
+<p>一个线程如果不是内核线程就都认为是用户线程</p>
+<ul>
+<li>优势：快速且低消耗，不需要系统内核支援</li>
+<li>劣势：没有系统内核支援，所有线程操作都需要用户程序自己处理</li>
+</ul>
+</li>
+<li><p>用户线程加轻量级进程混合实现（N:M 实现）</p>
+<p>内核线程与用户线程一起使用的实现方式</p>
+</li>
+<li><p>Java线程的实现</p>
+<ul>
+<li>基于内核实现（1：1实现）</li>
+</ul>
+</li>
+</ul>
+<h3 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a>线程调度</h3><p>系统为线程分配处理器使用权的过程</p>
+<ul>
+<li><p>协同式线程调度</p>
+<p>线程执行时间由线程本身控制，线程把自己的工作做完后要主动通知系统切换到另一个线程上去</p>
+<ul>
+<li>优势：实现简单，切换操作对线程自己式可知的所以没有线程同步问题</li>
+<li>劣势：线程执行时间不可控，如果一个线程一直不通知系统进行线程切换会导致程序阻塞</li>
+</ul>
+</li>
+<li><p>抢占式线程调度</p>
+<ul>
+<li><p>每个线程将由系统来分配执行时间，不由线程本身决定</p>
+<ul>
+<li>优势：不会因为一个线程导致系统阻塞</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="状态转换"><a href="#状态转换" class="headerlink" title="状态转换"></a>状态转换</h3><p>在任意一个时间点中，一个线程只能有且只有其中一种状态，并且可以通过特定的方法在不同状态之间转换</p>
+<ul>
+<li><p>新建（New）</p>
+<p>创建后尚未启动的线程处于这种状态</p>
+</li>
+<li><p>运行（Runnable）</p>
+<p>包括系统线程状态中的Running和Ready，有可能正在执行，也有可能正在等待系统为它分配执行时间</p>
+</li>
+<li><p>无限期等待（Waiting）</p>
+<p>这个状态的线程不会被分配处理器执行时间，它们等待被其他线程显式唤醒</p>
+<ul>
+<li>1、没有设置Timeout参数的Object::wait()方法</li>
+<li>2、没有设置Timeout参数的Thread::join()方法</li>
+<li>3、LockSupport::park()方法</li>
+</ul>
+</li>
+<li><p>限期等待（Timed Waiting）</p>
+<p>无需其他线程显式唤醒，在一定时间后会被系统唤醒</p>
+<ul>
+<li>1、设置Timeout参数的Object::wait()方法</li>
+<li>2、设置Timeout参数的Thread::join()方法</li>
+<li>3、LockSupport::parkNanos()方法</li>
+<li>4、LockSupport::parkUntil()方法</li>
+</ul>
+</li>
+<li><p>阻塞</p>
+<p>这个状态是在等待着获取到一个排它锁</p>
+</li>
+<li><p>结束</p>
+<p>已经终止线程的线程状态，线程已经结束运行</p>
+</li>
+</ul>
+<h2 id="Java与协程"><a href="#Java与协程" class="headerlink" title="Java与协程"></a>Java与协程</h2><h3 id="内核线程的局限性"><a href="#内核线程的局限性" class="headerlink" title="内核线程的局限性"></a>内核线程的局限性</h3><ul>
+<li>劣势：调度成本高，需要频繁在用户态与核心态之间转换</li>
+</ul>
+<h3 id="协程"><a href="#协程" class="headerlink" title="协程"></a>协程</h3><p>应用自己模拟多线程的做法，属于用户线程</p>
+<ul>
+<li>优势：轻量</li>
+<li>劣势：需要应用层面增加很多工作内容</li>
+</ul>
+<h2 id="线程安全与锁优化"><a href="#线程安全与锁优化" class="headerlink" title="线程安全与锁优化"></a>线程安全与锁优化</h2><h3 id="线程安全"><a href="#线程安全" class="headerlink" title="线程安全"></a>线程安全</h3><p>当多个线程访问一个对象时，如果不用考虑这些线程在运行时环境下的调度和交替执行，也不需要进行额外的同步，或者在调度方进行任何其他的协调操作，调用这个对象的行为都可以获得正确的结果，那就称这个对象是线程安全的</p>
+<ul>
+<li><p>Java语言中的线程安全</p>
+<ul>
+<li><p>不可变</p>
+<p>不可变的对象一定是线程安全的</p>
+</li>
+<li><p>绝对线程安全</p>
+<p>不管运行时环境如何，调用者都不需要任何额外的同步措施，因为这个条件很苛刻，导致Java api中标注自己是线程安全的类，大多数都不符合这个要求</p>
+</li>
+<li><p>相对线程安全</p>
+<p>通常意义上所讲的线程安全，它保证对这个对象单次的操作是线程安全的，不需要进行额外的保障措施，但是对于一些特定顺序的连续调用就可能需要在调用端使用额外的同步手段来保证调用的正确性</p>
+</li>
+<li><p>线程兼容</p>
+<p>对象本身不是线程安全的，但是可以通过在调用端正确使用同步手段来保证对象在并发环境中可以安全的调用；我们通常说一个类不是线程安全的通常就是指这种情况</p>
+</li>
+<li><p>线程对立</p>
+<p>不管是否使用同步措施在多线程环境中都是不安全的；这种情况应尽量避免</p>
+</li>
+</ul>
+</li>
+<li><p>线程安全的实现方法</p>
+<ul>
+<li><p>1、互斥同步</p>
+<p>是一种最常见也是最主要的并发正确性保障手段，指在多个线程并发访问共享数据时，保证共享数据在同一个时刻只能被一条线程使用，最基本的互斥同步手段就是同步锁</p>
+<ul>
+<li><p>同步锁</p>
+<p>jdk6以上版本的jdk中 性能已经不是选择这两个锁的决定性因素</p>
+<ul>
+<li><p>synchronized</p>
+<p>更简单</p>
+</li>
+<li><p>lock</p>
+<p>更灵活</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>2、非阻塞同步</p>
+<p>基于冲突检测的乐观并发策略，如果有共享数据被争用就进行补偿措施，最常用的补偿措施就是不断重试，直到出现没有竞争的共享数据为止。</p>
+<ul>
+<li><p>CAS</p>
+<ul>
+<li>优势：性能好</li>
+<li>劣势：不能处理ABA问题</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>3、无同步方案</p>
+<ul>
+<li><p>可重入代码</p>
+<p>又称纯代码，指可以在代码执行的任何时刻中断它，转而去执行另外一段代码，而在控制权返回后原来的程序不会出现任何错误，也不会对结果有所影响</p>
+<ul>
+<li>1、不依赖全局变量</li>
+<li>2、不依赖存储在堆上的数据和公用的系统资源</li>
+<li>3、用到的状态量都由参数中传入，不调用非可重入的方法</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>java高并发程序设计</title>
+    <url>/blog/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/</url>
+    <content><![CDATA[<h1 id="java高并发程序设计"><a href="#java高并发程序设计" class="headerlink" title="java高并发程序设计"></a>java高并发程序设计</h1><p>高并发是 java 开发必备知识，本篇文章整理出在高并发程序设计中常用的工具。</p>
+<span id="more"></span>
+
+<h2 id="java并发包"><a href="#java并发包" class="headerlink" title="java并发包"></a>java并发包</h2><h3 id="同步控制"><a href="#同步控制" class="headerlink" title="同步控制"></a>同步控制</h3><ul>
+<li><p>重入锁</p>
+<p>重入锁使用java.util.concurrent.locks.ReentrantLock类来实现。<br>锁实现包含的三要素：1、原子装填，使用了CAS操作。 2、等待列队，所有没有请求到锁的线程会进入等待列队进行等待。  3、阻塞原语 park()和unpark() 用来挂起和恢复线程。</p>
+<ul>
+<li><p>特性</p>
+<ul>
+<li><p>中断响应</p>
+<p>可以避免死锁，程序在等待锁的时候可以根据需要取消对锁的请求。<br>学习链接：<br><a href="https://blog.csdn.net/yyd19921214/article/details/49737061?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param">https://blog.csdn.net/yyd19921214/article/details/49737061?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param</a></p>
+<ul>
+<li><p>什么是线程中断</p>
+<p>学习链接：<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306580767211554">https://www.liaoxuefeng.com/wiki/1252599548343744/1306580767211554</a></p>
+</li>
+<li><p>如何使用此功能</p>
+<p>使用lockInterruptible()方法可以获得拥有此功能的锁</p>
+</li>
+</ul>
+</li>
+<li><p>公平锁</p>
+<p>公平锁会按照时间的先后顺序分配锁，但是性能低下，所以大多数情况下锁的申请都是非公平的。</p>
+</li>
+<li><p>锁申请等待限时</p>
+<p>可以避免死锁，因为可以设置等待时间。可以通过tryLock()方法使用此功能。</p>
+</li>
+</ul>
+</li>
+<li><p>搭档 Condition</p>
+<p>通过lock接口的 newCondition()方法可以生成一个与当前重入锁绑定的Condition实例，利用这个实例可以让线程在合适的时间等待，或者在某一个特定的时刻得到通知继续执行。</p>
+</li>
+</ul>
+</li>
+<li><p>信号量 Semaphore</p>
+<p>Semaphore(信号量)是java.util.concurrent下的一个工具类.用来控制可同时访问特定资源的线程数.内部是通过维护父类(AQS)的 int state值实现。<br>学习链接：<a href="https://zhuanlan.zhihu.com/p/27314456">https://zhuanlan.zhihu.com/p/27314456</a></p>
+</li>
+<li><p>ReadWriteLock 读写锁</p>
+<p>可以有效帮助减少锁竞争，提升系统性能。主要应用于读操作的次数远远大于写操作的次数。<br>学习链接：<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306581002092578">https://www.liaoxuefeng.com/wiki/1252599548343744/1306581002092578</a></p>
+</li>
+<li><p>倒计数器 CountDownLatch</p>
+<p>使用的多线程控制工具类，通常用来控制线程等待，它可以让某一个线程等待直到倒计数器结束再开始执行，它是一次性的，打开之后就不能关上了。<br>应用场景：在一个行为执行前需要执行很多前置步骤。<br>学习链接：<a href="https://www.jianshu.com/p/962bc7225ce8">https://www.jianshu.com/p/962bc7225ce8</a></p>
+</li>
+<li><p>循环栅栏 CyclicBarrier</p>
+<p>字面意思回环栅栏，通过它可以实现让一组线程等待至某个状态之后再全部同时执行。<br>叫做回环是因为当所有等待线程都被释放以后，CyclicBarrier可以被重用；跟 CountDownLatch功能类似，但是更灵活、更强大、更复杂。<br>学习链接：<a href="https://www.jianshu.com/p/4ef4bbf01811">https://www.jianshu.com/p/4ef4bbf01811</a></p>
+</li>
+<li><p>线程阻塞工具类 LockSupport</p>
+<p>LockSupport 是一个线程阻塞工具，可以让线程在任意位置阻塞；<br>应用实例：一个节点线程获取不到锁时，会阻塞自己，调用的就是LockSupport的park()方法，返回只有两种方式，前一个节点线程释放锁时unpark()了当前节点，或者当前节点线程被中断返回。</p>
+</li>
+<li><p>限流工具 Guava的RateLimiter</p>
+<p>应用或者组件都有访问上限，如果突破这个上限不仅会影响其性能，更可能会导致其崩溃，因此，对请求进行限流是必要的。<br>学习链接：<a href="https://juejin.im/post/6844903783432978439">https://juejin.im/post/6844903783432978439</a></p>
+<ul>
+<li><p>漏桶算法</p>
+<p>利用缓存，当有请求进入系统时无论请求速率如何，都先在缓存区内保存，然后以固定的流苏流出缓存区进行处理。</p>
+</li>
+<li><p>令牌桶算法</p>
+<p>桶中存放的不是请求而是令牌，处理程序只有拿到令牌后才能对请求进行处理，如果没有令牌可能被丢弃也可能等待可用令牌</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="线程复用：线程池"><a href="#线程复用：线程池" class="headerlink" title="线程复用：线程池"></a>线程复用：线程池</h3><ul>
+<li><p>Executor框架</p>
+<ul>
+<li><p>Executors类</p>
+<ul>
+<li><p>newFixedThreadPool()</p>
+<p>返回一个固定线程数量的线程池，待执行任务保存在队列中</p>
+</li>
+<li><p>newSingleThreadExecutor()</p>
+<p>返回只有一个线程的线程池，待执行任务保存在队列中</p>
+</li>
+<li><p>newCachedThreadPool()</p>
+<p>返回一个可根据实际情况调整线程数量的线程池</p>
+</li>
+<li><p>newScheduledThreadPool()</p>
+<p>返回ScheduleExecutorService对象，可以执行线程的数量</p>
+</li>
+<li><p>newSingleThreadScheduledExector()</p>
+<p>返回ScheduledExectorService对象，只有一个线程，可以设置执行任务相关的时间参数</p>
+</li>
+<li><p>。。。。</p>
+</li>
+</ul>
+</li>
+<li><p>自定义线程创建 ThreadFactory</p>
+</li>
+<li><p>扩展线程池 ThreadPoolExector</p>
+<p>提供了 beforeExecute()、afterExecute()和terminated() 三个接口用来对线程池进行控制</p>
+</li>
+<li><p>输出异常堆栈</p>
+<ul>
+<li><p>使用execute()方法</p>
+<p>submit()会忽略系统抛出的异常</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>分而治之 Fork/Join框架</p>
+<p>学习链接：<a href="https://www.liaoxuefeng.com/article/1146802219354112">https://www.liaoxuefeng.com/article/1146802219354112</a></p>
+</li>
+<li><p>Guava对线程池的扩展</p>
+<ul>
+<li><p>DirectExecutor线程池</p>
+<p>它并没有真的创建或者使用额外线程，它总是将任务在当前线程中直接执行。这个设计主要是为了完成业务的抽象工作，可以使用同一的编码风格处理同步和异步调用，进而简化设计。</p>
+</li>
+<li><p>Daemon线程池</p>
+<p>将普通线程池转为Daemon线程池，可以随着系统（也可以叫主线程）执行完成后一起销毁</p>
+</li>
+<li><p>Future模型的扩展</p>
+<p>Future模式核心思想是异步调用，线程会在等待结果返回的过程中执行其他业务，从而充分利用这段时间</p>
+<ul>
+<li><p>ListeningExecutorService</p>
+<p>调用 MoreExecutors.listeningDecorator 方法将一个普通线程池包装为一个包含通知同能的Future线程池</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="java并发容器"><a href="#java并发容器" class="headerlink" title="java并发容器"></a>java并发容器</h2><h3 id="并发集合"><a href="#并发集合" class="headerlink" title="并发集合"></a>并发集合</h3><ul>
+<li><p>ConcurrentHashMap</p>
+<p>高效的并发,线程安全的HashMap</p>
+</li>
+<li><p>CopyOnWriteArrayList</p>
+<p>线程安全的ArrayList 适合读多写少的场合，性能远好于Vector。<br>读取不加锁，写入也不会阻塞读取操作，只有写入和写入会加锁，因为在写入操作时会进行一次自我复制</p>
+</li>
+<li><p>ConcurrentLinkedQueue</p>
+<p>高效并发队列，链表实现可以看作是线程安全的LinkedList，是高并发环境中性能最好的队列</p>
+</li>
+<li><p>BlokingQueue</p>
+<p>阻塞队列，适合做数据共享通道。非常适合作为“生产和–消费者”模式的数据同步工具，在队列为空的时候会让读取阻塞，而当队列满了后会让存储操作阻塞</p>
+</li>
+<li><p>ConcurrentSkipListMap</p>
+<p>跳表实现，一种可以用来快速查找的数据结构。</p>
+<ul>
+<li><p>高性能</p>
+<p>类似平衡树，区别是对平衡树的插入和删除往往很可能导致平衡树进行一次全局调整，而跳表只需要对整个数据结构的局部进行操作即可。这样就可以控制锁的粒度。</p>
+</li>
+<li><p>随机算法</p>
+<p>跳表本质是同时维护了多个链表，并且链表是分层的，底层的链表维护了跳表内所有的元素，每上面一层链表都是下面一层链表的子集，一个元素插入哪些层是随机的。<br>查找操作时跳跃式的，跳表内所有链表的元素都是排序的，查找时会从顶层开始，一旦发现被查找的元素大于当前链表中的取值就会转入下一层继续查找。</p>
+<ul>
+<li>疑问：为什么插入是随机的 但是查找可以按照顺序查找呢？</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="JMH进行性能测试"><a href="#JMH进行性能测试" class="headerlink" title="JMH进行性能测试"></a>JMH进行性能测试</h2><p>学习链接：<a href="https://www.xncoding.com/2018/01/07/java/jmh.html">https://www.xncoding.com/2018/01/07/java/jmh.html</a></p>
+<h2 id="锁优化"><a href="#锁优化" class="headerlink" title="锁优化"></a>锁优化</h2><h3 id="提高性能的建议"><a href="#提高性能的建议" class="headerlink" title="提高性能的建议"></a>提高性能的建议</h3><ul>
+<li><p>1、减少锁的持有时间</p>
+<p>尽量不要在同步代码块中做耗时的操作，并且只在必要时进行同步</p>
+</li>
+<li><p>2、减小锁的粒度</p>
+<p>需要同步的代码块要尽量小</p>
+</li>
+<li><p>3、用读写分离锁替换独占锁</p>
+</li>
+<li><p>4、锁分离</p>
+<p>是读写锁的上层思想，可以将功能进行拆分，并根据每个功能的实际需求进行定制化的操作</p>
+</li>
+<li><p>5、锁粗化</p>
+<p>对同一个锁不断进行请求和释放的操作时便会把所有的锁操作整合成对锁的一次请求，从而减少对锁的请求同步的次数</p>
+</li>
+</ul>
+<h3 id="java虚拟机对锁的优化"><a href="#java虚拟机对锁的优化" class="headerlink" title="java虚拟机对锁的优化"></a>java虚拟机对锁的优化</h3><ul>
+<li><p>锁偏向</p>
+<p>是一种针对加锁操作的优化。<br>核心思想：如果一个线程获得了锁，那么锁就进入偏向模式，当这个线程再次请求锁时无须再做任何同步操作。<br>但是在锁竞争比较激烈的场合其效果不佳，因为可能每次请求锁的都不是同一个线程，所以不建议在竞争激烈的环境下启用</p>
+</li>
+<li><p>轻量级锁</p>
+<p>它只是简单地将对象头部作为指针指向持有锁的线程堆栈的内部，来判断一个线程是否持有对象锁。如果加锁失败就会转为重量级锁。<br>学习链接：<a href="https://www.zhihu.com/question/53826114">https://www.zhihu.com/question/53826114</a></p>
+</li>
+<li><p>自旋锁</p>
+<p>虚拟机会让当前线程做几个空循环，在经过若干次循环后如果可以得到锁，那么就会顺利进入临界区，如果不能获得锁会在操作系统层面挂起</p>
+</li>
+<li><p>锁消除</p>
+<p>虚拟机在编译过程中会去除不可能存在共享资源竞争的锁，通过这种措施可以节省毫无意义的请求锁时间。<br>之所以有这一操作，一方面是防止用户的错误使用。 另一方面用户在使用jdk提供的api时，api内部实现可能使用了同步锁</p>
+</li>
+</ul>
+<h3 id="ThreadLocal"><a href="#ThreadLocal" class="headerlink" title="ThreadLocal"></a>ThreadLocal</h3><p>本质是通过增加资源来保证所有对象的线程安全，会为每一个线程保存一份资源的副本，这样就不会产生竞争，但是用完要及时清理资源，不然容易发生内存泄漏。<br>学习链接：<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306581251653666">https://www.liaoxuefeng.com/wiki/1252599548343744/1306581251653666</a></p>
+<h3 id="无锁"><a href="#无锁" class="headerlink" title="无锁"></a>无锁</h3><p>乐观锁的思想，它会假设对资源的访问是没有冲突的，无锁的策略使用CAS的技术来鉴别线程冲突，一旦检测到冲突产生就重试当前操作直到没有冲突为止。</p>
+<ul>
+<li><p>CAS</p>
+<p>乐观锁，并没有真的是使用同步锁，当多个线程同时使用CAS操作一个变量时只有一个会胜出，并成功更新，其余均会失败。失败的线程不会被挂起，仅是被告知失败，并且允许再次尝试，也允许放弃操作。</p>
+</li>
+<li><p>安全整数 AtomicInteger</p>
+<p>线程安全的整数，使用CAS操作</p>
+</li>
+<li><p>无锁的对象引用 AtomicReference</p>
+<p>保证修改对象引用时的线程安全性</p>
+<ul>
+<li>缺点：无法解决ABA问题</li>
+</ul>
+</li>
+<li><p>带时间戳的对象引用 AtomicStampedReference</p>
+<ul>
+<li>优势：通过时间戳解决ABA问题</li>
+</ul>
+</li>
+<li><p>无锁数组 AtomicIntegerArray</p>
+</li>
+<li><p>让普通变量也享受原子操作 AtomicIntegerFieldUpdater</p>
+<p>可以对int、long和普通对象引用进行CAS修改；<br>注意事项：<br> 变量必须public 因为底层使用了反射获取变量的值<br>必须被volatile修饰<br>不支持static修饰的变量，因为会通过对象实例中的偏移量直接进行赋值</p>
+</li>
+<li><p>数据交换通道 SynchronousQueue</p>
+<p>学习链接：<a href="https://blog.csdn.net/zmx729618/article/details/52980158">https://blog.csdn.net/zmx729618/article/details/52980158</a></p>
+</li>
+</ul>
+<h2 id="实用工具"><a href="#实用工具" class="headerlink" title="实用工具"></a>实用工具</h2><h3 id="Disruptor-框架"><a href="#Disruptor-框架" class="headerlink" title="Disruptor 框架"></a>Disruptor 框架</h3><p>高效无锁内存队列 可以用来实现高性能的 生产者–消费者模式</p>
+<h3 id="Akka框架"><a href="#Akka框架" class="headerlink" title="Akka框架"></a>Akka框架</h3><p>帮助构建高并发程序</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>多线程</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Wireshark 简明教程</title>
+    <url>/blog/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<h1 id="Wireshark-简明教程"><a href="#Wireshark-简明教程" class="headerlink" title="Wireshark 简明教程"></a>Wireshark 简明教程</h1><p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
+<span id="more"></span>
+
+<h2 id="下载wireshark"><a href="#下载wireshark" class="headerlink" title="下载wireshark"></a>下载wireshark</h2><p><a href="https://www.wireshark.org/download.html">wireshark下载地址</a><br>选择Windows Installer (64-bit)，下载成功后一直点next就可以了。<br><img src="https://img-blog.csdnimg.cn/20210507224116599.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>2.1 选择网卡<br>打开软件，界面如下所示，被红框标记起来的就是网卡列表，如果你使用的是无线网就可以选择WLAN。<br><img src="https://img-blog.csdnimg.cn/20210507224420963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.2 开始抓包<br>双击选中目标网卡就会进入到抓包主界面，如图：<br><img src="https://img-blog.csdnimg.cn/20210507224707882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>被红框选中的就是该网卡发送和接受的网络包了，后续会详细讲解如果通过wireshark抓包学习网络。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Wireshark</tag>
+        <tag>网络</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【Mybatis源码解读】jdbc包</title>
+    <url>/blog/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</url>
+    <content><![CDATA[<h1 id="【Mybatis源码解读】jdbc包"><a href="#【Mybatis源码解读】jdbc包" class="headerlink" title="【Mybatis源码解读】jdbc包"></a>【Mybatis源码解读】jdbc包</h1><span id="more"></span>
+
+<h2 id="1-jdbc包的作用"><a href="#1-jdbc包的作用" class="headerlink" title="1. jdbc包的作用"></a>1. jdbc包的作用</h2><p>jdbc包作为Mybatis框架的核心包之一可以理解为是<strong>操作Sql的工具包</strong>，因为通过阅读代码观察到这个jdbc包里面的类并没有被Mybatis框架本身引用，而其本身的作用又是对sql的操作，所以当作工具包来理解是没有什么问题的。</p>
+<h2 id="2-设计思想"><a href="#2-设计思想" class="headerlink" title="2. 设计思想"></a>2. 设计思想</h2><p>利用面向对象的<strong>继承</strong>特性增加功能的<strong>拓展性</strong>。</p>
+<h2 id="3-实现细节"><a href="#3-实现细节" class="headerlink" title="3. 实现细节"></a>3. 实现细节</h2><p>jdbc包里面的类其实很少，去掉过期的和一些辅助类主要的类有三个：<strong>AbstractSQL</strong>、<strong>ScriptRunner</strong>、<strong>SqlRunner</strong>，这里着重介绍<strong>AbstractSQL</strong>类，因为相对于<strong>AbstractSQL</strong>类另外的两个类功能很简单。</p>
+<p><strong>AbstractSQL</strong>的类图:</p>
+<p>可以看出SQL类继承了<strong>AbstractSQL</strong>类，而SafeAppendable 和 SQLStatement 是<strong>AbstractSQL</strong>的内部类，下面逐一介绍。</p>
+<p><img src="https://s2.loli.net/2021/12/05/pJT69AcKPMHEqxf.png" alt="image-20201206170511920"></p>
+<h3 id="SQL类"><a href="#SQL类" class="headerlink" title="SQL类"></a>SQL类</h3><h4 id="3-1-1-简介"><a href="#3-1-1-简介" class="headerlink" title="3.1.1 简介"></a>3.1.1 简介</h4><p>SQL类的实现很简单：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SQL</span> <span class="keyword">extends</span> <span class="title">AbstractSQL</span>&lt;<span class="title">SQL</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> SQL <span class="title">getSelf</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说所有的逻辑实现都写在了它的父类中，那为什么还要SQL类呢？答案就是为了<strong>增加功能的拓展性</strong>，比如你想在生成sql的时候满足一些定制化的需求可以重新创建一个子类继承并拓展它。</p>
+<h4 id="3-1-2-使用"><a href="#3-1-2-使用" class="headerlink" title="3.1.2 使用"></a>3.1.2 使用</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    <span class="meta">@SelectProvider(type = UserProvider.class, method = &quot;queryUsersBySchoolName&quot;)</span></span><br><span class="line">    <span class="function">List&lt;User&gt; <span class="title">queryUsersBySchoolName</span><span class="params">(String schoolName)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserProvider</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">queryUsersBySchoolName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> SQL()</span><br><span class="line">                .SELECT(<span class="string">&quot;*&quot;</span>)</span><br><span class="line">                .FROM(<span class="string">&quot;user&quot;</span>)</span><br><span class="line">                .WHERE(<span class="string">&quot;schoolName = #&#123;schoolName&#125;&quot;</span>)</span><br><span class="line">                .toString();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看出这种方式是直接在每个接口上引入sql，如果项目比较庞大是很难有效管理sql的 ，所以这种使用方式很不常见。</p>
+<h3 id="SafeAppendable"><a href="#SafeAppendable" class="headerlink" title="SafeAppendable"></a>SafeAppendable</h3><h4 id="3-2-1-简介"><a href="#3-2-1-简介" class="headerlink" title="3.2.1 简介"></a>3.2.1 简介</h4><p>看名字就可以了解到这个类里面封装了<strong>拼接</strong>字符的行为，使用了<strong>组合模式</strong>持有了Appendable接口实例的引用，并调用其append方法实现拼接，拼接完成后调用Appendable实例的toString方法获取拼接结果。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SafeAppendable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Appendable a;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> empty = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SafeAppendable</span><span class="params">(Appendable a)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">super</span>();</span><br><span class="line">      <span class="keyword">this</span>.a = a;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SafeAppendable <span class="title">append</span><span class="params">(CharSequence s)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (empty &amp;&amp; s.length() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">          empty = <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        a.append(s);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> empty;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="SQLStatement"><a href="#SQLStatement" class="headerlink" title="SQLStatement"></a>SQLStatement</h3><h4 id="3-3-1-简介"><a href="#3-3-1-简介" class="headerlink" title="3.3.1 简介"></a>3.3.1 简介</h4><p>从下图为此类封装的方法，可以看出此类是拼接sql的主力军。</p>
+<p><img src="https://s2.loli.net/2021/12/05/PtIn4eRMAJwXsVx.png" alt="image-20201206180137582"></p>
+<p>下图这些为此类的属性，从名字可以看出是根据sql关键字进行分类的，存储着相应的值，用来拼接sql时使用。</p>
+<p><img src="https://s2.loli.net/2021/12/05/74HvADUTKCeFadm.png" alt="image-20201206180617860"></p>
+<p>以拼接select为例分析源码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">   <span class="comment">//只接收一个参数就是拼接器，用来拼接字符</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> String <span class="title">selectSQL</span><span class="params">(SafeAppendable builder)</span> </span>&#123;</span><br><span class="line">   <span class="comment">//判断是否需要去重，如果需要就增加 DISTINCT关键字，而select为上图的属性，是一个集合里面存储着相应的值，下面几个参数类似不做赘述，下面会对sqlClause方法做详细解释。</span></span><br><span class="line">     <span class="keyword">if</span> (distinct) &#123;</span><br><span class="line">       sqlClause(builder, <span class="string">&quot;SELECT DISTINCT&quot;</span>, select, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       sqlClause(builder, <span class="string">&quot;SELECT&quot;</span>, select, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     sqlClause(builder, <span class="string">&quot;FROM&quot;</span>, tables, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     <span class="comment">//join语句比较特殊，所以单独创建函数，但是本质也是复用sqlClause函数</span></span><br><span class="line">     joins(builder);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;WHERE&quot;</span>, where, <span class="string">&quot;(&quot;</span>, <span class="string">&quot;)&quot;</span>, <span class="string">&quot; AND &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;GROUP BY&quot;</span>, groupBy, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;HAVING&quot;</span>, having, <span class="string">&quot;(&quot;</span>, <span class="string">&quot;)&quot;</span>, <span class="string">&quot; AND &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;ORDER BY&quot;</span>, orderBy, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     <span class="comment">//利用LIMIT、OFFSET关键字做分页处理</span></span><br><span class="line">     limitingRowsStrategy.appendClause(builder, offset, limit);</span><br><span class="line">     <span class="keyword">return</span> builder.toString();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面是sqlClause 函数的代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//参数一：拼接器；参数二：关键字例如SELECT等等;参数三：sql所需值的集合；参数四和五：参数开始和结束字符 例如where语句需要括号括起来；参数六：参数连接字符例如 AND等等</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">sqlClause</span><span class="params">(SafeAppendable builder, String keyword, List&lt;String&gt; parts, String open, String close,String conjunction)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!parts.isEmpty()) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!builder.isEmpty()) &#123;</span><br><span class="line">      builder.append(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    builder.append(keyword);</span><br><span class="line">    builder.append(<span class="string">&quot; &quot;</span>);</span><br><span class="line">    builder.append(open);</span><br><span class="line">    String last = <span class="string">&quot;________&quot;</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>, n = parts.size(); i &lt; n; i++) &#123;</span><br><span class="line">      String part = parts.get(i);</span><br><span class="line">      <span class="keyword">if</span> (i &gt; <span class="number">0</span> &amp;&amp; !part.equals(AND) &amp;&amp; !part.equals(OR) &amp;&amp; !last.equals(AND) &amp;&amp; !last.equals(OR)) &#123;</span><br><span class="line">        builder.append(conjunction);</span><br><span class="line">      &#125;</span><br><span class="line">      builder.append(part);</span><br><span class="line">      last = part;</span><br><span class="line">    &#125;</span><br><span class="line">    builder.append(close);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="AbstractSQL"><a href="#AbstractSQL" class="headerlink" title="AbstractSQL"></a>AbstractSQL</h3><h4 id="3-4-1-简介"><a href="#3-4-1-简介" class="headerlink" title="3.4.1 简介"></a>3.4.1 简介</h4><p>如果理解了前面三个类的作用那理解此类的作用也就水到渠成了，下面看下此类封装的方法，可以看到所有方法都是以sql语句的关键词命名的</p>
+<p><img src="https://s2.loli.net/2021/12/05/nZctYG87sJqrvmK.png" alt="image-20201207221124727"></p>
+<h4 id="3-4-2-详解"><a href="#3-4-2-详解" class="headerlink" title="3.4.2 详解"></a>3.4.2 详解</h4><p>以SELECT方法为例，当使用如下方法时发生了什么？</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">new</span> SQL()</span><br><span class="line">              .SELECT(<span class="string">&quot;*&quot;</span>)</span><br><span class="line">              .FROM(<span class="string">&quot;user&quot;</span>)</span><br><span class="line">              .WHERE(<span class="string">&quot;schoolName = #&#123;schoolName&#125;&quot;</span>)</span><br><span class="line">              .toString();</span><br></pre></td></tr></table></figure>
+
+<p>当调用AbstractSQL里面封装的方法时其实都将传进来的值存储在了SQLStatement相应关键字的属性中，当最后调用toString方法时就会触发sql的拼接工作，所以可以理解为AbstractSQL是给SQLStatement类做了一层<strong>装饰器</strong>。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">SELECT</span><span class="params">(String columns)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//sql() 方法会返回SQLStatement类的一个实例</span></span><br><span class="line">    <span class="comment">//设置sql类别</span></span><br><span class="line">  sql().statementType = SQLStatement.StatementType.SELECT;</span><br><span class="line">    <span class="comment">//将传入的值存储到SQLStatement类的select属性中</span></span><br><span class="line">  sql().select.add(columns);</span><br><span class="line">    <span class="comment">//返回对象本身</span></span><br><span class="line">  <span class="keyword">return</span> getSelf();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其他关键字方法的调用都是类似的，这里不再赘述，下面介绍一下<strong>如何触发拼接sql的操作</strong>：</p>
+<p>当调用toString方法时就会触发sql拼接操作，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//创建一个字符拼接器</span></span><br><span class="line">  StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    <span class="comment">//调用SQLStatement类的sql方法，此方法会利用StringBuilder拼接sql</span></span><br><span class="line">  sql().sql(sb);</span><br><span class="line">    <span class="comment">//转化为字符串</span></span><br><span class="line">  <span class="keyword">return</span> sb.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//这个方法会根据sql的类型调用相应的拼接方法，而SELECT语句如何拼接的前文已经讲解过，大家可以按照此方法查看一下其他类型sql的拼接过程</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">sql</span><span class="params">(Appendable a)</span> </span>&#123;</span><br><span class="line">  SafeAppendable builder = <span class="keyword">new</span> SafeAppendable(a);</span><br><span class="line">  <span class="keyword">if</span> (statementType == <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  String answer;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">switch</span> (statementType) &#123;</span><br><span class="line">    <span class="keyword">case</span> DELETE:</span><br><span class="line">      answer = deleteSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> INSERT:</span><br><span class="line">      answer = insertSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> SELECT:</span><br><span class="line">      answer = selectSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> UPDATE:</span><br><span class="line">      answer = updateSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      answer = <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> answer;</span><br></pre></td></tr></table></figure>
+
+<p>这里有个细节，为什么AbstractSQL类中的方法都是大写的呢？ 我查阅了相关资料发现这是为了照顾大家写sql时的习惯。</p>
+<p>通过以上知识的学习我们就应该知道 Mybatis 是如何操作 sql 的了。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Mybatis</tag>
+        <tag>源码阅读</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>垃圾收集器与内存分配策略</title>
+    <url>/blog/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/</url>
+    <content><![CDATA[<h1 id="垃圾收集器与内存分配策略"><a href="#垃圾收集器与内存分配策略" class="headerlink" title="垃圾收集器与内存分配策略"></a>垃圾收集器与内存分配策略</h1><span id="more"></span>
+
+<h2 id="对象已死？-判断对象是否可以回收"><a href="#对象已死？-判断对象是否可以回收" class="headerlink" title="对象已死？(判断对象是否可以回收)"></a>对象已死？(判断对象是否可以回收)</h2><h3 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h3><ul>
+<li><p>reference类型的数据中存储的数值代表的是另一块内存的起始地址</p>
+<ul>
+<li>强引用：代码中的引用赋值 例如 new对象；意义：对象不会被回收</li>
+<li>软引用：还有用非必须的对象；意义：在系统将要发生内存溢出前回收</li>
+<li>弱引用：非必须对象；意义：每次垃圾回收时都会被清理</li>
+<li>虚引用：最弱的一种引用；意义：可以让一个对象被回收时收到一个系统通知</li>
+</ul>
+</li>
+</ul>
+<h3 id="引用计数算法"><a href="#引用计数算法" class="headerlink" title="引用计数算法"></a>引用计数算法</h3><ul>
+<li>在对象中添加一个引用计数器，被引用加一，引用失效减一，为零就不会再使用可以回收</li>
+<li>优点：原理简单，效率高</li>
+<li>缺点：实用性不强，例如 很难解决对象间的互相循环引用的问题</li>
+</ul>
+<h3 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h3><ul>
+<li><p>判断某个对象到GC Roots间有没有引用链相连，如果没有就说明对象不可达、不再使用可以回收</p>
+</li>
+<li><p>GC Roots</p>
+<ul>
+<li>虚拟机栈的本地变量表中引用的对象</li>
+<li>方法区中类静态属性引用的对象</li>
+<li>方法区中常量引用的对象</li>
+<li>本地方法栈中JNI(Native方法)引用的对象</li>
+<li>java虚拟机内部的引用，如基本数据类型对应的Class对象，常驻的异常对象，类加载器</li>
+<li>同步锁持有的对象</li>
+<li>反应虚拟机内部情况的JMXBean、JVMTI中注册的回调、本地代码缓存等</li>
+</ul>
+</li>
+</ul>
+<h3 id="生存还是死亡-判断对象是否真的能被回收"><a href="#生存还是死亡-判断对象是否真的能被回收" class="headerlink" title="生存还是死亡(判断对象是否真的能被回收)"></a>生存还是死亡(判断对象是否真的能被回收)</h3><ul>
+<li>至少要经历两次标记(判断)，如果第一次被标记成不可达，但是在第二次标记前又与GC Roots建立了链接就不会被清理</li>
+</ul>
+<h3 id="回收方法区"><a href="#回收方法区" class="headerlink" title="回收方法区"></a>回收方法区</h3><ul>
+<li>《java虚拟机规范》不强制方法区实现垃圾收集</li>
+<li>方法区垃圾收集性价比比较低</li>
+<li>主要回收废弃的常量和不再使用的类型（类型指加载到内存中的Class）</li>
+</ul>
+<h2 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h2><h3 id="引用计数式垃圾收集（直接垃圾收集）"><a href="#引用计数式垃圾收集（直接垃圾收集）" class="headerlink" title="引用计数式垃圾收集（直接垃圾收集）"></a>引用计数式垃圾收集（直接垃圾收集）</h3><h3 id="追踪式垃圾收集（间接垃圾收集）（主流）"><a href="#追踪式垃圾收集（间接垃圾收集）（主流）" class="headerlink" title="追踪式垃圾收集（间接垃圾收集）（主流）"></a>追踪式垃圾收集（间接垃圾收集）（主流）</h3><ul>
+<li><p>分代收集理论</p>
+<p>设计原则：收集器应该将java堆划分出不同区域，然后将回收对象依据其年龄分配到不同的区域之中存储</p>
+<ul>
+<li><p>弱分代假说：绝大多数对象都是朝生夕死的</p>
+</li>
+<li><p>强分代假说：熬过越多次垃圾收集过程的对象越你难以死亡</p>
+</li>
+<li><p>分代</p>
+<ul>
+<li>新生代</li>
+<li>老年代</li>
+</ul>
+</li>
+<li><p>跨分代引用假说：存在相互引用关系的对象应该倾向于同生同死，跨代引用占比较少。</p>
+<ul>
+<li><p>存在问题：当扫描新生代对象时如果有跨代引用还需要扫描整个老年代，成本较高</p>
+<ul>
+<li>解决办法：新生代建立一个全局数据结构（记忆集），这个结构将老年代划分成若干小块，标识出老年代的哪一块内存存在跨代引用。Minor GC时只有包含了跨代引用的小块内存里的对象才会被加入到GC Roots进行扫描，而不用扫描整个老年代</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>标记-清除算法：标记后清除被标记的对象</p>
+<ul>
+<li>缺点：1、执行效率不稳定（受要标记的目标对象数量的限制）；2、内存空间碎片化（产生不连续的内存碎片）</li>
+</ul>
+</li>
+<li><p>标记-复制算法：将内存划分为大小相等的两块，每次只用其中一块，当内存用完了就将存活对象复制到另一块，然后将已使用的内存一次清理掉</p>
+<ul>
+<li>缺点：空间浪费太严重</li>
+<li>新生代优先采用此算法，而老年代不会使用这种方法，因为新生代98%对象都是朝生夕死的，这种情况实现简单、效率高</li>
+</ul>
+</li>
+<li><p>标记-整理算法：先标记，让存活对象都移动到内存一端，然后清理掉边界以外的内存</p>
+</li>
+</ul>
+<h2 id="经典垃圾收集器"><a href="#经典垃圾收集器" class="headerlink" title="经典垃圾收集器"></a>经典垃圾收集器</h2><h3 id="Serial收集器"><a href="#Serial收集器" class="headerlink" title="Serial收集器"></a>Serial收集器</h3><ul>
+<li>单线程收集器</li>
+<li>优点：简单高效、内存消耗最小</li>
+<li>缺点：工作时必须“Stop The World”，用户体验差</li>
+</ul>
+<h3 id="ParNew收集器"><a href="#ParNew收集器" class="headerlink" title="ParNew收集器"></a>ParNew收集器</h3><ul>
+<li>Serial收集器多线程并行版本</li>
+<li>HotSpot虚拟机中第一款退出历史舞台的垃圾收集器，只能和CMS配合使用而CMS将会替代CMS</li>
+</ul>
+<h3 id="Parallel-Scavenge收集器"><a href="#Parallel-Scavenge收集器" class="headerlink" title="Parallel Scavenge收集器"></a>Parallel Scavenge收集器</h3><ul>
+<li>多线程，基于标记-复制算法</li>
+<li>设计目标：达到一个可控的吞吐量（也就是控制垃圾回收所占用的时间）</li>
+</ul>
+<h3 id="Serial-Old收集器"><a href="#Serial-Old收集器" class="headerlink" title="Serial Old收集器"></a>Serial Old收集器</h3><ul>
+<li>Serial的老年代版本 </li>
+<li>单线程，基于标记整理算法</li>
+</ul>
+<h3 id="Parallel-Old收集器"><a href="#Parallel-Old收集器" class="headerlink" title="Parallel Old收集器"></a>Parallel Old收集器</h3><ul>
+<li>Parallel Scavenge收集器老年代版本</li>
+<li>多线程，基于标记-整理算法</li>
+</ul>
+<h3 id="CMS收集器"><a href="#CMS收集器" class="headerlink" title="CMS收集器"></a>CMS收集器</h3><ul>
+<li><p>目标：为了获取最短回收停顿时间</p>
+</li>
+<li><p>多线程，基于标记-清除算法</p>
+</li>
+<li><p>缺点：1、处理器资源敏感，会占用一部分资源导致程序变慢，总吞吐量降低。2、无法处理浮动垃圾，可能导致full gc发生。3、无法处理空间碎片，只能依靠full gc</p>
+<p>浮动垃圾：CMS标记和清理阶段用户线程会同时运行并产生新的垃圾，因为有些垃圾在标记后产生所以本次无法清理，只能等到下次。</p>
+</li>
+</ul>
+<h3 id="Garbage-First收集器（G1）"><a href="#Garbage-First收集器（G1）" class="headerlink" title="Garbage First收集器（G1）"></a>Garbage First收集器（G1）</h3><ul>
+<li><p>将堆内存划分为多个大小相等的独立区域（Region），每个区域都可以根据需要扮演新生代的Eden空间、Survivor空间或老年代空间，每次回收时G1会判断那块回收性价比最高，收益最大；Region中设有Humongous区域，用来存储大对象（超过Region一半的对象），而超级大对象会被存放在多个连续的Humongous区域</p>
+</li>
+<li><p>与CMS比较</p>
+<ul>
+<li>优势：1、不会产生垃圾碎片；2、创新性设计带来较多红利：可以指定最大停顿时间，分区域的内存布局，按收益动态确定回收集</li>
+<li>弱势：1、占用内存多、负载率高</li>
+</ul>
+</li>
+</ul>
+<h2 id="基础故障处理工具"><a href="#基础故障处理工具" class="headerlink" title="基础故障处理工具"></a>基础故障处理工具</h2><h3 id="jps：虚拟机进程状况工具，主要用来查看进行的唯一ID"><a href="#jps：虚拟机进程状况工具，主要用来查看进行的唯一ID" class="headerlink" title="jps：虚拟机进程状况工具，主要用来查看进行的唯一ID"></a>jps：虚拟机进程状况工具，主要用来查看进行的唯一ID</h3><h3 id="jstat-虚拟机统计信息监视工具，主要用于查看虚拟机各种运行状态信息"><a href="#jstat-虚拟机统计信息监视工具，主要用于查看虚拟机各种运行状态信息" class="headerlink" title="jstat: 虚拟机统计信息监视工具，主要用于查看虚拟机各种运行状态信息"></a>jstat: 虚拟机统计信息监视工具，主要用于查看虚拟机各种运行状态信息</h3><h3 id="jinfo：java配置信息工具，主要使用-sysprops-打印System-getProperties-的内容"><a href="#jinfo：java配置信息工具，主要使用-sysprops-打印System-getProperties-的内容" class="headerlink" title="jinfo：java配置信息工具，主要使用-sysprops 打印System.getProperties()的内容"></a>jinfo：java配置信息工具，主要使用-sysprops 打印System.getProperties()的内容</h3><h3 id="jmap：java内存映像工具，主要用于生成堆转储快照"><a href="#jmap：java内存映像工具，主要用于生成堆转储快照" class="headerlink" title="jmap：java内存映像工具，主要用于生成堆转储快照"></a>jmap：java内存映像工具，主要用于生成堆转储快照</h3><h3 id="jhat：虚拟机堆转储快照分析工具，图形化工具更适合这个工作-所以这个命令用处不大"><a href="#jhat：虚拟机堆转储快照分析工具，图形化工具更适合这个工作-所以这个命令用处不大" class="headerlink" title="jhat：虚拟机堆转储快照分析工具，图形化工具更适合这个工作 所以这个命令用处不大"></a>jhat：虚拟机堆转储快照分析工具，图形化工具更适合这个工作 所以这个命令用处不大</h3><h3 id="jstack：java堆栈跟踪工具，主要用于生成虚拟机当前时刻线程快照，例如可以查看没有相应的线程在后台干什么"><a href="#jstack：java堆栈跟踪工具，主要用于生成虚拟机当前时刻线程快照，例如可以查看没有相应的线程在后台干什么" class="headerlink" title="jstack：java堆栈跟踪工具，主要用于生成虚拟机当前时刻线程快照，例如可以查看没有相应的线程在后台干什么"></a>jstack：java堆栈跟踪工具，主要用于生成虚拟机当前时刻线程快照，例如可以查看没有相应的线程在后台干什么</h3><h2 id="内存回收策略"><a href="#内存回收策略" class="headerlink" title="内存回收策略"></a>内存回收策略</h2><h3 id="在经典分代设计下，新生对象通常会分配在新生代中，少数情况下也可能直接分配在老年代"><a href="#在经典分代设计下，新生对象通常会分配在新生代中，少数情况下也可能直接分配在老年代" class="headerlink" title="在经典分代设计下，新生对象通常会分配在新生代中，少数情况下也可能直接分配在老年代"></a>在经典分代设计下，新生对象通常会分配在新生代中，少数情况下也可能直接分配在老年代</h3><h3 id="对象优先在新生代Eden区域分配"><a href="#对象优先在新生代Eden区域分配" class="headerlink" title="对象优先在新生代Eden区域分配"></a>对象优先在新生代Eden区域分配</h3><h3 id="大对象直接进入老年代"><a href="#大对象直接进入老年代" class="headerlink" title="大对象直接进入老年代"></a>大对象直接进入老年代</h3><h3 id="长期存活对象进入老年代"><a href="#长期存活对象进入老年代" class="headerlink" title="长期存活对象进入老年代"></a>长期存活对象进入老年代</h3><ul>
+<li>Eden中的对象经过一次GC仍然存活并且能被Survivor容纳就会被转移到Survivor中，并将对象年龄设置为1，对象在Survivor中每熬过一次GC就增加一岁，年龄增加到15（默认 可以设置）时进入老年代</li>
+</ul>
+<h3 id="动态对象年龄判定"><a href="#动态对象年龄判定" class="headerlink" title="动态对象年龄判定"></a>动态对象年龄判定</h3><ul>
+<li>HotSpot虚拟机并不是永远等到对象年龄达到标准才晋升到老年代，如果Survivor空间中的相同年龄所有对象大小的总和大于Survivor空间的一半，年龄大于或等于该年龄的对象就直接进入老年代</li>
+</ul>
+<h2 id="选择合适的垃圾收集器"><a href="#选择合适的垃圾收集器" class="headerlink" title="选择合适的垃圾收集器"></a>选择合适的垃圾收集器</h2><h3 id="垃圾收集器工作内容"><a href="#垃圾收集器工作内容" class="headerlink" title="垃圾收集器工作内容"></a>垃圾收集器工作内容</h3><ul>
+<li>垃圾收集、堆内存的管理与布局、对象的分配、与解释器的协作、与编译器的协作，与监控子系统的协作等等</li>
+</ul>
+<h3 id="应用只要运行数分钟甚至数秒，只要虚拟机能正确分配内存，在堆耗尽之前就会退出"><a href="#应用只要运行数分钟甚至数秒，只要虚拟机能正确分配内存，在堆耗尽之前就会退出" class="headerlink" title="应用只要运行数分钟甚至数秒，只要虚拟机能正确分配内存，在堆耗尽之前就会退出"></a>应用只要运行数分钟甚至数秒，只要虚拟机能正确分配内存，在堆耗尽之前就会退出</h3><ul>
+<li>Epslion收集器，不进行垃圾回收，但负载极小</li>
+</ul>
+<h3 id="收集器的权衡"><a href="#收集器的权衡" class="headerlink" title="收集器的权衡"></a>收集器的权衡</h3><ul>
+<li><p>应用程序的关注点</p>
+<ul>
+<li>吞吐量</li>
+<li>延迟</li>
+<li>内存占用</li>
+</ul>
+</li>
+</ul>
+<h3 id="虚拟机及垃圾收集器日志"><a href="#虚拟机及垃圾收集器日志" class="headerlink" title="虚拟机及垃圾收集器日志"></a>虚拟机及垃圾收集器日志</h3><ul>
+<li>1、查看GC基本信息：jdk9以前 -XX:+PrintGC,9以后 -Xlog:gc</li>
+<li>2、查看GC详细信息：9以前 -XX:+PrintGCDetails,9以后 -X-log:gc*</li>
+<li>3、查看GC前后堆、方法区可用容量变化：9以前-XX:+PrintHeapAtGC,9以后 -Xlog:gc+heap=debug</li>
+<li>4、查看GC过程中用户线程并发时间以及停顿的时间：9以前-XX:Print-GCApplicationConcurrentTime 及 -XX:+PrintGCApplicatiionStoppedTime,9以后 -Xlog:safepoint</li>
+<li>只列出一些常用的命令</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
+    <url>/blog/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</url>
+    <content><![CDATA[<h1 id="【通过抓包学网络】TCP三次握手与四次挥手"><a href="#【通过抓包学网络】TCP三次握手与四次挥手" class="headerlink" title="【通过抓包学网络】TCP三次握手与四次挥手"></a>【通过抓包学网络】TCP三次握手与四次挥手</h1><p>本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章<a href="https://blog.csdn.net/qq_43005544/article/details/116504407">wireshark 简易教程</a></p>
+<span id="more"></span>
+
+<p><strong>正文开始</strong></p>
+<h1 id="1-首先抓个包"><a href="#1-首先抓个包" class="headerlink" title="1.首先抓个包"></a>1.首先抓个包</h1><p>通过上一篇文章大家应该都能打开对应网卡的抓包页面了哈；我们利用DNS服务可以将域名解析成IP的功能来演示如何抓到我们想要的包。</p>
+<h2 id="1-1-开始抓包"><a href="#1-1-开始抓包" class="headerlink" title="1.1 开始抓包"></a>1.1 开始抓包</h2><p>如果进入抓包页面没有自动开始抓包，就点击左上角的开始抓包按钮，如图：<br><img src="https://img-blog.csdnimg.cn/20210507235225375.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="1-2-打开命令行界面"><a href="#1-2-打开命令行界面" class="headerlink" title="1.2 打开命令行界面"></a>1.2 打开命令行界面</h2><p>博主用的win10操作系统，所以打开的就是CMD了，输入以下命令</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;nslookup</span><br><span class="line">&gt;<span class="built_in">set</span> vc</span><br><span class="line">&gt;www.baidu.com</span><br></pre></td></tr></table></figure>
+<p>命令执行情况如图：<br><img src="https://img-blog.csdnimg.cn/20210507233243944.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70"></p>
+<h2 id="1-3-停止抓包"><a href="#1-3-停止抓包" class="headerlink" title="1.3 停止抓包"></a>1.3 停止抓包</h2><p>点击红框标记的按钮：<br><img src="https://img-blog.csdnimg.cn/20210507235328579.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="1-4-筛选"><a href="#1-4-筛选" class="headerlink" title="1.4 筛选"></a>1.4 筛选</h2><p>这个时候可以看到界面上抓到很多包，但是有很多是其他应用进行的网络请求，并不是我们想要的，所以要进行筛选。<br>在筛选框我们用Ip进行筛选，表达式为<strong>ip.addr == 116.199.0.200</strong>，如图<br><img src="https://img-blog.csdnimg.cn/20210507235517845.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>116.199.0.200是我本机DNS的ip，你可以通过刚在输入的nslookup命令得到，如图<br><img src="https://img-blog.csdnimg.cn/20210507235651897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>但是通过筛选后发现还是有很多包不是我们想要的，我们通过info列来找到我们请求DNS的包，如图：<br>找到DNS协议info这列有我们刚才输入需要解析的域名这两行，这两行就是DNS解析域名的过程，我们从这两行的Info就可以很清晰的看出DNS解析域名的过程，首先192.168.1.107询问DNS <a href="http://www.baidu.com的ip是多少,然后dns在下一行进行回复./">www.baidu.com的IP是多少，然后DNS在下一行进行回复。</a><br><img src="https://img-blog.csdnimg.cn/20210509113130576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="1-5-找到三次握手的包"><a href="#1-5-找到三次握手的包" class="headerlink" title="1.5 找到三次握手的包"></a>1.5 找到三次握手的包</h2><p>在1.4小节中我们找到的926和927号包的上面就是三次握手的包，分别是921，922，923这三个包，如图：<br><img src="https://img-blog.csdnimg.cn/20210509161642786.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>你可能想问是怎么看出来的，好问题，主要是看Seq和Ack的值，三次握手的时候Seq的相对值是为0的（注意是相对值）。找到了三次握手的网络包，我们就来分析一下三次握手吧。</p>
+<h1 id="2-分析三次握手"><a href="#2-分析三次握手" class="headerlink" title="2. 分析三次握手"></a>2. 分析三次握手</h1><h2 id="2-1-TCP-参数介绍"><a href="#2-1-TCP-参数介绍" class="headerlink" title="2.1 TCP 参数介绍"></a>2.1 TCP 参数介绍</h2><p>要学习TCP首先要学习它的参数。</p>
+<p><strong>Seq</strong>：标识改数据段的序号。因为TCP的传输是有序的，接收者可以通过Seq对包进行排序。</p>
+<p><strong>Len</strong>：表示Seq对应数据的长度。</p>
+<p><strong>Ack</strong>：确认号，向数据提供者表明收到了哪些包（实际收到包的Seq序号需要 Ack - 1，因为Seq是从0开始的，例如Ack = 2说明已经收到 第0段和第1段需要包，下一个需要接收的序号包Seq 需要为 2）。</p>
+<p><strong>SYN</strong>：表示携带这个参数的数据包正在发起连接请求。</p>
+<p><strong>FIN</strong>：表示携带这个参数的包正在请求停止连接。</p>
+<h2 id="2-2-三次握手过程"><a href="#2-2-三次握手过程" class="headerlink" title="2.2 三次握手过程"></a>2.2 三次握手过程</h2><p>用来分析的数据包如图：<br><img src="https://img-blog.csdnimg.cn/2021050917000075.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><strong>第一次握手</strong> 192.168.1.107 向 116.119.0.200 发送携带 SYN; Seq = 0;len = 0的请求。SYN表示这是在请求连接，Seq表示目前发送的是第0段数据包，len表示数据包的长度为0。</p>
+<p><strong>第二次握手</strong> 116.119.0.200 向192.168.1.107发送携带SYN;Seq = 0;Len = 0; Ack = 1的请求。因为TCP是双向连接，所以双方都要维护各自的参数，除了Ack其他参数在第一次握手的时候讲过了，Ack表示已经接收到Seq = 0 的数据包了，下一次请从Seq = 1 的数据包发送。</p>
+<p><strong>第三次握手</strong>：192.168.1.107 向 116.119.0.200 发送携带Ack = 1; Seq = 1; len = 0;的请求，表示已经收到Seq = 0 的数据包了，下一次请从Seq = 1 的数据包发送。<br>这时连接已经成功建立。</p>
+<p>这样就通过三次握手建立了一个连接，<strong>至于面试常问的为什么不是两次或者四次相信你已经知道答案了</strong>，因为<strong>两次不可靠</strong>，可能在第二次握手的时候超时了，对方并没有收到请求，而发送方并不知道，以为已经成功建立了连接，所以会向对方发送数据，但是对方因为其他原因没有接收到第二次握手，所以不会接受数据发送方发送的数据。<strong>至于四次没必要</strong>，因为所有想做的事情已经做完了。</p>
+<h1 id="3-分析四次挥手"><a href="#3-分析四次挥手" class="headerlink" title="3. 分析四次挥手"></a>3. 分析四次挥手</h1><h2 id="3-1-找到四次挥手的数据包"><a href="#3-1-找到四次挥手的数据包" class="headerlink" title="3.1 找到四次挥手的数据包"></a>3.1 找到四次挥手的数据包</h2><p>四次挥手的数据包就是928至931，你又想问这是怎么看出来的？好问题，讲三次握手的时候介绍过 <strong>FIN</strong>参数就代表着请求断开连接，那我们就找离DNS解析域名数据包最近的携带FIN参数的数据包。<br><img src="https://img-blog.csdnimg.cn/20210509174830567.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="3-2-分析四次挥手"><a href="#3-2-分析四次挥手" class="headerlink" title="3.2 分析四次挥手"></a>3.2 分析四次挥手</h2><p><strong>第一次挥手</strong>：192.168.1.107 向 116.119.0.200 发送携带FIN; Seq = 34; Ack = 93; 的数据包，FIN表示请求断开连接，Seq = 34表示这个数据包是第34段，Ack = 93表示已经收到93段之前的数据包了，下一次请求第93段数据包开始发送。</p>
+<p><strong>第二次挥手</strong>： 116.119.0.200 向192.168.1.107发送携带Seq = 93; Ack = 35;的数据包，表示请求已经收到 Seq和Ack参数就不解释了。</p>
+<p><strong>第三次挥手</strong>：116.119.0.200 向192.168.1.107发送携带FIN; Seq = 93; Ack = 35; 的数据包，表示请求断开连接。</p>
+<p><strong>第四次挥手</strong>：192.168.1.107 向 116.119.0.200 发送携带Seq = 35; Ack = 94;的数据包，表示已经接收到请求。</p>
+<p>通过四次挥手完成了连接的断开，<strong>面试的时候常问为什么不能是三次挥手</strong>，这里已经很明确了，因为116.119.0.200这台服务器需要连续发送两个数据包，那为什么是两个呢？因为可能还有一些网络数据没有处理完，不能马上断开连接，只能先回应请求收到了，等处理完数据后再发送断开连接请求。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Wireshark</tag>
+        <tag>网络</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>网站典型故障案例</title>
+    <url>/blog/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/</url>
+    <content><![CDATA[<h1 id="网站典型故障案例"><a href="#网站典型故障案例" class="headerlink" title="网站典型故障案例"></a>网站典型故障案例</h1><span id="more"></span>
+
+<h2 id="1-写日志也会引发故障"><a href="#1-写日志也会引发故障" class="headerlink" title="1.写日志也会引发故障"></a>1.写日志也会引发故障</h2><h3 id="故障现象"><a href="#故障现象" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用服务器在项目发布后不久就出现报警，硬盘可用空间低于警戒值，并且很快就宕机。登录到线上服务器，发现log文件夹里的文件迅速增加，不断消耗磁盘空间。</p>
+<h3 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h3><p>部署完系统后硬盘还剩余几十个G，正常情况下这些磁盘空间足够了，但是该应用的开发人员将l o g输出的level全局配置为Debug。这样一次简单的Web请求就会产生大量的log文件输出，在高并发的用户请求下，很快就消耗完不多的磁盘空间</p>
+<h3 id="经验教训"><a href="#经验教训" class="headerlink" title="经验教训"></a>经验教训</h3><p>应用程序自己的日志输出配置和第三方组件日志输出要分别配置。<br>检查log配置文件，日志输出级别至少为Warn，并且检查log输出代码调用，调用级别要符合其真实日志级别。<br>有些开源的第三方组件也会不恰当地输出太多的Error日志，需要关闭这些第三方库的日志输出，至于哪些第三方库有问题，只有在遇到问题时才知道。</p>
+<h2 id="2-高并发访问数据库引发的故障"><a href="#2-高并发访问数据库引发的故障" class="headerlink" title="2.高并发访问数据库引发的故障"></a>2.高并发访问数据库引发的故障</h2><h3 id="故障现象-1"><a href="#故障现象-1" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用发布后，数据库Load居高不下，远超过正常水平，持续报警。</p>
+<h3 id="原因分析-1"><a href="#原因分析-1" class="headerlink" title="原因分析"></a>原因分析</h3><p>查数据库，发现报警是因为某条SQL引起的，这条SQL是一条简单的有索引的数据查询，不应该引发报警。继续检查，发现这条SQL执行频率非常高，远远超过正常水平。追查这条SQL，发现被网站首页应用调用，首页是被访问最频繁的网页，这条SQL被首页调用，也就被频繁执行了。</p>
+<h3 id="经验教训-1"><a href="#经验教训-1" class="headerlink" title="经验教训"></a>经验教训</h3><p>首页不应该访问数据库，首页需要的数据可以从缓存服务器或者搜索引擎服务器获取。<br>首页最好是静态的。</p>
+<h2 id="3-高并发情况下锁引发的故障"><a href="#3-高并发情况下锁引发的故障" class="headerlink" title="3.高并发情况下锁引发的故障"></a>3.高并发情况下锁引发的故障</h2><h3 id="故障现象-2"><a href="#故障现象-2" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用服务器不定时地因为响应超时而报警，但是很快又超时解除，恢复正常，如此反复，让运维人员非常苦恼。</p>
+<h3 id="原因分析-2"><a href="#原因分析-2" class="headerlink" title="原因分析"></a>原因分析</h3><p>程序中某个单例对象（singleton object）中多处使用了synchronized（this），由于this对象只有一个，所有的并发请求都要排队获得这唯一的一把锁。一般情况下，都是一些简单操作，获得锁，迅速完成操作，释放锁，不会引起线程排队。但是某个需要远程调用的操作也被加了synchronized（this），这个操作只是偶尔会被执行，但是每次执行都需要较长的时间才能完成，这段时间锁被占用，所有的用户线程都要等待，响应超时，这个操作执行完后释放锁，其他线程迅速执行，超时解除。</p>
+<h3 id="经验教训-2"><a href="#经验教训-2" class="headerlink" title="经验教训"></a>经验教训</h3><p>使用锁操作要谨慎</p>
+<h2 id="4-缓存引发的故障"><a href="#4-缓存引发的故障" class="headerlink" title="4.缓存引发的故障"></a>4.缓存引发的故障</h2><h3 id="故障现象-3"><a href="#故障现象-3" class="headerlink" title="故障现象"></a>故障现象</h3><p>没有新应用发布，但是数据库服务器突然Load飙升，并很快失去响应。DBA将数据库访问切换到备机，Load也很快飙升，并失去响应。最终引发网站全部瘫痪</p>
+<h3 id="原因分析-3"><a href="#原因分析-3" class="headerlink" title="原因分析"></a>原因分析</h3><p>缓存服务器在网站服务器集群中的地位一直比较低，服务器配置和管理级别都比其他服务器要低一些。人们都认为缓存是改善性能的手段，丢失一些缓存也没什么问题，有时候关闭一两台缓存服务器也确实对应用没有明显影响，所以长期疏于管理缓存服务器。结果这次一个缺乏经验的工程师关闭了缓存服务器集群中全部的十几台Memcached服务器，导致了网站全部瘫痪的重大事故</p>
+<h3 id="经验教训-3"><a href="#经验教训-3" class="headerlink" title="经验教训"></a>经验教训</h3><p>当缓存已经不仅仅是改善性能，而是成为网站架构不可或缺的一部分时，对缓存的管理就需要提高到和其他服务器一样的级别</p>
+<h2 id="5-大文件读写独占磁盘引发的故障"><a href="#5-大文件读写独占磁盘引发的故障" class="headerlink" title="5.大文件读写独占磁盘引发的故障"></a>5.大文件读写独占磁盘引发的故障</h2><h3 id="故障现象-4"><a href="#故障现象-4" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用主要功能是管理用户图片，接到部分用户投诉，表示上传图片非常慢，原来只需要一两秒，现在需要几十秒，有时等半天结果浏览器显示服务器超时</p>
+<h3 id="原因分析-4"><a href="#原因分析-4" class="headerlink" title="原因分析"></a>原因分析</h3><p>图片需要使用存储，最有可能出错的地方是存储服务器。检查存储服务器，发现大部分文件只有几百KB，而有几个文件非常大，有数百兆，读写这些大文件一次需要几十秒，这段时间，磁盘基本被这个文件操作独占，导致其他用户的文件操作缓慢。</p>
+<h3 id="经验教训-4"><a href="#经验教训-4" class="headerlink" title="经验教训"></a>经验教训</h3><p>存储的使用需要根据不同文件类型和用途进行管理，图片都是小文件，应该使用专用的存储服务器，不能和大文件共用存储。批处理用的大文件可以使用其他类型的分布式文件系统。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
+        <tag>问题记录</tag>
+      </tags>
   </entry>
   <entry>
     <title>网站架构模式</title>
-    <url>/blog/2021/12/02/%E7%BD%91%E7%AB%99%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F/</url>
+    <url>/blog/%E7%BD%91%E7%AB%99%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F/</url>
     <content><![CDATA[<h1 id="网站架构模式"><a href="#网站架构模式" class="headerlink" title="网站架构模式"></a>网站架构模式</h1><p>大型互联网公司为了实现网站的高性能、高可用、易伸缩、可扩展、安全等各种技术架构目标，提出了很多解决方案，而这些方案又被更多网站重复使用，从而逐渐形成大型网站架构模式，下面对常见的模式进行总结。</p>
 <span id="more"></span>
 
@@ -125,8 +1118,564 @@
 <h2 id="7、冗余"><a href="#7、冗余" class="headerlink" title="7、冗余"></a>7、冗余</h2><p>沉余包括服务器冗余运行，数据冗余备份。网站需要不间断的提供服务，因此必须保证在有服务器宕机的情况下可以将服务和数据转移到其他机器上，以保证服务的高可用和数据的不丢失</p>
 <h2 id="8、自动化"><a href="#8、自动化" class="headerlink" title="8、自动化"></a>8、自动化</h2><p>包括但不限于以下部分：<br>1、自动化代码管理；2、自动化测试；3、自动化安全检测；4、自动化部署；<br>5、自动化监控 等等。</p>
 ]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
       <tags>
-        <tag>很好</tag>
+        <tag>架构</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>常见的Web应用攻击手段</title>
+    <url>/blog/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</url>
+    <content><![CDATA[<h1 id="常见的Web应用攻击手段"><a href="#常见的Web应用攻击手段" class="headerlink" title="常见的Web应用攻击手段"></a>常见的Web应用攻击手段</h1><span id="more"></span>
+
+<h2 id="1-XSS攻击"><a href="#1-XSS攻击" class="headerlink" title="1.XSS攻击"></a>1.XSS攻击</h2><p>XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。</p>
+<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><ul>
+<li><p>1.1 反射型</p>
+<p>攻击者诱使用户点击一个嵌入恶意脚本的链接，达到攻击的目的</p>
+</li>
+<li><p>1.2 持久型</p>
+<p>黑客提交含有恶意脚本的请求，保存在被攻击的Web站点的数据库中，用户浏览网页时，恶意脚本被包含在正常页面中，达到攻击的目的</p>
+</li>
+</ul>
+<h3 id="防护手段"><a href="#防护手段" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
+<li><p>1.3消毒</p>
+<p>XSS攻击者一般都是通过在请求中嵌入恶意脚本达到攻击的目的，这些脚本是一般用户输入中不使用的，如果进行过滤和消毒处理，即对某些html危险字符转义就可以让绝大部分攻击失败</p>
+</li>
+<li><p>1.4HttpOnly</p>
+<p>浏览器禁止页面JavaScript访问带有HttpOnly属性的Cookie，可以防止Cookie中的数据被窃取</p>
+</li>
+</ul>
+<h2 id="2-注入攻击"><a href="#2-注入攻击" class="headerlink" title="2.注入攻击"></a>2.注入攻击</h2><h3 id="分类-1"><a href="#分类-1" class="headerlink" title="分类"></a>分类</h3><ul>
+<li><p>2.1 SQL注入攻击</p>
+<p>攻击者在HTTP请求中注入恶意SQL命令（drop table users;），服务器用请求参数构造数据库SQL命令时，恶意SQL被一起构造，并在数据库中执行。</p>
+</li>
+<li><p>2.2 OS注入攻击</p>
+</li>
+</ul>
+<h3 id="防护手段-1"><a href="#防护手段-1" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
+<li><p>2.3 消毒</p>
+<p>通过正则匹配，过滤请求数据中可能注入的SQL</p>
+</li>
+<li><p>2.4 参数绑定</p>
+<p>使用预编译手段，绑定参数是最好的防SQL注入方法。目前许多数据访问层框架，如IBatis，Hibernate等，都实现SQL预编译和参数绑定，攻击者的恶意SQL会被当做SQL的参数，而不是SQL命令被执行。</p>
+</li>
+</ul>
+<h2 id="3-CSRF攻击"><a href="#3-CSRF攻击" class="headerlink" title="3.CSRF攻击"></a>3.CSRF攻击</h2><p>攻击者通过跨站请求，以合法用户的身份进行非法操作，如转账交易、发表评论等；<br>CSRF的主要手法是利用跨站请求，在用户不知情的情况下，以用户的身份伪造请求。其核心是利用了浏览器Cookie或服务器Session策略，盗取用户身份。</p>
+<h3 id="防护手段-2"><a href="#防护手段-2" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
+<li><p>3.1 Token验证</p>
+<p>通过在请求参数中增加随机数的办法来阻止攻击者获得所有请求参数：在页面表单中增加一个随机数作为Token，每次响应页面的Token都不相同，从正常页面提交的请求会包含该Token值，而伪造的请求无法获得该值，服务器检查请求参数中Token的值是否存在并且正确以确定请求提交者是否合法</p>
+</li>
+<li><p>3.2 验证码</p>
+<p>验证码则更加简单有效；<br>请求提交时，需要用户输入验证码，以避免在用户不知情的情况下被攻击者伪造请求。但是输入验证码是一个糟糕的用户体验，所以请在必要时使用，</p>
+</li>
+<li><p>3.3 Referer check</p>
+<p>HTTP请求头的Referer域中记录着请求来源，可通过检查请求来源，验证其是否合法。</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>虚拟机字节码执行引擎</title>
+    <url>/blog/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/</url>
+    <content><![CDATA[<h1 id="虚拟机字节码执行引擎"><a href="#虚拟机字节码执行引擎" class="headerlink" title="虚拟机字节码执行引擎"></a>虚拟机字节码执行引擎</h1><p>虚拟机字节码执行引擎是java虚拟机核心组成部分之一，所有java虚拟机的执行引擎输入、输出都是一致的：输入的是字节码二进制流，处理过程是字节码解析执行的等效过程，输出的是执行结果。</p>
+<span id="more"></span>
+
+<h2 id="运行时栈帧结构"><a href="#运行时栈帧结构" class="headerlink" title="运行时栈帧结构"></a>运行时栈帧结构</h2><p>java虚拟机以方法作为最基本的执行单元，栈帧则是用于支持虚拟机进行方法调用和方法执行背后的数据结构，它也是虚拟机运行时数据区中的虚拟机栈的栈元素。栈帧存储了方法的局部变量表、操作数栈、动态连接和方法返回地址等信息，栈帧需要分配多少内存编译期已经确定，并不会收到程序运行期变量数据的影响；以java程序的角度来看，同一时刻、同一线程里面，在调用堆栈的所有方法都同时处于执行状态，但在活动线程中，只有位于栈顶的方法才是在运行的，被称为当前栈帧，执行引擎所运行的字节码执行都只针对当前栈帧进行操作。</p>
+<h3 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h3><p>是一组变量值的存储空间，属于线程私有，用于存放方法参数和方法内部定义的局部变量，在java程序被编译为class文件时就在方法的Code属性的max_locals数据项中确定了该方法所需分配的局部变量表的最大容量，它以变量槽为最小单位，它允许变量槽的长度可以随着处理器、操作系统或虚拟机实现的不同而发生变化</p>
+<ul>
+<li><p>工作机制</p>
+<ul>
+<li>当一个方法被调用时，java虚拟机会使用局部变量表来完成参数值到参数变量的传递过程，即实参到形参的传递。如果执行的是实例方法，那局部变量表的第0位索引的变量槽默认是用于传递方法所属对象实例的引用，可以用this表示，其余参数按照顺序排列，而且局部变量表是可以重用的</li>
+</ul>
+</li>
+</ul>
+<h3 id="操作数栈"><a href="#操作数栈" class="headerlink" title="操作数栈"></a>操作数栈</h3><p>常被称为操作栈，是一个后入先出栈，它的最大深度在编译的时候已经确定</p>
+<ul>
+<li><p>工作机制</p>
+<ul>
+<li>当一个方法刚刚执行的时候，这个方法的操作数栈是空的，在方法的执行过程中会有各种字节码执行往操作数栈中写入和提取内容（入栈出栈的元素是局部变量表中的局部变量）</li>
+</ul>
+</li>
+</ul>
+<h3 id="栈帧信息"><a href="#栈帧信息" class="headerlink" title="栈帧信息"></a>栈帧信息</h3><ul>
+<li><p>动态链接</p>
+<p>每个栈帧都包含一个指向运行时常量池中该栈帧所属方法的引用，持有这个过程是为了支持方法调用过程中的动态连接（就是将符号引用转为直接引用）</p>
+</li>
+<li><p>方法返回地址</p>
+<p>方法退出之后都必须返回到最初方法被调用时的位置</p>
+</li>
+<li><p>附加信息</p>
+<p>可以返回一些java虚拟机没有描述的信息</p>
+</li>
+</ul>
+<h2 id="方法调用"><a href="#方法调用" class="headerlink" title="方法调用"></a>方法调用</h2><p>方法调用并不等于方法中的代码被执行，方法调用阶段唯一的任务就是确定被调用方法的版本（即调用哪一个方法），暂时还未涉及方法内部的具体运行过程</p>
+<h3 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h3><p>所有方法调用的目标方法在Class文件中都是一个常量池中的符号引用，在类加载的解析阶段，会将一部分符号引用转化为直接引用，前提是方法在程序真正运行之前就有一个可确定的调用版本，并且在运行期不可改变，这类方法的调用被称为解析；符合“编译期可知，运行期不可变”要求的方法主要静包括态方法和私有方法，这两类都不可能重写出其他版本</p>
+<ul>
+<li><p>非虚方法</p>
+<p>私有方法、实例构造器、静态方法、父类方法，被final修饰的方法 这5中方法调用会在类加载的时候就可以把符号引用解析为该方法的直接引用。这些方法统称为“非虚方法”</p>
+<ul>
+<li><p>解析调用</p>
+<ul>
+<li>是个静态过程，在编译期就完全确定，在类加载阶段就会将符号引用转变为直接引用</li>
+</ul>
+</li>
+<li><p>分派调用</p>
+<ul>
+<li><p>静态分派</p>
+<ul>
+<li>主要表现为重载，虚拟机在重载时是通过参数的静态类型而不是实际类型作为判定依据的</li>
+</ul>
+</li>
+<li><p>动态分派</p>
+<ul>
+<li>主要表现为重写，在运行期间根据实际类型确定方法执行版本的分派过程叫做动态分派</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="动态类型语言支持"><a href="#动态类型语言支持" class="headerlink" title="动态类型语言支持"></a>动态类型语言支持</h2><h3 id="动态类型语言"><a href="#动态类型语言" class="headerlink" title="动态类型语言"></a>动态类型语言</h3><p>类型检查的主体过程是在运行期而不是编译期进行的</p>
+<h3 id="java-lang-invoke包"><a href="#java-lang-invoke包" class="headerlink" title="java.lang.invoke包"></a>java.lang.invoke包</h3><p>主要目的是在之前单纯依靠符号引用来确定调用的目标方法这条路外提供一种新的动态确定目标方法的机制，称为方法句柄</p>
+<ul>
+<li><p>方法句柄和反射的区别</p>
+<ul>
+<li>1、反射是在模拟java代码层次的方法调用，方法句柄是在模拟字节码层次的方法调用</li>
+<li>2、反射是重量级的，方法句柄是轻量级的</li>
+<li>3、方法句柄可以享受虚拟机的优化策略，因为它是模拟字节码层面的方法调用</li>
+</ul>
+</li>
+</ul>
+<h2 id="基于栈的字节码解释执行引擎"><a href="#基于栈的字节码解释执行引擎" class="headerlink" title="基于栈的字节码解释执行引擎"></a>基于栈的字节码解释执行引擎</h2><p>主要功能是配合虚拟机执行方法里面的字节码指令的</p>
+<h3 id="解释执行"><a href="#解释执行" class="headerlink" title="解释执行"></a>解释执行</h3><p>java现在已经不能单纯归类于解释执行或者是编译执行，因为两者都有</p>
+<h3 id="基于栈的指令集与基于寄存器的指令集"><a href="#基于栈的指令集与基于寄存器的指令集" class="headerlink" title="基于栈的指令集与基于寄存器的指令集"></a>基于栈的指令集与基于寄存器的指令集</h3><p>javac编译器输出的字节码指令流是一种基于栈的指令集架构</p>
+<ul>
+<li>栈：优点： 1、可移植，因为寄存器由硬件直接提供，程序直接依赖这些硬件寄存器则不可避免的受硬件的约束；2、代码相对更紧凑、编译器实现更加简单。缺点：1、理论上执行速度相对慢一些</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+        <tag>字节码</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>网站的高性能架构</title>
+    <url>/blog/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/</url>
+    <content><![CDATA[<h1 id="网站的高性能架构"><a href="#网站的高性能架构" class="headerlink" title="网站的高性能架构"></a>网站的高性能架构</h1><p>网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。</p>
+<span id="more"></span>
+
+<h2 id="1-网站性能测试"><a href="#1-网站性能测试" class="headerlink" title="1. 网站性能测试"></a>1. 网站性能测试</h2><p>性能测试是性能优化的前提和基础，也是性能优化结果的检查和度量标准。不同视角下的网站性能有不同的标准，也有不同的优化手段。</p>
+<h3 id="1-1不同视角下的网站性能"><a href="#1-1不同视角下的网站性能" class="headerlink" title="1.1不同视角下的网站性能"></a>1.1不同视角下的网站性能</h3><ul>
+<li><p>1.1.1 用户视角的网站性能</p>
+<p>从用户角度，网站性能就是用户在浏览器上直观感受到的网站响应速度快还是慢</p>
+<ul>
+<li><p>优化手段：</p>
+<p>使用一些前端架构优化手段，通过优化页面HTML式样、利用浏览器端的并发和异步特性、调整浏览器缓存策略、使用CDN服务、反向代理等手段，使浏览器尽快地显示用户感兴趣的内容、尽可能近地获取页面内容，即使不优化应用程序和架构，也可以很大程度地改善用户视角下的网站性能</p>
+</li>
+</ul>
+</li>
+<li><p>1.1.2 开发人员视角的网站性能</p>
+<p>开发人员关注的主要是应用程序本身及其相关子系统的性能，包括响应延迟、系统吞吐量、并发处理能力、系统稳定性等技术指标。</p>
+<ul>
+<li><p>优化手段：</p>
+<p>使用缓存加速数据读取，使用集群提高吞吐能力，使用异步消息加快请求响应及实现削峰，使用代码优化手段改善程序性能。</p>
+</li>
+</ul>
+</li>
+<li><p>1.1.3 运维人员视角的网站性能</p>
+<p>运维人员更关注基础设施性能和资源利用率，如网络运营商的带宽能力、服务器硬件的配置、数据中心网络架构、服务器和网络带宽的资源利用率等</p>
+<ul>
+<li><p>优化手段</p>
+<p>建设优化骨干网、使用高性价比定制服务器、利用虚拟化技术优化资源利用等</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-2-性能测试指标"><a href="#1-2-性能测试指标" class="headerlink" title="1.2 性能测试指标"></a>1.2 性能测试指标</h3><p>不同视角下有不同的性能标准，不同的标准有不同的性能测试指标，从开发和测试人员的视角，网站性能测试的主要指标有响应时间、并发数、吞吐量、性能计数器等</p>
+<ul>
+<li><p>1.2.1 响应时间</p>
+<p>指应用执行一个操作需要的时间，包括从发出请求开始到收到最后响应数据所需要的时间</p>
+</li>
+<li><p>1.2.2 并发数</p>
+<p>指系统能够同时处理请求的数目，这个数字也反映了系统的负载特性。</p>
+</li>
+<li><p>1.2.3 吞吐量</p>
+<p>单位时间内系统处理的请求数量，体现系统的整体处理能力</p>
+</li>
+<li><p>1.2.4 性能计数器</p>
+<p>它是描述服务器或操作系统性能的一些数据指标。包括SystemLoad、对象与线程数、内存使用、CPU使用、磁盘与网络I/O等指标。这些指标也是系统监控的重要参数，对这些指标设置报警阈值，当监控系统发现性能计数器超过阈值时，就向运维和开发人员报警，及时发现处理系统异常。</p>
+</li>
+</ul>
+<h3 id="1-3-性能测试方法"><a href="#1-3-性能测试方法" class="headerlink" title="1.3 性能测试方法"></a>1.3 性能测试方法</h3><p>性能测试是一个总称，具体可细分为性能测试、负载测试、压力测试、稳定性测试。</p>
+<h2 id="2-Web前端性能优化"><a href="#2-Web前端性能优化" class="headerlink" title="2. Web前端性能优化"></a>2. Web前端性能优化</h2><h3 id="2-1-浏览器访问优化"><a href="#2-1-浏览器访问优化" class="headerlink" title="2.1 浏览器访问优化"></a>2.1 浏览器访问优化</h3><ul>
+<li><p>2.1.1 减少http请求</p>
+<ul>
+<li><p>2.1.1.1 为什么</p>
+<p>HTTP协议是无状态的应用层协议，意味着每次HTTP请求都需要建立通信链路、进行数据传输，而在服务器端，每个HTTP都需要启动独立的线程去处理</p>
+</li>
+<li><p>2.1.1.2 怎么办</p>
+<p>合并CSS、合并JavaScript、合并图片，这样一次请求就可以获取多个需要的文件</p>
+</li>
+</ul>
+</li>
+<li><p>2.1.2 使用浏览器缓存</p>
+<p>将更新的频率都低，而访问平凡的文件缓存在浏览器中，可以极好地改善性能</p>
+</li>
+<li><p>2.1.3 启用压缩</p>
+<p>在服务器端对文件进行压缩，在浏览器端对文件解压缩，可有效减少通信传输的数据量。有利就有弊，压缩对服务器和浏览器产生一定的压力，在通信带宽良好，而服务器资源不足的情况下要权衡考虑。</p>
+</li>
+<li><p>2.1.4 CSS放在页面最上面、JavaScript放在页面最下面</p>
+<p>浏览器会在下载完全部CSS之后才对整个页面进行渲染，因此最好的做法是将CSS放在页面最上面，让浏览器尽快下载CSS。JavaScript则相反，浏览器在加载JavaScript后立即执行，有可能会阻塞整个页面，造成页面显示缓慢，因此JavaScript最好放在页面最下面。</p>
+</li>
+<li><p>2.1.5 减少Cookie传输</p>
+<p>Cookie包含在每次请求和响应中，太大的Cookie会严重影响数据传输</p>
+</li>
+<li><p>2.1.5 CDN加速</p>
+<p>CDN（Content Distribute Network，内容分发网络）的本质仍然是一个缓存，而且将数据缓存在离用户最近的地方，使用户以最快速度获取数据</p>
+</li>
+<li><p>2.1.6 反向代理</p>
+<p>1、可以缓存静态内容，加快web访问；<br>2、保护网站安全，相当于在Web服务器和可能的网络攻击之间建立了一个屏障。</p>
+</li>
+</ul>
+<h2 id="3-应用服务器性能优化"><a href="#3-应用服务器性能优化" class="headerlink" title="3. 应用服务器性能优化"></a>3. 应用服务器性能优化</h2><p>优化手段主要有缓存、集群、异步等。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>虚拟机类加载机制</title>
+    <url>/blog/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/</url>
+    <content><![CDATA[<h1 id="虚拟机类加载机制"><a href="#虚拟机类加载机制" class="headerlink" title="虚拟机类加载机制"></a>虚拟机类加载机制</h1><p>java虚拟机把描述类的数据从Class文件加载到内存，并堆数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这个过程被称作虚拟机的类加载机制</p>
+<span id="more"></span>
+
+<h2 id="类加载的时机"><a href="#类加载的时机" class="headerlink" title="类加载的时机"></a>类加载的时机</h2><p>类型从被加载到虚拟机内存中开始到卸载出内存为止的生命周期为：加载、验证、准备、解析、初始化、使用、卸载 总共七个阶段，其中验证、准备、解析三个部分统称为链接；加载、验证、准备、初始化和卸载是按照顺序执行的，而解析为了满足java动态绑定的需求可能会在初始化之后进行。</p>
+<h3 id="必须立即对类初始化的六种情况"><a href="#必须立即对类初始化的六种情况" class="headerlink" title="必须立即对类初始化的六种情况"></a>必须立即对类初始化的六种情况</h3><p>虚拟机会为类和接口生成<clinit>()类构造器，用于初始化接口中所定义的成员变量；当一个类初始化时要求其全部父类都已经初始化过，而接口初始化时只有真正使用到父接口时才会初始化</p>
+<ul>
+<li>1、遇到new、getstatic（读取静态字段）、putstatic（设置静态字段）或invokestatic（调用静态方法）这四条字节码指令时。</li>
+<li>2、使用java.lang.reflect包的方法对类型进行反射调用的时候</li>
+<li>3、当初始化类时，要先初始化其父类</li>
+<li>4、当虚拟机启动时，用户需要指定一个要执行的主类，虚拟机会先初始化这个主类</li>
+<li>5、当使用jdk7加入的动态语言支持时，如果java.lang.invoke.MethodHandle实例最后的解析结果为REF_getStatic、REF_putStatic、REF_invokeStatic、REF_newInvokeSpecial四种类型的方法句柄时</li>
+<li>6、当一个接口定义了JDK8新加入的默认方法时</li>
+</ul>
+<h2 id="类加载的过程"><a href="#类加载的过程" class="headerlink" title="类加载的过程"></a>类加载的过程</h2><h3 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h3><p>开发人员可控性最强的阶段，主要表现在可以控制类二进制流的获取。数组是通过jvm自己创建的 再由类加载器创建数据中的元素类</p>
+<ul>
+<li><p>1、通过一个类的全限定名获取此类的二进制字节流</p>
+<p>虚拟机并没有规定怎样获取二进制字节流，可以从网络、加密文件、压缩包等等不同方式获取</p>
+</li>
+<li><p>2、将这个字节流所代表的静态储存结构转化为方法区的运行时数据结构</p>
+</li>
+<li><p>3、在内存中生成一个代表这个类的java.lang.Class对象，作为方法区这个类的各种数据的访问入口</p>
+</li>
+</ul>
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>这一阶段的目的是确保Class文件的字节流中包含的信息符合java虚拟机规范的全部约束要求，保证这些信息被当作代码运行后不会危害虚拟机自身的安全</p>
+<ul>
+<li><p>文件格式验证</p>
+<p>验证字节流是否符合Class文件格式的规范，并且能够被当前版本的虚拟机处理，只有通过了之后这段字节流才被允许进入java虚拟机内存的方法区中进行存储</p>
+<ul>
+<li>1、是否以魔数0XCAFEBABE开头</li>
+<li>2、主、次版本号是否在当前java虚拟机接受范围之内</li>
+<li>3、常量池的常量中是否有不被支持的常量类型</li>
+<li>4、指向常量的各种索引值中是否有指向不存在的常量或不符合类型的常量</li>
+<li>5、CONSTANT_Uft8_info型的常量中是否有不符合UTF-8编码的数据</li>
+<li>6、Class文件中各个部分及文件本省是否有被删除的或附加的其他信息</li>
+<li>。。。等等</li>
+</ul>
+</li>
+<li><p>元数据验证</p>
+<p>对字节码描述的信息进行语义分析，保证其描述的信息符合java语言规范的要求</p>
+<ul>
+<li>1、这个类是否有父类（除了java.lang.Object以外的类都有父类）</li>
+<li>2、这个类的父类是否继承了不允许被继承的类（final修饰的类）</li>
+<li>3、如果这个类不是抽象类，是否实现了其父类或者接口之中要求实现的所有方法</li>
+<li>4、类中的字段、方法是否与父类产生矛盾</li>
+<li>。。。等等</li>
+</ul>
+</li>
+<li><p>字节码验证</p>
+<p>主要目的是通过数据流分析和控制流分析确定程序语义是合法的符合逻辑的。</p>
+<ul>
+<li>1、保证任意时刻操作数栈的数据类型与指令代码序列都能配合工作</li>
+<li>2、保证任何跳转指令都不会跳转到方法体以外的字节码指令上</li>
+<li>3、保证方法体中的类型转换总是有效的</li>
+<li>。。。等等</li>
+</ul>
+</li>
+<li><p>符号引用验证</p>
+<p>该类是否缺少或者被禁止访问它依赖的某些外部类、方法、字段等资源</p>
+<ul>
+<li>1、符号引用中通过字符串描述的全限定名是否能找到对应的类</li>
+<li>2、在指定类中是否存在符合方法的字段描述符及简单名称所描述的方法和字段</li>
+<li>3、符号引用中的类、字段、方法的可访问性是否可被当前类访问</li>
+<li>。。。等等</li>
+</ul>
+</li>
+</ul>
+<h3 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h3><p>准备阶段是正式为类中定义的变量（静态变量）分配内存并设置类变量初始值的阶段；jdk7以上的版本中 类变量随着Class对象一起存放在java堆中；此阶段实例变量不会分配内存，它会在对象实例化时随着对象一起分配在java堆中；此阶段会为类变量赋予系统要求的初始零值</p>
+<h3 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h3><p>解析阶段是java虚拟机将常量池内的符号引用替换为直接引用的过程，解析动作主要针对类或接口、字段、类方法、接口方法、方法类型、方法句柄和调用点限定符</p>
+<ul>
+<li><p>符号引用</p>
+<p>符号引用以一组符号来描述所引用的目标，符号可以是任何形式的字面量，只要使用时能够无歧义的定位到目标即可。例如，在Class文件中它以CONSTANT_Class_info、CONSTANT_Fieldref_info、CONSTANT_Methodref_info等类型的常量出现。符号引用与虚拟机的内存布局无关，引用的目标并不一定加载到内存中。在Java中，一个java类将会编译成一个class文件。在编译时，java类并不知道所引用的类的实际地址，因此只能使用符号引用来代替。比如org.simple.People类引用了org.simple.Language类，在编译时People类并不知道Language类的实际内存地址，因此只能使用符号org.simple.Language（假设是这个，当然实际中是由类似于CONSTANT_Class_info的常量来表示的）来表示Language类的地址。各种虚拟机实现的内存布局可能有所不同，但是它们能接受的符号引用都是一致的，因为符号引用的字面量形式明确定义在Java虚拟机规范的Class文件格式中。</p>
+</li>
+<li><p>直接引用</p>
+<p>直接引用可以是<br>（1）直接指向目标的指针（比如，指向“类型”【Class对象】、类变量、类方法的直接引用可能是指向方法区的指针）<br>（2）相对偏移量（比如，指向实例变量、实例方法的直接引用都是偏移量）<br>（3）一个能间接定位到目标的句柄<br>直接引用是和虚拟机的布局相关的，同一个符号引用在不同的虚拟机实例上翻译出来的直接引用一般不会相同。如果有了直接引用，那引用的目标必定已经被加载入内存中了。</p>
+</li>
+<li><p>1、类或接口的解析</p>
+<p>假设当前代码所处的类为D，如果要把一个从未解析过的符号引用N解析为一个类或者接口C的直接引用，需要三步</p>
+<ul>
+<li>1.1 如果C不是数组，虚拟机将用D类的类加载器加载N</li>
+<li>1.2 如果C是数组并且数组元素类型为对象，就按照1.1的规则加载元素类型 然后由虚拟机生成一个代表该数组维度和元素的数组对象</li>
+<li>1.3 进行符号引用验证 确认D是否具备C的访问权限</li>
+</ul>
+</li>
+<li><p>2、字段解析</p>
+<p>要确保java虚拟机获得字段唯一的解析结果</p>
+<ul>
+<li>2.1 首先解析字段所属类或接口，用变量C表示</li>
+<li>2.2 如果C本身就包含了简单名称和字段描述符都与目标相匹配的字段，则返回这个字段的直接引用，查找结束</li>
+<li>2.3 如果C中实现了接口，将按照继承关系从下往上递归搜索各个接口和它的父接口，如果找到相匹配的字段则返回字段的直接引用，查找结束</li>
+<li>2.4 如果C不是java.lang.Object 将会按照继承关系从下往上递归搜索其父类，如果在父类中找到相匹配的字段则返回字段的直接引用 查找结束</li>
+<li>2.5 如果还没找到则抛出 java.lang.NoSuchFieldError异常 查找失败</li>
+<li>2.6 如果查找成功就对字段进行权限验证</li>
+</ul>
+</li>
+<li><p>3、类的方法解析</p>
+<ul>
+<li>3.1 首先解析字段所属类或接口，用变量C表示</li>
+<li>3.2  检查C是否为类 如果发现C是个接口就直接抛出异常</li>
+<li>3.3 在C中找到相匹配的方法返回方法的直接引用，查找结束</li>
+<li>3.4 在C的父类中递归查找 如果有相匹配的方法返回方法的直接引用，查找结束</li>
+<li>3.5 在C的实现接口列表中查找，如果存在相匹配的方法说明C是一个抽象类，抛出AbstractMethodError异常 查找结束</li>
+<li>3.6 否则查找失败 抛出NoSuchMethodError异常</li>
+<li>3.7 如果查找成功则进行权限校验</li>
+</ul>
+</li>
+<li><p>4、接口方法解析</p>
+<ul>
+<li>与类方法解析相似</li>
+</ul>
+</li>
+</ul>
+<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>这个是类加载的最后一个步骤，会根据程序员的主管计划去初始化类变量和其他资源；</p>
+<ul>
+<li><p><clinit>()</p>
+<p>初始化也可以说是执行类构造器<clinit>()方法的过程，</p>
+<ul>
+<li><clinit>()是编译器自动收集类中的所有类变量的赋值动作和静态语句块中的语句合并产生的</li>
+<li>不需要显示的调用父类构造器，java虚拟机保证父类的<clinit>() 先执行，意味着父类的静态语句赋值操作要优先于子类先执行</li>
+<li>这个方法不是必须的，如果一个类中没有静态代码块，也没有类变量的赋值操作那么也可以不生成此方法</li>
+<li>接口中执行此方法不需要先执行父接口的<clinit>()方法 只有父接口中定义的变量被使用时父接口才会初始化</li>
+<li>接口实现类初始化时也不会执行接口<clinit>()方法</li>
+<li>Java虚拟机必须保证一个类的<clinit>()是线程安全的</li>
+</ul>
+</li>
+</ul>
+<h2 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h2><p>类加载器定义：通过一个类的全限定名来获取描述该类的二进制字节流的代码</p>
+<h3 id="类与类加载器"><a href="#类与类加载器" class="headerlink" title="类与类加载器"></a>类与类加载器</h3><p>任意一个类都必须由加载它的类加载器和这个类本身一起共同确定其在java虚拟机总的唯一性</p>
+<h3 id="双亲委派模型"><a href="#双亲委派模型" class="headerlink" title="双亲委派模型"></a>双亲委派模型</h3><p>只存在两种不同的类加载器，一种是启动类加载器，这个类加载器使用C++语言实现，是虚拟机的一部分；另一个种是其他所有类的加载器，这些类加载器都由java语言实现，独立存在于虚拟机外部，并且全部继承自抽象类java.lang.ClassLoader； 双亲委派模型要求除了顶层的启动类加载器外，其余的类加载器都应有自己的父类，父子关系通常是使用组合关系来复用父加载器的代码</p>
+<ul>
+<li><p>类加载器分类</p>
+<ul>
+<li><p>启动类加载器</p>
+<p>启动类加载器无法被java程序直接引用</p>
+<ul>
+<li>负责加载存放在<JAVA_HOME>\lib目录或者被 -Xboostclasspath参数所指定的路径中存放的而且是java虚拟机能够识别的类库加载到虚拟机的内存中</li>
+</ul>
+</li>
+<li><p>扩展类加载器</p>
+<ul>
+<li>在sum.misc.Launcher$ExtClassLoader中以java代码形式实现的 负责加载<JAVA_HOME>\lib\ext目录中，或者被java.ext.dirs系统变量所指定的路径中所有的类库</li>
+</ul>
+</li>
+<li><p>应用程序类加载器</p>
+<ul>
+<li>在sum.misc.Launcher$AppClassLoader中以java代码形式实现的，负责加载用户类路径上所有的类库，一般情况下这个就是程序中默认的类加载器</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>工作过程</p>
+<ul>
+<li>如果一个类加载器要加载一个类，首先把请求委派给父类加载器去完成，每一个层次的类加载器都是如此，只有当父加载器反馈自己无法完成这个加载请求时子加载器才会尝试去完成加载</li>
+<li>优点：类会随着它的类加载器一起具备一种带有优先级的层次关系，避免核心类被篡改</li>
+</ul>
+</li>
+<li><p>破坏双亲委派</p>
+<ul>
+<li>1、兼容以前的版本，双亲委派机制出现在jdk1.2之后才引入，但是java.lang.ClassLoader在第一个版本中就已经出现，所以为了兼容以前的代码必须做出妥协，在ClassLoader中增加findClass()方法并引导用户重写此方法</li>
+<li>2、模型自身缺陷，基础类型无法回调用户的代码，也可以说父类加载器要加载子类加载器负责加载的类，解决方法是增加线程上下文类加载器，让用户可以设置要回调的子类加载器</li>
+<li>3、满足用户对程序的动态性追求，指代码热替换、模块热部署等等，典型应用是OSGI</li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+        <tag>类加载</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>集群环境下如何管理Session</title>
+    <url>/blog/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</url>
+    <content><![CDATA[<h1 id="集群环境下如何管理Session"><a href="#集群环境下如何管理Session" class="headerlink" title="集群环境下如何管理Session"></a>集群环境下如何管理Session</h1><span id="more"></span>
+
+<h2 id="1-Session复制"><a href="#1-Session复制" class="headerlink" title="1.Session复制"></a>1.Session复制</h2><p>应用服务器开启Web容器的Session复制功能，在集群中的几台服务器之间同步Session对象，使得每台服务器上都保存所有用户的Session信息，这样任何一台机器宕机都不会导致Session数据的丢失，而服务器使用Session时，也只需要在本机获取即可</p>
+<h3 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>1.方案简单</li>
+<li>2.获取Session速度块</li>
+</ul>
+<h3 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li><p>1.只能在集群规模较小的情况下使用</p>
+<p>如果集群规模大，会导致大量复制Session，会占用网络和服务器大量资源；<br>并且如果出现大量用户同时访问服务的情况可能会出现内存不够用的问题</p>
+</li>
+</ul>
+<h2 id="2-Session绑定"><a href="#2-Session绑定" class="headerlink" title="2.Session绑定"></a>2.Session绑定</h2><p>即Session绑定在某台特定服务器上，保证Session总能在这台服务器上获取。这种方法又被称作会话黏滞，负载均衡服务器总是将来源于同一IP的请求分发到同一台服务器上（也可以根据Cookie信息将同一个用户的请求总是分发到同一台服务器上，当然这时负载均衡服务器必须工作在HTTP协议层上）</p>
+<h3 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li><p>不具备高可用的特性</p>
+<p>如果绑定Session的服务器宕机了就会造成Session丢失</p>
+</li>
+</ul>
+<h2 id="3-利用Cookie记录Session"><a href="#3-利用Cookie记录Session" class="headerlink" title="3.利用Cookie记录Session"></a>3.利用Cookie记录Session</h2><p>将Session记录在Cookie中，每次请求服务器的时候，将Session放在请求中发送给服务器，服务器处理完请求后再将修改过的Session响应给客户端。</p>
+<h3 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>简单易用，可用性高，支持应用服务器的线性伸缩</li>
+</ul>
+<h3 id="缺点：-2"><a href="#缺点：-2" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li>1.信息记录有限，因为Cookie有大小限制</li>
+<li>2.影响性能，每次请求响应都需要传输Cookie</li>
+<li>3.受用户行为影响，如果用户关闭Cookie，访问就会不正常</li>
+</ul>
+<h2 id="4-Session服务器"><a href="#4-Session服务器" class="headerlink" title="4.Session服务器"></a>4.Session服务器</h2><p>可用性高、伸缩性好、性能也不错，对信息大小又没有限制的服务器集群Session管理方案。<br>利用独立部署的Session服务器（集群）统一管理Session，应用服务器每次读写Session时，都访问Session服务器。<br>这种解决方案事实上是将应用服务器的状态分离。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>CountDownLatch，CyclicBarrier，Semaphore及AQS介绍</title>
+    <url>/blog/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/</url>
+    <content><![CDATA[<h1 id="CountDownLatch，CyclicBarrier，Semaphore及AQS介绍"><a href="#CountDownLatch，CyclicBarrier，Semaphore及AQS介绍" class="headerlink" title="CountDownLatch，CyclicBarrier，Semaphore及AQS介绍"></a>CountDownLatch，CyclicBarrier，Semaphore及AQS介绍</h1><span id="more"></span>
+
+
+<p>﻿## 1. CountDownLatch</p>
+<h3 id="1-1-使用场景"><a href="#1-1-使用场景" class="headerlink" title="1.1 使用场景"></a>1.1 使用场景</h3><p>CountDownLatch适用于在多线程的场景需要等待所有子线程全部执行完毕之后再做操作的场景。</p>
+<h3 id="1-2-使用示例"><a href="#1-2-使用示例" class="headerlink" title="1.2 使用示例"></a>1.2 使用示例</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        CountDownLatch latch = <span class="keyword">new</span> CountDownLatch(<span class="number">5</span>);</span><br><span class="line">        ExecutorService service = Executors.newFixedThreadPool(<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">            service.submit(()-&gt;&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;子线程执行任务 &quot;</span>);</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="comment">//模拟任务执行所用时间</span></span><br><span class="line">                    Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                latch.countDown();</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        latch.await();</span><br><span class="line">        System.out.println(<span class="string">&quot;主线程结束运行&quot;</span>);</span><br><span class="line">        service.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="1-3-源码解读"><a href="#1-3-源码解读" class="headerlink" title="1.3 源码解读"></a>1.3 源码解读</h3><h4 id="1-3-1-new-CountDownLatch-5-发生了什么？"><a href="#1-3-1-new-CountDownLatch-5-发生了什么？" class="headerlink" title="1.3.1 new CountDownLatch(5) 发生了什么？"></a>1.3.1 new CountDownLatch(5) 发生了什么？</h4><p>通过构造函数可以看出，当我们执行new CountDownLatch(5)时会创建一个Sync对象，这个对象是CountDownLatch的一个内部类，Sync继承了AbstractQueuedSynchronizer抽象类，这个抽象类就是著名的AQS，java中很多重要的功能都有使用，关于AQS后续再详细介绍，先专注当前的问题。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">CountDownLatch</span><span class="params">(<span class="keyword">int</span> count)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (count &lt; <span class="number">0</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;count &lt; 0&quot;</span>);</span><br><span class="line">    <span class="keyword">this</span>.sync = <span class="keyword">new</span> Sync(count);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面看下Sync的构造方法，可以看到会将我们传入的数字赋值给一个int 类型的属性state，到此CountDownLatch就创建完毕了。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">int</span> state;</span><br><span class="line"></span><br><span class="line">Sync(<span class="keyword">int</span> count) &#123;</span><br><span class="line">    setState(count);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">setState</span><span class="params">(<span class="keyword">int</span> newState)</span> </span>&#123;</span><br><span class="line">    state = newState;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="1-3-2-当调用latch-await-时发生了什么？"><a href="#1-3-2-当调用latch-await-时发生了什么？" class="headerlink" title="1.3.2 当调用latch.await();时发生了什么？"></a>1.3.2 当调用latch.await();时发生了什么？</h4><p>当调用这个方法后当前线程会尝试获取执行权限（就是当state等于0的时候），如果获取不到执行权限就加入队列中，并在一个死循环中尝试获取执行权限。</p>
+<p>await方法会调用sync.acquireSharedInterruptibly方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    sync.acquireSharedInterruptibly(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>sync.acquireSharedInterruptibly 方法中会调用tryAcquireShared 方法检查当前state是否为0，如果不为0就会返回-1，会执行doAcquireSharedInterruptibly 方法。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">acquireSharedInterruptibly</span><span class="params">(<span class="keyword">int</span> arg)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (Thread.interrupted())</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> InterruptedException();</span><br><span class="line">    <span class="keyword">if</span> (tryAcquireShared(arg) &lt; <span class="number">0</span>)</span><br><span class="line">        doAcquireSharedInterruptibly(arg);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>先调用addWaiter方法，将当前线程加入到队列中，然后在死循环中通过tryAcquireShared方法检查state是否为0，如果为0就跳出循环继续执行主线程的业务逻辑。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doAcquireSharedInterruptibly</span><span class="params">(<span class="keyword">int</span> arg)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> Node node = addWaiter(Node.SHARED);</span><br><span class="line">    <span class="keyword">boolean</span> failed = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            <span class="keyword">final</span> Node p = node.predecessor();</span><br><span class="line">            <span class="comment">//如果node的前一个节点是头节点就尝试获取锁</span></span><br><span class="line">            <span class="keyword">if</span> (p == head) &#123;</span><br><span class="line">                <span class="keyword">int</span> r = tryAcquireShared(arg);</span><br><span class="line">                <span class="comment">//如果r大于零说明成功获得锁</span></span><br><span class="line">                <span class="keyword">if</span> (r &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">                	<span class="comment">//将node节点设置为头节点，并唤醒下一个阻塞的节点</span></span><br><span class="line">                    setHeadAndPropagate(node, r);</span><br><span class="line">                    p.next = <span class="keyword">null</span>; <span class="comment">// help GC</span></span><br><span class="line">                    failed = <span class="keyword">false</span>;</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//如果不是头节点就阻塞，如果阻塞失败就抛异常</span></span><br><span class="line">            <span class="keyword">if</span> (shouldParkAfterFailedAcquire(p, node) &amp;&amp;</span><br><span class="line">                parkAndCheckInterrupt())</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> InterruptedException();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (failed)</span><br><span class="line">            cancelAcquire(node);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>下面来看下addWaiter方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Node <span class="title">addWaiter</span><span class="params">(Node mode)</span> </span>&#123;</span><br><span class="line">	<span class="comment">//首先会利用当前线程创建一个node节点，</span></span><br><span class="line">    Node node = <span class="keyword">new</span> Node(Thread.currentThread(), mode);</span><br><span class="line">    <span class="comment">//获取队列中最后一个节点 </span></span><br><span class="line">    Node pred = tail;</span><br><span class="line">    <span class="comment">//如果不为空就将node加入到队列尾部</span></span><br><span class="line">    <span class="keyword">if</span> (pred != <span class="keyword">null</span>) &#123;</span><br><span class="line">    	<span class="comment">//将当前队列最后一个节点的引用赋值到node的prev属性中</span></span><br><span class="line">        node.prev = pred;</span><br><span class="line">        <span class="comment">//利用CAS获取临界区的执行权限，如果compareAndSetTail返回true说明当前没有其他线程在修改这个值，那么就将node的引用赋值到当前最后一个节点的next属性中</span></span><br><span class="line">        <span class="keyword">if</span> (compareAndSetTail(pred, node)) &#123;</span><br><span class="line">            pred.next = node;</span><br><span class="line">            <span class="keyword">return</span> node;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    enq(node);</span><br><span class="line">    <span class="keyword">return</span> node;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>addWaiter方法最后还要执行enq方法，enq方法如果发现当前队列还没有初始化就会将node放在队列的头部，如果已经初始化了就将node放在队列末尾。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Node <span class="title">enq</span><span class="params">(<span class="keyword">final</span> Node node)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        Node t = tail;</span><br><span class="line">        <span class="keyword">if</span> (t == <span class="keyword">null</span>) &#123; <span class="comment">// Must initialize</span></span><br><span class="line">            <span class="keyword">if</span> (compareAndSetHead(<span class="keyword">new</span> Node()))</span><br><span class="line">                tail = head;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            node.prev = t;</span><br><span class="line">            <span class="keyword">if</span> (compareAndSetTail(t, node)) &#123;</span><br><span class="line">                t.next = node;</span><br><span class="line">                <span class="keyword">return</span> t;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-3-3-当调用latch-countDown-时发生了什么？"><a href="#1-3-3-当调用latch-countDown-时发生了什么？" class="headerlink" title="1.3.3  当调用latch.countDown();时发生了什么？"></a>1.3.3  当调用latch.countDown();时发生了什么？</h4><p>每次执行这个方法的时候都会将state的数字减一，直到state到0为止，如果state到0就会让所有阻塞的线程继续执行。</p>
+<p>首先countDown会调用sync.releaseShared方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">countDown</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    sync.releaseShared(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>releaseShared会调用tryReleaseShared方法将state减一，如果tryReleaseShared返回true，就会执行doReleaseShared方法，释放所有队列中阻塞的线程。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">releaseShared</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (tryReleaseShared(arg)) &#123;</span><br><span class="line">        doReleaseShared();</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>下面看下tryReleaseShared方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">boolean</span> <span class="title">tryReleaseShared</span><span class="params">(<span class="keyword">int</span> releases)</span> </span>&#123;</span><br><span class="line">   </span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">    	<span class="comment">//获取当前state的值</span></span><br><span class="line">        <span class="keyword">int</span> c = getState();</span><br><span class="line">        <span class="comment">//如果当前state的值已经为0就不执行减一操作，并返回false</span></span><br><span class="line">        <span class="keyword">if</span> (c == <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">         <span class="comment">//执行减一操作</span></span><br><span class="line">        <span class="keyword">int</span> nextc = c-<span class="number">1</span>;</span><br><span class="line">        <span class="comment">//利用CAS将nextc赋值给state</span></span><br><span class="line">        <span class="keyword">if</span> (compareAndSetState(c, nextc))</span><br><span class="line">        <span class="comment">//这里还要进行判断是因为可能有其他线程更改了这个值</span></span><br><span class="line">            <span class="keyword">return</span> nextc == <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>node 状态介绍：</p>
+<ol>
+<li>int CANCELLED =  1;//waitStatus值为1时表示该线程节点已释放（超时、中断），已取消的节点不会再阻塞；</li>
+<li>int SIGNAL    = -1;//waitStatus为-1时表示该线程的后续线程需要阻塞，即只要前置节点释放锁，就会通知标识为 SIGNAL 状态的后续节点的线程 ；</li>
+<li>int CONDITION = -2; //waitStatus为-2时，表示该线程在condition队列中阻塞（Condition有使用）；</li>
+<li> int PROPAGATE = -3;//waitStatus为-3时，表示该线程以及后续线程进行无条件传播（CountDownLatch中有使用）共享模式下， PROPAGATE 状态的线程处于可运行状态 ；</li>
+<li>值为0，表示当前节点在sync队列中，等待着获取锁<br>下面看doReleaseShared方法<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doReleaseShared</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//这里用死循环是因为head节点可能会被其他线程更改掉</span></span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">    	<span class="comment">//获取头部节点</span></span><br><span class="line">        Node h = head;</span><br><span class="line">        <span class="comment">//如果队列不为空并且有多于一个以上的节点再执行if代码块中的逻辑</span></span><br><span class="line">        <span class="keyword">if</span> (h != <span class="keyword">null</span> &amp;&amp; h != tail) &#123;</span><br><span class="line">        	<span class="comment">//获取节点的状态信息</span></span><br><span class="line">            <span class="keyword">int</span> ws = h.waitStatus;</span><br><span class="line">            <span class="comment">//如果状态为SIGNAL说明h节点后面的节点在阻塞，等待执行</span></span><br><span class="line">            <span class="keyword">if</span> (ws == Node.SIGNAL) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!compareAndSetWaitStatus(h, Node.SIGNAL, <span class="number">0</span>))</span><br><span class="line">                    <span class="keyword">continue</span>;            </span><br><span class="line">                <span class="comment">//执行unparkSuccessor方法，唤醒后面节点所包含的线程</span></span><br><span class="line">                unparkSuccessor(h);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//如果状态为0就尝试将其状态更改为PROPAGATE</span></span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (ws == <span class="number">0</span> &amp;&amp;</span><br><span class="line">                     !compareAndSetWaitStatus(h, <span class="number">0</span>, Node.PROPAGATE))</span><br><span class="line">                <span class="keyword">continue</span>;                </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//判断这个过程中头节点是否被更改过，如果更改过就再执行一遍循环。</span></span><br><span class="line">        <span class="keyword">if</span> (h == head)                   </span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+下面来看unparkSuccessor方法<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">unparkSuccessor</span><span class="params">(Node node)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//获取节点状态信息</span></span><br><span class="line">    <span class="keyword">int</span> ws = node.waitStatus;</span><br><span class="line">    <span class="comment">//小于0就将状态设置为0</span></span><br><span class="line">    <span class="keyword">if</span> (ws &lt; <span class="number">0</span>)</span><br><span class="line">        compareAndSetWaitStatus(node, ws, <span class="number">0</span>);</span><br><span class="line">        </span><br><span class="line">    <span class="comment">//拿到下一个节点</span></span><br><span class="line">    Node s = node.next;</span><br><span class="line">    如果节点状态大于<span class="number">0</span>说明线程已经放弃争取锁，就设置为<span class="keyword">null</span>方便GC回收</span><br><span class="line">    <span class="keyword">if</span> (s == <span class="keyword">null</span> || s.waitStatus &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        s = <span class="keyword">null</span>;</span><br><span class="line">        <span class="comment">//如果头节点的下一个节点已经放弃执行，那就找到最接近头节点并且状态小于等于0的节点进行唤醒。</span></span><br><span class="line">        <span class="keyword">for</span> (Node t = tail; t != <span class="keyword">null</span> &amp;&amp; t != node; t = t.prev)</span><br><span class="line">            <span class="keyword">if</span> (t.waitStatus &lt;= <span class="number">0</span>)</span><br><span class="line">                s = t;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (s != <span class="keyword">null</span>)</span><br><span class="line">        LockSupport.unpark(s.thread);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="1-3-4-CountDownLatch总结"><a href="#1-3-4-CountDownLatch总结" class="headerlink" title="1.3.4 CountDownLatch总结"></a>1.3.4 CountDownLatch总结</h4>CountDownLatch在初始化的时候会设置一个任务总数并将数量赋值给state，latch.await();会让主线程加入到线程队列中，并一直通过CAS的方式检查state是否为0，而每当子线程执行latch.countDown();时就会利用CAS将state减一，直到减到0为止，这个时候主线程就获得了执行权限继续执行。</li>
+</ol>
+<h2 id="2-CyclicBarrier"><a href="#2-CyclicBarrier" class="headerlink" title="2. CyclicBarrier"></a>2. CyclicBarrier</h2><h3 id="2-1-使用场景"><a href="#2-1-使用场景" class="headerlink" title="2.1 使用场景"></a>2.1 使用场景</h3><p>CyclicBarrier叫做回环屏障，它的作用是让一组线程全部达到一个状态之后再全部同时执行，而且他有一个特点就是所有线程执行完毕之后是可以重用的。</p>
+<h3 id="2-2-使用示例"><a href="#2-2-使用示例" class="headerlink" title="2.2 使用示例"></a>2.2 使用示例</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        CyclicBarrier barrier = <span class="keyword">new</span> CyclicBarrier(<span class="number">5</span></span><br><span class="line">                , () -&gt; System.out.println(<span class="string">&quot;所有成员都到达指定地点,开始吃饭&quot;</span>));</span><br><span class="line"></span><br><span class="line">        ExecutorService service = Executors.newFixedThreadPool(<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">            service.submit(() -&gt; &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;开始出发 &quot;</span> + Thread.currentThread());</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                    System.out.println(<span class="string">&quot;到达指定地点，等待下一步指令 &quot;</span> + Thread.currentThread());</span><br><span class="line">                    barrier.await();</span><br><span class="line">                    System.out.println(<span class="string">&quot;开始吃饭 &quot;</span> + Thread.currentThread());</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">        service.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="2-3-源码解读"><a href="#2-3-源码解读" class="headerlink" title="2.3 源码解读"></a>2.3 源码解读</h3><h4 id="2-3-1-new-CyclicBarrier-时发生了什么？"><a href="#2-3-1-new-CyclicBarrier-时发生了什么？" class="headerlink" title="2.3.1 new CyclicBarrier 时发生了什么？"></a>2.3.1 new CyclicBarrier 时发生了什么？</h4><p>会直接创建CyclicBarrier对象，可以接受两个参数，第一个是需要有多少个线程必须运行到指定状态后才能一起继续执行，第二个是当到达指定状态后的一个回调方法（可以省略）。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">CyclicBarrier</span><span class="params">(<span class="keyword">int</span> parties, Runnable barrierAction)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (parties &lt;= <span class="number">0</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">    <span class="keyword">this</span>.parties = parties;</span><br><span class="line">    <span class="keyword">this</span>.count = parties;</span><br><span class="line">    <span class="keyword">this</span>.barrierCommand = barrierAction;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="2-3-2-当调用barrier-await-时发生了什么？"><a href="#2-3-2-当调用barrier-await-时发生了什么？" class="headerlink" title="2.3.2 当调用barrier.await();时发生了什么？"></a>2.3.2 当调用barrier.await();时发生了什么？</h4><p>barrier.await()最终会调用dowait方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">dowait</span><span class="params">(<span class="keyword">boolean</span> timed, <span class="keyword">long</span> nanos)</span></span></span><br><span class="line"><span class="function">     <span class="keyword">throws</span> InterruptedException, BrokenBarrierException,</span></span><br><span class="line"><span class="function">            TimeoutException </span>&#123;</span><br><span class="line">     <span class="comment">//先用重入锁进行加锁</span></span><br><span class="line">     <span class="keyword">final</span> ReentrantLock lock = <span class="keyword">this</span>.lock;</span><br><span class="line">     lock.lock();</span><br><span class="line">     <span class="keyword">try</span> &#123;</span><br><span class="line">         <span class="keyword">final</span> Generation g = generation;</span><br><span class="line"></span><br><span class="line">         <span class="keyword">if</span> (g.broken)</span><br><span class="line">             <span class="keyword">throw</span> <span class="keyword">new</span> BrokenBarrierException();</span><br><span class="line"><span class="comment">//如果线程中断过就直接放开所有线程，让他们继续执行</span></span><br><span class="line">         <span class="keyword">if</span> (Thread.interrupted()) &#123;</span><br><span class="line">             breakBarrier();</span><br><span class="line">             <span class="keyword">throw</span> <span class="keyword">new</span> InterruptedException();</span><br><span class="line">         &#125;</span><br><span class="line"><span class="comment">//数量减一</span></span><br><span class="line">         <span class="keyword">int</span> index = --count;</span><br><span class="line">         <span class="comment">//如果为0说明所有线程到达指定状态</span></span><br><span class="line">         <span class="keyword">if</span> (index == <span class="number">0</span>) &#123;  <span class="comment">// tripped</span></span><br><span class="line">             <span class="keyword">boolean</span> ranAction = <span class="keyword">false</span>;</span><br><span class="line">             <span class="keyword">try</span> &#123;</span><br><span class="line">             	<span class="comment">//判断是否有传回调方法如果有就执行</span></span><br><span class="line">                 <span class="keyword">final</span> Runnable command = barrierCommand;</span><br><span class="line">                 <span class="keyword">if</span> (command != <span class="keyword">null</span>)</span><br><span class="line">                     command.run();</span><br><span class="line">                 ranAction = <span class="keyword">true</span>;</span><br><span class="line">                 <span class="comment">//重制count数值，为下一次使用做准备，这就是为什么能够重用的原因</span></span><br><span class="line">                 nextGeneration();</span><br><span class="line">                 <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">             &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">             	<span class="comment">//判断条件为true说明已经到达指定状态，放开所有阻塞的线程</span></span><br><span class="line">                 <span class="keyword">if</span> (!ranAction)</span><br><span class="line">                     breakBarrier();</span><br><span class="line">             &#125;</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         <span class="comment">// 如果没到0就阻塞线程</span></span><br><span class="line">         <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">             <span class="keyword">try</span> &#123;</span><br><span class="line">             	<span class="comment">//判断是否有设置超时时间，如果没有就直接await等待唤醒</span></span><br><span class="line">                 <span class="keyword">if</span> (!timed)</span><br><span class="line">                     trip.await();</span><br><span class="line">                 <span class="comment">//如果有设置超时时间就睡眠指定时间</span></span><br><span class="line">                 <span class="keyword">else</span> <span class="keyword">if</span> (nanos &gt; <span class="number">0L</span>)</span><br><span class="line">                     nanos = trip.awaitNanos(nanos);</span><br><span class="line">             &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</span><br><span class="line">                 <span class="keyword">if</span> (g == generation &amp;&amp; ! g.broken) &#123;</span><br><span class="line">                     breakBarrier();</span><br><span class="line">                     <span class="keyword">throw</span> ie;</span><br><span class="line">                 &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                     Thread.currentThread().interrupt();</span><br><span class="line">                 &#125;</span><br><span class="line">             &#125;</span><br><span class="line"></span><br><span class="line">             <span class="keyword">if</span> (g.broken)</span><br><span class="line">                 <span class="keyword">throw</span> <span class="keyword">new</span> BrokenBarrierException();</span><br><span class="line"></span><br><span class="line">             <span class="keyword">if</span> (g != generation)</span><br><span class="line">                 <span class="keyword">return</span> index;</span><br><span class="line"></span><br><span class="line">             <span class="keyword">if</span> (timed &amp;&amp; nanos &lt;= <span class="number">0L</span>) &#123;</span><br><span class="line">                 breakBarrier();</span><br><span class="line">                 <span class="keyword">throw</span> <span class="keyword">new</span> TimeoutException();</span><br><span class="line">             &#125;</span><br><span class="line">         &#125;</span><br><span class="line">     &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">     	<span class="comment">//解锁</span></span><br><span class="line">         lock.unlock();</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>看一下breakBarrier方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">breakBarrier</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    generation.broken = <span class="keyword">true</span>;</span><br><span class="line">    <span class="comment">//会重新初始化count的值，这就是为什么可以复用</span></span><br><span class="line">    count = parties;</span><br><span class="line">    <span class="comment">//唤醒所有await的线程</span></span><br><span class="line">    trip.signalAll();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-4-CyclicBarrier-总结"><a href="#2-4-CyclicBarrier-总结" class="headerlink" title="2.4 CyclicBarrier 总结"></a>2.4 CyclicBarrier 总结</h3><p>CyclicBarrier比较简单，直接使用 Lock和Condition进行线程的协调工作.</p>
+<h2 id="3-Semaphore"><a href="#3-Semaphore" class="headerlink" title="3. Semaphore"></a>3. Semaphore</h2><h3 id="3-1-使用场景"><a href="#3-1-使用场景" class="headerlink" title="3.1 使用场景"></a>3.1 使用场景</h3><p>常用于限制可以访问某些资源（物理或逻辑的）线程数目。</p>
+<h3 id="3-2-使用示例"><a href="#3-2-使用示例" class="headerlink" title="3.2 使用示例"></a>3.2 使用示例</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        Semaphore semaphore = <span class="keyword">new</span> Semaphore(<span class="number">10</span>);</span><br><span class="line">        ExecutorService service = Executors.newFixedThreadPool(<span class="number">100</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">            service.submit(() -&gt; &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="keyword">if</span> (semaphore.availablePermits() == <span class="number">0</span>) &#123;</span><br><span class="line">                        System.out.println(<span class="string">&quot;当前令牌已经用完，请等待其他线程释放令牌&quot;</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                    semaphore.acquire();</span><br><span class="line">                    System.out.println(<span class="string">&quot;正在执行任务 &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">                    Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">                    semaphore.release();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">        service.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="3-3-源码解读"><a href="#3-3-源码解读" class="headerlink" title="3.3 源码解读"></a>3.3 源码解读</h3><h4 id="3-3-1-当new-Semaphore时发生了什么？"><a href="#3-3-1-当new-Semaphore时发生了什么？" class="headerlink" title="3.3.1 当new Semaphore时发生了什么？"></a>3.3.1 当new Semaphore时发生了什么？</h4><p>构造函数里面会创建NonfairSync对象</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Semaphore</span><span class="params">(<span class="keyword">int</span> permits)</span> </span>&#123;</span><br><span class="line">    sync = <span class="keyword">new</span> NonfairSync(permits);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>NonfairSync对象继承自Sync对象，在CountDownLatch已经介绍过这个类了，那么很明显，Semaphore也是基于AQS实现的，到这里Semaphore就已经创建完毕了。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">NonfairSync</span> <span class="keyword">extends</span> <span class="title">Sync</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = -<span class="number">2694183684443567898L</span>;</span><br><span class="line"></span><br><span class="line">    NonfairSync(<span class="keyword">int</span> permits) &#123;</span><br><span class="line">        <span class="keyword">super</span>(permits);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">tryAcquireShared</span><span class="params">(<span class="keyword">int</span> acquires)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> nonfairTryAcquireShared(acquires);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="3-3-2-当执行semaphore-acquire-时发生了什么？"><a href="#3-3-2-当执行semaphore-acquire-时发生了什么？" class="headerlink" title="3.3.2 当执行semaphore.acquire();时发生了什么？"></a>3.3.2 当执行semaphore.acquire();时发生了什么？</h4><p>当调用acquire方法时，会将AQS维护的state减一，可以理解为减少一个许可证，当state减少到0的时候剩余线程就会进入阻塞队列，直到有新的许可证可用（state不为0的时候）</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">acquireSharedInterruptibly</span><span class="params">(<span class="keyword">int</span> arg)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (Thread.interrupted())</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> InterruptedException();</span><br><span class="line">     <span class="comment">//尝试获取许可证，当结果小于0的时候说明许可证用完了，就会执行doAcquireSharedInterruptibly方法</span></span><br><span class="line">    <span class="keyword">if</span> (tryAcquireShared(arg) &lt; <span class="number">0</span>)</span><br><span class="line">        doAcquireSharedInterruptibly(arg);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>下面看下tryAcquireShared方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">int</span> <span class="title">nonfairTryAcquireShared</span><span class="params">(<span class="keyword">int</span> acquires)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">    	<span class="comment">//获取许可证state的数量</span></span><br><span class="line">        <span class="keyword">int</span> available = getState();</span><br><span class="line">        <span class="comment">//执行减一操作</span></span><br><span class="line">        <span class="keyword">int</span> remaining = available - acquires;</span><br><span class="line">        <span class="comment">//如果结果不小于0 就利用CAS进行赋值</span></span><br><span class="line">        <span class="keyword">if</span> (remaining &lt; <span class="number">0</span> ||</span><br><span class="line">            compareAndSetState(available, remaining))</span><br><span class="line">            <span class="comment">//返回结果</span></span><br><span class="line">            <span class="keyword">return</span> remaining;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>下面看下如果state小于零会发生什么</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doAcquireSharedInterruptibly</span><span class="params">(<span class="keyword">int</span> arg)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="comment">//首先创建一个node节点并加入到列队尾部，addWaiter方法在上面已经讲过了，这里就不说了。</span></span><br><span class="line">    <span class="keyword">final</span> Node node = addWaiter(Node.SHARED);</span><br><span class="line">    <span class="keyword">boolean</span> failed = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        	<span class="comment">//拿到当前节点的上一个节点</span></span><br><span class="line">            <span class="keyword">final</span> Node p = node.predecessor();</span><br><span class="line">            <span class="comment">//如果为头节点就有资格尝试获取锁</span></span><br><span class="line">            <span class="keyword">if</span> (p == head) &#123;</span><br><span class="line">            	<span class="comment">//尝试获取许可证</span></span><br><span class="line">                <span class="keyword">int</span> r = tryAcquireShared(arg);</span><br><span class="line">                <span class="comment">//满足条件说明成功获得许可证</span></span><br><span class="line">                <span class="keyword">if</span> (r &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">                	<span class="comment">//将此节点设置为头节点</span></span><br><span class="line">                    setHeadAndPropagate(node, r);</span><br><span class="line">                    <span class="comment">//头节点的pre和next都被设置为Null，这样就让其脱离队列了</span></span><br><span class="line">                    p.next = <span class="keyword">null</span>; <span class="comment">// help GC</span></span><br><span class="line">                    failed = <span class="keyword">false</span>;</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//如果获取锁失败就将其阻塞</span></span><br><span class="line">            <span class="keyword">if</span> (shouldParkAfterFailedAcquire(p, node) &amp;&amp;</span><br><span class="line">                parkAndCheckInterrupt())</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> InterruptedException();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (failed)</span><br><span class="line">        	<span class="comment">//如果成功进入到这个代码块说明当前线程已经成功获取执行权限，就将Node节点从队列中删除</span></span><br><span class="line">            cancelAcquire(node);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="3-3-3-当执行semaphore-release-时发生了什么？"><a href="#3-3-3-当执行semaphore-release-时发生了什么？" class="headerlink" title="3.3.3 当执行semaphore.release()时发生了什么？"></a>3.3.3 当执行semaphore.release()时发生了什么？</h4><p>每次执行release方法时都会将state加一，然后唤醒队列中正在阻塞的线程。<br>release方法会调用releaseShared方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">releaseShared</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">	<span class="comment">//执行state加一操作，如果成功就执行doReleaseShared方法</span></span><br><span class="line">    <span class="keyword">if</span> (tryReleaseShared(arg)) &#123;</span><br><span class="line">        doReleaseShared();</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>tryReleaseShared方法很简单，就是利用CAS将state加一而已。加一成功返回true。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">tryReleaseShared</span><span class="params">(<span class="keyword">int</span> releases)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="keyword">int</span> current = getState();</span><br><span class="line">        <span class="keyword">int</span> next = current + releases;</span><br><span class="line">        <span class="keyword">if</span> (next &lt; current) <span class="comment">// overflow</span></span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">&quot;Maximum permit count exceeded&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (compareAndSetState(current, next))</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>doReleaseShared会唤醒队列头部的线程</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doReleaseShared</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   </span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">    	<span class="comment">//获取队列头部的线程</span></span><br><span class="line">        Node h = head;</span><br><span class="line">        <span class="comment">//判断队列至少有两个节点</span></span><br><span class="line">        <span class="keyword">if</span> (h != <span class="keyword">null</span> &amp;&amp; h != tail) &#123;</span><br><span class="line">        	<span class="comment">//获取节点状态</span></span><br><span class="line">            <span class="keyword">int</span> ws = h.waitStatus;</span><br><span class="line">            <span class="keyword">if</span> (ws == Node.SIGNAL) &#123;</span><br><span class="line">            	<span class="comment">//如果是SIGNAL状态，将状态设置为0</span></span><br><span class="line">                <span class="keyword">if</span> (!compareAndSetWaitStatus(h, Node.SIGNAL, <span class="number">0</span>))</span><br><span class="line">                    <span class="keyword">continue</span>;            </span><br><span class="line">                <span class="comment">//设置成功后执行唤醒后一个Node节点</span></span><br><span class="line">                unparkSuccessor(h);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (ws == <span class="number">0</span> &amp;&amp;</span><br><span class="line">                     !compareAndSetWaitStatus(h, <span class="number">0</span>, Node.PROPAGATE))</span><br><span class="line">                <span class="keyword">continue</span>;                <span class="comment">// loop on failed CAS</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//防止有其他线程更改头部节点，如果发现更改就再循环一次</span></span><br><span class="line">        <span class="keyword">if</span> (h == head)                   <span class="comment">// loop if head changed</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>unparkSuccessor方法会唤醒头部节点的下一个节点</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">unparkSuccessor</span><span class="params">(Node node)</span> </span>&#123;</span><br><span class="line"><span class="comment">//获取节点状态</span></span><br><span class="line">      <span class="keyword">int</span> ws = node.waitStatus;</span><br><span class="line">      <span class="comment">//如果是大于零的说明已经放弃争取锁了</span></span><br><span class="line">      <span class="keyword">if</span> (ws &lt; <span class="number">0</span>)</span><br><span class="line">          compareAndSetWaitStatus(node, ws, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//如果s节点正在阻塞等待被唤醒就执行if代码块中的逻辑</span></span><br><span class="line">      Node s = node.next;</span><br><span class="line">      <span class="keyword">if</span> (s == <span class="keyword">null</span> || s.waitStatus &gt; <span class="number">0</span>) &#123;</span><br><span class="line">          s = <span class="keyword">null</span>;</span><br><span class="line">          <span class="comment">//找到一个最接近头部节点可运行的节点进行唤醒，这里从队列后面开始找是为了防止多线程的环境下丢失节。</span></span><br><span class="line">          <span class="keyword">for</span> (Node t = tail; t != <span class="keyword">null</span> &amp;&amp; t != node; t = t.prev)</span><br><span class="line">              <span class="keyword">if</span> (t.waitStatus &lt;= <span class="number">0</span>)</span><br><span class="line">                  s = t;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (s != <span class="keyword">null</span>)</span><br><span class="line">      	<span class="comment">//唤醒节点</span></span><br><span class="line">          LockSupport.unpark(s.thread);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-4-Semaphore总结"><a href="#3-4-Semaphore总结" class="headerlink" title="3.4 Semaphore总结"></a>3.4 Semaphore总结</h3><p>Semaphore初始化的时候会设置一个许可证的数量，每次执行semaphore.acquire();就会减一，如果state小于0就让其他线程阻塞，每次执行semaphore.release();都会将state加一并唤醒阻塞的线程，这样就可以控制同时执行的总任务数，可以用来限制资源的使用。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这三个功能都是基于AQS实现的，虽然CyclicBarrier是利用了Lock和Condition实现的但是其他内部实现也是利用AQS，如果你看懂了上面的逻辑其实就搞定AQS了，AQS会在全局维护一个state值和一个线程的队列，通过state值的数量来协调线程的运行和阻塞。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>多线程</tag>
+        <tag>源码阅读</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>项目如何分包</title>
+    <url>/blog/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</url>
+    <content><![CDATA[<h1 id="项目如何分包"><a href="#项目如何分包" class="headerlink" title="项目如何分包"></a>项目如何分包</h1><p>在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。</p>
+<span id="more"></span>
+
+<h2 id="1、按照类型方式划分"><a href="#1、按照类型方式划分" class="headerlink" title="1、按照类型方式划分"></a>1、按照类型方式划分</h2><p>例如将所有的接口放入一个包、Controller类放入一个包等等。</p>
+<p>优点：从类型看更为清晰</p>
+<p>缺点：不利于模块化开发，因为会将同一个功能的多个类分散在不同的包中</p>
+<h2 id="2、按照功能方式划分"><a href="#2、按照功能方式划分" class="headerlink" title="2、按照功能方式划分"></a>2、按照功能方式划分</h2><p>将同一个功能的所有类放在同一个包中。</p>
+<p>优点：高内聚，便于模块化开发</p>
+<p>缺点：同一包内类型混乱</p>
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>将功能耦合度高的类按照功能进行划分，而功能耦合度低的或者供多个功能使用的类按照类型进行划分。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
       </tags>
   </entry>
 </search>
