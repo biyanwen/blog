@@ -48,75 +48,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Git-submodule 统一配置简明教程</title>
-    <url>/blog/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</url>
-    <content><![CDATA[<p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
-<p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
-<p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
-<span id="more"></span>
-
-<p>﻿# Git-submodule 统一配置简明教程</p>
-<h2 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h2><p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
-<h2 id="2-为什么选用-git-submodule"><a href="#2-为什么选用-git-submodule" class="headerlink" title="2. 为什么选用 git-submodule"></a>2. 为什么选用 git-submodule</h2><p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
-<p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
-<h2 id="3-如果你需要集成-git-submodule-应该如何做"><a href="#3-如果你需要集成-git-submodule-应该如何做" class="headerlink" title="3. 如果你需要集成  git-submodule 应该如何做"></a>3. 如果你需要集成  git-submodule 应该如何做</h2><h3 id="3-1-检查项目中的同名模块"><a href="#3-1-检查项目中的同名模块" class="headerlink" title="3.1 检查项目中的同名模块"></a>3.1 检查项目中的同名模块</h3><p>  git-submodule 是不允许两个或两个以上的模块存在相同名字的情况发生，所以要先做检查。</p>
-<h3 id="3-2-使用-git-submodule-添加子模块"><a href="#3-2-使用-git-submodule-添加子模块" class="headerlink" title="3.2 使用  git-submodule 添加子模块"></a>3.2 使用  git-submodule 添加子模块</h3><p>执行如下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule add -b $&#123;分支名字&#125; $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
-
-<p>命令详细解析：</p>
-<ul>
-<li>git ：调用 git 可执行程序；</li>
-<li>submodule add ： 添加  git-submodule 子模块；</li>
-<li>-b ${分支名字}：将子模块的哪个分支作为当前项目的字目录，如果不写默认是主模块；</li>
-<li>${git仓库地址} ：子模块项目地址；</li>
-</ul>
-<p>以现货为例，最终命令如下：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule add -b prod/dev http://[xxx].git</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-3-拉取子模块代码"><a href="#3-3-拉取子模块代码" class="headerlink" title="3.3 拉取子模块代码"></a>3.3 拉取子模块代码</h3><p>当执行完 3.2 步骤之后我们会发现项目中多个一个空文件夹，没错是它空的， submodule add 命令不会直接将代码也拉取下来，第一次需要我们主动些。</p>
-<p>执行如下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule update --init --recursive</span><br></pre></td></tr></table></figure>
-
-<p>执行完这条命令后子模块的代码就被拉取下来了。</p>
-<p>如果之后子模块代码有更新了怎么办？当然再执行一次上面的命令就可以了，不过这样略显麻烦，git 当然不会有这么智障的操作，如果子模块有更新了，我们在主模块使用 <strong>git pull</strong> 也应该可以将最新代码拉取下拉，为此，需要你执行如下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
-
-<p>这样，每次在主模块执行 git pull 的时候，都会去拉取子模块的最新代码。</p>
-<h3 id="3-4-切换子模块分支"><a href="#3-4-切换子模块分支" class="headerlink" title="3.4 切换子模块分支"></a>3.4 切换子模块分支</h3><p>这一步是可选的，是否需要这么做需要你看看你的子模块是否成功关联了对应分支。</p>
-<p>可使用如下命令查看：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git status</span><br></pre></td></tr></table></figure>
-
-<p>会显示子模块目前所在分支，如果出现  <strong>HEAD detached from</strong> 等提示语就表示没有成功关联到指定分支，那么你需要按照下面的步骤进行操作。</p>
-<p>这一步可能让你迷惑，什么？在 3.2 步不是已经指定子模块的分支了吗？对没错，你是指定了，但是他只是让主模块保存了指定分支的最后一次提交的 commit id。并没有真正关联到对应模块。</p>
-<p>这个时候就需要你自己切换分支，可执行如下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git checkout xxx</span><br></pre></td></tr></table></figure>
-
-<p>xxx 为要切换分支的名字，当然你用各种 git 图形化工具操作也是一样的。</p>
-<h2 id="4-如果你要-clone-一个集成了-git-submodule-的项目应该如何做"><a href="#4-如果你要-clone-一个集成了-git-submodule-的项目应该如何做" class="headerlink" title="4. 如果你要 clone 一个集成了  git-submodule 的项目应该如何做"></a>4. 如果你要 clone 一个集成了  git-submodule 的项目应该如何做</h2><p>推荐使用如下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git clone --recurse-submodules $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在 clone 的时候加上 –recurse-submodules 参数，这样就会将子模块的内容都拉取下来。</p>
-<p>然后执行 3.4 步骤的操作，选取子模块分支。</p>
-<p>再执行如下命令，保证每次 git pull 的时候都能获取子模块最新代码。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
-
-<h2 id="5-在子模块上提交代码"><a href="#5-在子模块上提交代码" class="headerlink" title="5. 在子模块上提交代码"></a>5. 在子模块上提交代码</h2><p>子模块就跟其他 git 项目一样，你是可以直接更改代码并提交的，但是这里有一点需要注意，就是如果你在子模块上提交了代码，那么在主模块上也要提交一次，也就是说<strong>要提交两次代码</strong>，这是至关重要的，如果你没有这么做，有可能会让其他人的子模块无法正常工作。</p>
-<p>例如你在子模块提交代码后，在主模块查看 git 状态时会有如下提示：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">modified:   xxx（模块名） (new commits)</span><br></pre></td></tr></table></figure>
-
-<p>你必须要将这个代码提交到主模块的 git 仓库，这个更改其实是记录着子模块最新提交的 commit id 。用来做版本管理的。</p>
-<h2 id="6-其他"><a href="#6-其他" class="headerlink" title="6. 其他"></a>6. 其他</h2><p>如果想深入了解，可以参考以下文档。</p>
-<p><a href="https://git-scm.com/docs/git-submodule">参数文档</a></p>
-<p><a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">使用文档</a></p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Git</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Java内存区域</title>
     <url>/blog/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/</url>
     <content><![CDATA[<h1 id="Java内存区域"><a href="#Java内存区域" class="headerlink" title="Java内存区域"></a>Java内存区域</h1><span id="more"></span>
@@ -248,6 +179,570 @@
 </li>
 </ul>
 </li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Git-submodule 统一配置简明教程</title>
+    <url>/blog/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
+<p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
+<p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
+<span id="more"></span>
+
+<p>﻿# Git-submodule 统一配置简明教程</p>
+<h2 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h2><p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
+<h2 id="2-为什么选用-git-submodule"><a href="#2-为什么选用-git-submodule" class="headerlink" title="2. 为什么选用 git-submodule"></a>2. 为什么选用 git-submodule</h2><p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
+<p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
+<h2 id="3-如果你需要集成-git-submodule-应该如何做"><a href="#3-如果你需要集成-git-submodule-应该如何做" class="headerlink" title="3. 如果你需要集成  git-submodule 应该如何做"></a>3. 如果你需要集成  git-submodule 应该如何做</h2><h3 id="3-1-检查项目中的同名模块"><a href="#3-1-检查项目中的同名模块" class="headerlink" title="3.1 检查项目中的同名模块"></a>3.1 检查项目中的同名模块</h3><p>  git-submodule 是不允许两个或两个以上的模块存在相同名字的情况发生，所以要先做检查。</p>
+<h3 id="3-2-使用-git-submodule-添加子模块"><a href="#3-2-使用-git-submodule-添加子模块" class="headerlink" title="3.2 使用  git-submodule 添加子模块"></a>3.2 使用  git-submodule 添加子模块</h3><p>执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule add -b $&#123;分支名字&#125; $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
+
+<p>命令详细解析：</p>
+<ul>
+<li>git ：调用 git 可执行程序；</li>
+<li>submodule add ： 添加  git-submodule 子模块；</li>
+<li>-b ${分支名字}：将子模块的哪个分支作为当前项目的字目录，如果不写默认是主模块；</li>
+<li>${git仓库地址} ：子模块项目地址；</li>
+</ul>
+<p>以现货为例，最终命令如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule add -b prod/dev http://[xxx].git</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-拉取子模块代码"><a href="#3-3-拉取子模块代码" class="headerlink" title="3.3 拉取子模块代码"></a>3.3 拉取子模块代码</h3><p>当执行完 3.2 步骤之后我们会发现项目中多个一个空文件夹，没错是它空的， submodule add 命令不会直接将代码也拉取下来，第一次需要我们主动些。</p>
+<p>执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule update --init --recursive</span><br></pre></td></tr></table></figure>
+
+<p>执行完这条命令后子模块的代码就被拉取下来了。</p>
+<p>如果之后子模块代码有更新了怎么办？当然再执行一次上面的命令就可以了，不过这样略显麻烦，git 当然不会有这么智障的操作，如果子模块有更新了，我们在主模块使用 <strong>git pull</strong> 也应该可以将最新代码拉取下拉，为此，需要你执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
+
+<p>这样，每次在主模块执行 git pull 的时候，都会去拉取子模块的最新代码。</p>
+<h3 id="3-4-切换子模块分支"><a href="#3-4-切换子模块分支" class="headerlink" title="3.4 切换子模块分支"></a>3.4 切换子模块分支</h3><p>这一步是可选的，是否需要这么做需要你看看你的子模块是否成功关联了对应分支。</p>
+<p>可使用如下命令查看：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git status</span><br></pre></td></tr></table></figure>
+
+<p>会显示子模块目前所在分支，如果出现  <strong>HEAD detached from</strong> 等提示语就表示没有成功关联到指定分支，那么你需要按照下面的步骤进行操作。</p>
+<p>这一步可能让你迷惑，什么？在 3.2 步不是已经指定子模块的分支了吗？对没错，你是指定了，但是他只是让主模块保存了指定分支的最后一次提交的 commit id。并没有真正关联到对应模块。</p>
+<p>这个时候就需要你自己切换分支，可执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git checkout xxx</span><br></pre></td></tr></table></figure>
+
+<p>xxx 为要切换分支的名字，当然你用各种 git 图形化工具操作也是一样的。</p>
+<h2 id="4-如果你要-clone-一个集成了-git-submodule-的项目应该如何做"><a href="#4-如果你要-clone-一个集成了-git-submodule-的项目应该如何做" class="headerlink" title="4. 如果你要 clone 一个集成了  git-submodule 的项目应该如何做"></a>4. 如果你要 clone 一个集成了  git-submodule 的项目应该如何做</h2><p>推荐使用如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git clone --recurse-submodules $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 clone 的时候加上 –recurse-submodules 参数，这样就会将子模块的内容都拉取下来。</p>
+<p>然后执行 3.4 步骤的操作，选取子模块分支。</p>
+<p>再执行如下命令，保证每次 git pull 的时候都能获取子模块最新代码。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-在子模块上提交代码"><a href="#5-在子模块上提交代码" class="headerlink" title="5. 在子模块上提交代码"></a>5. 在子模块上提交代码</h2><p>子模块就跟其他 git 项目一样，你是可以直接更改代码并提交的，但是这里有一点需要注意，就是如果你在子模块上提交了代码，那么在主模块上也要提交一次，也就是说<strong>要提交两次代码</strong>，这是至关重要的，如果你没有这么做，有可能会让其他人的子模块无法正常工作。</p>
+<p>例如你在子模块提交代码后，在主模块查看 git 状态时会有如下提示：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">modified:   xxx（模块名） (new commits)</span><br></pre></td></tr></table></figure>
+
+<p>你必须要将这个代码提交到主模块的 git 仓库，这个更改其实是记录着子模块最新提交的 commit id 。用来做版本管理的。</p>
+<h2 id="6-其他"><a href="#6-其他" class="headerlink" title="6. 其他"></a>6. 其他</h2><p>如果想深入了解，可以参考以下文档。</p>
+<p><a href="https://git-scm.com/docs/git-submodule">参数文档</a></p>
+<p><a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">使用文档</a></p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Git</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>java高并发程序设计</title>
+    <url>/blog/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/</url>
+    <content><![CDATA[<h1 id="java高并发程序设计"><a href="#java高并发程序设计" class="headerlink" title="java高并发程序设计"></a>java高并发程序设计</h1><p>高并发是 java 开发必备知识，本篇文章整理出在高并发程序设计中常用的工具。</p>
+<span id="more"></span>
+
+<h2 id="java并发包"><a href="#java并发包" class="headerlink" title="java并发包"></a>java并发包</h2><h3 id="同步控制"><a href="#同步控制" class="headerlink" title="同步控制"></a>同步控制</h3><ul>
+<li><p>重入锁</p>
+<p>重入锁使用java.util.concurrent.locks.ReentrantLock类来实现。<br>锁实现包含的三要素：1、原子装填，使用了CAS操作。 2、等待列队，所有没有请求到锁的线程会进入等待列队进行等待。  3、阻塞原语 park()和unpark() 用来挂起和恢复线程。</p>
+<ul>
+<li><p>特性</p>
+<ul>
+<li><p>中断响应</p>
+<p>可以避免死锁，程序在等待锁的时候可以根据需要取消对锁的请求。<br>学习链接：<br><a href="https://blog.csdn.net/yyd19921214/article/details/49737061?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param">https://blog.csdn.net/yyd19921214/article/details/49737061?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param</a></p>
+<ul>
+<li><p>什么是线程中断</p>
+<p>学习链接：<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306580767211554">https://www.liaoxuefeng.com/wiki/1252599548343744/1306580767211554</a></p>
+</li>
+<li><p>如何使用此功能</p>
+<p>使用lockInterruptible()方法可以获得拥有此功能的锁</p>
+</li>
+</ul>
+</li>
+<li><p>公平锁</p>
+<p>公平锁会按照时间的先后顺序分配锁，但是性能低下，所以大多数情况下锁的申请都是非公平的。</p>
+</li>
+<li><p>锁申请等待限时</p>
+<p>可以避免死锁，因为可以设置等待时间。可以通过tryLock()方法使用此功能。</p>
+</li>
+</ul>
+</li>
+<li><p>搭档 Condition</p>
+<p>通过lock接口的 newCondition()方法可以生成一个与当前重入锁绑定的Condition实例，利用这个实例可以让线程在合适的时间等待，或者在某一个特定的时刻得到通知继续执行。</p>
+</li>
+</ul>
+</li>
+<li><p>信号量 Semaphore</p>
+<p>Semaphore(信号量)是java.util.concurrent下的一个工具类.用来控制可同时访问特定资源的线程数.内部是通过维护父类(AQS)的 int state值实现。<br>学习链接：<a href="https://zhuanlan.zhihu.com/p/27314456">https://zhuanlan.zhihu.com/p/27314456</a></p>
+</li>
+<li><p>ReadWriteLock 读写锁</p>
+<p>可以有效帮助减少锁竞争，提升系统性能。主要应用于读操作的次数远远大于写操作的次数。<br>学习链接：<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306581002092578">https://www.liaoxuefeng.com/wiki/1252599548343744/1306581002092578</a></p>
+</li>
+<li><p>倒计数器 CountDownLatch</p>
+<p>使用的多线程控制工具类，通常用来控制线程等待，它可以让某一个线程等待直到倒计数器结束再开始执行，它是一次性的，打开之后就不能关上了。<br>应用场景：在一个行为执行前需要执行很多前置步骤。<br>学习链接：<a href="https://www.jianshu.com/p/962bc7225ce8">https://www.jianshu.com/p/962bc7225ce8</a></p>
+</li>
+<li><p>循环栅栏 CyclicBarrier</p>
+<p>字面意思回环栅栏，通过它可以实现让一组线程等待至某个状态之后再全部同时执行。<br>叫做回环是因为当所有等待线程都被释放以后，CyclicBarrier可以被重用；跟 CountDownLatch功能类似，但是更灵活、更强大、更复杂。<br>学习链接：<a href="https://www.jianshu.com/p/4ef4bbf01811">https://www.jianshu.com/p/4ef4bbf01811</a></p>
+</li>
+<li><p>线程阻塞工具类 LockSupport</p>
+<p>LockSupport 是一个线程阻塞工具，可以让线程在任意位置阻塞；<br>应用实例：一个节点线程获取不到锁时，会阻塞自己，调用的就是LockSupport的park()方法，返回只有两种方式，前一个节点线程释放锁时unpark()了当前节点，或者当前节点线程被中断返回。</p>
+</li>
+<li><p>限流工具 Guava的RateLimiter</p>
+<p>应用或者组件都有访问上限，如果突破这个上限不仅会影响其性能，更可能会导致其崩溃，因此，对请求进行限流是必要的。<br>学习链接：<a href="https://juejin.im/post/6844903783432978439">https://juejin.im/post/6844903783432978439</a></p>
+<ul>
+<li><p>漏桶算法</p>
+<p>利用缓存，当有请求进入系统时无论请求速率如何，都先在缓存区内保存，然后以固定的流苏流出缓存区进行处理。</p>
+</li>
+<li><p>令牌桶算法</p>
+<p>桶中存放的不是请求而是令牌，处理程序只有拿到令牌后才能对请求进行处理，如果没有令牌可能被丢弃也可能等待可用令牌</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="线程复用：线程池"><a href="#线程复用：线程池" class="headerlink" title="线程复用：线程池"></a>线程复用：线程池</h3><ul>
+<li><p>Executor框架</p>
+<ul>
+<li><p>Executors类</p>
+<ul>
+<li><p>newFixedThreadPool()</p>
+<p>返回一个固定线程数量的线程池，待执行任务保存在队列中</p>
+</li>
+<li><p>newSingleThreadExecutor()</p>
+<p>返回只有一个线程的线程池，待执行任务保存在队列中</p>
+</li>
+<li><p>newCachedThreadPool()</p>
+<p>返回一个可根据实际情况调整线程数量的线程池</p>
+</li>
+<li><p>newScheduledThreadPool()</p>
+<p>返回ScheduleExecutorService对象，可以执行线程的数量</p>
+</li>
+<li><p>newSingleThreadScheduledExector()</p>
+<p>返回ScheduledExectorService对象，只有一个线程，可以设置执行任务相关的时间参数</p>
+</li>
+<li><p>。。。。</p>
+</li>
+</ul>
+</li>
+<li><p>自定义线程创建 ThreadFactory</p>
+</li>
+<li><p>扩展线程池 ThreadPoolExector</p>
+<p>提供了 beforeExecute()、afterExecute()和terminated() 三个接口用来对线程池进行控制</p>
+</li>
+<li><p>输出异常堆栈</p>
+<ul>
+<li><p>使用execute()方法</p>
+<p>submit()会忽略系统抛出的异常</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>分而治之 Fork/Join框架</p>
+<p>学习链接：<a href="https://www.liaoxuefeng.com/article/1146802219354112">https://www.liaoxuefeng.com/article/1146802219354112</a></p>
+</li>
+<li><p>Guava对线程池的扩展</p>
+<ul>
+<li><p>DirectExecutor线程池</p>
+<p>它并没有真的创建或者使用额外线程，它总是将任务在当前线程中直接执行。这个设计主要是为了完成业务的抽象工作，可以使用同一的编码风格处理同步和异步调用，进而简化设计。</p>
+</li>
+<li><p>Daemon线程池</p>
+<p>将普通线程池转为Daemon线程池，可以随着系统（也可以叫主线程）执行完成后一起销毁</p>
+</li>
+<li><p>Future模型的扩展</p>
+<p>Future模式核心思想是异步调用，线程会在等待结果返回的过程中执行其他业务，从而充分利用这段时间</p>
+<ul>
+<li><p>ListeningExecutorService</p>
+<p>调用 MoreExecutors.listeningDecorator 方法将一个普通线程池包装为一个包含通知同能的Future线程池</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="java并发容器"><a href="#java并发容器" class="headerlink" title="java并发容器"></a>java并发容器</h2><h3 id="并发集合"><a href="#并发集合" class="headerlink" title="并发集合"></a>并发集合</h3><ul>
+<li><p>ConcurrentHashMap</p>
+<p>高效的并发,线程安全的HashMap</p>
+</li>
+<li><p>CopyOnWriteArrayList</p>
+<p>线程安全的ArrayList 适合读多写少的场合，性能远好于Vector。<br>读取不加锁，写入也不会阻塞读取操作，只有写入和写入会加锁，因为在写入操作时会进行一次自我复制</p>
+</li>
+<li><p>ConcurrentLinkedQueue</p>
+<p>高效并发队列，链表实现可以看作是线程安全的LinkedList，是高并发环境中性能最好的队列</p>
+</li>
+<li><p>BlokingQueue</p>
+<p>阻塞队列，适合做数据共享通道。非常适合作为“生产和–消费者”模式的数据同步工具，在队列为空的时候会让读取阻塞，而当队列满了后会让存储操作阻塞</p>
+</li>
+<li><p>ConcurrentSkipListMap</p>
+<p>跳表实现，一种可以用来快速查找的数据结构。</p>
+<ul>
+<li><p>高性能</p>
+<p>类似平衡树，区别是对平衡树的插入和删除往往很可能导致平衡树进行一次全局调整，而跳表只需要对整个数据结构的局部进行操作即可。这样就可以控制锁的粒度。</p>
+</li>
+<li><p>随机算法</p>
+<p>跳表本质是同时维护了多个链表，并且链表是分层的，底层的链表维护了跳表内所有的元素，每上面一层链表都是下面一层链表的子集，一个元素插入哪些层是随机的。<br>查找操作时跳跃式的，跳表内所有链表的元素都是排序的，查找时会从顶层开始，一旦发现被查找的元素大于当前链表中的取值就会转入下一层继续查找。</p>
+<ul>
+<li>疑问：为什么插入是随机的 但是查找可以按照顺序查找呢？</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="JMH进行性能测试"><a href="#JMH进行性能测试" class="headerlink" title="JMH进行性能测试"></a>JMH进行性能测试</h2><p>学习链接：<a href="https://www.xncoding.com/2018/01/07/java/jmh.html">https://www.xncoding.com/2018/01/07/java/jmh.html</a></p>
+<h2 id="锁优化"><a href="#锁优化" class="headerlink" title="锁优化"></a>锁优化</h2><h3 id="提高性能的建议"><a href="#提高性能的建议" class="headerlink" title="提高性能的建议"></a>提高性能的建议</h3><ul>
+<li><p>1、减少锁的持有时间</p>
+<p>尽量不要在同步代码块中做耗时的操作，并且只在必要时进行同步</p>
+</li>
+<li><p>2、减小锁的粒度</p>
+<p>需要同步的代码块要尽量小</p>
+</li>
+<li><p>3、用读写分离锁替换独占锁</p>
+</li>
+<li><p>4、锁分离</p>
+<p>是读写锁的上层思想，可以将功能进行拆分，并根据每个功能的实际需求进行定制化的操作</p>
+</li>
+<li><p>5、锁粗化</p>
+<p>对同一个锁不断进行请求和释放的操作时便会把所有的锁操作整合成对锁的一次请求，从而减少对锁的请求同步的次数</p>
+</li>
+</ul>
+<h3 id="java虚拟机对锁的优化"><a href="#java虚拟机对锁的优化" class="headerlink" title="java虚拟机对锁的优化"></a>java虚拟机对锁的优化</h3><ul>
+<li><p>锁偏向</p>
+<p>是一种针对加锁操作的优化。<br>核心思想：如果一个线程获得了锁，那么锁就进入偏向模式，当这个线程再次请求锁时无须再做任何同步操作。<br>但是在锁竞争比较激烈的场合其效果不佳，因为可能每次请求锁的都不是同一个线程，所以不建议在竞争激烈的环境下启用</p>
+</li>
+<li><p>轻量级锁</p>
+<p>它只是简单地将对象头部作为指针指向持有锁的线程堆栈的内部，来判断一个线程是否持有对象锁。如果加锁失败就会转为重量级锁。<br>学习链接：<a href="https://www.zhihu.com/question/53826114">https://www.zhihu.com/question/53826114</a></p>
+</li>
+<li><p>自旋锁</p>
+<p>虚拟机会让当前线程做几个空循环，在经过若干次循环后如果可以得到锁，那么就会顺利进入临界区，如果不能获得锁会在操作系统层面挂起</p>
+</li>
+<li><p>锁消除</p>
+<p>虚拟机在编译过程中会去除不可能存在共享资源竞争的锁，通过这种措施可以节省毫无意义的请求锁时间。<br>之所以有这一操作，一方面是防止用户的错误使用。 另一方面用户在使用jdk提供的api时，api内部实现可能使用了同步锁</p>
+</li>
+</ul>
+<h3 id="ThreadLocal"><a href="#ThreadLocal" class="headerlink" title="ThreadLocal"></a>ThreadLocal</h3><p>本质是通过增加资源来保证所有对象的线程安全，会为每一个线程保存一份资源的副本，这样就不会产生竞争，但是用完要及时清理资源，不然容易发生内存泄漏。<br>学习链接：<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306581251653666">https://www.liaoxuefeng.com/wiki/1252599548343744/1306581251653666</a></p>
+<h3 id="无锁"><a href="#无锁" class="headerlink" title="无锁"></a>无锁</h3><p>乐观锁的思想，它会假设对资源的访问是没有冲突的，无锁的策略使用CAS的技术来鉴别线程冲突，一旦检测到冲突产生就重试当前操作直到没有冲突为止。</p>
+<ul>
+<li><p>CAS</p>
+<p>乐观锁，并没有真的是使用同步锁，当多个线程同时使用CAS操作一个变量时只有一个会胜出，并成功更新，其余均会失败。失败的线程不会被挂起，仅是被告知失败，并且允许再次尝试，也允许放弃操作。</p>
+</li>
+<li><p>安全整数 AtomicInteger</p>
+<p>线程安全的整数，使用CAS操作</p>
+</li>
+<li><p>无锁的对象引用 AtomicReference</p>
+<p>保证修改对象引用时的线程安全性</p>
+<ul>
+<li>缺点：无法解决ABA问题</li>
+</ul>
+</li>
+<li><p>带时间戳的对象引用 AtomicStampedReference</p>
+<ul>
+<li>优势：通过时间戳解决ABA问题</li>
+</ul>
+</li>
+<li><p>无锁数组 AtomicIntegerArray</p>
+</li>
+<li><p>让普通变量也享受原子操作 AtomicIntegerFieldUpdater</p>
+<p>可以对int、long和普通对象引用进行CAS修改；<br>注意事项：<br> 变量必须public 因为底层使用了反射获取变量的值<br>必须被volatile修饰<br>不支持static修饰的变量，因为会通过对象实例中的偏移量直接进行赋值</p>
+</li>
+<li><p>数据交换通道 SynchronousQueue</p>
+<p>学习链接：<a href="https://blog.csdn.net/zmx729618/article/details/52980158">https://blog.csdn.net/zmx729618/article/details/52980158</a></p>
+</li>
+</ul>
+<h2 id="实用工具"><a href="#实用工具" class="headerlink" title="实用工具"></a>实用工具</h2><h3 id="Disruptor-框架"><a href="#Disruptor-框架" class="headerlink" title="Disruptor 框架"></a>Disruptor 框架</h3><p>高效无锁内存队列 可以用来实现高性能的 生产者–消费者模式</p>
+<h3 id="Akka框架"><a href="#Akka框架" class="headerlink" title="Akka框架"></a>Akka框架</h3><p>帮助构建高并发程序</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>多线程</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Wireshark 简明教程</title>
+    <url>/blog/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<h1 id="Wireshark-简明教程"><a href="#Wireshark-简明教程" class="headerlink" title="Wireshark 简明教程"></a>Wireshark 简明教程</h1><p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
+<span id="more"></span>
+
+<h2 id="下载wireshark"><a href="#下载wireshark" class="headerlink" title="下载wireshark"></a>下载wireshark</h2><p><a href="https://www.wireshark.org/download.html">wireshark下载地址</a><br>选择Windows Installer (64-bit)，下载成功后一直点next就可以了。<br><img src="https://img-blog.csdnimg.cn/20210507224116599.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>2.1 选择网卡<br>打开软件，界面如下所示，被红框标记起来的就是网卡列表，如果你使用的是无线网就可以选择WLAN。<br><img src="https://img-blog.csdnimg.cn/20210507224420963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.2 开始抓包<br>双击选中目标网卡就会进入到抓包主界面，如图：<br><img src="https://img-blog.csdnimg.cn/20210507224707882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>被红框选中的就是该网卡发送和接受的网络包了，后续会详细讲解如果通过wireshark抓包学习网络。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Wireshark</tag>
+        <tag>网络</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
+    <url>/blog/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</url>
+    <content><![CDATA[<h1 id="【通过抓包学网络】TCP三次握手与四次挥手"><a href="#【通过抓包学网络】TCP三次握手与四次挥手" class="headerlink" title="【通过抓包学网络】TCP三次握手与四次挥手"></a>【通过抓包学网络】TCP三次握手与四次挥手</h1><p>本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章<a href="https://blog.csdn.net/qq_43005544/article/details/116504407">wireshark 简易教程</a></p>
+<span id="more"></span>
+
+<p><strong>正文开始</strong></p>
+<h1 id="1-首先抓个包"><a href="#1-首先抓个包" class="headerlink" title="1.首先抓个包"></a>1.首先抓个包</h1><p>通过上一篇文章大家应该都能打开对应网卡的抓包页面了哈；我们利用DNS服务可以将域名解析成IP的功能来演示如何抓到我们想要的包。</p>
+<h2 id="1-1-开始抓包"><a href="#1-1-开始抓包" class="headerlink" title="1.1 开始抓包"></a>1.1 开始抓包</h2><p>如果进入抓包页面没有自动开始抓包，就点击左上角的开始抓包按钮，如图：<br><img src="https://img-blog.csdnimg.cn/20210507235225375.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="1-2-打开命令行界面"><a href="#1-2-打开命令行界面" class="headerlink" title="1.2 打开命令行界面"></a>1.2 打开命令行界面</h2><p>博主用的win10操作系统，所以打开的就是CMD了，输入以下命令</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;nslookup</span><br><span class="line">&gt;<span class="built_in">set</span> vc</span><br><span class="line">&gt;www.baidu.com</span><br></pre></td></tr></table></figure>
+<p>命令执行情况如图：<br><img src="https://img-blog.csdnimg.cn/20210507233243944.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70"></p>
+<h2 id="1-3-停止抓包"><a href="#1-3-停止抓包" class="headerlink" title="1.3 停止抓包"></a>1.3 停止抓包</h2><p>点击红框标记的按钮：<br><img src="https://img-blog.csdnimg.cn/20210507235328579.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="1-4-筛选"><a href="#1-4-筛选" class="headerlink" title="1.4 筛选"></a>1.4 筛选</h2><p>这个时候可以看到界面上抓到很多包，但是有很多是其他应用进行的网络请求，并不是我们想要的，所以要进行筛选。<br>在筛选框我们用Ip进行筛选，表达式为<strong>ip.addr == 116.199.0.200</strong>，如图<br><img src="https://img-blog.csdnimg.cn/20210507235517845.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>116.199.0.200是我本机DNS的ip，你可以通过刚在输入的nslookup命令得到，如图<br><img src="https://img-blog.csdnimg.cn/20210507235651897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>但是通过筛选后发现还是有很多包不是我们想要的，我们通过info列来找到我们请求DNS的包，如图：<br>找到DNS协议info这列有我们刚才输入需要解析的域名这两行，这两行就是DNS解析域名的过程，我们从这两行的Info就可以很清晰的看出DNS解析域名的过程，首先192.168.1.107询问DNS <a href="http://www.baidu.com的ip是多少,然后dns在下一行进行回复./">www.baidu.com的IP是多少，然后DNS在下一行进行回复。</a><br><img src="https://img-blog.csdnimg.cn/20210509113130576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="1-5-找到三次握手的包"><a href="#1-5-找到三次握手的包" class="headerlink" title="1.5 找到三次握手的包"></a>1.5 找到三次握手的包</h2><p>在1.4小节中我们找到的926和927号包的上面就是三次握手的包，分别是921，922，923这三个包，如图：<br><img src="https://img-blog.csdnimg.cn/20210509161642786.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>你可能想问是怎么看出来的，好问题，主要是看Seq和Ack的值，三次握手的时候Seq的相对值是为0的（注意是相对值）。找到了三次握手的网络包，我们就来分析一下三次握手吧。</p>
+<h1 id="2-分析三次握手"><a href="#2-分析三次握手" class="headerlink" title="2. 分析三次握手"></a>2. 分析三次握手</h1><h2 id="2-1-TCP-参数介绍"><a href="#2-1-TCP-参数介绍" class="headerlink" title="2.1 TCP 参数介绍"></a>2.1 TCP 参数介绍</h2><p>要学习TCP首先要学习它的参数。</p>
+<p><strong>Seq</strong>：标识改数据段的序号。因为TCP的传输是有序的，接收者可以通过Seq对包进行排序。</p>
+<p><strong>Len</strong>：表示Seq对应数据的长度。</p>
+<p><strong>Ack</strong>：确认号，向数据提供者表明收到了哪些包（实际收到包的Seq序号需要 Ack - 1，因为Seq是从0开始的，例如Ack = 2说明已经收到 第0段和第1段需要包，下一个需要接收的序号包Seq 需要为 2）。</p>
+<p><strong>SYN</strong>：表示携带这个参数的数据包正在发起连接请求。</p>
+<p><strong>FIN</strong>：表示携带这个参数的包正在请求停止连接。</p>
+<h2 id="2-2-三次握手过程"><a href="#2-2-三次握手过程" class="headerlink" title="2.2 三次握手过程"></a>2.2 三次握手过程</h2><p>用来分析的数据包如图：<br><img src="https://img-blog.csdnimg.cn/2021050917000075.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><strong>第一次握手</strong> 192.168.1.107 向 116.119.0.200 发送携带 SYN; Seq = 0;len = 0的请求。SYN表示这是在请求连接，Seq表示目前发送的是第0段数据包，len表示数据包的长度为0。</p>
+<p><strong>第二次握手</strong> 116.119.0.200 向192.168.1.107发送携带SYN;Seq = 0;Len = 0; Ack = 1的请求。因为TCP是双向连接，所以双方都要维护各自的参数，除了Ack其他参数在第一次握手的时候讲过了，Ack表示已经接收到Seq = 0 的数据包了，下一次请从Seq = 1 的数据包发送。</p>
+<p><strong>第三次握手</strong>：192.168.1.107 向 116.119.0.200 发送携带Ack = 1; Seq = 1; len = 0;的请求，表示已经收到Seq = 0 的数据包了，下一次请从Seq = 1 的数据包发送。<br>这时连接已经成功建立。</p>
+<p>这样就通过三次握手建立了一个连接，<strong>至于面试常问的为什么不是两次或者四次相信你已经知道答案了</strong>，因为<strong>两次不可靠</strong>，可能在第二次握手的时候超时了，对方并没有收到请求，而发送方并不知道，以为已经成功建立了连接，所以会向对方发送数据，但是对方因为其他原因没有接收到第二次握手，所以不会接受数据发送方发送的数据。<strong>至于四次没必要</strong>，因为所有想做的事情已经做完了。</p>
+<h1 id="3-分析四次挥手"><a href="#3-分析四次挥手" class="headerlink" title="3. 分析四次挥手"></a>3. 分析四次挥手</h1><h2 id="3-1-找到四次挥手的数据包"><a href="#3-1-找到四次挥手的数据包" class="headerlink" title="3.1 找到四次挥手的数据包"></a>3.1 找到四次挥手的数据包</h2><p>四次挥手的数据包就是928至931，你又想问这是怎么看出来的？好问题，讲三次握手的时候介绍过 <strong>FIN</strong>参数就代表着请求断开连接，那我们就找离DNS解析域名数据包最近的携带FIN参数的数据包。<br><img src="https://img-blog.csdnimg.cn/20210509174830567.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="3-2-分析四次挥手"><a href="#3-2-分析四次挥手" class="headerlink" title="3.2 分析四次挥手"></a>3.2 分析四次挥手</h2><p><strong>第一次挥手</strong>：192.168.1.107 向 116.119.0.200 发送携带FIN; Seq = 34; Ack = 93; 的数据包，FIN表示请求断开连接，Seq = 34表示这个数据包是第34段，Ack = 93表示已经收到93段之前的数据包了，下一次请求第93段数据包开始发送。</p>
+<p><strong>第二次挥手</strong>： 116.119.0.200 向192.168.1.107发送携带Seq = 93; Ack = 35;的数据包，表示请求已经收到 Seq和Ack参数就不解释了。</p>
+<p><strong>第三次挥手</strong>：116.119.0.200 向192.168.1.107发送携带FIN; Seq = 93; Ack = 35; 的数据包，表示请求断开连接。</p>
+<p><strong>第四次挥手</strong>：192.168.1.107 向 116.119.0.200 发送携带Seq = 35; Ack = 94;的数据包，表示已经接收到请求。</p>
+<p>通过四次挥手完成了连接的断开，<strong>面试的时候常问为什么不能是三次挥手</strong>，这里已经很明确了，因为116.119.0.200这台服务器需要连续发送两个数据包，那为什么是两个呢？因为可能还有一些网络数据没有处理完，不能马上断开连接，只能先回应请求收到了，等处理完数据后再发送断开连接请求。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Wireshark</tag>
+        <tag>网络</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【Mybatis源码解读】jdbc包</title>
+    <url>/blog/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</url>
+    <content><![CDATA[<h1 id="【Mybatis源码解读】jdbc包"><a href="#【Mybatis源码解读】jdbc包" class="headerlink" title="【Mybatis源码解读】jdbc包"></a>【Mybatis源码解读】jdbc包</h1><span id="more"></span>
+
+<h2 id="1-jdbc包的作用"><a href="#1-jdbc包的作用" class="headerlink" title="1. jdbc包的作用"></a>1. jdbc包的作用</h2><p>jdbc包作为Mybatis框架的核心包之一可以理解为是<strong>操作Sql的工具包</strong>，因为通过阅读代码观察到这个jdbc包里面的类并没有被Mybatis框架本身引用，而其本身的作用又是对sql的操作，所以当作工具包来理解是没有什么问题的。</p>
+<h2 id="2-设计思想"><a href="#2-设计思想" class="headerlink" title="2. 设计思想"></a>2. 设计思想</h2><p>利用面向对象的<strong>继承</strong>特性增加功能的<strong>拓展性</strong>。</p>
+<h2 id="3-实现细节"><a href="#3-实现细节" class="headerlink" title="3. 实现细节"></a>3. 实现细节</h2><p>jdbc包里面的类其实很少，去掉过期的和一些辅助类主要的类有三个：<strong>AbstractSQL</strong>、<strong>ScriptRunner</strong>、<strong>SqlRunner</strong>，这里着重介绍<strong>AbstractSQL</strong>类，因为相对于<strong>AbstractSQL</strong>类另外的两个类功能很简单。</p>
+<p><strong>AbstractSQL</strong>的类图:</p>
+<p>可以看出SQL类继承了<strong>AbstractSQL</strong>类，而SafeAppendable 和 SQLStatement 是<strong>AbstractSQL</strong>的内部类，下面逐一介绍。</p>
+<p><img src="https://s2.loli.net/2021/12/05/pJT69AcKPMHEqxf.png" alt="image-20201206170511920"></p>
+<h3 id="SQL类"><a href="#SQL类" class="headerlink" title="SQL类"></a>SQL类</h3><h4 id="3-1-1-简介"><a href="#3-1-1-简介" class="headerlink" title="3.1.1 简介"></a>3.1.1 简介</h4><p>SQL类的实现很简单：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SQL</span> <span class="keyword">extends</span> <span class="title">AbstractSQL</span>&lt;<span class="title">SQL</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> SQL <span class="title">getSelf</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说所有的逻辑实现都写在了它的父类中，那为什么还要SQL类呢？答案就是为了<strong>增加功能的拓展性</strong>，比如你想在生成sql的时候满足一些定制化的需求可以重新创建一个子类继承并拓展它。</p>
+<h4 id="3-1-2-使用"><a href="#3-1-2-使用" class="headerlink" title="3.1.2 使用"></a>3.1.2 使用</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    <span class="meta">@SelectProvider(type = UserProvider.class, method = &quot;queryUsersBySchoolName&quot;)</span></span><br><span class="line">    <span class="function">List&lt;User&gt; <span class="title">queryUsersBySchoolName</span><span class="params">(String schoolName)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserProvider</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">queryUsersBySchoolName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> SQL()</span><br><span class="line">                .SELECT(<span class="string">&quot;*&quot;</span>)</span><br><span class="line">                .FROM(<span class="string">&quot;user&quot;</span>)</span><br><span class="line">                .WHERE(<span class="string">&quot;schoolName = #&#123;schoolName&#125;&quot;</span>)</span><br><span class="line">                .toString();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看出这种方式是直接在每个接口上引入sql，如果项目比较庞大是很难有效管理sql的 ，所以这种使用方式很不常见。</p>
+<h3 id="SafeAppendable"><a href="#SafeAppendable" class="headerlink" title="SafeAppendable"></a>SafeAppendable</h3><h4 id="3-2-1-简介"><a href="#3-2-1-简介" class="headerlink" title="3.2.1 简介"></a>3.2.1 简介</h4><p>看名字就可以了解到这个类里面封装了<strong>拼接</strong>字符的行为，使用了<strong>组合模式</strong>持有了Appendable接口实例的引用，并调用其append方法实现拼接，拼接完成后调用Appendable实例的toString方法获取拼接结果。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SafeAppendable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Appendable a;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> empty = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SafeAppendable</span><span class="params">(Appendable a)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">super</span>();</span><br><span class="line">      <span class="keyword">this</span>.a = a;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SafeAppendable <span class="title">append</span><span class="params">(CharSequence s)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (empty &amp;&amp; s.length() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">          empty = <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        a.append(s);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> empty;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="SQLStatement"><a href="#SQLStatement" class="headerlink" title="SQLStatement"></a>SQLStatement</h3><h4 id="3-3-1-简介"><a href="#3-3-1-简介" class="headerlink" title="3.3.1 简介"></a>3.3.1 简介</h4><p>从下图为此类封装的方法，可以看出此类是拼接sql的主力军。</p>
+<p><img src="https://s2.loli.net/2021/12/05/PtIn4eRMAJwXsVx.png" alt="image-20201206180137582"></p>
+<p>下图这些为此类的属性，从名字可以看出是根据sql关键字进行分类的，存储着相应的值，用来拼接sql时使用。</p>
+<p><img src="https://s2.loli.net/2021/12/05/74HvADUTKCeFadm.png" alt="image-20201206180617860"></p>
+<p>以拼接select为例分析源码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">   <span class="comment">//只接收一个参数就是拼接器，用来拼接字符</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> String <span class="title">selectSQL</span><span class="params">(SafeAppendable builder)</span> </span>&#123;</span><br><span class="line">   <span class="comment">//判断是否需要去重，如果需要就增加 DISTINCT关键字，而select为上图的属性，是一个集合里面存储着相应的值，下面几个参数类似不做赘述，下面会对sqlClause方法做详细解释。</span></span><br><span class="line">     <span class="keyword">if</span> (distinct) &#123;</span><br><span class="line">       sqlClause(builder, <span class="string">&quot;SELECT DISTINCT&quot;</span>, select, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       sqlClause(builder, <span class="string">&quot;SELECT&quot;</span>, select, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     sqlClause(builder, <span class="string">&quot;FROM&quot;</span>, tables, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     <span class="comment">//join语句比较特殊，所以单独创建函数，但是本质也是复用sqlClause函数</span></span><br><span class="line">     joins(builder);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;WHERE&quot;</span>, where, <span class="string">&quot;(&quot;</span>, <span class="string">&quot;)&quot;</span>, <span class="string">&quot; AND &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;GROUP BY&quot;</span>, groupBy, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;HAVING&quot;</span>, having, <span class="string">&quot;(&quot;</span>, <span class="string">&quot;)&quot;</span>, <span class="string">&quot; AND &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;ORDER BY&quot;</span>, orderBy, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     <span class="comment">//利用LIMIT、OFFSET关键字做分页处理</span></span><br><span class="line">     limitingRowsStrategy.appendClause(builder, offset, limit);</span><br><span class="line">     <span class="keyword">return</span> builder.toString();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面是sqlClause 函数的代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//参数一：拼接器；参数二：关键字例如SELECT等等;参数三：sql所需值的集合；参数四和五：参数开始和结束字符 例如where语句需要括号括起来；参数六：参数连接字符例如 AND等等</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">sqlClause</span><span class="params">(SafeAppendable builder, String keyword, List&lt;String&gt; parts, String open, String close,String conjunction)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!parts.isEmpty()) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!builder.isEmpty()) &#123;</span><br><span class="line">      builder.append(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    builder.append(keyword);</span><br><span class="line">    builder.append(<span class="string">&quot; &quot;</span>);</span><br><span class="line">    builder.append(open);</span><br><span class="line">    String last = <span class="string">&quot;________&quot;</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>, n = parts.size(); i &lt; n; i++) &#123;</span><br><span class="line">      String part = parts.get(i);</span><br><span class="line">      <span class="keyword">if</span> (i &gt; <span class="number">0</span> &amp;&amp; !part.equals(AND) &amp;&amp; !part.equals(OR) &amp;&amp; !last.equals(AND) &amp;&amp; !last.equals(OR)) &#123;</span><br><span class="line">        builder.append(conjunction);</span><br><span class="line">      &#125;</span><br><span class="line">      builder.append(part);</span><br><span class="line">      last = part;</span><br><span class="line">    &#125;</span><br><span class="line">    builder.append(close);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="AbstractSQL"><a href="#AbstractSQL" class="headerlink" title="AbstractSQL"></a>AbstractSQL</h3><h4 id="3-4-1-简介"><a href="#3-4-1-简介" class="headerlink" title="3.4.1 简介"></a>3.4.1 简介</h4><p>如果理解了前面三个类的作用那理解此类的作用也就水到渠成了，下面看下此类封装的方法，可以看到所有方法都是以sql语句的关键词命名的</p>
+<p><img src="https://s2.loli.net/2021/12/05/nZctYG87sJqrvmK.png" alt="image-20201207221124727"></p>
+<h4 id="3-4-2-详解"><a href="#3-4-2-详解" class="headerlink" title="3.4.2 详解"></a>3.4.2 详解</h4><p>以SELECT方法为例，当使用如下方法时发生了什么？</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">new</span> SQL()</span><br><span class="line">              .SELECT(<span class="string">&quot;*&quot;</span>)</span><br><span class="line">              .FROM(<span class="string">&quot;user&quot;</span>)</span><br><span class="line">              .WHERE(<span class="string">&quot;schoolName = #&#123;schoolName&#125;&quot;</span>)</span><br><span class="line">              .toString();</span><br></pre></td></tr></table></figure>
+
+<p>当调用AbstractSQL里面封装的方法时其实都将传进来的值存储在了SQLStatement相应关键字的属性中，当最后调用toString方法时就会触发sql的拼接工作，所以可以理解为AbstractSQL是给SQLStatement类做了一层<strong>装饰器</strong>。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">SELECT</span><span class="params">(String columns)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//sql() 方法会返回SQLStatement类的一个实例</span></span><br><span class="line">    <span class="comment">//设置sql类别</span></span><br><span class="line">  sql().statementType = SQLStatement.StatementType.SELECT;</span><br><span class="line">    <span class="comment">//将传入的值存储到SQLStatement类的select属性中</span></span><br><span class="line">  sql().select.add(columns);</span><br><span class="line">    <span class="comment">//返回对象本身</span></span><br><span class="line">  <span class="keyword">return</span> getSelf();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其他关键字方法的调用都是类似的，这里不再赘述，下面介绍一下<strong>如何触发拼接sql的操作</strong>：</p>
+<p>当调用toString方法时就会触发sql拼接操作，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//创建一个字符拼接器</span></span><br><span class="line">  StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    <span class="comment">//调用SQLStatement类的sql方法，此方法会利用StringBuilder拼接sql</span></span><br><span class="line">  sql().sql(sb);</span><br><span class="line">    <span class="comment">//转化为字符串</span></span><br><span class="line">  <span class="keyword">return</span> sb.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//这个方法会根据sql的类型调用相应的拼接方法，而SELECT语句如何拼接的前文已经讲解过，大家可以按照此方法查看一下其他类型sql的拼接过程</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">sql</span><span class="params">(Appendable a)</span> </span>&#123;</span><br><span class="line">  SafeAppendable builder = <span class="keyword">new</span> SafeAppendable(a);</span><br><span class="line">  <span class="keyword">if</span> (statementType == <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  String answer;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">switch</span> (statementType) &#123;</span><br><span class="line">    <span class="keyword">case</span> DELETE:</span><br><span class="line">      answer = deleteSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> INSERT:</span><br><span class="line">      answer = insertSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> SELECT:</span><br><span class="line">      answer = selectSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> UPDATE:</span><br><span class="line">      answer = updateSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      answer = <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> answer;</span><br></pre></td></tr></table></figure>
+
+<p>这里有个细节，为什么AbstractSQL类中的方法都是大写的呢？ 我查阅了相关资料发现这是为了照顾大家写sql时的习惯。</p>
+<p>通过以上知识的学习我们就应该知道 Mybatis 是如何操作 sql 的了。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Mybatis</tag>
+        <tag>源码阅读</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>垃圾收集器与内存分配策略</title>
+    <url>/blog/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/</url>
+    <content><![CDATA[<h1 id="垃圾收集器与内存分配策略"><a href="#垃圾收集器与内存分配策略" class="headerlink" title="垃圾收集器与内存分配策略"></a>垃圾收集器与内存分配策略</h1><span id="more"></span>
+
+<h2 id="对象已死？-判断对象是否可以回收"><a href="#对象已死？-判断对象是否可以回收" class="headerlink" title="对象已死？(判断对象是否可以回收)"></a>对象已死？(判断对象是否可以回收)</h2><h3 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h3><ul>
+<li><p>reference类型的数据中存储的数值代表的是另一块内存的起始地址</p>
+<ul>
+<li>强引用：代码中的引用赋值 例如 new对象；意义：对象不会被回收</li>
+<li>软引用：还有用非必须的对象；意义：在系统将要发生内存溢出前回收</li>
+<li>弱引用：非必须对象；意义：每次垃圾回收时都会被清理</li>
+<li>虚引用：最弱的一种引用；意义：可以让一个对象被回收时收到一个系统通知</li>
+</ul>
+</li>
+</ul>
+<h3 id="引用计数算法"><a href="#引用计数算法" class="headerlink" title="引用计数算法"></a>引用计数算法</h3><ul>
+<li>在对象中添加一个引用计数器，被引用加一，引用失效减一，为零就不会再使用可以回收</li>
+<li>优点：原理简单，效率高</li>
+<li>缺点：实用性不强，例如 很难解决对象间的互相循环引用的问题</li>
+</ul>
+<h3 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h3><ul>
+<li><p>判断某个对象到GC Roots间有没有引用链相连，如果没有就说明对象不可达、不再使用可以回收</p>
+</li>
+<li><p>GC Roots</p>
+<ul>
+<li>虚拟机栈的本地变量表中引用的对象</li>
+<li>方法区中类静态属性引用的对象</li>
+<li>方法区中常量引用的对象</li>
+<li>本地方法栈中JNI(Native方法)引用的对象</li>
+<li>java虚拟机内部的引用，如基本数据类型对应的Class对象，常驻的异常对象，类加载器</li>
+<li>同步锁持有的对象</li>
+<li>反应虚拟机内部情况的JMXBean、JVMTI中注册的回调、本地代码缓存等</li>
+</ul>
+</li>
+</ul>
+<h3 id="生存还是死亡-判断对象是否真的能被回收"><a href="#生存还是死亡-判断对象是否真的能被回收" class="headerlink" title="生存还是死亡(判断对象是否真的能被回收)"></a>生存还是死亡(判断对象是否真的能被回收)</h3><ul>
+<li>至少要经历两次标记(判断)，如果第一次被标记成不可达，但是在第二次标记前又与GC Roots建立了链接就不会被清理</li>
+</ul>
+<h3 id="回收方法区"><a href="#回收方法区" class="headerlink" title="回收方法区"></a>回收方法区</h3><ul>
+<li>《java虚拟机规范》不强制方法区实现垃圾收集</li>
+<li>方法区垃圾收集性价比比较低</li>
+<li>主要回收废弃的常量和不再使用的类型（类型指加载到内存中的Class）</li>
+</ul>
+<h2 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h2><h3 id="引用计数式垃圾收集（直接垃圾收集）"><a href="#引用计数式垃圾收集（直接垃圾收集）" class="headerlink" title="引用计数式垃圾收集（直接垃圾收集）"></a>引用计数式垃圾收集（直接垃圾收集）</h3><h3 id="追踪式垃圾收集（间接垃圾收集）（主流）"><a href="#追踪式垃圾收集（间接垃圾收集）（主流）" class="headerlink" title="追踪式垃圾收集（间接垃圾收集）（主流）"></a>追踪式垃圾收集（间接垃圾收集）（主流）</h3><ul>
+<li><p>分代收集理论</p>
+<p>设计原则：收集器应该将java堆划分出不同区域，然后将回收对象依据其年龄分配到不同的区域之中存储</p>
+<ul>
+<li><p>弱分代假说：绝大多数对象都是朝生夕死的</p>
+</li>
+<li><p>强分代假说：熬过越多次垃圾收集过程的对象越你难以死亡</p>
+</li>
+<li><p>分代</p>
+<ul>
+<li>新生代</li>
+<li>老年代</li>
+</ul>
+</li>
+<li><p>跨分代引用假说：存在相互引用关系的对象应该倾向于同生同死，跨代引用占比较少。</p>
+<ul>
+<li><p>存在问题：当扫描新生代对象时如果有跨代引用还需要扫描整个老年代，成本较高</p>
+<ul>
+<li>解决办法：新生代建立一个全局数据结构（记忆集），这个结构将老年代划分成若干小块，标识出老年代的哪一块内存存在跨代引用。Minor GC时只有包含了跨代引用的小块内存里的对象才会被加入到GC Roots进行扫描，而不用扫描整个老年代</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>标记-清除算法：标记后清除被标记的对象</p>
+<ul>
+<li>缺点：1、执行效率不稳定（受要标记的目标对象数量的限制）；2、内存空间碎片化（产生不连续的内存碎片）</li>
+</ul>
+</li>
+<li><p>标记-复制算法：将内存划分为大小相等的两块，每次只用其中一块，当内存用完了就将存活对象复制到另一块，然后将已使用的内存一次清理掉</p>
+<ul>
+<li>缺点：空间浪费太严重</li>
+<li>新生代优先采用此算法，而老年代不会使用这种方法，因为新生代98%对象都是朝生夕死的，这种情况实现简单、效率高</li>
+</ul>
+</li>
+<li><p>标记-整理算法：先标记，让存活对象都移动到内存一端，然后清理掉边界以外的内存</p>
+</li>
+</ul>
+<h2 id="经典垃圾收集器"><a href="#经典垃圾收集器" class="headerlink" title="经典垃圾收集器"></a>经典垃圾收集器</h2><h3 id="Serial收集器"><a href="#Serial收集器" class="headerlink" title="Serial收集器"></a>Serial收集器</h3><ul>
+<li>单线程收集器</li>
+<li>优点：简单高效、内存消耗最小</li>
+<li>缺点：工作时必须“Stop The World”，用户体验差</li>
+</ul>
+<h3 id="ParNew收集器"><a href="#ParNew收集器" class="headerlink" title="ParNew收集器"></a>ParNew收集器</h3><ul>
+<li>Serial收集器多线程并行版本</li>
+<li>HotSpot虚拟机中第一款退出历史舞台的垃圾收集器，只能和CMS配合使用而CMS将会替代CMS</li>
+</ul>
+<h3 id="Parallel-Scavenge收集器"><a href="#Parallel-Scavenge收集器" class="headerlink" title="Parallel Scavenge收集器"></a>Parallel Scavenge收集器</h3><ul>
+<li>多线程，基于标记-复制算法</li>
+<li>设计目标：达到一个可控的吞吐量（也就是控制垃圾回收所占用的时间）</li>
+</ul>
+<h3 id="Serial-Old收集器"><a href="#Serial-Old收集器" class="headerlink" title="Serial Old收集器"></a>Serial Old收集器</h3><ul>
+<li>Serial的老年代版本 </li>
+<li>单线程，基于标记整理算法</li>
+</ul>
+<h3 id="Parallel-Old收集器"><a href="#Parallel-Old收集器" class="headerlink" title="Parallel Old收集器"></a>Parallel Old收集器</h3><ul>
+<li>Parallel Scavenge收集器老年代版本</li>
+<li>多线程，基于标记-整理算法</li>
+</ul>
+<h3 id="CMS收集器"><a href="#CMS收集器" class="headerlink" title="CMS收集器"></a>CMS收集器</h3><ul>
+<li><p>目标：为了获取最短回收停顿时间</p>
+</li>
+<li><p>多线程，基于标记-清除算法</p>
+</li>
+<li><p>缺点：1、处理器资源敏感，会占用一部分资源导致程序变慢，总吞吐量降低。2、无法处理浮动垃圾，可能导致full gc发生。3、无法处理空间碎片，只能依靠full gc</p>
+<p>浮动垃圾：CMS标记和清理阶段用户线程会同时运行并产生新的垃圾，因为有些垃圾在标记后产生所以本次无法清理，只能等到下次。</p>
+</li>
+</ul>
+<h3 id="Garbage-First收集器（G1）"><a href="#Garbage-First收集器（G1）" class="headerlink" title="Garbage First收集器（G1）"></a>Garbage First收集器（G1）</h3><ul>
+<li><p>将堆内存划分为多个大小相等的独立区域（Region），每个区域都可以根据需要扮演新生代的Eden空间、Survivor空间或老年代空间，每次回收时G1会判断那块回收性价比最高，收益最大；Region中设有Humongous区域，用来存储大对象（超过Region一半的对象），而超级大对象会被存放在多个连续的Humongous区域</p>
+</li>
+<li><p>与CMS比较</p>
+<ul>
+<li>优势：1、不会产生垃圾碎片；2、创新性设计带来较多红利：可以指定最大停顿时间，分区域的内存布局，按收益动态确定回收集</li>
+<li>弱势：1、占用内存多、负载率高</li>
+</ul>
+</li>
+</ul>
+<h2 id="基础故障处理工具"><a href="#基础故障处理工具" class="headerlink" title="基础故障处理工具"></a>基础故障处理工具</h2><h3 id="jps：虚拟机进程状况工具，主要用来查看进行的唯一ID"><a href="#jps：虚拟机进程状况工具，主要用来查看进行的唯一ID" class="headerlink" title="jps：虚拟机进程状况工具，主要用来查看进行的唯一ID"></a>jps：虚拟机进程状况工具，主要用来查看进行的唯一ID</h3><h3 id="jstat-虚拟机统计信息监视工具，主要用于查看虚拟机各种运行状态信息"><a href="#jstat-虚拟机统计信息监视工具，主要用于查看虚拟机各种运行状态信息" class="headerlink" title="jstat: 虚拟机统计信息监视工具，主要用于查看虚拟机各种运行状态信息"></a>jstat: 虚拟机统计信息监视工具，主要用于查看虚拟机各种运行状态信息</h3><h3 id="jinfo：java配置信息工具，主要使用-sysprops-打印System-getProperties-的内容"><a href="#jinfo：java配置信息工具，主要使用-sysprops-打印System-getProperties-的内容" class="headerlink" title="jinfo：java配置信息工具，主要使用-sysprops 打印System.getProperties()的内容"></a>jinfo：java配置信息工具，主要使用-sysprops 打印System.getProperties()的内容</h3><h3 id="jmap：java内存映像工具，主要用于生成堆转储快照"><a href="#jmap：java内存映像工具，主要用于生成堆转储快照" class="headerlink" title="jmap：java内存映像工具，主要用于生成堆转储快照"></a>jmap：java内存映像工具，主要用于生成堆转储快照</h3><h3 id="jhat：虚拟机堆转储快照分析工具，图形化工具更适合这个工作-所以这个命令用处不大"><a href="#jhat：虚拟机堆转储快照分析工具，图形化工具更适合这个工作-所以这个命令用处不大" class="headerlink" title="jhat：虚拟机堆转储快照分析工具，图形化工具更适合这个工作 所以这个命令用处不大"></a>jhat：虚拟机堆转储快照分析工具，图形化工具更适合这个工作 所以这个命令用处不大</h3><h3 id="jstack：java堆栈跟踪工具，主要用于生成虚拟机当前时刻线程快照，例如可以查看没有相应的线程在后台干什么"><a href="#jstack：java堆栈跟踪工具，主要用于生成虚拟机当前时刻线程快照，例如可以查看没有相应的线程在后台干什么" class="headerlink" title="jstack：java堆栈跟踪工具，主要用于生成虚拟机当前时刻线程快照，例如可以查看没有相应的线程在后台干什么"></a>jstack：java堆栈跟踪工具，主要用于生成虚拟机当前时刻线程快照，例如可以查看没有相应的线程在后台干什么</h3><h2 id="内存回收策略"><a href="#内存回收策略" class="headerlink" title="内存回收策略"></a>内存回收策略</h2><h3 id="在经典分代设计下，新生对象通常会分配在新生代中，少数情况下也可能直接分配在老年代"><a href="#在经典分代设计下，新生对象通常会分配在新生代中，少数情况下也可能直接分配在老年代" class="headerlink" title="在经典分代设计下，新生对象通常会分配在新生代中，少数情况下也可能直接分配在老年代"></a>在经典分代设计下，新生对象通常会分配在新生代中，少数情况下也可能直接分配在老年代</h3><h3 id="对象优先在新生代Eden区域分配"><a href="#对象优先在新生代Eden区域分配" class="headerlink" title="对象优先在新生代Eden区域分配"></a>对象优先在新生代Eden区域分配</h3><h3 id="大对象直接进入老年代"><a href="#大对象直接进入老年代" class="headerlink" title="大对象直接进入老年代"></a>大对象直接进入老年代</h3><h3 id="长期存活对象进入老年代"><a href="#长期存活对象进入老年代" class="headerlink" title="长期存活对象进入老年代"></a>长期存活对象进入老年代</h3><ul>
+<li>Eden中的对象经过一次GC仍然存活并且能被Survivor容纳就会被转移到Survivor中，并将对象年龄设置为1，对象在Survivor中每熬过一次GC就增加一岁，年龄增加到15（默认 可以设置）时进入老年代</li>
+</ul>
+<h3 id="动态对象年龄判定"><a href="#动态对象年龄判定" class="headerlink" title="动态对象年龄判定"></a>动态对象年龄判定</h3><ul>
+<li>HotSpot虚拟机并不是永远等到对象年龄达到标准才晋升到老年代，如果Survivor空间中的相同年龄所有对象大小的总和大于Survivor空间的一半，年龄大于或等于该年龄的对象就直接进入老年代</li>
+</ul>
+<h2 id="选择合适的垃圾收集器"><a href="#选择合适的垃圾收集器" class="headerlink" title="选择合适的垃圾收集器"></a>选择合适的垃圾收集器</h2><h3 id="垃圾收集器工作内容"><a href="#垃圾收集器工作内容" class="headerlink" title="垃圾收集器工作内容"></a>垃圾收集器工作内容</h3><ul>
+<li>垃圾收集、堆内存的管理与布局、对象的分配、与解释器的协作、与编译器的协作，与监控子系统的协作等等</li>
+</ul>
+<h3 id="应用只要运行数分钟甚至数秒，只要虚拟机能正确分配内存，在堆耗尽之前就会退出"><a href="#应用只要运行数分钟甚至数秒，只要虚拟机能正确分配内存，在堆耗尽之前就会退出" class="headerlink" title="应用只要运行数分钟甚至数秒，只要虚拟机能正确分配内存，在堆耗尽之前就会退出"></a>应用只要运行数分钟甚至数秒，只要虚拟机能正确分配内存，在堆耗尽之前就会退出</h3><ul>
+<li>Epslion收集器，不进行垃圾回收，但负载极小</li>
+</ul>
+<h3 id="收集器的权衡"><a href="#收集器的权衡" class="headerlink" title="收集器的权衡"></a>收集器的权衡</h3><ul>
+<li><p>应用程序的关注点</p>
+<ul>
+<li>吞吐量</li>
+<li>延迟</li>
+<li>内存占用</li>
+</ul>
+</li>
+</ul>
+<h3 id="虚拟机及垃圾收集器日志"><a href="#虚拟机及垃圾收集器日志" class="headerlink" title="虚拟机及垃圾收集器日志"></a>虚拟机及垃圾收集器日志</h3><ul>
+<li>1、查看GC基本信息：jdk9以前 -XX:+PrintGC,9以后 -Xlog:gc</li>
+<li>2、查看GC详细信息：9以前 -XX:+PrintGCDetails,9以后 -X-log:gc*</li>
+<li>3、查看GC前后堆、方法区可用容量变化：9以前-XX:+PrintHeapAtGC,9以后 -Xlog:gc+heap=debug</li>
+<li>4、查看GC过程中用户线程并发时间以及停顿的时间：9以前-XX:Print-GCApplicationConcurrentTime 及 -XX:+PrintGCApplicatiionStoppedTime,9以后 -Xlog:safepoint</li>
+<li>只列出一些常用的命令</li>
 </ul>
 ]]></content>
       <categories>
@@ -493,501 +988,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Wireshark 简明教程</title>
-    <url>/blog/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</url>
-    <content><![CDATA[<h1 id="Wireshark-简明教程"><a href="#Wireshark-简明教程" class="headerlink" title="Wireshark 简明教程"></a>Wireshark 简明教程</h1><p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
-<span id="more"></span>
-
-<h2 id="下载wireshark"><a href="#下载wireshark" class="headerlink" title="下载wireshark"></a>下载wireshark</h2><p><a href="https://www.wireshark.org/download.html">wireshark下载地址</a><br>选择Windows Installer (64-bit)，下载成功后一直点next就可以了。<br><img src="https://img-blog.csdnimg.cn/20210507224116599.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>2.1 选择网卡<br>打开软件，界面如下所示，被红框标记起来的就是网卡列表，如果你使用的是无线网就可以选择WLAN。<br><img src="https://img-blog.csdnimg.cn/20210507224420963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.2 开始抓包<br>双击选中目标网卡就会进入到抓包主界面，如图：<br><img src="https://img-blog.csdnimg.cn/20210507224707882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>被红框选中的就是该网卡发送和接受的网络包了，后续会详细讲解如果通过wireshark抓包学习网络。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Wireshark</tag>
-        <tag>网络</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>java高并发程序设计</title>
-    <url>/blog/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/</url>
-    <content><![CDATA[<h1 id="java高并发程序设计"><a href="#java高并发程序设计" class="headerlink" title="java高并发程序设计"></a>java高并发程序设计</h1><p>高并发是 java 开发必备知识，本篇文章整理出在高并发程序设计中常用的工具。</p>
-<span id="more"></span>
-
-<h2 id="java并发包"><a href="#java并发包" class="headerlink" title="java并发包"></a>java并发包</h2><h3 id="同步控制"><a href="#同步控制" class="headerlink" title="同步控制"></a>同步控制</h3><ul>
-<li><p>重入锁</p>
-<p>重入锁使用java.util.concurrent.locks.ReentrantLock类来实现。<br>锁实现包含的三要素：1、原子装填，使用了CAS操作。 2、等待列队，所有没有请求到锁的线程会进入等待列队进行等待。  3、阻塞原语 park()和unpark() 用来挂起和恢复线程。</p>
-<ul>
-<li><p>特性</p>
-<ul>
-<li><p>中断响应</p>
-<p>可以避免死锁，程序在等待锁的时候可以根据需要取消对锁的请求。<br>学习链接：<br><a href="https://blog.csdn.net/yyd19921214/article/details/49737061?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param">https://blog.csdn.net/yyd19921214/article/details/49737061?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param</a></p>
-<ul>
-<li><p>什么是线程中断</p>
-<p>学习链接：<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306580767211554">https://www.liaoxuefeng.com/wiki/1252599548343744/1306580767211554</a></p>
-</li>
-<li><p>如何使用此功能</p>
-<p>使用lockInterruptible()方法可以获得拥有此功能的锁</p>
-</li>
-</ul>
-</li>
-<li><p>公平锁</p>
-<p>公平锁会按照时间的先后顺序分配锁，但是性能低下，所以大多数情况下锁的申请都是非公平的。</p>
-</li>
-<li><p>锁申请等待限时</p>
-<p>可以避免死锁，因为可以设置等待时间。可以通过tryLock()方法使用此功能。</p>
-</li>
-</ul>
-</li>
-<li><p>搭档 Condition</p>
-<p>通过lock接口的 newCondition()方法可以生成一个与当前重入锁绑定的Condition实例，利用这个实例可以让线程在合适的时间等待，或者在某一个特定的时刻得到通知继续执行。</p>
-</li>
-</ul>
-</li>
-<li><p>信号量 Semaphore</p>
-<p>Semaphore(信号量)是java.util.concurrent下的一个工具类.用来控制可同时访问特定资源的线程数.内部是通过维护父类(AQS)的 int state值实现。<br>学习链接：<a href="https://zhuanlan.zhihu.com/p/27314456">https://zhuanlan.zhihu.com/p/27314456</a></p>
-</li>
-<li><p>ReadWriteLock 读写锁</p>
-<p>可以有效帮助减少锁竞争，提升系统性能。主要应用于读操作的次数远远大于写操作的次数。<br>学习链接：<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306581002092578">https://www.liaoxuefeng.com/wiki/1252599548343744/1306581002092578</a></p>
-</li>
-<li><p>倒计数器 CountDownLatch</p>
-<p>使用的多线程控制工具类，通常用来控制线程等待，它可以让某一个线程等待直到倒计数器结束再开始执行，它是一次性的，打开之后就不能关上了。<br>应用场景：在一个行为执行前需要执行很多前置步骤。<br>学习链接：<a href="https://www.jianshu.com/p/962bc7225ce8">https://www.jianshu.com/p/962bc7225ce8</a></p>
-</li>
-<li><p>循环栅栏 CyclicBarrier</p>
-<p>字面意思回环栅栏，通过它可以实现让一组线程等待至某个状态之后再全部同时执行。<br>叫做回环是因为当所有等待线程都被释放以后，CyclicBarrier可以被重用；跟 CountDownLatch功能类似，但是更灵活、更强大、更复杂。<br>学习链接：<a href="https://www.jianshu.com/p/4ef4bbf01811">https://www.jianshu.com/p/4ef4bbf01811</a></p>
-</li>
-<li><p>线程阻塞工具类 LockSupport</p>
-<p>LockSupport 是一个线程阻塞工具，可以让线程在任意位置阻塞；<br>应用实例：一个节点线程获取不到锁时，会阻塞自己，调用的就是LockSupport的park()方法，返回只有两种方式，前一个节点线程释放锁时unpark()了当前节点，或者当前节点线程被中断返回。</p>
-</li>
-<li><p>限流工具 Guava的RateLimiter</p>
-<p>应用或者组件都有访问上限，如果突破这个上限不仅会影响其性能，更可能会导致其崩溃，因此，对请求进行限流是必要的。<br>学习链接：<a href="https://juejin.im/post/6844903783432978439">https://juejin.im/post/6844903783432978439</a></p>
-<ul>
-<li><p>漏桶算法</p>
-<p>利用缓存，当有请求进入系统时无论请求速率如何，都先在缓存区内保存，然后以固定的流苏流出缓存区进行处理。</p>
-</li>
-<li><p>令牌桶算法</p>
-<p>桶中存放的不是请求而是令牌，处理程序只有拿到令牌后才能对请求进行处理，如果没有令牌可能被丢弃也可能等待可用令牌</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="线程复用：线程池"><a href="#线程复用：线程池" class="headerlink" title="线程复用：线程池"></a>线程复用：线程池</h3><ul>
-<li><p>Executor框架</p>
-<ul>
-<li><p>Executors类</p>
-<ul>
-<li><p>newFixedThreadPool()</p>
-<p>返回一个固定线程数量的线程池，待执行任务保存在队列中</p>
-</li>
-<li><p>newSingleThreadExecutor()</p>
-<p>返回只有一个线程的线程池，待执行任务保存在队列中</p>
-</li>
-<li><p>newCachedThreadPool()</p>
-<p>返回一个可根据实际情况调整线程数量的线程池</p>
-</li>
-<li><p>newScheduledThreadPool()</p>
-<p>返回ScheduleExecutorService对象，可以执行线程的数量</p>
-</li>
-<li><p>newSingleThreadScheduledExector()</p>
-<p>返回ScheduledExectorService对象，只有一个线程，可以设置执行任务相关的时间参数</p>
-</li>
-<li><p>。。。。</p>
-</li>
-</ul>
-</li>
-<li><p>自定义线程创建 ThreadFactory</p>
-</li>
-<li><p>扩展线程池 ThreadPoolExector</p>
-<p>提供了 beforeExecute()、afterExecute()和terminated() 三个接口用来对线程池进行控制</p>
-</li>
-<li><p>输出异常堆栈</p>
-<ul>
-<li><p>使用execute()方法</p>
-<p>submit()会忽略系统抛出的异常</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>分而治之 Fork/Join框架</p>
-<p>学习链接：<a href="https://www.liaoxuefeng.com/article/1146802219354112">https://www.liaoxuefeng.com/article/1146802219354112</a></p>
-</li>
-<li><p>Guava对线程池的扩展</p>
-<ul>
-<li><p>DirectExecutor线程池</p>
-<p>它并没有真的创建或者使用额外线程，它总是将任务在当前线程中直接执行。这个设计主要是为了完成业务的抽象工作，可以使用同一的编码风格处理同步和异步调用，进而简化设计。</p>
-</li>
-<li><p>Daemon线程池</p>
-<p>将普通线程池转为Daemon线程池，可以随着系统（也可以叫主线程）执行完成后一起销毁</p>
-</li>
-<li><p>Future模型的扩展</p>
-<p>Future模式核心思想是异步调用，线程会在等待结果返回的过程中执行其他业务，从而充分利用这段时间</p>
-<ul>
-<li><p>ListeningExecutorService</p>
-<p>调用 MoreExecutors.listeningDecorator 方法将一个普通线程池包装为一个包含通知同能的Future线程池</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="java并发容器"><a href="#java并发容器" class="headerlink" title="java并发容器"></a>java并发容器</h2><h3 id="并发集合"><a href="#并发集合" class="headerlink" title="并发集合"></a>并发集合</h3><ul>
-<li><p>ConcurrentHashMap</p>
-<p>高效的并发,线程安全的HashMap</p>
-</li>
-<li><p>CopyOnWriteArrayList</p>
-<p>线程安全的ArrayList 适合读多写少的场合，性能远好于Vector。<br>读取不加锁，写入也不会阻塞读取操作，只有写入和写入会加锁，因为在写入操作时会进行一次自我复制</p>
-</li>
-<li><p>ConcurrentLinkedQueue</p>
-<p>高效并发队列，链表实现可以看作是线程安全的LinkedList，是高并发环境中性能最好的队列</p>
-</li>
-<li><p>BlokingQueue</p>
-<p>阻塞队列，适合做数据共享通道。非常适合作为“生产和–消费者”模式的数据同步工具，在队列为空的时候会让读取阻塞，而当队列满了后会让存储操作阻塞</p>
-</li>
-<li><p>ConcurrentSkipListMap</p>
-<p>跳表实现，一种可以用来快速查找的数据结构。</p>
-<ul>
-<li><p>高性能</p>
-<p>类似平衡树，区别是对平衡树的插入和删除往往很可能导致平衡树进行一次全局调整，而跳表只需要对整个数据结构的局部进行操作即可。这样就可以控制锁的粒度。</p>
-</li>
-<li><p>随机算法</p>
-<p>跳表本质是同时维护了多个链表，并且链表是分层的，底层的链表维护了跳表内所有的元素，每上面一层链表都是下面一层链表的子集，一个元素插入哪些层是随机的。<br>查找操作时跳跃式的，跳表内所有链表的元素都是排序的，查找时会从顶层开始，一旦发现被查找的元素大于当前链表中的取值就会转入下一层继续查找。</p>
-<ul>
-<li>疑问：为什么插入是随机的 但是查找可以按照顺序查找呢？</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="JMH进行性能测试"><a href="#JMH进行性能测试" class="headerlink" title="JMH进行性能测试"></a>JMH进行性能测试</h2><p>学习链接：<a href="https://www.xncoding.com/2018/01/07/java/jmh.html">https://www.xncoding.com/2018/01/07/java/jmh.html</a></p>
-<h2 id="锁优化"><a href="#锁优化" class="headerlink" title="锁优化"></a>锁优化</h2><h3 id="提高性能的建议"><a href="#提高性能的建议" class="headerlink" title="提高性能的建议"></a>提高性能的建议</h3><ul>
-<li><p>1、减少锁的持有时间</p>
-<p>尽量不要在同步代码块中做耗时的操作，并且只在必要时进行同步</p>
-</li>
-<li><p>2、减小锁的粒度</p>
-<p>需要同步的代码块要尽量小</p>
-</li>
-<li><p>3、用读写分离锁替换独占锁</p>
-</li>
-<li><p>4、锁分离</p>
-<p>是读写锁的上层思想，可以将功能进行拆分，并根据每个功能的实际需求进行定制化的操作</p>
-</li>
-<li><p>5、锁粗化</p>
-<p>对同一个锁不断进行请求和释放的操作时便会把所有的锁操作整合成对锁的一次请求，从而减少对锁的请求同步的次数</p>
-</li>
-</ul>
-<h3 id="java虚拟机对锁的优化"><a href="#java虚拟机对锁的优化" class="headerlink" title="java虚拟机对锁的优化"></a>java虚拟机对锁的优化</h3><ul>
-<li><p>锁偏向</p>
-<p>是一种针对加锁操作的优化。<br>核心思想：如果一个线程获得了锁，那么锁就进入偏向模式，当这个线程再次请求锁时无须再做任何同步操作。<br>但是在锁竞争比较激烈的场合其效果不佳，因为可能每次请求锁的都不是同一个线程，所以不建议在竞争激烈的环境下启用</p>
-</li>
-<li><p>轻量级锁</p>
-<p>它只是简单地将对象头部作为指针指向持有锁的线程堆栈的内部，来判断一个线程是否持有对象锁。如果加锁失败就会转为重量级锁。<br>学习链接：<a href="https://www.zhihu.com/question/53826114">https://www.zhihu.com/question/53826114</a></p>
-</li>
-<li><p>自旋锁</p>
-<p>虚拟机会让当前线程做几个空循环，在经过若干次循环后如果可以得到锁，那么就会顺利进入临界区，如果不能获得锁会在操作系统层面挂起</p>
-</li>
-<li><p>锁消除</p>
-<p>虚拟机在编译过程中会去除不可能存在共享资源竞争的锁，通过这种措施可以节省毫无意义的请求锁时间。<br>之所以有这一操作，一方面是防止用户的错误使用。 另一方面用户在使用jdk提供的api时，api内部实现可能使用了同步锁</p>
-</li>
-</ul>
-<h3 id="ThreadLocal"><a href="#ThreadLocal" class="headerlink" title="ThreadLocal"></a>ThreadLocal</h3><p>本质是通过增加资源来保证所有对象的线程安全，会为每一个线程保存一份资源的副本，这样就不会产生竞争，但是用完要及时清理资源，不然容易发生内存泄漏。<br>学习链接：<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306581251653666">https://www.liaoxuefeng.com/wiki/1252599548343744/1306581251653666</a></p>
-<h3 id="无锁"><a href="#无锁" class="headerlink" title="无锁"></a>无锁</h3><p>乐观锁的思想，它会假设对资源的访问是没有冲突的，无锁的策略使用CAS的技术来鉴别线程冲突，一旦检测到冲突产生就重试当前操作直到没有冲突为止。</p>
-<ul>
-<li><p>CAS</p>
-<p>乐观锁，并没有真的是使用同步锁，当多个线程同时使用CAS操作一个变量时只有一个会胜出，并成功更新，其余均会失败。失败的线程不会被挂起，仅是被告知失败，并且允许再次尝试，也允许放弃操作。</p>
-</li>
-<li><p>安全整数 AtomicInteger</p>
-<p>线程安全的整数，使用CAS操作</p>
-</li>
-<li><p>无锁的对象引用 AtomicReference</p>
-<p>保证修改对象引用时的线程安全性</p>
-<ul>
-<li>缺点：无法解决ABA问题</li>
-</ul>
-</li>
-<li><p>带时间戳的对象引用 AtomicStampedReference</p>
-<ul>
-<li>优势：通过时间戳解决ABA问题</li>
-</ul>
-</li>
-<li><p>无锁数组 AtomicIntegerArray</p>
-</li>
-<li><p>让普通变量也享受原子操作 AtomicIntegerFieldUpdater</p>
-<p>可以对int、long和普通对象引用进行CAS修改；<br>注意事项：<br> 变量必须public 因为底层使用了反射获取变量的值<br>必须被volatile修饰<br>不支持static修饰的变量，因为会通过对象实例中的偏移量直接进行赋值</p>
-</li>
-<li><p>数据交换通道 SynchronousQueue</p>
-<p>学习链接：<a href="https://blog.csdn.net/zmx729618/article/details/52980158">https://blog.csdn.net/zmx729618/article/details/52980158</a></p>
-</li>
-</ul>
-<h2 id="实用工具"><a href="#实用工具" class="headerlink" title="实用工具"></a>实用工具</h2><h3 id="Disruptor-框架"><a href="#Disruptor-框架" class="headerlink" title="Disruptor 框架"></a>Disruptor 框架</h3><p>高效无锁内存队列 可以用来实现高性能的 生产者–消费者模式</p>
-<h3 id="Akka框架"><a href="#Akka框架" class="headerlink" title="Akka框架"></a>Akka框架</h3><p>帮助构建高并发程序</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>多线程</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【Mybatis源码解读】jdbc包</title>
-    <url>/blog/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</url>
-    <content><![CDATA[<h1 id="【Mybatis源码解读】jdbc包"><a href="#【Mybatis源码解读】jdbc包" class="headerlink" title="【Mybatis源码解读】jdbc包"></a>【Mybatis源码解读】jdbc包</h1><span id="more"></span>
-
-<h2 id="1-jdbc包的作用"><a href="#1-jdbc包的作用" class="headerlink" title="1. jdbc包的作用"></a>1. jdbc包的作用</h2><p>jdbc包作为Mybatis框架的核心包之一可以理解为是<strong>操作Sql的工具包</strong>，因为通过阅读代码观察到这个jdbc包里面的类并没有被Mybatis框架本身引用，而其本身的作用又是对sql的操作，所以当作工具包来理解是没有什么问题的。</p>
-<h2 id="2-设计思想"><a href="#2-设计思想" class="headerlink" title="2. 设计思想"></a>2. 设计思想</h2><p>利用面向对象的<strong>继承</strong>特性增加功能的<strong>拓展性</strong>。</p>
-<h2 id="3-实现细节"><a href="#3-实现细节" class="headerlink" title="3. 实现细节"></a>3. 实现细节</h2><p>jdbc包里面的类其实很少，去掉过期的和一些辅助类主要的类有三个：<strong>AbstractSQL</strong>、<strong>ScriptRunner</strong>、<strong>SqlRunner</strong>，这里着重介绍<strong>AbstractSQL</strong>类，因为相对于<strong>AbstractSQL</strong>类另外的两个类功能很简单。</p>
-<p><strong>AbstractSQL</strong>的类图:</p>
-<p>可以看出SQL类继承了<strong>AbstractSQL</strong>类，而SafeAppendable 和 SQLStatement 是<strong>AbstractSQL</strong>的内部类，下面逐一介绍。</p>
-<p><img src="https://s2.loli.net/2021/12/05/pJT69AcKPMHEqxf.png" alt="image-20201206170511920"></p>
-<h3 id="SQL类"><a href="#SQL类" class="headerlink" title="SQL类"></a>SQL类</h3><h4 id="3-1-1-简介"><a href="#3-1-1-简介" class="headerlink" title="3.1.1 简介"></a>3.1.1 简介</h4><p>SQL类的实现很简单：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SQL</span> <span class="keyword">extends</span> <span class="title">AbstractSQL</span>&lt;<span class="title">SQL</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> SQL <span class="title">getSelf</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>也就是说所有的逻辑实现都写在了它的父类中，那为什么还要SQL类呢？答案就是为了<strong>增加功能的拓展性</strong>，比如你想在生成sql的时候满足一些定制化的需求可以重新创建一个子类继承并拓展它。</p>
-<h4 id="3-1-2-使用"><a href="#3-1-2-使用" class="headerlink" title="3.1.2 使用"></a>3.1.2 使用</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    <span class="meta">@SelectProvider(type = UserProvider.class, method = &quot;queryUsersBySchoolName&quot;)</span></span><br><span class="line">    <span class="function">List&lt;User&gt; <span class="title">queryUsersBySchoolName</span><span class="params">(String schoolName)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserProvider</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">queryUsersBySchoolName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> SQL()</span><br><span class="line">                .SELECT(<span class="string">&quot;*&quot;</span>)</span><br><span class="line">                .FROM(<span class="string">&quot;user&quot;</span>)</span><br><span class="line">                .WHERE(<span class="string">&quot;schoolName = #&#123;schoolName&#125;&quot;</span>)</span><br><span class="line">                .toString();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可以看出这种方式是直接在每个接口上引入sql，如果项目比较庞大是很难有效管理sql的 ，所以这种使用方式很不常见。</p>
-<h3 id="SafeAppendable"><a href="#SafeAppendable" class="headerlink" title="SafeAppendable"></a>SafeAppendable</h3><h4 id="3-2-1-简介"><a href="#3-2-1-简介" class="headerlink" title="3.2.1 简介"></a>3.2.1 简介</h4><p>看名字就可以了解到这个类里面封装了<strong>拼接</strong>字符的行为，使用了<strong>组合模式</strong>持有了Appendable接口实例的引用，并调用其append方法实现拼接，拼接完成后调用Appendable实例的toString方法获取拼接结果。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SafeAppendable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Appendable a;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> empty = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SafeAppendable</span><span class="params">(Appendable a)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">super</span>();</span><br><span class="line">      <span class="keyword">this</span>.a = a;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SafeAppendable <span class="title">append</span><span class="params">(CharSequence s)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (empty &amp;&amp; s.length() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">          empty = <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        a.append(s);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> empty;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="SQLStatement"><a href="#SQLStatement" class="headerlink" title="SQLStatement"></a>SQLStatement</h3><h4 id="3-3-1-简介"><a href="#3-3-1-简介" class="headerlink" title="3.3.1 简介"></a>3.3.1 简介</h4><p>从下图为此类封装的方法，可以看出此类是拼接sql的主力军。</p>
-<p><img src="https://s2.loli.net/2021/12/05/PtIn4eRMAJwXsVx.png" alt="image-20201206180137582"></p>
-<p>下图这些为此类的属性，从名字可以看出是根据sql关键字进行分类的，存储着相应的值，用来拼接sql时使用。</p>
-<p><img src="https://s2.loli.net/2021/12/05/74HvADUTKCeFadm.png" alt="image-20201206180617860"></p>
-<p>以拼接select为例分析源码：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">   <span class="comment">//只接收一个参数就是拼接器，用来拼接字符</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> String <span class="title">selectSQL</span><span class="params">(SafeAppendable builder)</span> </span>&#123;</span><br><span class="line">   <span class="comment">//判断是否需要去重，如果需要就增加 DISTINCT关键字，而select为上图的属性，是一个集合里面存储着相应的值，下面几个参数类似不做赘述，下面会对sqlClause方法做详细解释。</span></span><br><span class="line">     <span class="keyword">if</span> (distinct) &#123;</span><br><span class="line">       sqlClause(builder, <span class="string">&quot;SELECT DISTINCT&quot;</span>, select, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       sqlClause(builder, <span class="string">&quot;SELECT&quot;</span>, select, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     sqlClause(builder, <span class="string">&quot;FROM&quot;</span>, tables, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     <span class="comment">//join语句比较特殊，所以单独创建函数，但是本质也是复用sqlClause函数</span></span><br><span class="line">     joins(builder);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;WHERE&quot;</span>, where, <span class="string">&quot;(&quot;</span>, <span class="string">&quot;)&quot;</span>, <span class="string">&quot; AND &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;GROUP BY&quot;</span>, groupBy, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;HAVING&quot;</span>, having, <span class="string">&quot;(&quot;</span>, <span class="string">&quot;)&quot;</span>, <span class="string">&quot; AND &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;ORDER BY&quot;</span>, orderBy, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     <span class="comment">//利用LIMIT、OFFSET关键字做分页处理</span></span><br><span class="line">     limitingRowsStrategy.appendClause(builder, offset, limit);</span><br><span class="line">     <span class="keyword">return</span> builder.toString();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<p>下面是sqlClause 函数的代码：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//参数一：拼接器；参数二：关键字例如SELECT等等;参数三：sql所需值的集合；参数四和五：参数开始和结束字符 例如where语句需要括号括起来；参数六：参数连接字符例如 AND等等</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">sqlClause</span><span class="params">(SafeAppendable builder, String keyword, List&lt;String&gt; parts, String open, String close,String conjunction)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!parts.isEmpty()) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!builder.isEmpty()) &#123;</span><br><span class="line">      builder.append(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    builder.append(keyword);</span><br><span class="line">    builder.append(<span class="string">&quot; &quot;</span>);</span><br><span class="line">    builder.append(open);</span><br><span class="line">    String last = <span class="string">&quot;________&quot;</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>, n = parts.size(); i &lt; n; i++) &#123;</span><br><span class="line">      String part = parts.get(i);</span><br><span class="line">      <span class="keyword">if</span> (i &gt; <span class="number">0</span> &amp;&amp; !part.equals(AND) &amp;&amp; !part.equals(OR) &amp;&amp; !last.equals(AND) &amp;&amp; !last.equals(OR)) &#123;</span><br><span class="line">        builder.append(conjunction);</span><br><span class="line">      &#125;</span><br><span class="line">      builder.append(part);</span><br><span class="line">      last = part;</span><br><span class="line">    &#125;</span><br><span class="line">    builder.append(close);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="AbstractSQL"><a href="#AbstractSQL" class="headerlink" title="AbstractSQL"></a>AbstractSQL</h3><h4 id="3-4-1-简介"><a href="#3-4-1-简介" class="headerlink" title="3.4.1 简介"></a>3.4.1 简介</h4><p>如果理解了前面三个类的作用那理解此类的作用也就水到渠成了，下面看下此类封装的方法，可以看到所有方法都是以sql语句的关键词命名的</p>
-<p><img src="https://s2.loli.net/2021/12/05/nZctYG87sJqrvmK.png" alt="image-20201207221124727"></p>
-<h4 id="3-4-2-详解"><a href="#3-4-2-详解" class="headerlink" title="3.4.2 详解"></a>3.4.2 详解</h4><p>以SELECT方法为例，当使用如下方法时发生了什么？</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">new</span> SQL()</span><br><span class="line">              .SELECT(<span class="string">&quot;*&quot;</span>)</span><br><span class="line">              .FROM(<span class="string">&quot;user&quot;</span>)</span><br><span class="line">              .WHERE(<span class="string">&quot;schoolName = #&#123;schoolName&#125;&quot;</span>)</span><br><span class="line">              .toString();</span><br></pre></td></tr></table></figure>
-
-<p>当调用AbstractSQL里面封装的方法时其实都将传进来的值存储在了SQLStatement相应关键字的属性中，当最后调用toString方法时就会触发sql的拼接工作，所以可以理解为AbstractSQL是给SQLStatement类做了一层<strong>装饰器</strong>。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">SELECT</span><span class="params">(String columns)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//sql() 方法会返回SQLStatement类的一个实例</span></span><br><span class="line">    <span class="comment">//设置sql类别</span></span><br><span class="line">  sql().statementType = SQLStatement.StatementType.SELECT;</span><br><span class="line">    <span class="comment">//将传入的值存储到SQLStatement类的select属性中</span></span><br><span class="line">  sql().select.add(columns);</span><br><span class="line">    <span class="comment">//返回对象本身</span></span><br><span class="line">  <span class="keyword">return</span> getSelf();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>其他关键字方法的调用都是类似的，这里不再赘述，下面介绍一下<strong>如何触发拼接sql的操作</strong>：</p>
-<p>当调用toString方法时就会触发sql拼接操作，代码如下：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//创建一个字符拼接器</span></span><br><span class="line">  StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    <span class="comment">//调用SQLStatement类的sql方法，此方法会利用StringBuilder拼接sql</span></span><br><span class="line">  sql().sql(sb);</span><br><span class="line">    <span class="comment">//转化为字符串</span></span><br><span class="line">  <span class="keyword">return</span> sb.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//这个方法会根据sql的类型调用相应的拼接方法，而SELECT语句如何拼接的前文已经讲解过，大家可以按照此方法查看一下其他类型sql的拼接过程</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">sql</span><span class="params">(Appendable a)</span> </span>&#123;</span><br><span class="line">  SafeAppendable builder = <span class="keyword">new</span> SafeAppendable(a);</span><br><span class="line">  <span class="keyword">if</span> (statementType == <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  String answer;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">switch</span> (statementType) &#123;</span><br><span class="line">    <span class="keyword">case</span> DELETE:</span><br><span class="line">      answer = deleteSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> INSERT:</span><br><span class="line">      answer = insertSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> SELECT:</span><br><span class="line">      answer = selectSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> UPDATE:</span><br><span class="line">      answer = updateSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      answer = <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> answer;</span><br></pre></td></tr></table></figure>
-
-<p>这里有个细节，为什么AbstractSQL类中的方法都是大写的呢？ 我查阅了相关资料发现这是为了照顾大家写sql时的习惯。</p>
-<p>通过以上知识的学习我们就应该知道 Mybatis 是如何操作 sql 的了。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Mybatis</tag>
-        <tag>源码阅读</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
-    <url>/blog/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</url>
-    <content><![CDATA[<h1 id="【通过抓包学网络】TCP三次握手与四次挥手"><a href="#【通过抓包学网络】TCP三次握手与四次挥手" class="headerlink" title="【通过抓包学网络】TCP三次握手与四次挥手"></a>【通过抓包学网络】TCP三次握手与四次挥手</h1><p>本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章<a href="https://blog.csdn.net/qq_43005544/article/details/116504407">wireshark 简易教程</a></p>
-<span id="more"></span>
-
-<p><strong>正文开始</strong></p>
-<h1 id="1-首先抓个包"><a href="#1-首先抓个包" class="headerlink" title="1.首先抓个包"></a>1.首先抓个包</h1><p>通过上一篇文章大家应该都能打开对应网卡的抓包页面了哈；我们利用DNS服务可以将域名解析成IP的功能来演示如何抓到我们想要的包。</p>
-<h2 id="1-1-开始抓包"><a href="#1-1-开始抓包" class="headerlink" title="1.1 开始抓包"></a>1.1 开始抓包</h2><p>如果进入抓包页面没有自动开始抓包，就点击左上角的开始抓包按钮，如图：<br><img src="https://img-blog.csdnimg.cn/20210507235225375.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="1-2-打开命令行界面"><a href="#1-2-打开命令行界面" class="headerlink" title="1.2 打开命令行界面"></a>1.2 打开命令行界面</h2><p>博主用的win10操作系统，所以打开的就是CMD了，输入以下命令</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;nslookup</span><br><span class="line">&gt;<span class="built_in">set</span> vc</span><br><span class="line">&gt;www.baidu.com</span><br></pre></td></tr></table></figure>
-<p>命令执行情况如图：<br><img src="https://img-blog.csdnimg.cn/20210507233243944.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70"></p>
-<h2 id="1-3-停止抓包"><a href="#1-3-停止抓包" class="headerlink" title="1.3 停止抓包"></a>1.3 停止抓包</h2><p>点击红框标记的按钮：<br><img src="https://img-blog.csdnimg.cn/20210507235328579.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="1-4-筛选"><a href="#1-4-筛选" class="headerlink" title="1.4 筛选"></a>1.4 筛选</h2><p>这个时候可以看到界面上抓到很多包，但是有很多是其他应用进行的网络请求，并不是我们想要的，所以要进行筛选。<br>在筛选框我们用Ip进行筛选，表达式为<strong>ip.addr == 116.199.0.200</strong>，如图<br><img src="https://img-blog.csdnimg.cn/20210507235517845.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>116.199.0.200是我本机DNS的ip，你可以通过刚在输入的nslookup命令得到，如图<br><img src="https://img-blog.csdnimg.cn/20210507235651897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>但是通过筛选后发现还是有很多包不是我们想要的，我们通过info列来找到我们请求DNS的包，如图：<br>找到DNS协议info这列有我们刚才输入需要解析的域名这两行，这两行就是DNS解析域名的过程，我们从这两行的Info就可以很清晰的看出DNS解析域名的过程，首先192.168.1.107询问DNS <a href="http://www.baidu.com的ip是多少,然后dns在下一行进行回复./">www.baidu.com的IP是多少，然后DNS在下一行进行回复。</a><br><img src="https://img-blog.csdnimg.cn/20210509113130576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="1-5-找到三次握手的包"><a href="#1-5-找到三次握手的包" class="headerlink" title="1.5 找到三次握手的包"></a>1.5 找到三次握手的包</h2><p>在1.4小节中我们找到的926和927号包的上面就是三次握手的包，分别是921，922，923这三个包，如图：<br><img src="https://img-blog.csdnimg.cn/20210509161642786.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>你可能想问是怎么看出来的，好问题，主要是看Seq和Ack的值，三次握手的时候Seq的相对值是为0的（注意是相对值）。找到了三次握手的网络包，我们就来分析一下三次握手吧。</p>
-<h1 id="2-分析三次握手"><a href="#2-分析三次握手" class="headerlink" title="2. 分析三次握手"></a>2. 分析三次握手</h1><h2 id="2-1-TCP-参数介绍"><a href="#2-1-TCP-参数介绍" class="headerlink" title="2.1 TCP 参数介绍"></a>2.1 TCP 参数介绍</h2><p>要学习TCP首先要学习它的参数。</p>
-<p><strong>Seq</strong>：标识改数据段的序号。因为TCP的传输是有序的，接收者可以通过Seq对包进行排序。</p>
-<p><strong>Len</strong>：表示Seq对应数据的长度。</p>
-<p><strong>Ack</strong>：确认号，向数据提供者表明收到了哪些包（实际收到包的Seq序号需要 Ack - 1，因为Seq是从0开始的，例如Ack = 2说明已经收到 第0段和第1段需要包，下一个需要接收的序号包Seq 需要为 2）。</p>
-<p><strong>SYN</strong>：表示携带这个参数的数据包正在发起连接请求。</p>
-<p><strong>FIN</strong>：表示携带这个参数的包正在请求停止连接。</p>
-<h2 id="2-2-三次握手过程"><a href="#2-2-三次握手过程" class="headerlink" title="2.2 三次握手过程"></a>2.2 三次握手过程</h2><p>用来分析的数据包如图：<br><img src="https://img-blog.csdnimg.cn/2021050917000075.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><strong>第一次握手</strong> 192.168.1.107 向 116.119.0.200 发送携带 SYN; Seq = 0;len = 0的请求。SYN表示这是在请求连接，Seq表示目前发送的是第0段数据包，len表示数据包的长度为0。</p>
-<p><strong>第二次握手</strong> 116.119.0.200 向192.168.1.107发送携带SYN;Seq = 0;Len = 0; Ack = 1的请求。因为TCP是双向连接，所以双方都要维护各自的参数，除了Ack其他参数在第一次握手的时候讲过了，Ack表示已经接收到Seq = 0 的数据包了，下一次请从Seq = 1 的数据包发送。</p>
-<p><strong>第三次握手</strong>：192.168.1.107 向 116.119.0.200 发送携带Ack = 1; Seq = 1; len = 0;的请求，表示已经收到Seq = 0 的数据包了，下一次请从Seq = 1 的数据包发送。<br>这时连接已经成功建立。</p>
-<p>这样就通过三次握手建立了一个连接，<strong>至于面试常问的为什么不是两次或者四次相信你已经知道答案了</strong>，因为<strong>两次不可靠</strong>，可能在第二次握手的时候超时了，对方并没有收到请求，而发送方并不知道，以为已经成功建立了连接，所以会向对方发送数据，但是对方因为其他原因没有接收到第二次握手，所以不会接受数据发送方发送的数据。<strong>至于四次没必要</strong>，因为所有想做的事情已经做完了。</p>
-<h1 id="3-分析四次挥手"><a href="#3-分析四次挥手" class="headerlink" title="3. 分析四次挥手"></a>3. 分析四次挥手</h1><h2 id="3-1-找到四次挥手的数据包"><a href="#3-1-找到四次挥手的数据包" class="headerlink" title="3.1 找到四次挥手的数据包"></a>3.1 找到四次挥手的数据包</h2><p>四次挥手的数据包就是928至931，你又想问这是怎么看出来的？好问题，讲三次握手的时候介绍过 <strong>FIN</strong>参数就代表着请求断开连接，那我们就找离DNS解析域名数据包最近的携带FIN参数的数据包。<br><img src="https://img-blog.csdnimg.cn/20210509174830567.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="3-2-分析四次挥手"><a href="#3-2-分析四次挥手" class="headerlink" title="3.2 分析四次挥手"></a>3.2 分析四次挥手</h2><p><strong>第一次挥手</strong>：192.168.1.107 向 116.119.0.200 发送携带FIN; Seq = 34; Ack = 93; 的数据包，FIN表示请求断开连接，Seq = 34表示这个数据包是第34段，Ack = 93表示已经收到93段之前的数据包了，下一次请求第93段数据包开始发送。</p>
-<p><strong>第二次挥手</strong>： 116.119.0.200 向192.168.1.107发送携带Seq = 93; Ack = 35;的数据包，表示请求已经收到 Seq和Ack参数就不解释了。</p>
-<p><strong>第三次挥手</strong>：116.119.0.200 向192.168.1.107发送携带FIN; Seq = 93; Ack = 35; 的数据包，表示请求断开连接。</p>
-<p><strong>第四次挥手</strong>：192.168.1.107 向 116.119.0.200 发送携带Seq = 35; Ack = 94;的数据包，表示已经接收到请求。</p>
-<p>通过四次挥手完成了连接的断开，<strong>面试的时候常问为什么不能是三次挥手</strong>，这里已经很明确了，因为116.119.0.200这台服务器需要连续发送两个数据包，那为什么是两个呢？因为可能还有一些网络数据没有处理完，不能马上断开连接，只能先回应请求收到了，等处理完数据后再发送断开连接请求。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Wireshark</tag>
-        <tag>网络</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>垃圾收集器与内存分配策略</title>
-    <url>/blog/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/</url>
-    <content><![CDATA[<h1 id="垃圾收集器与内存分配策略"><a href="#垃圾收集器与内存分配策略" class="headerlink" title="垃圾收集器与内存分配策略"></a>垃圾收集器与内存分配策略</h1><span id="more"></span>
-
-<h2 id="对象已死？-判断对象是否可以回收"><a href="#对象已死？-判断对象是否可以回收" class="headerlink" title="对象已死？(判断对象是否可以回收)"></a>对象已死？(判断对象是否可以回收)</h2><h3 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h3><ul>
-<li><p>reference类型的数据中存储的数值代表的是另一块内存的起始地址</p>
-<ul>
-<li>强引用：代码中的引用赋值 例如 new对象；意义：对象不会被回收</li>
-<li>软引用：还有用非必须的对象；意义：在系统将要发生内存溢出前回收</li>
-<li>弱引用：非必须对象；意义：每次垃圾回收时都会被清理</li>
-<li>虚引用：最弱的一种引用；意义：可以让一个对象被回收时收到一个系统通知</li>
-</ul>
-</li>
-</ul>
-<h3 id="引用计数算法"><a href="#引用计数算法" class="headerlink" title="引用计数算法"></a>引用计数算法</h3><ul>
-<li>在对象中添加一个引用计数器，被引用加一，引用失效减一，为零就不会再使用可以回收</li>
-<li>优点：原理简单，效率高</li>
-<li>缺点：实用性不强，例如 很难解决对象间的互相循环引用的问题</li>
-</ul>
-<h3 id="可达性分析算法"><a href="#可达性分析算法" class="headerlink" title="可达性分析算法"></a>可达性分析算法</h3><ul>
-<li><p>判断某个对象到GC Roots间有没有引用链相连，如果没有就说明对象不可达、不再使用可以回收</p>
-</li>
-<li><p>GC Roots</p>
-<ul>
-<li>虚拟机栈的本地变量表中引用的对象</li>
-<li>方法区中类静态属性引用的对象</li>
-<li>方法区中常量引用的对象</li>
-<li>本地方法栈中JNI(Native方法)引用的对象</li>
-<li>java虚拟机内部的引用，如基本数据类型对应的Class对象，常驻的异常对象，类加载器</li>
-<li>同步锁持有的对象</li>
-<li>反应虚拟机内部情况的JMXBean、JVMTI中注册的回调、本地代码缓存等</li>
-</ul>
-</li>
-</ul>
-<h3 id="生存还是死亡-判断对象是否真的能被回收"><a href="#生存还是死亡-判断对象是否真的能被回收" class="headerlink" title="生存还是死亡(判断对象是否真的能被回收)"></a>生存还是死亡(判断对象是否真的能被回收)</h3><ul>
-<li>至少要经历两次标记(判断)，如果第一次被标记成不可达，但是在第二次标记前又与GC Roots建立了链接就不会被清理</li>
-</ul>
-<h3 id="回收方法区"><a href="#回收方法区" class="headerlink" title="回收方法区"></a>回收方法区</h3><ul>
-<li>《java虚拟机规范》不强制方法区实现垃圾收集</li>
-<li>方法区垃圾收集性价比比较低</li>
-<li>主要回收废弃的常量和不再使用的类型（类型指加载到内存中的Class）</li>
-</ul>
-<h2 id="垃圾收集算法"><a href="#垃圾收集算法" class="headerlink" title="垃圾收集算法"></a>垃圾收集算法</h2><h3 id="引用计数式垃圾收集（直接垃圾收集）"><a href="#引用计数式垃圾收集（直接垃圾收集）" class="headerlink" title="引用计数式垃圾收集（直接垃圾收集）"></a>引用计数式垃圾收集（直接垃圾收集）</h3><h3 id="追踪式垃圾收集（间接垃圾收集）（主流）"><a href="#追踪式垃圾收集（间接垃圾收集）（主流）" class="headerlink" title="追踪式垃圾收集（间接垃圾收集）（主流）"></a>追踪式垃圾收集（间接垃圾收集）（主流）</h3><ul>
-<li><p>分代收集理论</p>
-<p>设计原则：收集器应该将java堆划分出不同区域，然后将回收对象依据其年龄分配到不同的区域之中存储</p>
-<ul>
-<li><p>弱分代假说：绝大多数对象都是朝生夕死的</p>
-</li>
-<li><p>强分代假说：熬过越多次垃圾收集过程的对象越你难以死亡</p>
-</li>
-<li><p>分代</p>
-<ul>
-<li>新生代</li>
-<li>老年代</li>
-</ul>
-</li>
-<li><p>跨分代引用假说：存在相互引用关系的对象应该倾向于同生同死，跨代引用占比较少。</p>
-<ul>
-<li><p>存在问题：当扫描新生代对象时如果有跨代引用还需要扫描整个老年代，成本较高</p>
-<ul>
-<li>解决办法：新生代建立一个全局数据结构（记忆集），这个结构将老年代划分成若干小块，标识出老年代的哪一块内存存在跨代引用。Minor GC时只有包含了跨代引用的小块内存里的对象才会被加入到GC Roots进行扫描，而不用扫描整个老年代</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>标记-清除算法：标记后清除被标记的对象</p>
-<ul>
-<li>缺点：1、执行效率不稳定（受要标记的目标对象数量的限制）；2、内存空间碎片化（产生不连续的内存碎片）</li>
-</ul>
-</li>
-<li><p>标记-复制算法：将内存划分为大小相等的两块，每次只用其中一块，当内存用完了就将存活对象复制到另一块，然后将已使用的内存一次清理掉</p>
-<ul>
-<li>缺点：空间浪费太严重</li>
-<li>新生代优先采用此算法，而老年代不会使用这种方法，因为新生代98%对象都是朝生夕死的，这种情况实现简单、效率高</li>
-</ul>
-</li>
-<li><p>标记-整理算法：先标记，让存活对象都移动到内存一端，然后清理掉边界以外的内存</p>
-</li>
-</ul>
-<h2 id="经典垃圾收集器"><a href="#经典垃圾收集器" class="headerlink" title="经典垃圾收集器"></a>经典垃圾收集器</h2><h3 id="Serial收集器"><a href="#Serial收集器" class="headerlink" title="Serial收集器"></a>Serial收集器</h3><ul>
-<li>单线程收集器</li>
-<li>优点：简单高效、内存消耗最小</li>
-<li>缺点：工作时必须“Stop The World”，用户体验差</li>
-</ul>
-<h3 id="ParNew收集器"><a href="#ParNew收集器" class="headerlink" title="ParNew收集器"></a>ParNew收集器</h3><ul>
-<li>Serial收集器多线程并行版本</li>
-<li>HotSpot虚拟机中第一款退出历史舞台的垃圾收集器，只能和CMS配合使用而CMS将会替代CMS</li>
-</ul>
-<h3 id="Parallel-Scavenge收集器"><a href="#Parallel-Scavenge收集器" class="headerlink" title="Parallel Scavenge收集器"></a>Parallel Scavenge收集器</h3><ul>
-<li>多线程，基于标记-复制算法</li>
-<li>设计目标：达到一个可控的吞吐量（也就是控制垃圾回收所占用的时间）</li>
-</ul>
-<h3 id="Serial-Old收集器"><a href="#Serial-Old收集器" class="headerlink" title="Serial Old收集器"></a>Serial Old收集器</h3><ul>
-<li>Serial的老年代版本 </li>
-<li>单线程，基于标记整理算法</li>
-</ul>
-<h3 id="Parallel-Old收集器"><a href="#Parallel-Old收集器" class="headerlink" title="Parallel Old收集器"></a>Parallel Old收集器</h3><ul>
-<li>Parallel Scavenge收集器老年代版本</li>
-<li>多线程，基于标记-整理算法</li>
-</ul>
-<h3 id="CMS收集器"><a href="#CMS收集器" class="headerlink" title="CMS收集器"></a>CMS收集器</h3><ul>
-<li><p>目标：为了获取最短回收停顿时间</p>
-</li>
-<li><p>多线程，基于标记-清除算法</p>
-</li>
-<li><p>缺点：1、处理器资源敏感，会占用一部分资源导致程序变慢，总吞吐量降低。2、无法处理浮动垃圾，可能导致full gc发生。3、无法处理空间碎片，只能依靠full gc</p>
-<p>浮动垃圾：CMS标记和清理阶段用户线程会同时运行并产生新的垃圾，因为有些垃圾在标记后产生所以本次无法清理，只能等到下次。</p>
-</li>
-</ul>
-<h3 id="Garbage-First收集器（G1）"><a href="#Garbage-First收集器（G1）" class="headerlink" title="Garbage First收集器（G1）"></a>Garbage First收集器（G1）</h3><ul>
-<li><p>将堆内存划分为多个大小相等的独立区域（Region），每个区域都可以根据需要扮演新生代的Eden空间、Survivor空间或老年代空间，每次回收时G1会判断那块回收性价比最高，收益最大；Region中设有Humongous区域，用来存储大对象（超过Region一半的对象），而超级大对象会被存放在多个连续的Humongous区域</p>
-</li>
-<li><p>与CMS比较</p>
-<ul>
-<li>优势：1、不会产生垃圾碎片；2、创新性设计带来较多红利：可以指定最大停顿时间，分区域的内存布局，按收益动态确定回收集</li>
-<li>弱势：1、占用内存多、负载率高</li>
-</ul>
-</li>
-</ul>
-<h2 id="基础故障处理工具"><a href="#基础故障处理工具" class="headerlink" title="基础故障处理工具"></a>基础故障处理工具</h2><h3 id="jps：虚拟机进程状况工具，主要用来查看进行的唯一ID"><a href="#jps：虚拟机进程状况工具，主要用来查看进行的唯一ID" class="headerlink" title="jps：虚拟机进程状况工具，主要用来查看进行的唯一ID"></a>jps：虚拟机进程状况工具，主要用来查看进行的唯一ID</h3><h3 id="jstat-虚拟机统计信息监视工具，主要用于查看虚拟机各种运行状态信息"><a href="#jstat-虚拟机统计信息监视工具，主要用于查看虚拟机各种运行状态信息" class="headerlink" title="jstat: 虚拟机统计信息监视工具，主要用于查看虚拟机各种运行状态信息"></a>jstat: 虚拟机统计信息监视工具，主要用于查看虚拟机各种运行状态信息</h3><h3 id="jinfo：java配置信息工具，主要使用-sysprops-打印System-getProperties-的内容"><a href="#jinfo：java配置信息工具，主要使用-sysprops-打印System-getProperties-的内容" class="headerlink" title="jinfo：java配置信息工具，主要使用-sysprops 打印System.getProperties()的内容"></a>jinfo：java配置信息工具，主要使用-sysprops 打印System.getProperties()的内容</h3><h3 id="jmap：java内存映像工具，主要用于生成堆转储快照"><a href="#jmap：java内存映像工具，主要用于生成堆转储快照" class="headerlink" title="jmap：java内存映像工具，主要用于生成堆转储快照"></a>jmap：java内存映像工具，主要用于生成堆转储快照</h3><h3 id="jhat：虚拟机堆转储快照分析工具，图形化工具更适合这个工作-所以这个命令用处不大"><a href="#jhat：虚拟机堆转储快照分析工具，图形化工具更适合这个工作-所以这个命令用处不大" class="headerlink" title="jhat：虚拟机堆转储快照分析工具，图形化工具更适合这个工作 所以这个命令用处不大"></a>jhat：虚拟机堆转储快照分析工具，图形化工具更适合这个工作 所以这个命令用处不大</h3><h3 id="jstack：java堆栈跟踪工具，主要用于生成虚拟机当前时刻线程快照，例如可以查看没有相应的线程在后台干什么"><a href="#jstack：java堆栈跟踪工具，主要用于生成虚拟机当前时刻线程快照，例如可以查看没有相应的线程在后台干什么" class="headerlink" title="jstack：java堆栈跟踪工具，主要用于生成虚拟机当前时刻线程快照，例如可以查看没有相应的线程在后台干什么"></a>jstack：java堆栈跟踪工具，主要用于生成虚拟机当前时刻线程快照，例如可以查看没有相应的线程在后台干什么</h3><h2 id="内存回收策略"><a href="#内存回收策略" class="headerlink" title="内存回收策略"></a>内存回收策略</h2><h3 id="在经典分代设计下，新生对象通常会分配在新生代中，少数情况下也可能直接分配在老年代"><a href="#在经典分代设计下，新生对象通常会分配在新生代中，少数情况下也可能直接分配在老年代" class="headerlink" title="在经典分代设计下，新生对象通常会分配在新生代中，少数情况下也可能直接分配在老年代"></a>在经典分代设计下，新生对象通常会分配在新生代中，少数情况下也可能直接分配在老年代</h3><h3 id="对象优先在新生代Eden区域分配"><a href="#对象优先在新生代Eden区域分配" class="headerlink" title="对象优先在新生代Eden区域分配"></a>对象优先在新生代Eden区域分配</h3><h3 id="大对象直接进入老年代"><a href="#大对象直接进入老年代" class="headerlink" title="大对象直接进入老年代"></a>大对象直接进入老年代</h3><h3 id="长期存活对象进入老年代"><a href="#长期存活对象进入老年代" class="headerlink" title="长期存活对象进入老年代"></a>长期存活对象进入老年代</h3><ul>
-<li>Eden中的对象经过一次GC仍然存活并且能被Survivor容纳就会被转移到Survivor中，并将对象年龄设置为1，对象在Survivor中每熬过一次GC就增加一岁，年龄增加到15（默认 可以设置）时进入老年代</li>
-</ul>
-<h3 id="动态对象年龄判定"><a href="#动态对象年龄判定" class="headerlink" title="动态对象年龄判定"></a>动态对象年龄判定</h3><ul>
-<li>HotSpot虚拟机并不是永远等到对象年龄达到标准才晋升到老年代，如果Survivor空间中的相同年龄所有对象大小的总和大于Survivor空间的一半，年龄大于或等于该年龄的对象就直接进入老年代</li>
-</ul>
-<h2 id="选择合适的垃圾收集器"><a href="#选择合适的垃圾收集器" class="headerlink" title="选择合适的垃圾收集器"></a>选择合适的垃圾收集器</h2><h3 id="垃圾收集器工作内容"><a href="#垃圾收集器工作内容" class="headerlink" title="垃圾收集器工作内容"></a>垃圾收集器工作内容</h3><ul>
-<li>垃圾收集、堆内存的管理与布局、对象的分配、与解释器的协作、与编译器的协作，与监控子系统的协作等等</li>
-</ul>
-<h3 id="应用只要运行数分钟甚至数秒，只要虚拟机能正确分配内存，在堆耗尽之前就会退出"><a href="#应用只要运行数分钟甚至数秒，只要虚拟机能正确分配内存，在堆耗尽之前就会退出" class="headerlink" title="应用只要运行数分钟甚至数秒，只要虚拟机能正确分配内存，在堆耗尽之前就会退出"></a>应用只要运行数分钟甚至数秒，只要虚拟机能正确分配内存，在堆耗尽之前就会退出</h3><ul>
-<li>Epslion收集器，不进行垃圾回收，但负载极小</li>
-</ul>
-<h3 id="收集器的权衡"><a href="#收集器的权衡" class="headerlink" title="收集器的权衡"></a>收集器的权衡</h3><ul>
-<li><p>应用程序的关注点</p>
-<ul>
-<li>吞吐量</li>
-<li>延迟</li>
-<li>内存占用</li>
-</ul>
-</li>
-</ul>
-<h3 id="虚拟机及垃圾收集器日志"><a href="#虚拟机及垃圾收集器日志" class="headerlink" title="虚拟机及垃圾收集器日志"></a>虚拟机及垃圾收集器日志</h3><ul>
-<li>1、查看GC基本信息：jdk9以前 -XX:+PrintGC,9以后 -Xlog:gc</li>
-<li>2、查看GC详细信息：9以前 -XX:+PrintGCDetails,9以后 -X-log:gc*</li>
-<li>3、查看GC前后堆、方法区可用容量变化：9以前-XX:+PrintHeapAtGC,9以后 -Xlog:gc+heap=debug</li>
-<li>4、查看GC过程中用户线程并发时间以及停顿的时间：9以前-XX:Print-GCApplicationConcurrentTime 及 -XX:+PrintGCApplicatiionStoppedTime,9以后 -Xlog:safepoint</li>
-<li>只列出一些常用的命令</li>
-</ul>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Jvm</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>常见的Web应用攻击手段</title>
     <url>/blog/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</url>
     <content><![CDATA[<h1 id="常见的Web应用攻击手段"><a href="#常见的Web应用攻击手段" class="headerlink" title="常见的Web应用攻击手段"></a>常见的Web应用攻击手段</h1><span id="more"></span>
@@ -1071,6 +1071,94 @@
       <tags>
         <tag>架构</tag>
         <tag>问题记录</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>网站的高性能架构</title>
+    <url>/blog/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/</url>
+    <content><![CDATA[<h1 id="网站的高性能架构"><a href="#网站的高性能架构" class="headerlink" title="网站的高性能架构"></a>网站的高性能架构</h1><p>网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。</p>
+<span id="more"></span>
+
+<h2 id="1-网站性能测试"><a href="#1-网站性能测试" class="headerlink" title="1. 网站性能测试"></a>1. 网站性能测试</h2><p>性能测试是性能优化的前提和基础，也是性能优化结果的检查和度量标准。不同视角下的网站性能有不同的标准，也有不同的优化手段。</p>
+<h3 id="1-1不同视角下的网站性能"><a href="#1-1不同视角下的网站性能" class="headerlink" title="1.1不同视角下的网站性能"></a>1.1不同视角下的网站性能</h3><ul>
+<li><p>1.1.1 用户视角的网站性能</p>
+<p>从用户角度，网站性能就是用户在浏览器上直观感受到的网站响应速度快还是慢</p>
+<ul>
+<li><p>优化手段：</p>
+<p>使用一些前端架构优化手段，通过优化页面HTML式样、利用浏览器端的并发和异步特性、调整浏览器缓存策略、使用CDN服务、反向代理等手段，使浏览器尽快地显示用户感兴趣的内容、尽可能近地获取页面内容，即使不优化应用程序和架构，也可以很大程度地改善用户视角下的网站性能</p>
+</li>
+</ul>
+</li>
+<li><p>1.1.2 开发人员视角的网站性能</p>
+<p>开发人员关注的主要是应用程序本身及其相关子系统的性能，包括响应延迟、系统吞吐量、并发处理能力、系统稳定性等技术指标。</p>
+<ul>
+<li><p>优化手段：</p>
+<p>使用缓存加速数据读取，使用集群提高吞吐能力，使用异步消息加快请求响应及实现削峰，使用代码优化手段改善程序性能。</p>
+</li>
+</ul>
+</li>
+<li><p>1.1.3 运维人员视角的网站性能</p>
+<p>运维人员更关注基础设施性能和资源利用率，如网络运营商的带宽能力、服务器硬件的配置、数据中心网络架构、服务器和网络带宽的资源利用率等</p>
+<ul>
+<li><p>优化手段</p>
+<p>建设优化骨干网、使用高性价比定制服务器、利用虚拟化技术优化资源利用等</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-2-性能测试指标"><a href="#1-2-性能测试指标" class="headerlink" title="1.2 性能测试指标"></a>1.2 性能测试指标</h3><p>不同视角下有不同的性能标准，不同的标准有不同的性能测试指标，从开发和测试人员的视角，网站性能测试的主要指标有响应时间、并发数、吞吐量、性能计数器等</p>
+<ul>
+<li><p>1.2.1 响应时间</p>
+<p>指应用执行一个操作需要的时间，包括从发出请求开始到收到最后响应数据所需要的时间</p>
+</li>
+<li><p>1.2.2 并发数</p>
+<p>指系统能够同时处理请求的数目，这个数字也反映了系统的负载特性。</p>
+</li>
+<li><p>1.2.3 吞吐量</p>
+<p>单位时间内系统处理的请求数量，体现系统的整体处理能力</p>
+</li>
+<li><p>1.2.4 性能计数器</p>
+<p>它是描述服务器或操作系统性能的一些数据指标。包括SystemLoad、对象与线程数、内存使用、CPU使用、磁盘与网络I/O等指标。这些指标也是系统监控的重要参数，对这些指标设置报警阈值，当监控系统发现性能计数器超过阈值时，就向运维和开发人员报警，及时发现处理系统异常。</p>
+</li>
+</ul>
+<h3 id="1-3-性能测试方法"><a href="#1-3-性能测试方法" class="headerlink" title="1.3 性能测试方法"></a>1.3 性能测试方法</h3><p>性能测试是一个总称，具体可细分为性能测试、负载测试、压力测试、稳定性测试。</p>
+<h2 id="2-Web前端性能优化"><a href="#2-Web前端性能优化" class="headerlink" title="2. Web前端性能优化"></a>2. Web前端性能优化</h2><h3 id="2-1-浏览器访问优化"><a href="#2-1-浏览器访问优化" class="headerlink" title="2.1 浏览器访问优化"></a>2.1 浏览器访问优化</h3><ul>
+<li><p>2.1.1 减少http请求</p>
+<ul>
+<li><p>2.1.1.1 为什么</p>
+<p>HTTP协议是无状态的应用层协议，意味着每次HTTP请求都需要建立通信链路、进行数据传输，而在服务器端，每个HTTP都需要启动独立的线程去处理</p>
+</li>
+<li><p>2.1.1.2 怎么办</p>
+<p>合并CSS、合并JavaScript、合并图片，这样一次请求就可以获取多个需要的文件</p>
+</li>
+</ul>
+</li>
+<li><p>2.1.2 使用浏览器缓存</p>
+<p>将更新的频率都低，而访问平凡的文件缓存在浏览器中，可以极好地改善性能</p>
+</li>
+<li><p>2.1.3 启用压缩</p>
+<p>在服务器端对文件进行压缩，在浏览器端对文件解压缩，可有效减少通信传输的数据量。有利就有弊，压缩对服务器和浏览器产生一定的压力，在通信带宽良好，而服务器资源不足的情况下要权衡考虑。</p>
+</li>
+<li><p>2.1.4 CSS放在页面最上面、JavaScript放在页面最下面</p>
+<p>浏览器会在下载完全部CSS之后才对整个页面进行渲染，因此最好的做法是将CSS放在页面最上面，让浏览器尽快下载CSS。JavaScript则相反，浏览器在加载JavaScript后立即执行，有可能会阻塞整个页面，造成页面显示缓慢，因此JavaScript最好放在页面最下面。</p>
+</li>
+<li><p>2.1.5 减少Cookie传输</p>
+<p>Cookie包含在每次请求和响应中，太大的Cookie会严重影响数据传输</p>
+</li>
+<li><p>2.1.5 CDN加速</p>
+<p>CDN（Content Distribute Network，内容分发网络）的本质仍然是一个缓存，而且将数据缓存在离用户最近的地方，使用户以最快速度获取数据</p>
+</li>
+<li><p>2.1.6 反向代理</p>
+<p>1、可以缓存静态内容，加快web访问；<br>2、保护网站安全，相当于在Web服务器和可能的网络攻击之间建立了一个屏障。</p>
+</li>
+</ul>
+<h2 id="3-应用服务器性能优化"><a href="#3-应用服务器性能优化" class="headerlink" title="3. 应用服务器性能优化"></a>3. 应用服务器性能优化</h2><p>优化手段主要有缓存、集群、异步等。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
@@ -1183,94 +1271,6 @@
       </tags>
   </entry>
   <entry>
-    <title>网站的高性能架构</title>
-    <url>/blog/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/</url>
-    <content><![CDATA[<h1 id="网站的高性能架构"><a href="#网站的高性能架构" class="headerlink" title="网站的高性能架构"></a>网站的高性能架构</h1><p>网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。</p>
-<span id="more"></span>
-
-<h2 id="1-网站性能测试"><a href="#1-网站性能测试" class="headerlink" title="1. 网站性能测试"></a>1. 网站性能测试</h2><p>性能测试是性能优化的前提和基础，也是性能优化结果的检查和度量标准。不同视角下的网站性能有不同的标准，也有不同的优化手段。</p>
-<h3 id="1-1不同视角下的网站性能"><a href="#1-1不同视角下的网站性能" class="headerlink" title="1.1不同视角下的网站性能"></a>1.1不同视角下的网站性能</h3><ul>
-<li><p>1.1.1 用户视角的网站性能</p>
-<p>从用户角度，网站性能就是用户在浏览器上直观感受到的网站响应速度快还是慢</p>
-<ul>
-<li><p>优化手段：</p>
-<p>使用一些前端架构优化手段，通过优化页面HTML式样、利用浏览器端的并发和异步特性、调整浏览器缓存策略、使用CDN服务、反向代理等手段，使浏览器尽快地显示用户感兴趣的内容、尽可能近地获取页面内容，即使不优化应用程序和架构，也可以很大程度地改善用户视角下的网站性能</p>
-</li>
-</ul>
-</li>
-<li><p>1.1.2 开发人员视角的网站性能</p>
-<p>开发人员关注的主要是应用程序本身及其相关子系统的性能，包括响应延迟、系统吞吐量、并发处理能力、系统稳定性等技术指标。</p>
-<ul>
-<li><p>优化手段：</p>
-<p>使用缓存加速数据读取，使用集群提高吞吐能力，使用异步消息加快请求响应及实现削峰，使用代码优化手段改善程序性能。</p>
-</li>
-</ul>
-</li>
-<li><p>1.1.3 运维人员视角的网站性能</p>
-<p>运维人员更关注基础设施性能和资源利用率，如网络运营商的带宽能力、服务器硬件的配置、数据中心网络架构、服务器和网络带宽的资源利用率等</p>
-<ul>
-<li><p>优化手段</p>
-<p>建设优化骨干网、使用高性价比定制服务器、利用虚拟化技术优化资源利用等</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="1-2-性能测试指标"><a href="#1-2-性能测试指标" class="headerlink" title="1.2 性能测试指标"></a>1.2 性能测试指标</h3><p>不同视角下有不同的性能标准，不同的标准有不同的性能测试指标，从开发和测试人员的视角，网站性能测试的主要指标有响应时间、并发数、吞吐量、性能计数器等</p>
-<ul>
-<li><p>1.2.1 响应时间</p>
-<p>指应用执行一个操作需要的时间，包括从发出请求开始到收到最后响应数据所需要的时间</p>
-</li>
-<li><p>1.2.2 并发数</p>
-<p>指系统能够同时处理请求的数目，这个数字也反映了系统的负载特性。</p>
-</li>
-<li><p>1.2.3 吞吐量</p>
-<p>单位时间内系统处理的请求数量，体现系统的整体处理能力</p>
-</li>
-<li><p>1.2.4 性能计数器</p>
-<p>它是描述服务器或操作系统性能的一些数据指标。包括SystemLoad、对象与线程数、内存使用、CPU使用、磁盘与网络I/O等指标。这些指标也是系统监控的重要参数，对这些指标设置报警阈值，当监控系统发现性能计数器超过阈值时，就向运维和开发人员报警，及时发现处理系统异常。</p>
-</li>
-</ul>
-<h3 id="1-3-性能测试方法"><a href="#1-3-性能测试方法" class="headerlink" title="1.3 性能测试方法"></a>1.3 性能测试方法</h3><p>性能测试是一个总称，具体可细分为性能测试、负载测试、压力测试、稳定性测试。</p>
-<h2 id="2-Web前端性能优化"><a href="#2-Web前端性能优化" class="headerlink" title="2. Web前端性能优化"></a>2. Web前端性能优化</h2><h3 id="2-1-浏览器访问优化"><a href="#2-1-浏览器访问优化" class="headerlink" title="2.1 浏览器访问优化"></a>2.1 浏览器访问优化</h3><ul>
-<li><p>2.1.1 减少http请求</p>
-<ul>
-<li><p>2.1.1.1 为什么</p>
-<p>HTTP协议是无状态的应用层协议，意味着每次HTTP请求都需要建立通信链路、进行数据传输，而在服务器端，每个HTTP都需要启动独立的线程去处理</p>
-</li>
-<li><p>2.1.1.2 怎么办</p>
-<p>合并CSS、合并JavaScript、合并图片，这样一次请求就可以获取多个需要的文件</p>
-</li>
-</ul>
-</li>
-<li><p>2.1.2 使用浏览器缓存</p>
-<p>将更新的频率都低，而访问平凡的文件缓存在浏览器中，可以极好地改善性能</p>
-</li>
-<li><p>2.1.3 启用压缩</p>
-<p>在服务器端对文件进行压缩，在浏览器端对文件解压缩，可有效减少通信传输的数据量。有利就有弊，压缩对服务器和浏览器产生一定的压力，在通信带宽良好，而服务器资源不足的情况下要权衡考虑。</p>
-</li>
-<li><p>2.1.4 CSS放在页面最上面、JavaScript放在页面最下面</p>
-<p>浏览器会在下载完全部CSS之后才对整个页面进行渲染，因此最好的做法是将CSS放在页面最上面，让浏览器尽快下载CSS。JavaScript则相反，浏览器在加载JavaScript后立即执行，有可能会阻塞整个页面，造成页面显示缓慢，因此JavaScript最好放在页面最下面。</p>
-</li>
-<li><p>2.1.5 减少Cookie传输</p>
-<p>Cookie包含在每次请求和响应中，太大的Cookie会严重影响数据传输</p>
-</li>
-<li><p>2.1.5 CDN加速</p>
-<p>CDN（Content Distribute Network，内容分发网络）的本质仍然是一个缓存，而且将数据缓存在离用户最近的地方，使用户以最快速度获取数据</p>
-</li>
-<li><p>2.1.6 反向代理</p>
-<p>1、可以缓存静态内容，加快web访问；<br>2、保护网站安全，相当于在Web服务器和可能的网络攻击之间建立了一个屏障。</p>
-</li>
-</ul>
-<h2 id="3-应用服务器性能优化"><a href="#3-应用服务器性能优化" class="headerlink" title="3. 应用服务器性能优化"></a>3. 应用服务器性能优化</h2><p>优化手段主要有缓存、集群、异步等。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>虚拟机字节码执行引擎</title>
     <url>/blog/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/</url>
     <content><![CDATA[<h1 id="虚拟机字节码执行引擎"><a href="#虚拟机字节码执行引擎" class="headerlink" title="虚拟机字节码执行引擎"></a>虚拟机字节码执行引擎</h1><p>虚拟机字节码执行引擎是java虚拟机核心组成部分之一，所有java虚拟机的执行引擎输入、输出都是一致的：输入的是字节码二进制流，处理过程是字节码解析执行的等效过程，输出的是执行结果。</p>
@@ -1356,6 +1356,66 @@
       <tags>
         <tag>Jvm</tag>
         <tag>字节码</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>集群环境下如何管理Session</title>
+    <url>/blog/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</url>
+    <content><![CDATA[<h1 id="集群环境下如何管理Session"><a href="#集群环境下如何管理Session" class="headerlink" title="集群环境下如何管理Session"></a>集群环境下如何管理Session</h1><span id="more"></span>
+
+<h2 id="1-Session复制"><a href="#1-Session复制" class="headerlink" title="1.Session复制"></a>1.Session复制</h2><p>应用服务器开启Web容器的Session复制功能，在集群中的几台服务器之间同步Session对象，使得每台服务器上都保存所有用户的Session信息，这样任何一台机器宕机都不会导致Session数据的丢失，而服务器使用Session时，也只需要在本机获取即可</p>
+<h3 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>1.方案简单</li>
+<li>2.获取Session速度块</li>
+</ul>
+<h3 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li><p>1.只能在集群规模较小的情况下使用</p>
+<p>如果集群规模大，会导致大量复制Session，会占用网络和服务器大量资源；<br>并且如果出现大量用户同时访问服务的情况可能会出现内存不够用的问题</p>
+</li>
+</ul>
+<h2 id="2-Session绑定"><a href="#2-Session绑定" class="headerlink" title="2.Session绑定"></a>2.Session绑定</h2><p>即Session绑定在某台特定服务器上，保证Session总能在这台服务器上获取。这种方法又被称作会话黏滞，负载均衡服务器总是将来源于同一IP的请求分发到同一台服务器上（也可以根据Cookie信息将同一个用户的请求总是分发到同一台服务器上，当然这时负载均衡服务器必须工作在HTTP协议层上）</p>
+<h3 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li><p>不具备高可用的特性</p>
+<p>如果绑定Session的服务器宕机了就会造成Session丢失</p>
+</li>
+</ul>
+<h2 id="3-利用Cookie记录Session"><a href="#3-利用Cookie记录Session" class="headerlink" title="3.利用Cookie记录Session"></a>3.利用Cookie记录Session</h2><p>将Session记录在Cookie中，每次请求服务器的时候，将Session放在请求中发送给服务器，服务器处理完请求后再将修改过的Session响应给客户端。</p>
+<h3 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>简单易用，可用性高，支持应用服务器的线性伸缩</li>
+</ul>
+<h3 id="缺点：-2"><a href="#缺点：-2" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li>1.信息记录有限，因为Cookie有大小限制</li>
+<li>2.影响性能，每次请求响应都需要传输Cookie</li>
+<li>3.受用户行为影响，如果用户关闭Cookie，访问就会不正常</li>
+</ul>
+<h2 id="4-Session服务器"><a href="#4-Session服务器" class="headerlink" title="4.Session服务器"></a>4.Session服务器</h2><p>可用性高、伸缩性好、性能也不错，对信息大小又没有限制的服务器集群Session管理方案。<br>利用独立部署的Session服务器（集群）统一管理Session，应用服务器每次读写Session时，都访问Session服务器。<br>这种解决方案事实上是将应用服务器的状态分离。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>项目如何分包</title>
+    <url>/blog/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</url>
+    <content><![CDATA[<h1 id="项目如何分包"><a href="#项目如何分包" class="headerlink" title="项目如何分包"></a>项目如何分包</h1><p>在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。</p>
+<span id="more"></span>
+
+<h2 id="1、按照类型方式划分"><a href="#1、按照类型方式划分" class="headerlink" title="1、按照类型方式划分"></a>1、按照类型方式划分</h2><p>例如将所有的接口放入一个包、Controller类放入一个包等等。</p>
+<p>优点：从类型看更为清晰</p>
+<p>缺点：不利于模块化开发，因为会将同一个功能的多个类分散在不同的包中</p>
+<h2 id="2、按照功能方式划分"><a href="#2、按照功能方式划分" class="headerlink" title="2、按照功能方式划分"></a>2、按照功能方式划分</h2><p>将同一个功能的所有类放在同一个包中。</p>
+<p>优点：高内聚，便于模块化开发</p>
+<p>缺点：同一包内类型混乱</p>
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>将功能耦合度高的类按照功能进行划分，而功能耦合度低的或者供多个功能使用的类按照类型进行划分。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
@@ -1531,66 +1591,6 @@
       <tags>
         <tag>Jvm</tag>
         <tag>类加载</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>集群环境下如何管理Session</title>
-    <url>/blog/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</url>
-    <content><![CDATA[<h1 id="集群环境下如何管理Session"><a href="#集群环境下如何管理Session" class="headerlink" title="集群环境下如何管理Session"></a>集群环境下如何管理Session</h1><span id="more"></span>
-
-<h2 id="1-Session复制"><a href="#1-Session复制" class="headerlink" title="1.Session复制"></a>1.Session复制</h2><p>应用服务器开启Web容器的Session复制功能，在集群中的几台服务器之间同步Session对象，使得每台服务器上都保存所有用户的Session信息，这样任何一台机器宕机都不会导致Session数据的丢失，而服务器使用Session时，也只需要在本机获取即可</p>
-<h3 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h3><ul>
-<li>1.方案简单</li>
-<li>2.获取Session速度块</li>
-</ul>
-<h3 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h3><ul>
-<li><p>1.只能在集群规模较小的情况下使用</p>
-<p>如果集群规模大，会导致大量复制Session，会占用网络和服务器大量资源；<br>并且如果出现大量用户同时访问服务的情况可能会出现内存不够用的问题</p>
-</li>
-</ul>
-<h2 id="2-Session绑定"><a href="#2-Session绑定" class="headerlink" title="2.Session绑定"></a>2.Session绑定</h2><p>即Session绑定在某台特定服务器上，保证Session总能在这台服务器上获取。这种方法又被称作会话黏滞，负载均衡服务器总是将来源于同一IP的请求分发到同一台服务器上（也可以根据Cookie信息将同一个用户的请求总是分发到同一台服务器上，当然这时负载均衡服务器必须工作在HTTP协议层上）</p>
-<h3 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h3><ul>
-<li><p>不具备高可用的特性</p>
-<p>如果绑定Session的服务器宕机了就会造成Session丢失</p>
-</li>
-</ul>
-<h2 id="3-利用Cookie记录Session"><a href="#3-利用Cookie记录Session" class="headerlink" title="3.利用Cookie记录Session"></a>3.利用Cookie记录Session</h2><p>将Session记录在Cookie中，每次请求服务器的时候，将Session放在请求中发送给服务器，服务器处理完请求后再将修改过的Session响应给客户端。</p>
-<h3 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h3><ul>
-<li>简单易用，可用性高，支持应用服务器的线性伸缩</li>
-</ul>
-<h3 id="缺点：-2"><a href="#缺点：-2" class="headerlink" title="缺点："></a>缺点：</h3><ul>
-<li>1.信息记录有限，因为Cookie有大小限制</li>
-<li>2.影响性能，每次请求响应都需要传输Cookie</li>
-<li>3.受用户行为影响，如果用户关闭Cookie，访问就会不正常</li>
-</ul>
-<h2 id="4-Session服务器"><a href="#4-Session服务器" class="headerlink" title="4.Session服务器"></a>4.Session服务器</h2><p>可用性高、伸缩性好、性能也不错，对信息大小又没有限制的服务器集群Session管理方案。<br>利用独立部署的Session服务器（集群）统一管理Session，应用服务器每次读写Session时，都访问Session服务器。<br>这种解决方案事实上是将应用服务器的状态分离。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>项目如何分包</title>
-    <url>/blog/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</url>
-    <content><![CDATA[<h1 id="项目如何分包"><a href="#项目如何分包" class="headerlink" title="项目如何分包"></a>项目如何分包</h1><p>在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。</p>
-<span id="more"></span>
-
-<h2 id="1、按照类型方式划分"><a href="#1、按照类型方式划分" class="headerlink" title="1、按照类型方式划分"></a>1、按照类型方式划分</h2><p>例如将所有的接口放入一个包、Controller类放入一个包等等。</p>
-<p>优点：从类型看更为清晰</p>
-<p>缺点：不利于模块化开发，因为会将同一个功能的多个类分散在不同的包中</p>
-<h2 id="2、按照功能方式划分"><a href="#2、按照功能方式划分" class="headerlink" title="2、按照功能方式划分"></a>2、按照功能方式划分</h2><p>将同一个功能的所有类放在同一个包中。</p>
-<p>优点：高内聚，便于模块化开发</p>
-<p>缺点：同一包内类型混乱</p>
-<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>将功能耦合度高的类按照功能进行划分，而功能耦合度低的或者供多个功能使用的类按照类型进行划分。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
