@@ -1,147 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Java内存区域</title>
-    <url>/blog/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/</url>
-    <content><![CDATA[<h1 id="Java内存区域"><a href="#Java内存区域" class="headerlink" title="Java内存区域"></a>Java内存区域</h1><span id="more"></span>
-
-<h2 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h2><h3 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h3><ul>
-<li>当前线程所执行的字节码的行号指示器，用来选取下一条需要执行的字节码指令</li>
-<li>线程私有</li>
-<li>唯一一个不会出现OOM的区域</li>
-</ul>
-<h3 id="虚拟机栈"><a href="#虚拟机栈" class="headerlink" title="虚拟机栈"></a>虚拟机栈</h3><ul>
-<li><p>线程私有</p>
-</li>
-<li><p>每个方法执行时都会创建对应的栈帧入栈，执行完毕后出栈，栈帧用于存储局部变量表、操作数栈、动态连接、方法出口等信息</p>
-</li>
-<li><p>局部变量表</p>
-<ul>
-<li>用来存储基本数据类型、对象引用等信息</li>
-</ul>
-</li>
-</ul>
-<h3 id="本地方法栈"><a href="#本地方法栈" class="headerlink" title="本地方法栈"></a>本地方法栈</h3><ul>
-<li>线程私有</li>
-<li>虚拟机使用到的本地（Native)方法服务（可以是C、C++等语言提供的服务）</li>
-</ul>
-<h3 id="java堆"><a href="#java堆" class="headerlink" title="java堆"></a>java堆</h3><ul>
-<li><p>线程共享</p>
-</li>
-<li><p>唯一目的就是存放对象实例，是内存中最大的一块</p>
-</li>
-<li><p>拥有常量池（jdk1.7 从永久代移动到堆）</p>
-<ul>
-<li><p>字符串常量池</p>
-</li>
-<li><p>运行时常量池</p>
-<p>运行时常量池是方法区的一部分</p>
-<ul>
-<li>存放编译期生成的各种字面量与符号引用</li>
-</ul>
-</li>
-<li><p>Class常量池</p>
-<p>运行时常量池是在类加载完成之后，将每个class常量池中的符号引用值转存到运行时常量池中，也就是说，每个class都有一个运行时常量池，类在解析之后，将符号引用替换成直接引用，与全局常量池中的引用值保持一致</p>
-<ul>
-<li>静态变量（jdk1.7 从永久代移动到堆 跟Class对象在一起）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="方法区-元空间"><a href="#方法区-元空间" class="headerlink" title="方法区/元空间"></a>方法区/元空间</h3><p>jdk7以前也被称为永久代，之后永久代的概念被舍弃,并提出元空间的概念。方法区就在元空间上（元空间和永久代都是方法区的具体实现，类似接口和实现类）</p>
-<ul>
-<li><p>线程共享</p>
-</li>
-<li><p>存储已被虚拟机加载的类型信息、即时编译器编译后的代码缓存数据等等（也叫元数据 包括类的方法代码，变量名，方法名，访问权限，返回值等等都是在方法区的）才是存在方法区的【存疑 】）</p>
-</li>
-<li><p>此区域的垃圾回收主要针对常量池和对类型的卸载</p>
-<p>类型卸载：简单来说就是清理加载到内存中的Class 除非是故意设计不然这种情况发生的概率很低，因为Class是由ClassLoader加载进来的 而java虚拟机不会主动放弃ClassLoader 而Class又被ClassLoader引用，所以永远是“可达”的。</p>
-</li>
-</ul>
-<h3 id="直接内存-堆外内存"><a href="#直接内存-堆外内存" class="headerlink" title="直接内存(堆外内存)"></a>直接内存(堆外内存)</h3><ul>
-<li>直接使用物理内存不受到堆大小的限制，但受本地总内存的限制</li>
-<li>优点：提高性能，避免在java堆和native堆来回复制数据</li>
-<li>缺点：如果直接内存发生OOM排查难度较高</li>
-</ul>
-<h2 id="HotSpot虚拟机对象探秘"><a href="#HotSpot虚拟机对象探秘" class="headerlink" title="HotSpot虚拟机对象探秘"></a>HotSpot虚拟机对象探秘</h2><h3 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h3><ul>
-<li><p>1、类加载：先去常量池找类的符号引用并检查是否已加载</p>
-</li>
-<li><p>2、分配内存</p>
-<ul>
-<li><p>分配方法</p>
-<ul>
-<li><p>2.1 指针碰撞</p>
-<ul>
-<li>堆内存规整时使用，已使用和未使用的内存划分到两边，分配内存时指针向空闲空间移动</li>
-</ul>
-</li>
-<li><p>2.2 空间列表</p>
-<ul>
-<li>堆内存不规整时使用，维护一个内存使用情况列表，分配内存时跟据表数据选取内存空间</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>解决并发安全问题</p>
-<ul>
-<li>同步处理，例如CAS</li>
-<li>预先在堆中为每个线程分配一块内存，只有用完后分配新内存的时候再同步处理</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>3、执行构造函数<init>()</p>
-</li>
-</ul>
-<h3 id="对象内存布局"><a href="#对象内存布局" class="headerlink" title="对象内存布局"></a>对象内存布局</h3><ul>
-<li><p>对象头</p>
-<ul>
-<li>1、存储对象自身运行时数据，如哈希码、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等等</li>
-<li>2、类型指针，虚拟机通过这个指针来确定对象是哪个类的实例</li>
-<li>3、如果是数组还有一块区域记录数组长度，因为虚拟机无法通过元数据推断数组的大小</li>
-</ul>
-</li>
-<li><p>实例数据</p>
-<ul>
-<li>对象真正存储的有效信息，即代码中定义的各种类型的字段内容</li>
-</ul>
-</li>
-<li><p>对齐填充</p>
-<ul>
-<li>占位符的作用，因为对象的大小必须是8字节的整数倍，但实例数据可能不是 所以用它来补全</li>
-</ul>
-</li>
-</ul>
-<h3 id="对象的访问定位"><a href="#对象的访问定位" class="headerlink" title="对象的访问定位"></a>对象的访问定位</h3><ul>
-<li><p>句柄访问</p>
-<ul>
-<li><p>Java堆中划分出一块内存做句柄池，局部变量表中存储句柄地址，句柄中存储对象实例数据与类型数据的内存地址</p>
-<ul>
-<li>优点：如果对象被移动指挥改变句柄中的实例数据指针</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>直接指针访问</p>
-<ul>
-<li><p>堆中对象的内存布局需要存储对应类型数据的地址，局部变量表中存储的是对象地址</p>
-<ul>
-<li>优点：速度快，因为节省了一次定位指针的时间开销</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Jvm</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>分布式锁</title>
     <url>/blog/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/</url>
     <content><![CDATA[<p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
@@ -493,6 +352,147 @@
       </tags>
   </entry>
   <entry>
+    <title>Java内存区域</title>
+    <url>/blog/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/</url>
+    <content><![CDATA[<h1 id="Java内存区域"><a href="#Java内存区域" class="headerlink" title="Java内存区域"></a>Java内存区域</h1><span id="more"></span>
+
+<h2 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h2><h3 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h3><ul>
+<li>当前线程所执行的字节码的行号指示器，用来选取下一条需要执行的字节码指令</li>
+<li>线程私有</li>
+<li>唯一一个不会出现OOM的区域</li>
+</ul>
+<h3 id="虚拟机栈"><a href="#虚拟机栈" class="headerlink" title="虚拟机栈"></a>虚拟机栈</h3><ul>
+<li><p>线程私有</p>
+</li>
+<li><p>每个方法执行时都会创建对应的栈帧入栈，执行完毕后出栈，栈帧用于存储局部变量表、操作数栈、动态连接、方法出口等信息</p>
+</li>
+<li><p>局部变量表</p>
+<ul>
+<li>用来存储基本数据类型、对象引用等信息</li>
+</ul>
+</li>
+</ul>
+<h3 id="本地方法栈"><a href="#本地方法栈" class="headerlink" title="本地方法栈"></a>本地方法栈</h3><ul>
+<li>线程私有</li>
+<li>虚拟机使用到的本地（Native)方法服务（可以是C、C++等语言提供的服务）</li>
+</ul>
+<h3 id="java堆"><a href="#java堆" class="headerlink" title="java堆"></a>java堆</h3><ul>
+<li><p>线程共享</p>
+</li>
+<li><p>唯一目的就是存放对象实例，是内存中最大的一块</p>
+</li>
+<li><p>拥有常量池（jdk1.7 从永久代移动到堆）</p>
+<ul>
+<li><p>字符串常量池</p>
+</li>
+<li><p>运行时常量池</p>
+<p>运行时常量池是方法区的一部分</p>
+<ul>
+<li>存放编译期生成的各种字面量与符号引用</li>
+</ul>
+</li>
+<li><p>Class常量池</p>
+<p>运行时常量池是在类加载完成之后，将每个class常量池中的符号引用值转存到运行时常量池中，也就是说，每个class都有一个运行时常量池，类在解析之后，将符号引用替换成直接引用，与全局常量池中的引用值保持一致</p>
+<ul>
+<li>静态变量（jdk1.7 从永久代移动到堆 跟Class对象在一起）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="方法区-元空间"><a href="#方法区-元空间" class="headerlink" title="方法区/元空间"></a>方法区/元空间</h3><p>jdk7以前也被称为永久代，之后永久代的概念被舍弃,并提出元空间的概念。方法区就在元空间上（元空间和永久代都是方法区的具体实现，类似接口和实现类）</p>
+<ul>
+<li><p>线程共享</p>
+</li>
+<li><p>存储已被虚拟机加载的类型信息、即时编译器编译后的代码缓存数据等等（也叫元数据 包括类的方法代码，变量名，方法名，访问权限，返回值等等都是在方法区的）才是存在方法区的【存疑 】）</p>
+</li>
+<li><p>此区域的垃圾回收主要针对常量池和对类型的卸载</p>
+<p>类型卸载：简单来说就是清理加载到内存中的Class 除非是故意设计不然这种情况发生的概率很低，因为Class是由ClassLoader加载进来的 而java虚拟机不会主动放弃ClassLoader 而Class又被ClassLoader引用，所以永远是“可达”的。</p>
+</li>
+</ul>
+<h3 id="直接内存-堆外内存"><a href="#直接内存-堆外内存" class="headerlink" title="直接内存(堆外内存)"></a>直接内存(堆外内存)</h3><ul>
+<li>直接使用物理内存不受到堆大小的限制，但受本地总内存的限制</li>
+<li>优点：提高性能，避免在java堆和native堆来回复制数据</li>
+<li>缺点：如果直接内存发生OOM排查难度较高</li>
+</ul>
+<h2 id="HotSpot虚拟机对象探秘"><a href="#HotSpot虚拟机对象探秘" class="headerlink" title="HotSpot虚拟机对象探秘"></a>HotSpot虚拟机对象探秘</h2><h3 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h3><ul>
+<li><p>1、类加载：先去常量池找类的符号引用并检查是否已加载</p>
+</li>
+<li><p>2、分配内存</p>
+<ul>
+<li><p>分配方法</p>
+<ul>
+<li><p>2.1 指针碰撞</p>
+<ul>
+<li>堆内存规整时使用，已使用和未使用的内存划分到两边，分配内存时指针向空闲空间移动</li>
+</ul>
+</li>
+<li><p>2.2 空间列表</p>
+<ul>
+<li>堆内存不规整时使用，维护一个内存使用情况列表，分配内存时跟据表数据选取内存空间</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>解决并发安全问题</p>
+<ul>
+<li>同步处理，例如CAS</li>
+<li>预先在堆中为每个线程分配一块内存，只有用完后分配新内存的时候再同步处理</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>3、执行构造函数<init>()</p>
+</li>
+</ul>
+<h3 id="对象内存布局"><a href="#对象内存布局" class="headerlink" title="对象内存布局"></a>对象内存布局</h3><ul>
+<li><p>对象头</p>
+<ul>
+<li>1、存储对象自身运行时数据，如哈希码、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等等</li>
+<li>2、类型指针，虚拟机通过这个指针来确定对象是哪个类的实例</li>
+<li>3、如果是数组还有一块区域记录数组长度，因为虚拟机无法通过元数据推断数组的大小</li>
+</ul>
+</li>
+<li><p>实例数据</p>
+<ul>
+<li>对象真正存储的有效信息，即代码中定义的各种类型的字段内容</li>
+</ul>
+</li>
+<li><p>对齐填充</p>
+<ul>
+<li>占位符的作用，因为对象的大小必须是8字节的整数倍，但实例数据可能不是 所以用它来补全</li>
+</ul>
+</li>
+</ul>
+<h3 id="对象的访问定位"><a href="#对象的访问定位" class="headerlink" title="对象的访问定位"></a>对象的访问定位</h3><ul>
+<li><p>句柄访问</p>
+<ul>
+<li><p>Java堆中划分出一块内存做句柄池，局部变量表中存储句柄地址，句柄中存储对象实例数据与类型数据的内存地址</p>
+<ul>
+<li>优点：如果对象被移动指挥改变句柄中的实例数据指针</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>直接指针访问</p>
+<ul>
+<li><p>堆中对象的内存布局需要存储对应类型数据的地址，局部变量表中存储的是对象地址</p>
+<ul>
+<li>优点：速度快，因为节省了一次定位指针的时间开销</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>java高并发程序设计</title>
     <url>/blog/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/</url>
     <content><![CDATA[<h1 id="java高并发程序设计"><a href="#java高并发程序设计" class="headerlink" title="java高并发程序设计"></a>java高并发程序设计</h1><p>高并发是 java 开发必备知识，本篇文章整理出在高并发程序设计中常用的工具。</p>
@@ -715,6 +715,63 @@
       </tags>
   </entry>
   <entry>
+    <title>Wireshark 简明教程</title>
+    <url>/blog/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<h1 id="Wireshark-简明教程"><a href="#Wireshark-简明教程" class="headerlink" title="Wireshark 简明教程"></a>Wireshark 简明教程</h1><p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
+<span id="more"></span>
+
+<h2 id="下载wireshark"><a href="#下载wireshark" class="headerlink" title="下载wireshark"></a>下载wireshark</h2><p><a href="https://www.wireshark.org/download.html">wireshark下载地址</a><br>选择Windows Installer (64-bit)，下载成功后一直点next就可以了。<br><img src="https://img-blog.csdnimg.cn/20210507224116599.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>2.1 选择网卡<br>打开软件，界面如下所示，被红框标记起来的就是网卡列表，如果你使用的是无线网就可以选择WLAN。<br><img src="https://img-blog.csdnimg.cn/20210507224420963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.2 开始抓包<br>双击选中目标网卡就会进入到抓包主界面，如图：<br><img src="https://img-blog.csdnimg.cn/20210507224707882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>被红框选中的就是该网卡发送和接受的网络包了，后续会详细讲解如果通过wireshark抓包学习网络。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Wireshark</tag>
+        <tag>网络</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
+    <url>/blog/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</url>
+    <content><![CDATA[<h1 id="【通过抓包学网络】TCP三次握手与四次挥手"><a href="#【通过抓包学网络】TCP三次握手与四次挥手" class="headerlink" title="【通过抓包学网络】TCP三次握手与四次挥手"></a>【通过抓包学网络】TCP三次握手与四次挥手</h1><p>本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章<a href="https://blog.csdn.net/qq_43005544/article/details/116504407">wireshark 简易教程</a></p>
+<span id="more"></span>
+
+<p><strong>正文开始</strong></p>
+<h1 id="1-首先抓个包"><a href="#1-首先抓个包" class="headerlink" title="1.首先抓个包"></a>1.首先抓个包</h1><p>通过上一篇文章大家应该都能打开对应网卡的抓包页面了哈；我们利用DNS服务可以将域名解析成IP的功能来演示如何抓到我们想要的包。</p>
+<h2 id="1-1-开始抓包"><a href="#1-1-开始抓包" class="headerlink" title="1.1 开始抓包"></a>1.1 开始抓包</h2><p>如果进入抓包页面没有自动开始抓包，就点击左上角的开始抓包按钮，如图：<br><img src="https://img-blog.csdnimg.cn/20210507235225375.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="1-2-打开命令行界面"><a href="#1-2-打开命令行界面" class="headerlink" title="1.2 打开命令行界面"></a>1.2 打开命令行界面</h2><p>博主用的win10操作系统，所以打开的就是CMD了，输入以下命令</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;nslookup</span><br><span class="line">&gt;<span class="built_in">set</span> vc</span><br><span class="line">&gt;www.baidu.com</span><br></pre></td></tr></table></figure>
+<p>命令执行情况如图：<br><img src="https://img-blog.csdnimg.cn/20210507233243944.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70"></p>
+<h2 id="1-3-停止抓包"><a href="#1-3-停止抓包" class="headerlink" title="1.3 停止抓包"></a>1.3 停止抓包</h2><p>点击红框标记的按钮：<br><img src="https://img-blog.csdnimg.cn/20210507235328579.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="1-4-筛选"><a href="#1-4-筛选" class="headerlink" title="1.4 筛选"></a>1.4 筛选</h2><p>这个时候可以看到界面上抓到很多包，但是有很多是其他应用进行的网络请求，并不是我们想要的，所以要进行筛选。<br>在筛选框我们用Ip进行筛选，表达式为<strong>ip.addr == 116.199.0.200</strong>，如图<br><img src="https://img-blog.csdnimg.cn/20210507235517845.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>116.199.0.200是我本机DNS的ip，你可以通过刚在输入的nslookup命令得到，如图<br><img src="https://img-blog.csdnimg.cn/20210507235651897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>但是通过筛选后发现还是有很多包不是我们想要的，我们通过info列来找到我们请求DNS的包，如图：<br>找到DNS协议info这列有我们刚才输入需要解析的域名这两行，这两行就是DNS解析域名的过程，我们从这两行的Info就可以很清晰的看出DNS解析域名的过程，首先192.168.1.107询问DNS <a href="http://www.baidu.com的ip是多少,然后dns在下一行进行回复./">www.baidu.com的IP是多少，然后DNS在下一行进行回复。</a><br><img src="https://img-blog.csdnimg.cn/20210509113130576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="1-5-找到三次握手的包"><a href="#1-5-找到三次握手的包" class="headerlink" title="1.5 找到三次握手的包"></a>1.5 找到三次握手的包</h2><p>在1.4小节中我们找到的926和927号包的上面就是三次握手的包，分别是921，922，923这三个包，如图：<br><img src="https://img-blog.csdnimg.cn/20210509161642786.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>你可能想问是怎么看出来的，好问题，主要是看Seq和Ack的值，三次握手的时候Seq的相对值是为0的（注意是相对值）。找到了三次握手的网络包，我们就来分析一下三次握手吧。</p>
+<h1 id="2-分析三次握手"><a href="#2-分析三次握手" class="headerlink" title="2. 分析三次握手"></a>2. 分析三次握手</h1><h2 id="2-1-TCP-参数介绍"><a href="#2-1-TCP-参数介绍" class="headerlink" title="2.1 TCP 参数介绍"></a>2.1 TCP 参数介绍</h2><p>要学习TCP首先要学习它的参数。</p>
+<p><strong>Seq</strong>：标识改数据段的序号。因为TCP的传输是有序的，接收者可以通过Seq对包进行排序。</p>
+<p><strong>Len</strong>：表示Seq对应数据的长度。</p>
+<p><strong>Ack</strong>：确认号，向数据提供者表明收到了哪些包（实际收到包的Seq序号需要 Ack - 1，因为Seq是从0开始的，例如Ack = 2说明已经收到 第0段和第1段需要包，下一个需要接收的序号包Seq 需要为 2）。</p>
+<p><strong>SYN</strong>：表示携带这个参数的数据包正在发起连接请求。</p>
+<p><strong>FIN</strong>：表示携带这个参数的包正在请求停止连接。</p>
+<h2 id="2-2-三次握手过程"><a href="#2-2-三次握手过程" class="headerlink" title="2.2 三次握手过程"></a>2.2 三次握手过程</h2><p>用来分析的数据包如图：<br><img src="https://img-blog.csdnimg.cn/2021050917000075.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><strong>第一次握手</strong> 192.168.1.107 向 116.119.0.200 发送携带 SYN; Seq = 0;len = 0的请求。SYN表示这是在请求连接，Seq表示目前发送的是第0段数据包，len表示数据包的长度为0。</p>
+<p><strong>第二次握手</strong> 116.119.0.200 向192.168.1.107发送携带SYN;Seq = 0;Len = 0; Ack = 1的请求。因为TCP是双向连接，所以双方都要维护各自的参数，除了Ack其他参数在第一次握手的时候讲过了，Ack表示已经接收到Seq = 0 的数据包了，下一次请从Seq = 1 的数据包发送。</p>
+<p><strong>第三次握手</strong>：192.168.1.107 向 116.119.0.200 发送携带Ack = 1; Seq = 1; len = 0;的请求，表示已经收到Seq = 0 的数据包了，下一次请从Seq = 1 的数据包发送。<br>这时连接已经成功建立。</p>
+<p>这样就通过三次握手建立了一个连接，<strong>至于面试常问的为什么不是两次或者四次相信你已经知道答案了</strong>，因为<strong>两次不可靠</strong>，可能在第二次握手的时候超时了，对方并没有收到请求，而发送方并不知道，以为已经成功建立了连接，所以会向对方发送数据，但是对方因为其他原因没有接收到第二次握手，所以不会接受数据发送方发送的数据。<strong>至于四次没必要</strong>，因为所有想做的事情已经做完了。</p>
+<h1 id="3-分析四次挥手"><a href="#3-分析四次挥手" class="headerlink" title="3. 分析四次挥手"></a>3. 分析四次挥手</h1><h2 id="3-1-找到四次挥手的数据包"><a href="#3-1-找到四次挥手的数据包" class="headerlink" title="3.1 找到四次挥手的数据包"></a>3.1 找到四次挥手的数据包</h2><p>四次挥手的数据包就是928至931，你又想问这是怎么看出来的？好问题，讲三次握手的时候介绍过 <strong>FIN</strong>参数就代表着请求断开连接，那我们就找离DNS解析域名数据包最近的携带FIN参数的数据包。<br><img src="https://img-blog.csdnimg.cn/20210509174830567.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="3-2-分析四次挥手"><a href="#3-2-分析四次挥手" class="headerlink" title="3.2 分析四次挥手"></a>3.2 分析四次挥手</h2><p><strong>第一次挥手</strong>：192.168.1.107 向 116.119.0.200 发送携带FIN; Seq = 34; Ack = 93; 的数据包，FIN表示请求断开连接，Seq = 34表示这个数据包是第34段，Ack = 93表示已经收到93段之前的数据包了，下一次请求第93段数据包开始发送。</p>
+<p><strong>第二次挥手</strong>： 116.119.0.200 向192.168.1.107发送携带Seq = 93; Ack = 35;的数据包，表示请求已经收到 Seq和Ack参数就不解释了。</p>
+<p><strong>第三次挥手</strong>：116.119.0.200 向192.168.1.107发送携带FIN; Seq = 93; Ack = 35; 的数据包，表示请求断开连接。</p>
+<p><strong>第四次挥手</strong>：192.168.1.107 向 116.119.0.200 发送携带Seq = 35; Ack = 94;的数据包，表示已经接收到请求。</p>
+<p>通过四次挥手完成了连接的断开，<strong>面试的时候常问为什么不能是三次挥手</strong>，这里已经很明确了，因为116.119.0.200这台服务器需要连续发送两个数据包，那为什么是两个呢？因为可能还有一些网络数据没有处理完，不能马上断开连接，只能先回应请求收到了，等处理完数据后再发送断开连接请求。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Wireshark</tag>
+        <tag>网络</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【Mybatis源码解读】jdbc包</title>
     <url>/blog/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</url>
     <content><![CDATA[<h1 id="【Mybatis源码解读】jdbc包"><a href="#【Mybatis源码解读】jdbc包" class="headerlink" title="【Mybatis源码解读】jdbc包"></a>【Mybatis源码解读】jdbc包</h1><span id="more"></span>
@@ -773,20 +830,112 @@
       </tags>
   </entry>
   <entry>
-    <title>Wireshark 简明教程</title>
-    <url>/blog/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</url>
-    <content><![CDATA[<h1 id="Wireshark-简明教程"><a href="#Wireshark-简明教程" class="headerlink" title="Wireshark 简明教程"></a>Wireshark 简明教程</h1><p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
+    <title>网站架构模式</title>
+    <url>/blog/%E7%BD%91%E7%AB%99%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<h1 id="网站架构模式"><a href="#网站架构模式" class="headerlink" title="网站架构模式"></a>网站架构模式</h1><p>大型互联网公司为了实现网站的高性能、高可用、易伸缩、可扩展、安全等各种技术架构目标，提出了很多解决方案，而这些方案又被更多网站重复使用，从而逐渐形成大型网站架构模式，下面对常见的模式进行总结。</p>
 <span id="more"></span>
 
-<h2 id="下载wireshark"><a href="#下载wireshark" class="headerlink" title="下载wireshark"></a>下载wireshark</h2><p><a href="https://www.wireshark.org/download.html">wireshark下载地址</a><br>选择Windows Installer (64-bit)，下载成功后一直点next就可以了。<br><img src="https://img-blog.csdnimg.cn/20210507224116599.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>2.1 选择网卡<br>打开软件，界面如下所示，被红框标记起来的就是网卡列表，如果你使用的是无线网就可以选择WLAN。<br><img src="https://img-blog.csdnimg.cn/20210507224420963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.2 开始抓包<br>双击选中目标网卡就会进入到抓包主界面，如图：<br><img src="https://img-blog.csdnimg.cn/20210507224707882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>被红框选中的就是该网卡发送和接受的网络包了，后续会详细讲解如果通过wireshark抓包学习网络。</p>
+<h2 id="1、分层"><a href="#1、分层" class="headerlink" title="1、分层"></a>1、分层</h2><p>分层是企业应用系统中最常见的一种架构模式，将系统在横向维度上切分成几个部分，每个部分负责一部分相对比较单一的职责，然后通过上层对下层的依赖和调用组成一个完整的系统，一般会将网站软件系统分为应用层、服务层、数据层</p>
+<h3 id="优点：便于分工合作开发和维护"><a href="#优点：便于分工合作开发和维护" class="headerlink" title="优点：便于分工合作开发和维护"></a>优点：便于分工合作开发和维护</h3><p>因为各层之间具有一定的独立性，只要维持调用接口不变，各层可以根据具体问题独立演化发展而不需要其他层必须做出相应调整。</p>
+<h3 id="缺点：加大了设计系统的难度"><a href="#缺点：加大了设计系统的难度" class="headerlink" title="缺点：加大了设计系统的难度"></a>缺点：加大了设计系统的难度</h3><p>必须合理规划层次边界和接口，在开发过程中，严格遵循分层架构的约束，禁止跨层次的调用（应用层直接调用数据层）及逆向调用（数据层调用服务层，或者服务层调用应用层）。</p>
+<h2 id="2、分割"><a href="#2、分割" class="headerlink" title="2、分割"></a>2、分割</h2><p>分割是在纵向方面对软件进行切分，将不同的功能和服务分割开来，包装成高内聚低耦合的模块单元，例如将购物、论坛、搜索、广告分割成不同的应用，由独立的团队负责，部署在不同的服务器上</p>
+<h3 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>1、有助于软件的开发和维护</li>
+<li>2、便于不同模块的分布式部署，提高网站的并发处理能力和功能扩展能力</li>
+</ul>
+<h2 id="3、分布式"><a href="#3、分布式" class="headerlink" title="3、分布式"></a>3、分布式</h2><p>分层和分割的一个主要目的是为了切分后的模块便于分布式部署，即将不同模块部署在不同的服务器上，通过远程调用协同工作。</p>
+<h3 id="优点：可以为更多的用户提供服务"><a href="#优点：可以为更多的用户提供服务" class="headerlink" title="优点：可以为更多的用户提供服务"></a>优点：可以为更多的用户提供服务</h3><p>分布式意味着可以使用更多的计算机完成同样的功能，计算机越多，CPU、内存、存储资源也就越多，能够处理的并发访问和数据量就越大</p>
+<h3 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li><p>1、性能可能会收到较大影响</p>
+<p>因为分布式服务之间的调用必须通过网络</p>
+</li>
+<li><p>2、可用性可能会降低</p>
+<p>服务器越多，服务器宕机的概率也就越大，一台服务器宕机造成的服务不可用可能会导致很多应用不可访问</p>
+</li>
+<li><p>3、难以保持数据的一致性</p>
+</li>
+<li><p>4、开发管理维护难度加大</p>
+</li>
+</ul>
+<h3 id="常用的分布式方案："><a href="#常用的分布式方案：" class="headerlink" title="常用的分布式方案："></a>常用的分布式方案：</h3><ul>
+<li><p>1、分布式应用和服务</p>
+<p>将分层和分割后的应用和服务模块分布式部署</p>
+<ul>
+<li><p>优点：</p>
+<ul>
+<li>1、改善网站性能和并发性、加快开发和发布速度、减少数据库连接资源消耗外</li>
+<li>2、可以使不同应用复用共同的服务，便于业务功能扩展</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>2、分布式静态资源</p>
+<p>也叫动静分离，网站的静态资源如JS，CSS，Logo图片等资源独立分布式部署，并采用独立的域名</p>
+<ul>
+<li><p>优点：</p>
+<ul>
+<li>1、静态资源分布式部署可以减轻应用服务器的负载压力</li>
+<li>2、通过使用独立域名加快浏览器并发加载的速度</li>
+<li>3、由负责用户体验的团队进行开发维护有利于网站分工合作，使不同技术工种术业有专攻</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>3、分布式数据和存储</p>
+<p>大型网站需要处理以P为单位的海量数据，单台计算机无法提供如此大的存储空间，这些数据需要分布式存储</p>
+</li>
+</ul>
+<h2 id="4、集群"><a href="#4、集群" class="headerlink" title="4、集群"></a>4、集群</h2><p>即多台服务器部署相同应用构成一个集群，通过负载均衡设备共同对外提供服务</p>
+<h3 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li><p>1、更好的并发性</p>
+<p>因为有很多服务器提供相同的服务</p>
+</li>
+<li><p>2、更好的拓展性</p>
+<p>如果目前的资源不能满足业务需求可以直接以增加服务器的方式对系统进行拓展</p>
+</li>
+<li><p>3、更好的可用性</p>
+<p>如果某台服务器宕机并不会对系统功能造成影响，因为负载均衡设备会将请求转发到其他服务器中</p>
+</li>
+</ul>
+<h2 id="5、缓存"><a href="#5、缓存" class="headerlink" title="5、缓存"></a>5、缓存</h2><p>缓存就是将数据存放在距离计算最近的位置以加快处理速度。<br>使用缓存前提条件：<br>1、数据访问热点不均衡，某些数据会被更频繁的访问，这些数据应该放在缓存中；2、数据在某个时间段内有效，不会很快过期，否则缓存的数据就会因已经失效而产生脏读，影响结果的正确性。</p>
+<h3 id="优点：-2"><a href="#优点：-2" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>1、加快数据访问速度</li>
+<li>2、减轻后端应用和数据存储的负载压力</li>
+</ul>
+<h3 id="常用缓存方式："><a href="#常用缓存方式：" class="headerlink" title="常用缓存方式："></a>常用缓存方式：</h3><ul>
+<li><p>1、CDN</p>
+<p>容分发网络，部署在距离终端用户最近的网络服务商，用户的网络请求总是先到达他的网络服务商那里，在这里缓存网站的一些静态资源（较少变化的数据），可以就近以最快速度返回给用户，如视频网站和门户网站会将用户访问量大的热点内容缓存在CDN。</p>
+</li>
+<li><p>2、反向代理</p>
+<p>反向代理属于网站前端架构的一部分，部署在网站的前端，当用户请求到达网站的数据中心时，最先访问到的就是反向代理服务器，这里缓存网站的静态资源，无需将请求继续转发给应用服务器就能返回给用户。</p>
+</li>
+<li><p>3、本地缓存</p>
+<p>在应用服务器本地缓存着热点数据，应用程序可以在本机内存中直接访问数据，而无需访问数据库，例如使用redis进行缓存</p>
+</li>
+<li><p>4、分布式缓存</p>
+<p>大型网站的数据量非常庞大，即使只缓存一小部分，需要的内存空间也不是单机能承受的，所以除了本地缓存，还需要分布式缓存，将数据缓存在一个专门的分布式缓存集群中，应用程序通过网络通信访问缓存数据</p>
+</li>
+</ul>
+<h2 id="6、异步"><a href="#6、异步" class="headerlink" title="6、异步"></a>6、异步</h2><p>主要目的是解耦，将一个业务操作分成多个阶段，每个阶段之间通过共享数据的方式异步执行进行协作。<br>单一服务器内部可通过多线程共享内存队列的方式实现异步；<br>在分布式系统中，多个服务器集群通过分布式消息队列实现异步，分布式消息队列可以看作内存队列的分布式部署。</p>
+<h3 id="优点：-3"><a href="#优点：-3" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li><p>1、提高系统可用性</p>
+<p>消费者服务器发生故障，数据会在消息队列服务器中存储堆积，生产者服务器可以继续处理业务请求，系统整体表现无故障。消费者服务器恢复正常后，继续处理消息队列中的数据。</p>
+</li>
+<li><p>2、加快网站响应速度</p>
+<p>处在业务处理前端的生产者服务器在处理完业务请求后，将数据写入消息队列，不需要等待消费者服务器处理就可以返回，响应延迟减少。</p>
+</li>
+<li><p>3、消除并发访问高峰</p>
+<p>用户访问量有可能突然增加很多倍，但是并不会持续很久，例如在秒杀活动进行的时刻，这种突增的访问量有可能是服务被压垮，如果为了这个时刻而增加硬件设施又得不偿失，所以使用异步的方式就可以做到“削峰填谷”，使用消息队列将突然增加的访问请求数据放入消息队列中，等待消费者服务器依次处理，就不会对整个网站负载造成太大压力。</p>
+</li>
+</ul>
+<h2 id="7、冗余"><a href="#7、冗余" class="headerlink" title="7、冗余"></a>7、冗余</h2><p>沉余包括服务器冗余运行，数据冗余备份。网站需要不间断的提供服务，因此必须保证在有服务器宕机的情况下可以将服务和数据转移到其他机器上，以保证服务的高可用和数据的不丢失</p>
+<h2 id="8、自动化"><a href="#8、自动化" class="headerlink" title="8、自动化"></a>8、自动化</h2><p>包括但不限于以下部分：<br>1、自动化代码管理；2、自动化测试；3、自动化安全检测；4、自动化部署；<br>5、自动化监控 等等。</p>
 ]]></content>
       <categories>
         <category>技术</category>
       </categories>
       <tags>
-        <tag>Wireshark</tag>
-        <tag>网络</tag>
+        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
@@ -948,43 +1097,60 @@
       </tags>
   </entry>
   <entry>
-    <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
-    <url>/blog/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</url>
-    <content><![CDATA[<h1 id="【通过抓包学网络】TCP三次握手与四次挥手"><a href="#【通过抓包学网络】TCP三次握手与四次挥手" class="headerlink" title="【通过抓包学网络】TCP三次握手与四次挥手"></a>【通过抓包学网络】TCP三次握手与四次挥手</h1><p>本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章<a href="https://blog.csdn.net/qq_43005544/article/details/116504407">wireshark 简易教程</a></p>
-<span id="more"></span>
+    <title>常见的Web应用攻击手段</title>
+    <url>/blog/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</url>
+    <content><![CDATA[<h1 id="常见的Web应用攻击手段"><a href="#常见的Web应用攻击手段" class="headerlink" title="常见的Web应用攻击手段"></a>常见的Web应用攻击手段</h1><span id="more"></span>
 
-<p><strong>正文开始</strong></p>
-<h1 id="1-首先抓个包"><a href="#1-首先抓个包" class="headerlink" title="1.首先抓个包"></a>1.首先抓个包</h1><p>通过上一篇文章大家应该都能打开对应网卡的抓包页面了哈；我们利用DNS服务可以将域名解析成IP的功能来演示如何抓到我们想要的包。</p>
-<h2 id="1-1-开始抓包"><a href="#1-1-开始抓包" class="headerlink" title="1.1 开始抓包"></a>1.1 开始抓包</h2><p>如果进入抓包页面没有自动开始抓包，就点击左上角的开始抓包按钮，如图：<br><img src="https://img-blog.csdnimg.cn/20210507235225375.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="1-2-打开命令行界面"><a href="#1-2-打开命令行界面" class="headerlink" title="1.2 打开命令行界面"></a>1.2 打开命令行界面</h2><p>博主用的win10操作系统，所以打开的就是CMD了，输入以下命令</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;nslookup</span><br><span class="line">&gt;<span class="built_in">set</span> vc</span><br><span class="line">&gt;www.baidu.com</span><br></pre></td></tr></table></figure>
-<p>命令执行情况如图：<br><img src="https://img-blog.csdnimg.cn/20210507233243944.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70"></p>
-<h2 id="1-3-停止抓包"><a href="#1-3-停止抓包" class="headerlink" title="1.3 停止抓包"></a>1.3 停止抓包</h2><p>点击红框标记的按钮：<br><img src="https://img-blog.csdnimg.cn/20210507235328579.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="1-4-筛选"><a href="#1-4-筛选" class="headerlink" title="1.4 筛选"></a>1.4 筛选</h2><p>这个时候可以看到界面上抓到很多包，但是有很多是其他应用进行的网络请求，并不是我们想要的，所以要进行筛选。<br>在筛选框我们用Ip进行筛选，表达式为<strong>ip.addr == 116.199.0.200</strong>，如图<br><img src="https://img-blog.csdnimg.cn/20210507235517845.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>116.199.0.200是我本机DNS的ip，你可以通过刚在输入的nslookup命令得到，如图<br><img src="https://img-blog.csdnimg.cn/20210507235651897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>但是通过筛选后发现还是有很多包不是我们想要的，我们通过info列来找到我们请求DNS的包，如图：<br>找到DNS协议info这列有我们刚才输入需要解析的域名这两行，这两行就是DNS解析域名的过程，我们从这两行的Info就可以很清晰的看出DNS解析域名的过程，首先192.168.1.107询问DNS <a href="http://www.baidu.com的ip是多少,然后dns在下一行进行回复./">www.baidu.com的IP是多少，然后DNS在下一行进行回复。</a><br><img src="https://img-blog.csdnimg.cn/20210509113130576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="1-5-找到三次握手的包"><a href="#1-5-找到三次握手的包" class="headerlink" title="1.5 找到三次握手的包"></a>1.5 找到三次握手的包</h2><p>在1.4小节中我们找到的926和927号包的上面就是三次握手的包，分别是921，922，923这三个包，如图：<br><img src="https://img-blog.csdnimg.cn/20210509161642786.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>你可能想问是怎么看出来的，好问题，主要是看Seq和Ack的值，三次握手的时候Seq的相对值是为0的（注意是相对值）。找到了三次握手的网络包，我们就来分析一下三次握手吧。</p>
-<h1 id="2-分析三次握手"><a href="#2-分析三次握手" class="headerlink" title="2. 分析三次握手"></a>2. 分析三次握手</h1><h2 id="2-1-TCP-参数介绍"><a href="#2-1-TCP-参数介绍" class="headerlink" title="2.1 TCP 参数介绍"></a>2.1 TCP 参数介绍</h2><p>要学习TCP首先要学习它的参数。</p>
-<p><strong>Seq</strong>：标识改数据段的序号。因为TCP的传输是有序的，接收者可以通过Seq对包进行排序。</p>
-<p><strong>Len</strong>：表示Seq对应数据的长度。</p>
-<p><strong>Ack</strong>：确认号，向数据提供者表明收到了哪些包（实际收到包的Seq序号需要 Ack - 1，因为Seq是从0开始的，例如Ack = 2说明已经收到 第0段和第1段需要包，下一个需要接收的序号包Seq 需要为 2）。</p>
-<p><strong>SYN</strong>：表示携带这个参数的数据包正在发起连接请求。</p>
-<p><strong>FIN</strong>：表示携带这个参数的包正在请求停止连接。</p>
-<h2 id="2-2-三次握手过程"><a href="#2-2-三次握手过程" class="headerlink" title="2.2 三次握手过程"></a>2.2 三次握手过程</h2><p>用来分析的数据包如图：<br><img src="https://img-blog.csdnimg.cn/2021050917000075.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><strong>第一次握手</strong> 192.168.1.107 向 116.119.0.200 发送携带 SYN; Seq = 0;len = 0的请求。SYN表示这是在请求连接，Seq表示目前发送的是第0段数据包，len表示数据包的长度为0。</p>
-<p><strong>第二次握手</strong> 116.119.0.200 向192.168.1.107发送携带SYN;Seq = 0;Len = 0; Ack = 1的请求。因为TCP是双向连接，所以双方都要维护各自的参数，除了Ack其他参数在第一次握手的时候讲过了，Ack表示已经接收到Seq = 0 的数据包了，下一次请从Seq = 1 的数据包发送。</p>
-<p><strong>第三次握手</strong>：192.168.1.107 向 116.119.0.200 发送携带Ack = 1; Seq = 1; len = 0;的请求，表示已经收到Seq = 0 的数据包了，下一次请从Seq = 1 的数据包发送。<br>这时连接已经成功建立。</p>
-<p>这样就通过三次握手建立了一个连接，<strong>至于面试常问的为什么不是两次或者四次相信你已经知道答案了</strong>，因为<strong>两次不可靠</strong>，可能在第二次握手的时候超时了，对方并没有收到请求，而发送方并不知道，以为已经成功建立了连接，所以会向对方发送数据，但是对方因为其他原因没有接收到第二次握手，所以不会接受数据发送方发送的数据。<strong>至于四次没必要</strong>，因为所有想做的事情已经做完了。</p>
-<h1 id="3-分析四次挥手"><a href="#3-分析四次挥手" class="headerlink" title="3. 分析四次挥手"></a>3. 分析四次挥手</h1><h2 id="3-1-找到四次挥手的数据包"><a href="#3-1-找到四次挥手的数据包" class="headerlink" title="3.1 找到四次挥手的数据包"></a>3.1 找到四次挥手的数据包</h2><p>四次挥手的数据包就是928至931，你又想问这是怎么看出来的？好问题，讲三次握手的时候介绍过 <strong>FIN</strong>参数就代表着请求断开连接，那我们就找离DNS解析域名数据包最近的携带FIN参数的数据包。<br><img src="https://img-blog.csdnimg.cn/20210509174830567.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="3-2-分析四次挥手"><a href="#3-2-分析四次挥手" class="headerlink" title="3.2 分析四次挥手"></a>3.2 分析四次挥手</h2><p><strong>第一次挥手</strong>：192.168.1.107 向 116.119.0.200 发送携带FIN; Seq = 34; Ack = 93; 的数据包，FIN表示请求断开连接，Seq = 34表示这个数据包是第34段，Ack = 93表示已经收到93段之前的数据包了，下一次请求第93段数据包开始发送。</p>
-<p><strong>第二次挥手</strong>： 116.119.0.200 向192.168.1.107发送携带Seq = 93; Ack = 35;的数据包，表示请求已经收到 Seq和Ack参数就不解释了。</p>
-<p><strong>第三次挥手</strong>：116.119.0.200 向192.168.1.107发送携带FIN; Seq = 93; Ack = 35; 的数据包，表示请求断开连接。</p>
-<p><strong>第四次挥手</strong>：192.168.1.107 向 116.119.0.200 发送携带Seq = 35; Ack = 94;的数据包，表示已经接收到请求。</p>
-<p>通过四次挥手完成了连接的断开，<strong>面试的时候常问为什么不能是三次挥手</strong>，这里已经很明确了，因为116.119.0.200这台服务器需要连续发送两个数据包，那为什么是两个呢？因为可能还有一些网络数据没有处理完，不能马上断开连接，只能先回应请求收到了，等处理完数据后再发送断开连接请求。</p>
+<h2 id="1-XSS攻击"><a href="#1-XSS攻击" class="headerlink" title="1.XSS攻击"></a>1.XSS攻击</h2><p>XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。</p>
+<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><ul>
+<li><p>1.1 反射型</p>
+<p>攻击者诱使用户点击一个嵌入恶意脚本的链接，达到攻击的目的</p>
+</li>
+<li><p>1.2 持久型</p>
+<p>黑客提交含有恶意脚本的请求，保存在被攻击的Web站点的数据库中，用户浏览网页时，恶意脚本被包含在正常页面中，达到攻击的目的</p>
+</li>
+</ul>
+<h3 id="防护手段"><a href="#防护手段" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
+<li><p>1.3消毒</p>
+<p>XSS攻击者一般都是通过在请求中嵌入恶意脚本达到攻击的目的，这些脚本是一般用户输入中不使用的，如果进行过滤和消毒处理，即对某些html危险字符转义就可以让绝大部分攻击失败</p>
+</li>
+<li><p>1.4HttpOnly</p>
+<p>浏览器禁止页面JavaScript访问带有HttpOnly属性的Cookie，可以防止Cookie中的数据被窃取</p>
+</li>
+</ul>
+<h2 id="2-注入攻击"><a href="#2-注入攻击" class="headerlink" title="2.注入攻击"></a>2.注入攻击</h2><h3 id="分类-1"><a href="#分类-1" class="headerlink" title="分类"></a>分类</h3><ul>
+<li><p>2.1 SQL注入攻击</p>
+<p>攻击者在HTTP请求中注入恶意SQL命令（drop table users;），服务器用请求参数构造数据库SQL命令时，恶意SQL被一起构造，并在数据库中执行。</p>
+</li>
+<li><p>2.2 OS注入攻击</p>
+</li>
+</ul>
+<h3 id="防护手段-1"><a href="#防护手段-1" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
+<li><p>2.3 消毒</p>
+<p>通过正则匹配，过滤请求数据中可能注入的SQL</p>
+</li>
+<li><p>2.4 参数绑定</p>
+<p>使用预编译手段，绑定参数是最好的防SQL注入方法。目前许多数据访问层框架，如IBatis，Hibernate等，都实现SQL预编译和参数绑定，攻击者的恶意SQL会被当做SQL的参数，而不是SQL命令被执行。</p>
+</li>
+</ul>
+<h2 id="3-CSRF攻击"><a href="#3-CSRF攻击" class="headerlink" title="3.CSRF攻击"></a>3.CSRF攻击</h2><p>攻击者通过跨站请求，以合法用户的身份进行非法操作，如转账交易、发表评论等；<br>CSRF的主要手法是利用跨站请求，在用户不知情的情况下，以用户的身份伪造请求。其核心是利用了浏览器Cookie或服务器Session策略，盗取用户身份。</p>
+<h3 id="防护手段-2"><a href="#防护手段-2" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
+<li><p>3.1 Token验证</p>
+<p>通过在请求参数中增加随机数的办法来阻止攻击者获得所有请求参数：在页面表单中增加一个随机数作为Token，每次响应页面的Token都不相同，从正常页面提交的请求会包含该Token值，而伪造的请求无法获得该值，服务器检查请求参数中Token的值是否存在并且正确以确定请求提交者是否合法</p>
+</li>
+<li><p>3.2 验证码</p>
+<p>验证码则更加简单有效；<br>请求提交时，需要用户输入验证码，以避免在用户不知情的情况下被攻击者伪造请求。但是输入验证码是一个糟糕的用户体验，所以请在必要时使用，</p>
+</li>
+<li><p>3.3 Referer check</p>
+<p>HTTP请求头的Referer域中记录着请求来源，可通过检查请求来源，验证其是否合法。</p>
+</li>
+</ul>
 ]]></content>
       <categories>
         <category>技术</category>
       </categories>
       <tags>
-        <tag>Wireshark</tag>
-        <tag>网络</tag>
+        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
@@ -1096,172 +1262,6 @@
 </li>
 </ul>
 <h2 id="3-应用服务器性能优化"><a href="#3-应用服务器性能优化" class="headerlink" title="3. 应用服务器性能优化"></a>3. 应用服务器性能优化</h2><p>优化手段主要有缓存、集群、异步等。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>网站架构模式</title>
-    <url>/blog/%E7%BD%91%E7%AB%99%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F/</url>
-    <content><![CDATA[<h1 id="网站架构模式"><a href="#网站架构模式" class="headerlink" title="网站架构模式"></a>网站架构模式</h1><p>大型互联网公司为了实现网站的高性能、高可用、易伸缩、可扩展、安全等各种技术架构目标，提出了很多解决方案，而这些方案又被更多网站重复使用，从而逐渐形成大型网站架构模式，下面对常见的模式进行总结。</p>
-<span id="more"></span>
-
-<h2 id="1、分层"><a href="#1、分层" class="headerlink" title="1、分层"></a>1、分层</h2><p>分层是企业应用系统中最常见的一种架构模式，将系统在横向维度上切分成几个部分，每个部分负责一部分相对比较单一的职责，然后通过上层对下层的依赖和调用组成一个完整的系统，一般会将网站软件系统分为应用层、服务层、数据层</p>
-<h3 id="优点：便于分工合作开发和维护"><a href="#优点：便于分工合作开发和维护" class="headerlink" title="优点：便于分工合作开发和维护"></a>优点：便于分工合作开发和维护</h3><p>因为各层之间具有一定的独立性，只要维持调用接口不变，各层可以根据具体问题独立演化发展而不需要其他层必须做出相应调整。</p>
-<h3 id="缺点：加大了设计系统的难度"><a href="#缺点：加大了设计系统的难度" class="headerlink" title="缺点：加大了设计系统的难度"></a>缺点：加大了设计系统的难度</h3><p>必须合理规划层次边界和接口，在开发过程中，严格遵循分层架构的约束，禁止跨层次的调用（应用层直接调用数据层）及逆向调用（数据层调用服务层，或者服务层调用应用层）。</p>
-<h2 id="2、分割"><a href="#2、分割" class="headerlink" title="2、分割"></a>2、分割</h2><p>分割是在纵向方面对软件进行切分，将不同的功能和服务分割开来，包装成高内聚低耦合的模块单元，例如将购物、论坛、搜索、广告分割成不同的应用，由独立的团队负责，部署在不同的服务器上</p>
-<h3 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h3><ul>
-<li>1、有助于软件的开发和维护</li>
-<li>2、便于不同模块的分布式部署，提高网站的并发处理能力和功能扩展能力</li>
-</ul>
-<h2 id="3、分布式"><a href="#3、分布式" class="headerlink" title="3、分布式"></a>3、分布式</h2><p>分层和分割的一个主要目的是为了切分后的模块便于分布式部署，即将不同模块部署在不同的服务器上，通过远程调用协同工作。</p>
-<h3 id="优点：可以为更多的用户提供服务"><a href="#优点：可以为更多的用户提供服务" class="headerlink" title="优点：可以为更多的用户提供服务"></a>优点：可以为更多的用户提供服务</h3><p>分布式意味着可以使用更多的计算机完成同样的功能，计算机越多，CPU、内存、存储资源也就越多，能够处理的并发访问和数据量就越大</p>
-<h3 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h3><ul>
-<li><p>1、性能可能会收到较大影响</p>
-<p>因为分布式服务之间的调用必须通过网络</p>
-</li>
-<li><p>2、可用性可能会降低</p>
-<p>服务器越多，服务器宕机的概率也就越大，一台服务器宕机造成的服务不可用可能会导致很多应用不可访问</p>
-</li>
-<li><p>3、难以保持数据的一致性</p>
-</li>
-<li><p>4、开发管理维护难度加大</p>
-</li>
-</ul>
-<h3 id="常用的分布式方案："><a href="#常用的分布式方案：" class="headerlink" title="常用的分布式方案："></a>常用的分布式方案：</h3><ul>
-<li><p>1、分布式应用和服务</p>
-<p>将分层和分割后的应用和服务模块分布式部署</p>
-<ul>
-<li><p>优点：</p>
-<ul>
-<li>1、改善网站性能和并发性、加快开发和发布速度、减少数据库连接资源消耗外</li>
-<li>2、可以使不同应用复用共同的服务，便于业务功能扩展</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>2、分布式静态资源</p>
-<p>也叫动静分离，网站的静态资源如JS，CSS，Logo图片等资源独立分布式部署，并采用独立的域名</p>
-<ul>
-<li><p>优点：</p>
-<ul>
-<li>1、静态资源分布式部署可以减轻应用服务器的负载压力</li>
-<li>2、通过使用独立域名加快浏览器并发加载的速度</li>
-<li>3、由负责用户体验的团队进行开发维护有利于网站分工合作，使不同技术工种术业有专攻</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>3、分布式数据和存储</p>
-<p>大型网站需要处理以P为单位的海量数据，单台计算机无法提供如此大的存储空间，这些数据需要分布式存储</p>
-</li>
-</ul>
-<h2 id="4、集群"><a href="#4、集群" class="headerlink" title="4、集群"></a>4、集群</h2><p>即多台服务器部署相同应用构成一个集群，通过负载均衡设备共同对外提供服务</p>
-<h3 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h3><ul>
-<li><p>1、更好的并发性</p>
-<p>因为有很多服务器提供相同的服务</p>
-</li>
-<li><p>2、更好的拓展性</p>
-<p>如果目前的资源不能满足业务需求可以直接以增加服务器的方式对系统进行拓展</p>
-</li>
-<li><p>3、更好的可用性</p>
-<p>如果某台服务器宕机并不会对系统功能造成影响，因为负载均衡设备会将请求转发到其他服务器中</p>
-</li>
-</ul>
-<h2 id="5、缓存"><a href="#5、缓存" class="headerlink" title="5、缓存"></a>5、缓存</h2><p>缓存就是将数据存放在距离计算最近的位置以加快处理速度。<br>使用缓存前提条件：<br>1、数据访问热点不均衡，某些数据会被更频繁的访问，这些数据应该放在缓存中；2、数据在某个时间段内有效，不会很快过期，否则缓存的数据就会因已经失效而产生脏读，影响结果的正确性。</p>
-<h3 id="优点：-2"><a href="#优点：-2" class="headerlink" title="优点："></a>优点：</h3><ul>
-<li>1、加快数据访问速度</li>
-<li>2、减轻后端应用和数据存储的负载压力</li>
-</ul>
-<h3 id="常用缓存方式："><a href="#常用缓存方式：" class="headerlink" title="常用缓存方式："></a>常用缓存方式：</h3><ul>
-<li><p>1、CDN</p>
-<p>容分发网络，部署在距离终端用户最近的网络服务商，用户的网络请求总是先到达他的网络服务商那里，在这里缓存网站的一些静态资源（较少变化的数据），可以就近以最快速度返回给用户，如视频网站和门户网站会将用户访问量大的热点内容缓存在CDN。</p>
-</li>
-<li><p>2、反向代理</p>
-<p>反向代理属于网站前端架构的一部分，部署在网站的前端，当用户请求到达网站的数据中心时，最先访问到的就是反向代理服务器，这里缓存网站的静态资源，无需将请求继续转发给应用服务器就能返回给用户。</p>
-</li>
-<li><p>3、本地缓存</p>
-<p>在应用服务器本地缓存着热点数据，应用程序可以在本机内存中直接访问数据，而无需访问数据库，例如使用redis进行缓存</p>
-</li>
-<li><p>4、分布式缓存</p>
-<p>大型网站的数据量非常庞大，即使只缓存一小部分，需要的内存空间也不是单机能承受的，所以除了本地缓存，还需要分布式缓存，将数据缓存在一个专门的分布式缓存集群中，应用程序通过网络通信访问缓存数据</p>
-</li>
-</ul>
-<h2 id="6、异步"><a href="#6、异步" class="headerlink" title="6、异步"></a>6、异步</h2><p>主要目的是解耦，将一个业务操作分成多个阶段，每个阶段之间通过共享数据的方式异步执行进行协作。<br>单一服务器内部可通过多线程共享内存队列的方式实现异步；<br>在分布式系统中，多个服务器集群通过分布式消息队列实现异步，分布式消息队列可以看作内存队列的分布式部署。</p>
-<h3 id="优点：-3"><a href="#优点：-3" class="headerlink" title="优点："></a>优点：</h3><ul>
-<li><p>1、提高系统可用性</p>
-<p>消费者服务器发生故障，数据会在消息队列服务器中存储堆积，生产者服务器可以继续处理业务请求，系统整体表现无故障。消费者服务器恢复正常后，继续处理消息队列中的数据。</p>
-</li>
-<li><p>2、加快网站响应速度</p>
-<p>处在业务处理前端的生产者服务器在处理完业务请求后，将数据写入消息队列，不需要等待消费者服务器处理就可以返回，响应延迟减少。</p>
-</li>
-<li><p>3、消除并发访问高峰</p>
-<p>用户访问量有可能突然增加很多倍，但是并不会持续很久，例如在秒杀活动进行的时刻，这种突增的访问量有可能是服务被压垮，如果为了这个时刻而增加硬件设施又得不偿失，所以使用异步的方式就可以做到“削峰填谷”，使用消息队列将突然增加的访问请求数据放入消息队列中，等待消费者服务器依次处理，就不会对整个网站负载造成太大压力。</p>
-</li>
-</ul>
-<h2 id="7、冗余"><a href="#7、冗余" class="headerlink" title="7、冗余"></a>7、冗余</h2><p>沉余包括服务器冗余运行，数据冗余备份。网站需要不间断的提供服务，因此必须保证在有服务器宕机的情况下可以将服务和数据转移到其他机器上，以保证服务的高可用和数据的不丢失</p>
-<h2 id="8、自动化"><a href="#8、自动化" class="headerlink" title="8、自动化"></a>8、自动化</h2><p>包括但不限于以下部分：<br>1、自动化代码管理；2、自动化测试；3、自动化安全检测；4、自动化部署；<br>5、自动化监控 等等。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>常见的Web应用攻击手段</title>
-    <url>/blog/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</url>
-    <content><![CDATA[<h1 id="常见的Web应用攻击手段"><a href="#常见的Web应用攻击手段" class="headerlink" title="常见的Web应用攻击手段"></a>常见的Web应用攻击手段</h1><span id="more"></span>
-
-<h2 id="1-XSS攻击"><a href="#1-XSS攻击" class="headerlink" title="1.XSS攻击"></a>1.XSS攻击</h2><p>XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。</p>
-<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><ul>
-<li><p>1.1 反射型</p>
-<p>攻击者诱使用户点击一个嵌入恶意脚本的链接，达到攻击的目的</p>
-</li>
-<li><p>1.2 持久型</p>
-<p>黑客提交含有恶意脚本的请求，保存在被攻击的Web站点的数据库中，用户浏览网页时，恶意脚本被包含在正常页面中，达到攻击的目的</p>
-</li>
-</ul>
-<h3 id="防护手段"><a href="#防护手段" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
-<li><p>1.3消毒</p>
-<p>XSS攻击者一般都是通过在请求中嵌入恶意脚本达到攻击的目的，这些脚本是一般用户输入中不使用的，如果进行过滤和消毒处理，即对某些html危险字符转义就可以让绝大部分攻击失败</p>
-</li>
-<li><p>1.4HttpOnly</p>
-<p>浏览器禁止页面JavaScript访问带有HttpOnly属性的Cookie，可以防止Cookie中的数据被窃取</p>
-</li>
-</ul>
-<h2 id="2-注入攻击"><a href="#2-注入攻击" class="headerlink" title="2.注入攻击"></a>2.注入攻击</h2><h3 id="分类-1"><a href="#分类-1" class="headerlink" title="分类"></a>分类</h3><ul>
-<li><p>2.1 SQL注入攻击</p>
-<p>攻击者在HTTP请求中注入恶意SQL命令（drop table users;），服务器用请求参数构造数据库SQL命令时，恶意SQL被一起构造，并在数据库中执行。</p>
-</li>
-<li><p>2.2 OS注入攻击</p>
-</li>
-</ul>
-<h3 id="防护手段-1"><a href="#防护手段-1" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
-<li><p>2.3 消毒</p>
-<p>通过正则匹配，过滤请求数据中可能注入的SQL</p>
-</li>
-<li><p>2.4 参数绑定</p>
-<p>使用预编译手段，绑定参数是最好的防SQL注入方法。目前许多数据访问层框架，如IBatis，Hibernate等，都实现SQL预编译和参数绑定，攻击者的恶意SQL会被当做SQL的参数，而不是SQL命令被执行。</p>
-</li>
-</ul>
-<h2 id="3-CSRF攻击"><a href="#3-CSRF攻击" class="headerlink" title="3.CSRF攻击"></a>3.CSRF攻击</h2><p>攻击者通过跨站请求，以合法用户的身份进行非法操作，如转账交易、发表评论等；<br>CSRF的主要手法是利用跨站请求，在用户不知情的情况下，以用户的身份伪造请求。其核心是利用了浏览器Cookie或服务器Session策略，盗取用户身份。</p>
-<h3 id="防护手段-2"><a href="#防护手段-2" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
-<li><p>3.1 Token验证</p>
-<p>通过在请求参数中增加随机数的办法来阻止攻击者获得所有请求参数：在页面表单中增加一个随机数作为Token，每次响应页面的Token都不相同，从正常页面提交的请求会包含该Token值，而伪造的请求无法获得该值，服务器检查请求参数中Token的值是否存在并且正确以确定请求提交者是否合法</p>
-</li>
-<li><p>3.2 验证码</p>
-<p>验证码则更加简单有效；<br>请求提交时，需要用户输入验证码，以避免在用户不知情的情况下被攻击者伪造请求。但是输入验证码是一个糟糕的用户体验，所以请在必要时使用，</p>
-</li>
-<li><p>3.3 Referer check</p>
-<p>HTTP请求头的Referer域中记录着请求来源，可通过检查请求来源，验证其是否合法。</p>
-</li>
-</ul>
 ]]></content>
       <categories>
         <category>技术</category>
