@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>博客</title>
-  <icon>https://biyanwen.github.io/icon.png</icon>
+  <icon>http://biyw.cf/icon.png</icon>
   <subtitle>道阻且长，行则将至</subtitle>
-  <link href="https://biyanwen.github.io/atom.xml" rel="self"/>
+  <link href="http://biyw.cf/atom.xml" rel="self"/>
   
-  <link href="https://biyanwen.github.io/"/>
+  <link href="http://biyw.cf/"/>
   <updated>2021-12-05T07:14:14.428Z</updated>
-  <id>https://biyanwen.github.io/</id>
+  <id>http://biyw.cf/</id>
   
   <author>
     <name>Byw</name>
@@ -18,8 +18,8 @@
   
   <entry>
     <title>CountDownLatch，CyclicBarrier，Semaphore及AQS介绍</title>
-    <link href="https://biyanwen.github.io/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/"/>
-    <id>https://biyanwen.github.io/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/</id>
+    <link href="http://biyw.cf/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/"/>
+    <id>http://biyw.cf/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/</id>
     <published>2021-12-05T07:10:31.558Z</published>
     <updated>2021-12-05T07:14:14.428Z</updated>
     
@@ -28,21 +28,21 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Java" scheme="https://biyanwen.github.io/tags/Java/"/>
+    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
     
-    <category term="多线程" scheme="https://biyanwen.github.io/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
+    <category term="多线程" scheme="http://biyw.cf/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
     
-    <category term="源码阅读" scheme="https://biyanwen.github.io/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
+    <category term="源码阅读" scheme="http://biyw.cf/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
     
   </entry>
   
   <entry>
     <title>分布式锁</title>
-    <link href="https://biyanwen.github.io/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/"/>
-    <id>https://biyanwen.github.io/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/</id>
+    <link href="http://biyw.cf/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/"/>
+    <id>http://biyw.cf/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/</id>
     <published>2021-12-05T06:57:16.379Z</published>
     <updated>2021-12-05T07:08:43.446Z</updated>
     
@@ -51,21 +51,21 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Java" scheme="https://biyanwen.github.io/tags/Java/"/>
+    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
     
-    <category term="分布式" scheme="https://biyanwen.github.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
+    <category term="分布式" scheme="http://biyw.cf/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
     
-    <category term="多线程" scheme="https://biyanwen.github.io/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
+    <category term="多线程" scheme="http://biyw.cf/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
     
   </entry>
   
   <entry>
     <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
-    <link href="https://biyanwen.github.io/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/"/>
-    <id>https://biyanwen.github.io/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</id>
+    <link href="http://biyw.cf/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/"/>
+    <id>http://biyw.cf/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</id>
     <published>2021-12-05T06:47:29.126Z</published>
     <updated>2021-12-05T07:03:24.592Z</updated>
     
@@ -74,19 +74,19 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Wireshark" scheme="https://biyanwen.github.io/tags/Wireshark/"/>
+    <category term="Wireshark" scheme="http://biyw.cf/tags/Wireshark/"/>
     
-    <category term="网络" scheme="https://biyanwen.github.io/tags/%E7%BD%91%E7%BB%9C/"/>
+    <category term="网络" scheme="http://biyw.cf/tags/%E7%BD%91%E7%BB%9C/"/>
     
   </entry>
   
   <entry>
     <title>Wireshark 简明教程</title>
-    <link href="https://biyanwen.github.io/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/"/>
-    <id>https://biyanwen.github.io/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</id>
+    <link href="http://biyw.cf/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/"/>
+    <id>http://biyw.cf/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</id>
     <published>2021-12-05T06:42:55.422Z</published>
     <updated>2021-12-05T06:46:53.512Z</updated>
     
@@ -95,19 +95,19 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Wireshark" scheme="https://biyanwen.github.io/tags/Wireshark/"/>
+    <category term="Wireshark" scheme="http://biyw.cf/tags/Wireshark/"/>
     
-    <category term="网络" scheme="https://biyanwen.github.io/tags/%E7%BD%91%E7%BB%9C/"/>
+    <category term="网络" scheme="http://biyw.cf/tags/%E7%BD%91%E7%BB%9C/"/>
     
   </entry>
   
   <entry>
     <title>Git-submodule 统一配置简明教程</title>
-    <link href="https://biyanwen.github.io/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/"/>
-    <id>https://biyanwen.github.io/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</id>
+    <link href="http://biyw.cf/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/"/>
+    <id>http://biyw.cf/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</id>
     <published>2021-12-05T06:41:25.950Z</published>
     <updated>2021-12-05T07:06:03.597Z</updated>
     
@@ -118,17 +118,17 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Git" scheme="https://biyanwen.github.io/tags/Git/"/>
+    <category term="Git" scheme="http://biyw.cf/tags/Git/"/>
     
   </entry>
   
   <entry>
     <title>【Mybatis源码解读】jdbc包</title>
-    <link href="https://biyanwen.github.io/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/"/>
-    <id>https://biyanwen.github.io/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</id>
+    <link href="http://biyw.cf/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/"/>
+    <id>http://biyw.cf/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</id>
     <published>2021-12-05T06:30:01.964Z</published>
     <updated>2021-12-05T06:35:43.720Z</updated>
     
@@ -137,19 +137,19 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Mybatis" scheme="https://biyanwen.github.io/tags/Mybatis/"/>
+    <category term="Mybatis" scheme="http://biyw.cf/tags/Mybatis/"/>
     
-    <category term="源码阅读" scheme="https://biyanwen.github.io/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
+    <category term="源码阅读" scheme="http://biyw.cf/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
     
   </entry>
   
   <entry>
     <title>常见的Web应用攻击手段</title>
-    <link href="https://biyanwen.github.io/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/"/>
-    <id>https://biyanwen.github.io/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</id>
+    <link href="http://biyw.cf/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/"/>
+    <id>http://biyw.cf/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</id>
     <published>2021-12-05T06:24:20.623Z</published>
     <updated>2021-12-05T06:25:37.045Z</updated>
     
@@ -158,17 +158,17 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="架构" scheme="https://biyanwen.github.io/tags/%E6%9E%B6%E6%9E%84/"/>
+    <category term="架构" scheme="http://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
     
   </entry>
   
   <entry>
     <title>集群环境下如何管理Session</title>
-    <link href="https://biyanwen.github.io/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/"/>
-    <id>https://biyanwen.github.io/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</id>
+    <link href="http://biyw.cf/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/"/>
+    <id>http://biyw.cf/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</id>
     <published>2021-12-05T06:21:36.434Z</published>
     <updated>2021-12-05T06:36:58.156Z</updated>
     
@@ -177,17 +177,17 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="架构" scheme="https://biyanwen.github.io/tags/%E6%9E%B6%E6%9E%84/"/>
+    <category term="架构" scheme="http://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
     
   </entry>
   
   <entry>
     <title>网站的高性能架构</title>
-    <link href="https://biyanwen.github.io/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/"/>
-    <id>https://biyanwen.github.io/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/</id>
+    <link href="http://biyw.cf/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/"/>
+    <id>http://biyw.cf/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/</id>
     <published>2021-12-05T06:20:42.235Z</published>
     <updated>2021-12-05T06:37:10.437Z</updated>
     
@@ -196,17 +196,17 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="架构" scheme="https://biyanwen.github.io/tags/%E6%9E%B6%E6%9E%84/"/>
+    <category term="架构" scheme="http://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
     
   </entry>
   
   <entry>
     <title>网站典型故障案例</title>
-    <link href="https://biyanwen.github.io/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/"/>
-    <id>https://biyanwen.github.io/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/</id>
+    <link href="http://biyw.cf/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/"/>
+    <id>http://biyw.cf/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/</id>
     <published>2021-12-05T06:18:51.996Z</published>
     <updated>2021-12-05T06:37:26.745Z</updated>
     
@@ -215,19 +215,19 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="架构" scheme="https://biyanwen.github.io/tags/%E6%9E%B6%E6%9E%84/"/>
+    <category term="架构" scheme="http://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
     
-    <category term="问题记录" scheme="https://biyanwen.github.io/tags/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/"/>
+    <category term="问题记录" scheme="http://biyw.cf/tags/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/"/>
     
   </entry>
   
   <entry>
     <title>Java内存模型与线程</title>
-    <link href="https://biyanwen.github.io/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/"/>
-    <id>https://biyanwen.github.io/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/</id>
+    <link href="http://biyw.cf/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/"/>
+    <id>http://biyw.cf/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/</id>
     <published>2021-12-05T06:16:49.258Z</published>
     <updated>2021-12-05T06:18:44.534Z</updated>
     
@@ -236,17 +236,17 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Java" scheme="https://biyanwen.github.io/tags/Java/"/>
+    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
     
   </entry>
   
   <entry>
     <title>Java内存区域</title>
-    <link href="https://biyanwen.github.io/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/"/>
-    <id>https://biyanwen.github.io/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/</id>
+    <link href="http://biyw.cf/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/"/>
+    <id>http://biyw.cf/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/</id>
     <published>2021-12-05T06:15:11.402Z</published>
     <updated>2021-12-05T06:16:35.988Z</updated>
     
@@ -255,17 +255,17 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Jvm" scheme="https://biyanwen.github.io/tags/Jvm/"/>
+    <category term="Jvm" scheme="http://biyw.cf/tags/Jvm/"/>
     
   </entry>
   
   <entry>
     <title>垃圾收集器与内存分配策略</title>
-    <link href="https://biyanwen.github.io/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/"/>
-    <id>https://biyanwen.github.io/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/</id>
+    <link href="http://biyw.cf/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/"/>
+    <id>http://biyw.cf/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/</id>
     <published>2021-12-05T06:13:31.866Z</published>
     <updated>2021-12-05T06:15:01.283Z</updated>
     
@@ -274,17 +274,17 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Jvm" scheme="https://biyanwen.github.io/tags/Jvm/"/>
+    <category term="Jvm" scheme="http://biyw.cf/tags/Jvm/"/>
     
   </entry>
   
   <entry>
     <title>虚拟机类加载机制</title>
-    <link href="https://biyanwen.github.io/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/"/>
-    <id>https://biyanwen.github.io/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/</id>
+    <link href="http://biyw.cf/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/"/>
+    <id>http://biyw.cf/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/</id>
     <published>2021-12-05T06:12:44.443Z</published>
     <updated>2021-12-05T06:32:54.639Z</updated>
     
@@ -293,19 +293,19 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Jvm" scheme="https://biyanwen.github.io/tags/Jvm/"/>
+    <category term="Jvm" scheme="http://biyw.cf/tags/Jvm/"/>
     
-    <category term="类加载" scheme="https://biyanwen.github.io/tags/%E7%B1%BB%E5%8A%A0%E8%BD%BD/"/>
+    <category term="类加载" scheme="http://biyw.cf/tags/%E7%B1%BB%E5%8A%A0%E8%BD%BD/"/>
     
   </entry>
   
   <entry>
     <title>虚拟机字节码执行引擎</title>
-    <link href="https://biyanwen.github.io/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/"/>
-    <id>https://biyanwen.github.io/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/</id>
+    <link href="http://biyw.cf/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/"/>
+    <id>http://biyw.cf/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/</id>
     <published>2021-12-05T06:09:58.727Z</published>
     <updated>2021-12-05T06:12:09.479Z</updated>
     
@@ -314,19 +314,19 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Jvm" scheme="https://biyanwen.github.io/tags/Jvm/"/>
+    <category term="Jvm" scheme="http://biyw.cf/tags/Jvm/"/>
     
-    <category term="字节码" scheme="https://biyanwen.github.io/tags/%E5%AD%97%E8%8A%82%E7%A0%81/"/>
+    <category term="字节码" scheme="http://biyw.cf/tags/%E5%AD%97%E8%8A%82%E7%A0%81/"/>
     
   </entry>
   
   <entry>
     <title>java高并发程序设计</title>
-    <link href="https://biyanwen.github.io/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/"/>
-    <id>https://biyanwen.github.io/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/</id>
+    <link href="http://biyw.cf/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/"/>
+    <id>http://biyw.cf/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/</id>
     <published>2021-12-05T04:21:18.434Z</published>
     <updated>2021-12-05T06:36:29.157Z</updated>
     
@@ -335,19 +335,19 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Java" scheme="https://biyanwen.github.io/tags/Java/"/>
+    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
     
-    <category term="多线程" scheme="https://biyanwen.github.io/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
+    <category term="多线程" scheme="http://biyw.cf/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
     
   </entry>
   
   <entry>
     <title>项目如何分包</title>
-    <link href="https://biyanwen.github.io/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/"/>
-    <id>https://biyanwen.github.io/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</id>
+    <link href="http://biyw.cf/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/"/>
+    <id>http://biyw.cf/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</id>
     <published>2021-12-05T03:55:50.836Z</published>
     <updated>2021-12-05T06:37:48.886Z</updated>
     
@@ -356,17 +356,17 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="架构" scheme="https://biyanwen.github.io/tags/%E6%9E%B6%E6%9E%84/"/>
+    <category term="架构" scheme="http://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
     
   </entry>
   
   <entry>
     <title>网站架构模式</title>
-    <link href="https://biyanwen.github.io/%E7%BD%91%E7%AB%99%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F/"/>
-    <id>https://biyanwen.github.io/%E7%BD%91%E7%AB%99%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F/</id>
+    <link href="http://biyw.cf/%E7%BD%91%E7%AB%99%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F/"/>
+    <id>http://biyw.cf/%E7%BD%91%E7%AB%99%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F/</id>
     <published>2021-12-02T05:13:15.874Z</published>
     <updated>2021-12-05T06:37:34.535Z</updated>
     
@@ -375,10 +375,10 @@
     
     
     
-    <category term="技术" scheme="https://biyanwen.github.io/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="架构" scheme="https://biyanwen.github.io/tags/%E6%9E%B6%E6%9E%84/"/>
+    <category term="架构" scheme="http://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
     
   </entry>
   
