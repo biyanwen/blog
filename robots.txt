@@ -11,5 +11,5 @@ Disallow: /fonts/
 Disallow: /vendors/
 Disallow: /fancybox/
 
-Sitemap: https://biyanwen.github.io/sitemap.xml
-Sitemap: https://biyanwen.github.io/baidusitemap.xml
+Sitemap: https://biyw.cf/sitemap.xml
+Sitemap: https://biyw.cf/baidusitemap.xml
