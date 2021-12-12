@@ -1,6 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Hibernate 实战第二版 中文翻译 管理数据篇(一)</title>
+    <url>/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/</url>
+    <content><![CDATA[<h1 id="Hibernate-实战第二版-中文翻译-管理数据篇-一"><a href="#Hibernate-实战第二版-中文翻译-管理数据篇-一" class="headerlink" title="Hibernate 实战第二版 中文翻译 管理数据篇(一)"></a>Hibernate 实战第二版 中文翻译 管理数据篇(一)</h1><h2 id="管理数据"><a href="#管理数据" class="headerlink" title="管理数据"></a>管理数据</h2><h3 id="entity-持久化过程中的生命周期"><a href="#entity-持久化过程中的生命周期" class="headerlink" title="entity 持久化过程中的生命周期"></a>entity 持久化过程中的生命周期</h3><p>因为 JPA 是一种透明的持久化机制，classes 不用关心他们自己的持久化行为，这样在写业务代码时就不需要关心数据是会被持久化还是仅仅保存在内存中。</p>
+<p>应用层在调用方法时真的没必要关心实体的持久化。例如，你在调用Item#calculate-TotalPrice()业务方法时一点也不用关心持久化的事情。任何与持久化有关的应用，无论是否要把内存的数据保存到数据库中都必须使用持久化服务。换句话说，你必须使用 Java Persistence 的接口存储和查询数据。</p>
+<p>当调用持久化的方法时，虽然不用关心 entity 是怎么持久化的，但是应用必须关注 entity 实体在持久化机制下的状态和生命周期。我们将用下面这段话作为生命周期的定义：entity 实体的状态将贯穿整个流程。我们也使用<em>工作单元</em>这个专业术语：众多改变状态的操作被认为是同一组操作（我理解这个就是指事务）。另一方面，我们还需要了解持久化服务提供的<em>持久化上下文</em>。把 <em>持久化上下文</em> 想象成一个可以记录你在一个事务中对数据的所有更改以及状态改变情况的服务。</p>
+<p>我们现在要仔细分析这些术语：entity states（实体状态），persistence contexts（持久化上下文），managed scope（管理范围）。你可能更多的是考虑通过 sql 语句去操作数据库，以达到增删改查的目的。但是，能够学会使用 Java Persistence 的关键就是明白它是怎么进行状态管理的，我们会通过这一章节进行学习。</p>
+<span id="more"></span>
+
+<h4 id="Entity-实例的状态"><a href="#Entity-实例的状态" class="headerlink" title="Entity 实例的状态"></a>Entity 实例的状态</h4><p>不同的 ORM 框架会使用不同的专业术语，状态的定义也不一样，甚至在持久化的过程中，状态转换的过程也是不同的。此外，提供给客户端的使用方式也是不一样的。JPA 定义了四种状态，从而隐藏了 Hibernate 复杂的内部实现。下图展示了这些状态是如何转换的。</p>
+<p><img src="https://s2.loli.net/2021/12/10/iBpw2yIkGXez3ls.png" alt="image-20211210131538695"></p>
+<p>上图不仅展示了状态如何转换，也展示了如何通过调用 EntityManager 的 API 来触发状态的转换。我们将在这一章节仔细讲解这个图表；如果在这个过程中你忘记状态如何转换的，你就可以回来参考一下。下面让我们更深入的研究一下状态以及状态的转换。</p>
+<h5 id="瞬时态"><a href="#瞬时态" class="headerlink" title="瞬时态"></a>瞬时态</h5><p>任何刚刚通过 Java 的 new 关键字生成的实例都是<strong>瞬时态</strong>的，这意味着如果没有强引用关联的话，那么很快它就会被垃圾回收清理掉，状态也会丢失。例如，new Item() 操作会创建一个 Item 瞬时态的实例，new Long() 和 new BigDecimal() 也是一样的。Hibernate 没有提供任何关于瞬时态的回调函数，所以如果你修改了处于瞬时态的 Item 实例，那么这次更改将不可能被取消。</p>
+<p>如果一个 entity 实例的状态从瞬时态转换为持久态，那这个状态就是可以被管理的，通过调用  EntityManager#persist() 方法，或者让一个已经开启状态级联操作的持久态的实例引用它都可以达到此目的。</p>
+<h5 id="持久态"><a href="#持久态" class="headerlink" title="持久态"></a>持久态</h5><p>一个持久态的 entity 实例说明它已经跟数据库产生了关联关系。它不是已经被持久化到数据库中了，就是在事务结束后会被持久化到数据库中。这个实例已经与数据库产生了映射关系，这部分内容可以参考 4.2 节内容。它的数据库标识存储在主键上。</p>
+<p>应用可能创建多个实例，然后通过 调用 EntityManager#persist() 方法让它们持久化。当然还有另一种方法进行持久化，就是在已经被 JPA 持久化的实例上创建一个对这些新实例的引用。一个已经被持久化的 entity 实例可以通过查询条件，或者其他实例的级联操作从数据库中查询出来。持久态实例总是跟持久化上下文存在着引用关系，一会儿你就会了解到更多的信息。</p>
+<h5 id="删除态"><a href="#删除态" class="headerlink" title="删除态"></a>删除态</h5><p>你可以通过很多方式将一个持久化实例从数据库中删除：例如，你可以调用  EntityManager#remove() 方法，这个在你开启了删除孤立元素配置的情况下，删除带有级联关系的实例时是非常有用的，它可以让你在没有配置级联操作的情况下，一同删除有级联关系的数据。</p>
+<p>之后实例就会转换成删除态，在事务结束后删除态的实例会被从数据库中删除。在应用执行删除后，你就不应该再对删除态的实例进行操作。</p>
+<h5 id="游离态"><a href="#游离态" class="headerlink" title="游离态"></a>游离态</h5><p>了解游离态之前，需要先明白如何从数据库中加载实例。你可以通过调用 EntityManager#find() 方法进行条件查询，将 entity 实例从数据库中查询出来，查询完成之后关闭持久化上下文。之后应用仍然维持着对这个实例的引用。那现在，这个实例就转换成游离态了，并且这个数据会被认为是旧数据。这个时候你可以放弃继续使用该实例并且让垃圾回收器将其回收。当然，你也可以继续使用该实例，之后调用 merge() 方法去保存你的更改。我们将会在之后的章节专门讨论 merging。</p>
+<p>现在你应该基本理解了 entity 实例的状态以及它们的转换。我们的下一个主题是 <strong>持久化上下文</strong> ：一个非常重要的服务。</p>
+<h4 id="持久化上下文"><a href="#持久化上下文" class="headerlink" title="持久化上下文"></a>持久化上下文</h4><p>在 Java 持久化应用中，每个 EntityManager 都有一个持久化上下文，当你调用 EntityManagerFactory#createEntityManager() 方法时就会创建一个持久化上下文。当你调用 EntityManager#close() 方法时就可以关闭它，在 Jpa 术语中这也被叫做应用程序托管（application-managed）持久化上下文；你的应用要在一个事务中定义持久化上下文的边界。</p>
+<p>持久化上下文监控、管理着所有 entity 的持久态。它是 JPA 许多功能的核心。</p>
+<p>持久化上下文让持久化引擎可以自动检测哪些数据被应用修改了。它通过监控实例可以自动或者在需要的时候将状态同步到数据库中。一个典型场景就是当一个事务结束后，存储在内存中的状态会通过执行 INSERT,UPDATE,DELETE 等 SQL 语句同步到数据库中。当然，状态由内存同步到数据库的操作也可能发生在其他时间。例如，Hibernate 也可能在查询之前将这些同步到数据库中。这会确保查询出来的是当前事务范围内的最新数据。</p>
+<p>持久化上下文作为一级缓存，它会记住哪些 entity 实例在当前事务中被处理过。例如，当你让 Hibernate 用主键去查询数据时，它会第一时间检查当前事务的持久化上下文，如果 Hibernate 从持久化上下文中找到了当前正在查询的实例，那它就会返回这个实例，而不会去数据库中进行查询。连续调用 em.find(Item.class, ITEM_ID) 会得到相同的结果。</p>
+<p>这个缓存会影响所有查询的结果，例如 javax.persistence.Query 接口中定义的查询方法。Hibernate 会读取 sql 的查询结果，然后将结果转换成 entity 实例。程序首先会通过主键在持久化上下文中进行查找。只有在找不到的情况下 Hibernate 才会从结果集中读取。Hibernate 会忽略任何结果集中的新数据，受数据库读已提交的隔离级别影响，实例最新的数据就在当前的持久化上下文中。</p>
+<p>持久化上下文默认开启，并且不可关闭，它可以做到以下几种事情：</p>
+<ul>
+<li>在因为循环引用导致堆栈溢出的情况下持久层依然有效。</li>
+<li>保证线程安全。同一个 entity 实例被多次编辑，入库的时候也不会线程产生问题。</li>
+<li>同一个事务中，数据的更改对其他正在执行的代码是立即可见的。JPA 保证 entity 实例是可重复读的。</li>
+</ul>
+<p><strong>在同一个持久化上下文中</strong>，可以保证每个特定的数据库数据的映射都是唯一的。例如，当前数据 A 的实例叫 entityA ，程序再次查询 A 数据，将实例的取名叫 entityB,  Hibernate 会保证 entityA == entityB 和 entityA.getId().equals(entityB.getId()) 两个条件同时为 true。</p>
+<p>这么做合理吗？在大部分应用中，这么做是最好的选择。在单线程的应用进行操作的过程中保证 entity 实例在内存中是唯一的可以提高缓存的利用率。然而在多线程的应用中，则会产生资源的相互竞争，从而造成资源浪费。不过，让每个线程都有自己单独的持久化上下文副本也是很简单的，同时增加了程序的拓展性。</p>
+<p>entity 实例的生命周期以及持久化上下文的功能在一开始可能是比较难理解的。下面就让我们看下 <strong>脏数据检查</strong>，<strong>进行缓存</strong>以及<strong>如何保证 entity 唯一</strong>的实战代码。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+        <category>翻译</category>
+      </categories>
+      <tags>
+        <tag>ORM</tag>
+        <tag>Java</tag>
+        <tag>Hibernate</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>分布式锁</title>
+    <url>/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/</url>
+    <content><![CDATA[<p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
+<span id="more"></span>
+
+<h1 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h1><h2 id="为什么需要分布式锁"><a href="#为什么需要分布式锁" class="headerlink" title="为什么需要分布式锁"></a>为什么需要分布式锁</h2><p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
+<h2 id="2-常用分布式锁"><a href="#2-常用分布式锁" class="headerlink" title="2. 常用分布式锁"></a>2. 常用分布式锁</h2><h3 id="2-1-Redis实现分布式锁"><a href="#2-1-Redis实现分布式锁" class="headerlink" title="2.1 Redis实现分布式锁"></a>2.1 Redis实现分布式锁</h3><h4 id="2-1-1-Redis实现分布式锁原理"><a href="#2-1-1-Redis实现分布式锁原理" class="headerlink" title="2.1.1 Redis实现分布式锁原理"></a>2.1.1 Redis实现分布式锁原理</h4><p>Redis实现分布式锁主要是使用Redis提供的setnx命令，setnx 是『SET if Not eXists』(如果不存在，则 SET)的简写。 命令格式：SETNX key value；使用：只在键 key 不存在的情况下，将键 key 的值设置为 value 。若键 key 已经存在， 则 SETNX 命令不做任何动作。返回值：命令在设置成功时返回 1 ，设置失败时返回 0 ，Redis保证setnx的原子性，所以如果setnx返回1就说明获取到锁，如果0就说明获取锁失败。</p>
+<h4 id="2-1-2-Redis实现分布式锁潜在问题"><a href="#2-1-2-Redis实现分布式锁潜在问题" class="headerlink" title="2.1.2 Redis实现分布式锁潜在问题"></a>2.1.2 Redis实现分布式锁潜在问题</h4><p>主要问题就是<strong>超时</strong>，例如当业务执行时间大于key的过期时间就可能产生并发问题，同时也可能将其他线程持有的锁误删。</p>
+<h4 id="2-1-2-超时问题解决方案"><a href="#2-1-2-超时问题解决方案" class="headerlink" title="2.1.2 超时问题解决方案"></a>2.1.2 超时问题解决方案</h4><p>解决方案就是<strong>自动续期</strong>，当线程成功获得锁后就开启一个WatchDog监听当前线程，如果key超时之前不能完成业务逻辑那就将key的过期时间延长，同时如果持有锁的服务宕机就不自动续期，让Redis将key删除，当然这个功能已经有现成的实现方式了，就是<strong>Redisson</strong>。</p>
+<h4 id="2-1-3-利用Redisson实现Redis分布式锁"><a href="#2-1-3-利用Redisson实现Redis分布式锁" class="headerlink" title="2.1.3 利用Redisson实现Redis分布式锁"></a>2.1.3 利用Redisson实现Redis分布式锁</h4><p>首先引入Redisson依赖</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;!-- https:<span class="comment">//mvnrepository.com/artifact/org.redisson/redisson --&gt;</span></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.redisson&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;redisson&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">3.15</span><span class="number">.1</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>实现方式</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> RedissonClient redissonClient;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">    	<span class="comment">//添加Redis配置信息</span></span><br><span class="line">        Config config = <span class="keyword">new</span> Config();</span><br><span class="line">        config.useSingleServer().setAddress(<span class="string">&quot;redis://127.0.0.1:6379&quot;</span>);</span><br><span class="line">        redissonClient = Redisson.create(config);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread myThread1 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread2 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread3 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread4 = <span class="keyword">new</span> MyThread();</span><br><span class="line"></span><br><span class="line">        myThread1.start();</span><br><span class="line">        myThread2.start();</span><br><span class="line">        myThread3.start();</span><br><span class="line">        myThread4.start();</span><br><span class="line"></span><br><span class="line">        myThread1.join();</span><br><span class="line">        myThread2.join();</span><br><span class="line">        myThread3.join();</span><br><span class="line">        myThread4.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        	<span class="comment">//初始化锁对象</span></span><br><span class="line">            RLock watchDogLock = redissonClient.getLock(<span class="string">&quot;watchDogLock&quot;</span>);</span><br><span class="line">            <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">            	<span class="comment">//利用Redisson的API成功获取锁时Redisson会自动启动WatchDog监听当前线程，底层实现是通过Lua脚本。</span></span><br><span class="line">                <span class="keyword">boolean</span> success = watchDogLock.tryLock();</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 是否成功获取锁：&quot;</span> + success);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (success) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 开始执行业务逻辑&quot;</span>);</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                        System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 业务执行成功，进行解锁&quot;</span>);</span><br><span class="line">                        watchDogLock.unlock();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 获取锁失败&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-2-Zookeeper实现分布式锁"><a href="#2-2-Zookeeper实现分布式锁" class="headerlink" title="2.2 Zookeeper实现分布式锁"></a>2.2 Zookeeper实现分布式锁</h3><h4 id="2-2-1-Zookeeper实现分布式锁原理"><a href="#2-2-1-Zookeeper实现分布式锁原理" class="headerlink" title="2.2.1  Zookeeper实现分布式锁原理"></a>2.2.1  Zookeeper实现分布式锁原理</h4><ol>
+<li><strong>数据结构</strong>：Zookeeper内部维护一个树形的数据结构，用户可以根据其提供的Api创建或者删除节点，并且Zookeeper会为每个节点生成一个不会重复并且根据创建顺序由小到大排列的序号。</li>
+<li><strong>永久节点和临时节点</strong>：永久节点除非手动删除，不然不会自动删除；临时节点会在客户端断开一段时间后自动删除，如果客户端没有断开链接，或者没有手动删除就会一直存在，同时永久节点下面可以创建临时节点，但是临时节点下面不能创建永久节点。</li>
+<li><strong>Watch机制</strong>：子节点可以在上一个节点创建一个监听器，同时传入一个回调方法，当前一个节点改变时（例如，删除，更新）会收到通知，并且执行回调方法。</li>
+</ol>
+<p>就是因为临时节点的特性，所以Zookeeper不会遇到和Redis相同的问题，如果客户端运行正常运行就不会删除临时节点，也就不会释放锁，如果客户端宕机那临时节点就会在客户端断开一段时间后自动删除。</p>
+<h4 id="2-2-2-Zookeeper分布式锁工作流程"><a href="#2-2-2-Zookeeper分布式锁工作流程" class="headerlink" title="2.2.2 Zookeeper分布式锁工作流程"></a>2.2.2 Zookeeper分布式锁工作流程</h4><ol>
+<li>当需要对资源进行加锁时，实际上就是在父节点之下创建一个临时顺序节点。</li>
+<li>客户端A来对资源加锁，首先判断当前创建的节点是否为最小节点，如果是，那么加锁成功，后续加锁线程阻塞等待。</li>
+<li>此时，客户端B也来尝试加锁，由于客户端A已经加锁成功，所以客户端B发现自己的节点并不是最小节点，就会去取到上一个节点，并且对上一节点注册监听。</li>
+<li>当客户端A操作完成，释放锁的操作就是删除这个节点，这样就可以触发监听事件，客户端B就会得到通知，同样，客户端B判断自己是否为最小节点，如果是，那么则加锁成功。</li>
+</ol>
+<h4 id="2-2-3-代码示例"><a href="#2-2-3-代码示例" class="headerlink" title="2.2.3 代码示例"></a>2.2.3 代码示例</h4><p>代码使用了Curator包，这个包封装了底层Zookeeper的操作，使用起来更加方便，可以有效减少样板代码。</p>
+<p>首先引入依赖</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;!-- https:<span class="comment">//mvnrepository.com/artifact/org.apache.curator/curator-recipes --&gt;</span></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.curator&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;curator-recipes&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">5.1</span><span class="number">.0</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>代码示例</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> CuratorFramework ZK_CLIENT;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">    	<span class="comment">//初始化Zookeeper配置</span></span><br><span class="line">        String zkServerAddress = <span class="string">&quot;127.0.0.1:12181&quot;</span>;</span><br><span class="line">        ExponentialBackoffRetry retryPolicy = <span class="keyword">new</span> ExponentialBackoffRetry(<span class="number">1000</span>, <span class="number">3</span>, <span class="number">5000</span>);</span><br><span class="line">        ZK_CLIENT = CuratorFrameworkFactory.builder()</span><br><span class="line">                .connectString(zkServerAddress)</span><br><span class="line">                .sessionTimeoutMs(<span class="number">5000</span>)</span><br><span class="line">                .connectionTimeoutMs(<span class="number">5000</span>)</span><br><span class="line">                .retryPolicy(retryPolicy)</span><br><span class="line">                .build();</span><br><span class="line">        ZK_CLIENT.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String LOCK_PATH = <span class="string">&quot;/myLock&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//创建锁对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> InterProcessMutex LOCK = <span class="keyword">new</span> InterProcessMutex(ZK_CLIENT, LOCK_PATH);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread myThread1 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread2 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread3 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread4 = <span class="keyword">new</span> MyThread();</span><br><span class="line"></span><br><span class="line">        myThread1.start();</span><br><span class="line">        myThread2.start();</span><br><span class="line">        myThread3.start();</span><br><span class="line">        myThread4.start();</span><br><span class="line"></span><br><span class="line">        myThread1.join();</span><br><span class="line">        myThread2.join();</span><br><span class="line">        myThread3.join();</span><br><span class="line">        myThread4.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                	<span class="comment">//加锁</span></span><br><span class="line">                    LOCK.acquire();</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 获取到锁&quot;</span>);</span><br><span class="line">                    Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 释放锁&quot;</span>);</span><br><span class="line">                        <span class="comment">//解锁</span></span><br><span class="line">                        LOCK.release();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-总结"><a href="#3-总结" class="headerlink" title="3 总结"></a>3 总结</h2><p>Redis和Zookeeper都能够实现分布式锁，但是他们之间有相同点和不同点，使用的时候需要根据需求来选择。<br><strong>相同点</strong>：由于工具封装的都比较好，实现起来都很简单。</p>
+<p><strong>不同点</strong>：</p>
+<ol>
+<li><strong>可靠性</strong>：Zookeeper可靠性高于Redis，因为Zookeeper的实现方式而言，本身就是保证数据一致性的，可靠性更高，而Redis不是数据强一致性的，某些极端场景下还是可能会存在问题。</li>
+<li><strong>性能</strong>：Redis性能比Zookeeper好，因为Zookeeper需要频繁创建和删除节点，性能略低。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>分布式</tag>
+        <tag>多线程</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Git-submodule 统一配置简明教程</title>
     <url>/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</url>
     <content><![CDATA[<p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
@@ -67,53 +159,6 @@
       </categories>
       <tags>
         <tag>Git</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>分布式锁</title>
-    <url>/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/</url>
-    <content><![CDATA[<p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
-<span id="more"></span>
-
-<h1 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h1><h2 id="为什么需要分布式锁"><a href="#为什么需要分布式锁" class="headerlink" title="为什么需要分布式锁"></a>为什么需要分布式锁</h2><p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
-<h2 id="2-常用分布式锁"><a href="#2-常用分布式锁" class="headerlink" title="2. 常用分布式锁"></a>2. 常用分布式锁</h2><h3 id="2-1-Redis实现分布式锁"><a href="#2-1-Redis实现分布式锁" class="headerlink" title="2.1 Redis实现分布式锁"></a>2.1 Redis实现分布式锁</h3><h4 id="2-1-1-Redis实现分布式锁原理"><a href="#2-1-1-Redis实现分布式锁原理" class="headerlink" title="2.1.1 Redis实现分布式锁原理"></a>2.1.1 Redis实现分布式锁原理</h4><p>Redis实现分布式锁主要是使用Redis提供的setnx命令，setnx 是『SET if Not eXists』(如果不存在，则 SET)的简写。 命令格式：SETNX key value；使用：只在键 key 不存在的情况下，将键 key 的值设置为 value 。若键 key 已经存在， 则 SETNX 命令不做任何动作。返回值：命令在设置成功时返回 1 ，设置失败时返回 0 ，Redis保证setnx的原子性，所以如果setnx返回1就说明获取到锁，如果0就说明获取锁失败。</p>
-<h4 id="2-1-2-Redis实现分布式锁潜在问题"><a href="#2-1-2-Redis实现分布式锁潜在问题" class="headerlink" title="2.1.2 Redis实现分布式锁潜在问题"></a>2.1.2 Redis实现分布式锁潜在问题</h4><p>主要问题就是<strong>超时</strong>，例如当业务执行时间大于key的过期时间就可能产生并发问题，同时也可能将其他线程持有的锁误删。</p>
-<h4 id="2-1-2-超时问题解决方案"><a href="#2-1-2-超时问题解决方案" class="headerlink" title="2.1.2 超时问题解决方案"></a>2.1.2 超时问题解决方案</h4><p>解决方案就是<strong>自动续期</strong>，当线程成功获得锁后就开启一个WatchDog监听当前线程，如果key超时之前不能完成业务逻辑那就将key的过期时间延长，同时如果持有锁的服务宕机就不自动续期，让Redis将key删除，当然这个功能已经有现成的实现方式了，就是<strong>Redisson</strong>。</p>
-<h4 id="2-1-3-利用Redisson实现Redis分布式锁"><a href="#2-1-3-利用Redisson实现Redis分布式锁" class="headerlink" title="2.1.3 利用Redisson实现Redis分布式锁"></a>2.1.3 利用Redisson实现Redis分布式锁</h4><p>首先引入Redisson依赖</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;!-- https:<span class="comment">//mvnrepository.com/artifact/org.redisson/redisson --&gt;</span></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.redisson&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;redisson&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">3.15</span><span class="number">.1</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
-<p>实现方式</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> RedissonClient redissonClient;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">    	<span class="comment">//添加Redis配置信息</span></span><br><span class="line">        Config config = <span class="keyword">new</span> Config();</span><br><span class="line">        config.useSingleServer().setAddress(<span class="string">&quot;redis://127.0.0.1:6379&quot;</span>);</span><br><span class="line">        redissonClient = Redisson.create(config);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread myThread1 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread2 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread3 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread4 = <span class="keyword">new</span> MyThread();</span><br><span class="line"></span><br><span class="line">        myThread1.start();</span><br><span class="line">        myThread2.start();</span><br><span class="line">        myThread3.start();</span><br><span class="line">        myThread4.start();</span><br><span class="line"></span><br><span class="line">        myThread1.join();</span><br><span class="line">        myThread2.join();</span><br><span class="line">        myThread3.join();</span><br><span class="line">        myThread4.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        	<span class="comment">//初始化锁对象</span></span><br><span class="line">            RLock watchDogLock = redissonClient.getLock(<span class="string">&quot;watchDogLock&quot;</span>);</span><br><span class="line">            <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">            	<span class="comment">//利用Redisson的API成功获取锁时Redisson会自动启动WatchDog监听当前线程，底层实现是通过Lua脚本。</span></span><br><span class="line">                <span class="keyword">boolean</span> success = watchDogLock.tryLock();</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 是否成功获取锁：&quot;</span> + success);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (success) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 开始执行业务逻辑&quot;</span>);</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                        System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 业务执行成功，进行解锁&quot;</span>);</span><br><span class="line">                        watchDogLock.unlock();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 获取锁失败&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="2-2-Zookeeper实现分布式锁"><a href="#2-2-Zookeeper实现分布式锁" class="headerlink" title="2.2 Zookeeper实现分布式锁"></a>2.2 Zookeeper实现分布式锁</h3><h4 id="2-2-1-Zookeeper实现分布式锁原理"><a href="#2-2-1-Zookeeper实现分布式锁原理" class="headerlink" title="2.2.1  Zookeeper实现分布式锁原理"></a>2.2.1  Zookeeper实现分布式锁原理</h4><ol>
-<li><strong>数据结构</strong>：Zookeeper内部维护一个树形的数据结构，用户可以根据其提供的Api创建或者删除节点，并且Zookeeper会为每个节点生成一个不会重复并且根据创建顺序由小到大排列的序号。</li>
-<li><strong>永久节点和临时节点</strong>：永久节点除非手动删除，不然不会自动删除；临时节点会在客户端断开一段时间后自动删除，如果客户端没有断开链接，或者没有手动删除就会一直存在，同时永久节点下面可以创建临时节点，但是临时节点下面不能创建永久节点。</li>
-<li><strong>Watch机制</strong>：子节点可以在上一个节点创建一个监听器，同时传入一个回调方法，当前一个节点改变时（例如，删除，更新）会收到通知，并且执行回调方法。</li>
-</ol>
-<p>就是因为临时节点的特性，所以Zookeeper不会遇到和Redis相同的问题，如果客户端运行正常运行就不会删除临时节点，也就不会释放锁，如果客户端宕机那临时节点就会在客户端断开一段时间后自动删除。</p>
-<h4 id="2-2-2-Zookeeper分布式锁工作流程"><a href="#2-2-2-Zookeeper分布式锁工作流程" class="headerlink" title="2.2.2 Zookeeper分布式锁工作流程"></a>2.2.2 Zookeeper分布式锁工作流程</h4><ol>
-<li>当需要对资源进行加锁时，实际上就是在父节点之下创建一个临时顺序节点。</li>
-<li>客户端A来对资源加锁，首先判断当前创建的节点是否为最小节点，如果是，那么加锁成功，后续加锁线程阻塞等待。</li>
-<li>此时，客户端B也来尝试加锁，由于客户端A已经加锁成功，所以客户端B发现自己的节点并不是最小节点，就会去取到上一个节点，并且对上一节点注册监听。</li>
-<li>当客户端A操作完成，释放锁的操作就是删除这个节点，这样就可以触发监听事件，客户端B就会得到通知，同样，客户端B判断自己是否为最小节点，如果是，那么则加锁成功。</li>
-</ol>
-<h4 id="2-2-3-代码示例"><a href="#2-2-3-代码示例" class="headerlink" title="2.2.3 代码示例"></a>2.2.3 代码示例</h4><p>代码使用了Curator包，这个包封装了底层Zookeeper的操作，使用起来更加方便，可以有效减少样板代码。</p>
-<p>首先引入依赖</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;!-- https:<span class="comment">//mvnrepository.com/artifact/org.apache.curator/curator-recipes --&gt;</span></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.curator&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;curator-recipes&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">5.1</span><span class="number">.0</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
-<p>代码示例</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> CuratorFramework ZK_CLIENT;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">    	<span class="comment">//初始化Zookeeper配置</span></span><br><span class="line">        String zkServerAddress = <span class="string">&quot;127.0.0.1:12181&quot;</span>;</span><br><span class="line">        ExponentialBackoffRetry retryPolicy = <span class="keyword">new</span> ExponentialBackoffRetry(<span class="number">1000</span>, <span class="number">3</span>, <span class="number">5000</span>);</span><br><span class="line">        ZK_CLIENT = CuratorFrameworkFactory.builder()</span><br><span class="line">                .connectString(zkServerAddress)</span><br><span class="line">                .sessionTimeoutMs(<span class="number">5000</span>)</span><br><span class="line">                .connectionTimeoutMs(<span class="number">5000</span>)</span><br><span class="line">                .retryPolicy(retryPolicy)</span><br><span class="line">                .build();</span><br><span class="line">        ZK_CLIENT.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String LOCK_PATH = <span class="string">&quot;/myLock&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//创建锁对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> InterProcessMutex LOCK = <span class="keyword">new</span> InterProcessMutex(ZK_CLIENT, LOCK_PATH);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread myThread1 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread2 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread3 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread4 = <span class="keyword">new</span> MyThread();</span><br><span class="line"></span><br><span class="line">        myThread1.start();</span><br><span class="line">        myThread2.start();</span><br><span class="line">        myThread3.start();</span><br><span class="line">        myThread4.start();</span><br><span class="line"></span><br><span class="line">        myThread1.join();</span><br><span class="line">        myThread2.join();</span><br><span class="line">        myThread3.join();</span><br><span class="line">        myThread4.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                	<span class="comment">//加锁</span></span><br><span class="line">                    LOCK.acquire();</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 获取到锁&quot;</span>);</span><br><span class="line">                    Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 释放锁&quot;</span>);</span><br><span class="line">                        <span class="comment">//解锁</span></span><br><span class="line">                        LOCK.release();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="3-总结"><a href="#3-总结" class="headerlink" title="3 总结"></a>3 总结</h2><p>Redis和Zookeeper都能够实现分布式锁，但是他们之间有相同点和不同点，使用的时候需要根据需求来选择。<br><strong>相同点</strong>：由于工具封装的都比较好，实现起来都很简单。</p>
-<p><strong>不同点</strong>：</p>
-<ol>
-<li><strong>可靠性</strong>：Zookeeper可靠性高于Redis，因为Zookeeper的实现方式而言，本身就是保证数据一致性的，可靠性更高，而Redis不是数据强一致性的，某些极端场景下还是可能会存在问题。</li>
-<li><strong>性能</strong>：Redis性能比Zookeeper好，因为Zookeeper需要频繁创建和删除节点，性能略低。</li>
-</ol>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>分布式</tag>
-        <tag>多线程</tag>
       </tags>
   </entry>
   <entry>
@@ -255,6 +300,228 @@
       </categories>
       <tags>
         <tag>Jvm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>java高并发程序设计</title>
+    <url>/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/</url>
+    <content><![CDATA[<h1 id="java高并发程序设计"><a href="#java高并发程序设计" class="headerlink" title="java高并发程序设计"></a>java高并发程序设计</h1><p>高并发是 java 开发必备知识，本篇文章整理出在高并发程序设计中常用的工具。</p>
+<span id="more"></span>
+
+<h2 id="java并发包"><a href="#java并发包" class="headerlink" title="java并发包"></a>java并发包</h2><h3 id="同步控制"><a href="#同步控制" class="headerlink" title="同步控制"></a>同步控制</h3><ul>
+<li><p>重入锁</p>
+<p>重入锁使用java.util.concurrent.locks.ReentrantLock类来实现。<br>锁实现包含的三要素：1、原子装填，使用了CAS操作。 2、等待列队，所有没有请求到锁的线程会进入等待列队进行等待。  3、阻塞原语 park()和unpark() 用来挂起和恢复线程。</p>
+<ul>
+<li><p>特性</p>
+<ul>
+<li><p>中断响应</p>
+<p>可以避免死锁，程序在等待锁的时候可以根据需要取消对锁的请求。<br>学习链接：<br><a href="https://blog.csdn.net/yyd19921214/article/details/49737061?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param">https://blog.csdn.net/yyd19921214/article/details/49737061?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param</a></p>
+<ul>
+<li><p>什么是线程中断</p>
+<p>学习链接：<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306580767211554">https://www.liaoxuefeng.com/wiki/1252599548343744/1306580767211554</a></p>
+</li>
+<li><p>如何使用此功能</p>
+<p>使用lockInterruptible()方法可以获得拥有此功能的锁</p>
+</li>
+</ul>
+</li>
+<li><p>公平锁</p>
+<p>公平锁会按照时间的先后顺序分配锁，但是性能低下，所以大多数情况下锁的申请都是非公平的。</p>
+</li>
+<li><p>锁申请等待限时</p>
+<p>可以避免死锁，因为可以设置等待时间。可以通过tryLock()方法使用此功能。</p>
+</li>
+</ul>
+</li>
+<li><p>搭档 Condition</p>
+<p>通过lock接口的 newCondition()方法可以生成一个与当前重入锁绑定的Condition实例，利用这个实例可以让线程在合适的时间等待，或者在某一个特定的时刻得到通知继续执行。</p>
+</li>
+</ul>
+</li>
+<li><p>信号量 Semaphore</p>
+<p>Semaphore(信号量)是java.util.concurrent下的一个工具类.用来控制可同时访问特定资源的线程数.内部是通过维护父类(AQS)的 int state值实现。<br>学习链接：<a href="https://zhuanlan.zhihu.com/p/27314456">https://zhuanlan.zhihu.com/p/27314456</a></p>
+</li>
+<li><p>ReadWriteLock 读写锁</p>
+<p>可以有效帮助减少锁竞争，提升系统性能。主要应用于读操作的次数远远大于写操作的次数。<br>学习链接：<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306581002092578">https://www.liaoxuefeng.com/wiki/1252599548343744/1306581002092578</a></p>
+</li>
+<li><p>倒计数器 CountDownLatch</p>
+<p>使用的多线程控制工具类，通常用来控制线程等待，它可以让某一个线程等待直到倒计数器结束再开始执行，它是一次性的，打开之后就不能关上了。<br>应用场景：在一个行为执行前需要执行很多前置步骤。<br>学习链接：<a href="https://www.jianshu.com/p/962bc7225ce8">https://www.jianshu.com/p/962bc7225ce8</a></p>
+</li>
+<li><p>循环栅栏 CyclicBarrier</p>
+<p>字面意思回环栅栏，通过它可以实现让一组线程等待至某个状态之后再全部同时执行。<br>叫做回环是因为当所有等待线程都被释放以后，CyclicBarrier可以被重用；跟 CountDownLatch功能类似，但是更灵活、更强大、更复杂。<br>学习链接：<a href="https://www.jianshu.com/p/4ef4bbf01811">https://www.jianshu.com/p/4ef4bbf01811</a></p>
+</li>
+<li><p>线程阻塞工具类 LockSupport</p>
+<p>LockSupport 是一个线程阻塞工具，可以让线程在任意位置阻塞；<br>应用实例：一个节点线程获取不到锁时，会阻塞自己，调用的就是LockSupport的park()方法，返回只有两种方式，前一个节点线程释放锁时unpark()了当前节点，或者当前节点线程被中断返回。</p>
+</li>
+<li><p>限流工具 Guava的RateLimiter</p>
+<p>应用或者组件都有访问上限，如果突破这个上限不仅会影响其性能，更可能会导致其崩溃，因此，对请求进行限流是必要的。<br>学习链接：<a href="https://juejin.im/post/6844903783432978439">https://juejin.im/post/6844903783432978439</a></p>
+<ul>
+<li><p>漏桶算法</p>
+<p>利用缓存，当有请求进入系统时无论请求速率如何，都先在缓存区内保存，然后以固定的流苏流出缓存区进行处理。</p>
+</li>
+<li><p>令牌桶算法</p>
+<p>桶中存放的不是请求而是令牌，处理程序只有拿到令牌后才能对请求进行处理，如果没有令牌可能被丢弃也可能等待可用令牌</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="线程复用：线程池"><a href="#线程复用：线程池" class="headerlink" title="线程复用：线程池"></a>线程复用：线程池</h3><ul>
+<li><p>Executor框架</p>
+<ul>
+<li><p>Executors类</p>
+<ul>
+<li><p>newFixedThreadPool()</p>
+<p>返回一个固定线程数量的线程池，待执行任务保存在队列中</p>
+</li>
+<li><p>newSingleThreadExecutor()</p>
+<p>返回只有一个线程的线程池，待执行任务保存在队列中</p>
+</li>
+<li><p>newCachedThreadPool()</p>
+<p>返回一个可根据实际情况调整线程数量的线程池</p>
+</li>
+<li><p>newScheduledThreadPool()</p>
+<p>返回ScheduleExecutorService对象，可以执行线程的数量</p>
+</li>
+<li><p>newSingleThreadScheduledExector()</p>
+<p>返回ScheduledExectorService对象，只有一个线程，可以设置执行任务相关的时间参数</p>
+</li>
+<li><p>。。。。</p>
+</li>
+</ul>
+</li>
+<li><p>自定义线程创建 ThreadFactory</p>
+</li>
+<li><p>扩展线程池 ThreadPoolExector</p>
+<p>提供了 beforeExecute()、afterExecute()和terminated() 三个接口用来对线程池进行控制</p>
+</li>
+<li><p>输出异常堆栈</p>
+<ul>
+<li><p>使用execute()方法</p>
+<p>submit()会忽略系统抛出的异常</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>分而治之 Fork/Join框架</p>
+<p>学习链接：<a href="https://www.liaoxuefeng.com/article/1146802219354112">https://www.liaoxuefeng.com/article/1146802219354112</a></p>
+</li>
+<li><p>Guava对线程池的扩展</p>
+<ul>
+<li><p>DirectExecutor线程池</p>
+<p>它并没有真的创建或者使用额外线程，它总是将任务在当前线程中直接执行。这个设计主要是为了完成业务的抽象工作，可以使用同一的编码风格处理同步和异步调用，进而简化设计。</p>
+</li>
+<li><p>Daemon线程池</p>
+<p>将普通线程池转为Daemon线程池，可以随着系统（也可以叫主线程）执行完成后一起销毁</p>
+</li>
+<li><p>Future模型的扩展</p>
+<p>Future模式核心思想是异步调用，线程会在等待结果返回的过程中执行其他业务，从而充分利用这段时间</p>
+<ul>
+<li><p>ListeningExecutorService</p>
+<p>调用 MoreExecutors.listeningDecorator 方法将一个普通线程池包装为一个包含通知同能的Future线程池</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="java并发容器"><a href="#java并发容器" class="headerlink" title="java并发容器"></a>java并发容器</h2><h3 id="并发集合"><a href="#并发集合" class="headerlink" title="并发集合"></a>并发集合</h3><ul>
+<li><p>ConcurrentHashMap</p>
+<p>高效的并发,线程安全的HashMap</p>
+</li>
+<li><p>CopyOnWriteArrayList</p>
+<p>线程安全的ArrayList 适合读多写少的场合，性能远好于Vector。<br>读取不加锁，写入也不会阻塞读取操作，只有写入和写入会加锁，因为在写入操作时会进行一次自我复制</p>
+</li>
+<li><p>ConcurrentLinkedQueue</p>
+<p>高效并发队列，链表实现可以看作是线程安全的LinkedList，是高并发环境中性能最好的队列</p>
+</li>
+<li><p>BlokingQueue</p>
+<p>阻塞队列，适合做数据共享通道。非常适合作为“生产和–消费者”模式的数据同步工具，在队列为空的时候会让读取阻塞，而当队列满了后会让存储操作阻塞</p>
+</li>
+<li><p>ConcurrentSkipListMap</p>
+<p>跳表实现，一种可以用来快速查找的数据结构。</p>
+<ul>
+<li><p>高性能</p>
+<p>类似平衡树，区别是对平衡树的插入和删除往往很可能导致平衡树进行一次全局调整，而跳表只需要对整个数据结构的局部进行操作即可。这样就可以控制锁的粒度。</p>
+</li>
+<li><p>随机算法</p>
+<p>跳表本质是同时维护了多个链表，并且链表是分层的，底层的链表维护了跳表内所有的元素，每上面一层链表都是下面一层链表的子集，一个元素插入哪些层是随机的。<br>查找操作时跳跃式的，跳表内所有链表的元素都是排序的，查找时会从顶层开始，一旦发现被查找的元素大于当前链表中的取值就会转入下一层继续查找。</p>
+<ul>
+<li>疑问：为什么插入是随机的 但是查找可以按照顺序查找呢？</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="JMH进行性能测试"><a href="#JMH进行性能测试" class="headerlink" title="JMH进行性能测试"></a>JMH进行性能测试</h2><p>学习链接：<a href="https://www.xncoding.com/2018/01/07/java/jmh.html">https://www.xncoding.com/2018/01/07/java/jmh.html</a></p>
+<h2 id="锁优化"><a href="#锁优化" class="headerlink" title="锁优化"></a>锁优化</h2><h3 id="提高性能的建议"><a href="#提高性能的建议" class="headerlink" title="提高性能的建议"></a>提高性能的建议</h3><ul>
+<li><p>1、减少锁的持有时间</p>
+<p>尽量不要在同步代码块中做耗时的操作，并且只在必要时进行同步</p>
+</li>
+<li><p>2、减小锁的粒度</p>
+<p>需要同步的代码块要尽量小</p>
+</li>
+<li><p>3、用读写分离锁替换独占锁</p>
+</li>
+<li><p>4、锁分离</p>
+<p>是读写锁的上层思想，可以将功能进行拆分，并根据每个功能的实际需求进行定制化的操作</p>
+</li>
+<li><p>5、锁粗化</p>
+<p>对同一个锁不断进行请求和释放的操作时便会把所有的锁操作整合成对锁的一次请求，从而减少对锁的请求同步的次数</p>
+</li>
+</ul>
+<h3 id="java虚拟机对锁的优化"><a href="#java虚拟机对锁的优化" class="headerlink" title="java虚拟机对锁的优化"></a>java虚拟机对锁的优化</h3><ul>
+<li><p>锁偏向</p>
+<p>是一种针对加锁操作的优化。<br>核心思想：如果一个线程获得了锁，那么锁就进入偏向模式，当这个线程再次请求锁时无须再做任何同步操作。<br>但是在锁竞争比较激烈的场合其效果不佳，因为可能每次请求锁的都不是同一个线程，所以不建议在竞争激烈的环境下启用</p>
+</li>
+<li><p>轻量级锁</p>
+<p>它只是简单地将对象头部作为指针指向持有锁的线程堆栈的内部，来判断一个线程是否持有对象锁。如果加锁失败就会转为重量级锁。<br>学习链接：<a href="https://www.zhihu.com/question/53826114">https://www.zhihu.com/question/53826114</a></p>
+</li>
+<li><p>自旋锁</p>
+<p>虚拟机会让当前线程做几个空循环，在经过若干次循环后如果可以得到锁，那么就会顺利进入临界区，如果不能获得锁会在操作系统层面挂起</p>
+</li>
+<li><p>锁消除</p>
+<p>虚拟机在编译过程中会去除不可能存在共享资源竞争的锁，通过这种措施可以节省毫无意义的请求锁时间。<br>之所以有这一操作，一方面是防止用户的错误使用。 另一方面用户在使用jdk提供的api时，api内部实现可能使用了同步锁</p>
+</li>
+</ul>
+<h3 id="ThreadLocal"><a href="#ThreadLocal" class="headerlink" title="ThreadLocal"></a>ThreadLocal</h3><p>本质是通过增加资源来保证所有对象的线程安全，会为每一个线程保存一份资源的副本，这样就不会产生竞争，但是用完要及时清理资源，不然容易发生内存泄漏。<br>学习链接：<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306581251653666">https://www.liaoxuefeng.com/wiki/1252599548343744/1306581251653666</a></p>
+<h3 id="无锁"><a href="#无锁" class="headerlink" title="无锁"></a>无锁</h3><p>乐观锁的思想，它会假设对资源的访问是没有冲突的，无锁的策略使用CAS的技术来鉴别线程冲突，一旦检测到冲突产生就重试当前操作直到没有冲突为止。</p>
+<ul>
+<li><p>CAS</p>
+<p>乐观锁，并没有真的是使用同步锁，当多个线程同时使用CAS操作一个变量时只有一个会胜出，并成功更新，其余均会失败。失败的线程不会被挂起，仅是被告知失败，并且允许再次尝试，也允许放弃操作。</p>
+</li>
+<li><p>安全整数 AtomicInteger</p>
+<p>线程安全的整数，使用CAS操作</p>
+</li>
+<li><p>无锁的对象引用 AtomicReference</p>
+<p>保证修改对象引用时的线程安全性</p>
+<ul>
+<li>缺点：无法解决ABA问题</li>
+</ul>
+</li>
+<li><p>带时间戳的对象引用 AtomicStampedReference</p>
+<ul>
+<li>优势：通过时间戳解决ABA问题</li>
+</ul>
+</li>
+<li><p>无锁数组 AtomicIntegerArray</p>
+</li>
+<li><p>让普通变量也享受原子操作 AtomicIntegerFieldUpdater</p>
+<p>可以对int、long和普通对象引用进行CAS修改；<br>注意事项：<br> 变量必须public 因为底层使用了反射获取变量的值<br>必须被volatile修饰<br>不支持static修饰的变量，因为会通过对象实例中的偏移量直接进行赋值</p>
+</li>
+<li><p>数据交换通道 SynchronousQueue</p>
+<p>学习链接：<a href="https://blog.csdn.net/zmx729618/article/details/52980158">https://blog.csdn.net/zmx729618/article/details/52980158</a></p>
+</li>
+</ul>
+<h2 id="实用工具"><a href="#实用工具" class="headerlink" title="实用工具"></a>实用工具</h2><h3 id="Disruptor-框架"><a href="#Disruptor-框架" class="headerlink" title="Disruptor 框架"></a>Disruptor 框架</h3><p>高效无锁内存队列 可以用来实现高性能的 生产者–消费者模式</p>
+<h3 id="Akka框架"><a href="#Akka框架" class="headerlink" title="Akka框架"></a>Akka框架</h3><p>帮助构建高并发程序</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>多线程</tag>
       </tags>
   </entry>
   <entry>
@@ -493,245 +760,6 @@
       </tags>
   </entry>
   <entry>
-    <title>java高并发程序设计</title>
-    <url>/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/</url>
-    <content><![CDATA[<h1 id="java高并发程序设计"><a href="#java高并发程序设计" class="headerlink" title="java高并发程序设计"></a>java高并发程序设计</h1><p>高并发是 java 开发必备知识，本篇文章整理出在高并发程序设计中常用的工具。</p>
-<span id="more"></span>
-
-<h2 id="java并发包"><a href="#java并发包" class="headerlink" title="java并发包"></a>java并发包</h2><h3 id="同步控制"><a href="#同步控制" class="headerlink" title="同步控制"></a>同步控制</h3><ul>
-<li><p>重入锁</p>
-<p>重入锁使用java.util.concurrent.locks.ReentrantLock类来实现。<br>锁实现包含的三要素：1、原子装填，使用了CAS操作。 2、等待列队，所有没有请求到锁的线程会进入等待列队进行等待。  3、阻塞原语 park()和unpark() 用来挂起和恢复线程。</p>
-<ul>
-<li><p>特性</p>
-<ul>
-<li><p>中断响应</p>
-<p>可以避免死锁，程序在等待锁的时候可以根据需要取消对锁的请求。<br>学习链接：<br><a href="https://blog.csdn.net/yyd19921214/article/details/49737061?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param">https://blog.csdn.net/yyd19921214/article/details/49737061?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.channel_param</a></p>
-<ul>
-<li><p>什么是线程中断</p>
-<p>学习链接：<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306580767211554">https://www.liaoxuefeng.com/wiki/1252599548343744/1306580767211554</a></p>
-</li>
-<li><p>如何使用此功能</p>
-<p>使用lockInterruptible()方法可以获得拥有此功能的锁</p>
-</li>
-</ul>
-</li>
-<li><p>公平锁</p>
-<p>公平锁会按照时间的先后顺序分配锁，但是性能低下，所以大多数情况下锁的申请都是非公平的。</p>
-</li>
-<li><p>锁申请等待限时</p>
-<p>可以避免死锁，因为可以设置等待时间。可以通过tryLock()方法使用此功能。</p>
-</li>
-</ul>
-</li>
-<li><p>搭档 Condition</p>
-<p>通过lock接口的 newCondition()方法可以生成一个与当前重入锁绑定的Condition实例，利用这个实例可以让线程在合适的时间等待，或者在某一个特定的时刻得到通知继续执行。</p>
-</li>
-</ul>
-</li>
-<li><p>信号量 Semaphore</p>
-<p>Semaphore(信号量)是java.util.concurrent下的一个工具类.用来控制可同时访问特定资源的线程数.内部是通过维护父类(AQS)的 int state值实现。<br>学习链接：<a href="https://zhuanlan.zhihu.com/p/27314456">https://zhuanlan.zhihu.com/p/27314456</a></p>
-</li>
-<li><p>ReadWriteLock 读写锁</p>
-<p>可以有效帮助减少锁竞争，提升系统性能。主要应用于读操作的次数远远大于写操作的次数。<br>学习链接：<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306581002092578">https://www.liaoxuefeng.com/wiki/1252599548343744/1306581002092578</a></p>
-</li>
-<li><p>倒计数器 CountDownLatch</p>
-<p>使用的多线程控制工具类，通常用来控制线程等待，它可以让某一个线程等待直到倒计数器结束再开始执行，它是一次性的，打开之后就不能关上了。<br>应用场景：在一个行为执行前需要执行很多前置步骤。<br>学习链接：<a href="https://www.jianshu.com/p/962bc7225ce8">https://www.jianshu.com/p/962bc7225ce8</a></p>
-</li>
-<li><p>循环栅栏 CyclicBarrier</p>
-<p>字面意思回环栅栏，通过它可以实现让一组线程等待至某个状态之后再全部同时执行。<br>叫做回环是因为当所有等待线程都被释放以后，CyclicBarrier可以被重用；跟 CountDownLatch功能类似，但是更灵活、更强大、更复杂。<br>学习链接：<a href="https://www.jianshu.com/p/4ef4bbf01811">https://www.jianshu.com/p/4ef4bbf01811</a></p>
-</li>
-<li><p>线程阻塞工具类 LockSupport</p>
-<p>LockSupport 是一个线程阻塞工具，可以让线程在任意位置阻塞；<br>应用实例：一个节点线程获取不到锁时，会阻塞自己，调用的就是LockSupport的park()方法，返回只有两种方式，前一个节点线程释放锁时unpark()了当前节点，或者当前节点线程被中断返回。</p>
-</li>
-<li><p>限流工具 Guava的RateLimiter</p>
-<p>应用或者组件都有访问上限，如果突破这个上限不仅会影响其性能，更可能会导致其崩溃，因此，对请求进行限流是必要的。<br>学习链接：<a href="https://juejin.im/post/6844903783432978439">https://juejin.im/post/6844903783432978439</a></p>
-<ul>
-<li><p>漏桶算法</p>
-<p>利用缓存，当有请求进入系统时无论请求速率如何，都先在缓存区内保存，然后以固定的流苏流出缓存区进行处理。</p>
-</li>
-<li><p>令牌桶算法</p>
-<p>桶中存放的不是请求而是令牌，处理程序只有拿到令牌后才能对请求进行处理，如果没有令牌可能被丢弃也可能等待可用令牌</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="线程复用：线程池"><a href="#线程复用：线程池" class="headerlink" title="线程复用：线程池"></a>线程复用：线程池</h3><ul>
-<li><p>Executor框架</p>
-<ul>
-<li><p>Executors类</p>
-<ul>
-<li><p>newFixedThreadPool()</p>
-<p>返回一个固定线程数量的线程池，待执行任务保存在队列中</p>
-</li>
-<li><p>newSingleThreadExecutor()</p>
-<p>返回只有一个线程的线程池，待执行任务保存在队列中</p>
-</li>
-<li><p>newCachedThreadPool()</p>
-<p>返回一个可根据实际情况调整线程数量的线程池</p>
-</li>
-<li><p>newScheduledThreadPool()</p>
-<p>返回ScheduleExecutorService对象，可以执行线程的数量</p>
-</li>
-<li><p>newSingleThreadScheduledExector()</p>
-<p>返回ScheduledExectorService对象，只有一个线程，可以设置执行任务相关的时间参数</p>
-</li>
-<li><p>。。。。</p>
-</li>
-</ul>
-</li>
-<li><p>自定义线程创建 ThreadFactory</p>
-</li>
-<li><p>扩展线程池 ThreadPoolExector</p>
-<p>提供了 beforeExecute()、afterExecute()和terminated() 三个接口用来对线程池进行控制</p>
-</li>
-<li><p>输出异常堆栈</p>
-<ul>
-<li><p>使用execute()方法</p>
-<p>submit()会忽略系统抛出的异常</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>分而治之 Fork/Join框架</p>
-<p>学习链接：<a href="https://www.liaoxuefeng.com/article/1146802219354112">https://www.liaoxuefeng.com/article/1146802219354112</a></p>
-</li>
-<li><p>Guava对线程池的扩展</p>
-<ul>
-<li><p>DirectExecutor线程池</p>
-<p>它并没有真的创建或者使用额外线程，它总是将任务在当前线程中直接执行。这个设计主要是为了完成业务的抽象工作，可以使用同一的编码风格处理同步和异步调用，进而简化设计。</p>
-</li>
-<li><p>Daemon线程池</p>
-<p>将普通线程池转为Daemon线程池，可以随着系统（也可以叫主线程）执行完成后一起销毁</p>
-</li>
-<li><p>Future模型的扩展</p>
-<p>Future模式核心思想是异步调用，线程会在等待结果返回的过程中执行其他业务，从而充分利用这段时间</p>
-<ul>
-<li><p>ListeningExecutorService</p>
-<p>调用 MoreExecutors.listeningDecorator 方法将一个普通线程池包装为一个包含通知同能的Future线程池</p>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="java并发容器"><a href="#java并发容器" class="headerlink" title="java并发容器"></a>java并发容器</h2><h3 id="并发集合"><a href="#并发集合" class="headerlink" title="并发集合"></a>并发集合</h3><ul>
-<li><p>ConcurrentHashMap</p>
-<p>高效的并发,线程安全的HashMap</p>
-</li>
-<li><p>CopyOnWriteArrayList</p>
-<p>线程安全的ArrayList 适合读多写少的场合，性能远好于Vector。<br>读取不加锁，写入也不会阻塞读取操作，只有写入和写入会加锁，因为在写入操作时会进行一次自我复制</p>
-</li>
-<li><p>ConcurrentLinkedQueue</p>
-<p>高效并发队列，链表实现可以看作是线程安全的LinkedList，是高并发环境中性能最好的队列</p>
-</li>
-<li><p>BlokingQueue</p>
-<p>阻塞队列，适合做数据共享通道。非常适合作为“生产和–消费者”模式的数据同步工具，在队列为空的时候会让读取阻塞，而当队列满了后会让存储操作阻塞</p>
-</li>
-<li><p>ConcurrentSkipListMap</p>
-<p>跳表实现，一种可以用来快速查找的数据结构。</p>
-<ul>
-<li><p>高性能</p>
-<p>类似平衡树，区别是对平衡树的插入和删除往往很可能导致平衡树进行一次全局调整，而跳表只需要对整个数据结构的局部进行操作即可。这样就可以控制锁的粒度。</p>
-</li>
-<li><p>随机算法</p>
-<p>跳表本质是同时维护了多个链表，并且链表是分层的，底层的链表维护了跳表内所有的元素，每上面一层链表都是下面一层链表的子集，一个元素插入哪些层是随机的。<br>查找操作时跳跃式的，跳表内所有链表的元素都是排序的，查找时会从顶层开始，一旦发现被查找的元素大于当前链表中的取值就会转入下一层继续查找。</p>
-<ul>
-<li>疑问：为什么插入是随机的 但是查找可以按照顺序查找呢？</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="JMH进行性能测试"><a href="#JMH进行性能测试" class="headerlink" title="JMH进行性能测试"></a>JMH进行性能测试</h2><p>学习链接：<a href="https://www.xncoding.com/2018/01/07/java/jmh.html">https://www.xncoding.com/2018/01/07/java/jmh.html</a></p>
-<h2 id="锁优化"><a href="#锁优化" class="headerlink" title="锁优化"></a>锁优化</h2><h3 id="提高性能的建议"><a href="#提高性能的建议" class="headerlink" title="提高性能的建议"></a>提高性能的建议</h3><ul>
-<li><p>1、减少锁的持有时间</p>
-<p>尽量不要在同步代码块中做耗时的操作，并且只在必要时进行同步</p>
-</li>
-<li><p>2、减小锁的粒度</p>
-<p>需要同步的代码块要尽量小</p>
-</li>
-<li><p>3、用读写分离锁替换独占锁</p>
-</li>
-<li><p>4、锁分离</p>
-<p>是读写锁的上层思想，可以将功能进行拆分，并根据每个功能的实际需求进行定制化的操作</p>
-</li>
-<li><p>5、锁粗化</p>
-<p>对同一个锁不断进行请求和释放的操作时便会把所有的锁操作整合成对锁的一次请求，从而减少对锁的请求同步的次数</p>
-</li>
-</ul>
-<h3 id="java虚拟机对锁的优化"><a href="#java虚拟机对锁的优化" class="headerlink" title="java虚拟机对锁的优化"></a>java虚拟机对锁的优化</h3><ul>
-<li><p>锁偏向</p>
-<p>是一种针对加锁操作的优化。<br>核心思想：如果一个线程获得了锁，那么锁就进入偏向模式，当这个线程再次请求锁时无须再做任何同步操作。<br>但是在锁竞争比较激烈的场合其效果不佳，因为可能每次请求锁的都不是同一个线程，所以不建议在竞争激烈的环境下启用</p>
-</li>
-<li><p>轻量级锁</p>
-<p>它只是简单地将对象头部作为指针指向持有锁的线程堆栈的内部，来判断一个线程是否持有对象锁。如果加锁失败就会转为重量级锁。<br>学习链接：<a href="https://www.zhihu.com/question/53826114">https://www.zhihu.com/question/53826114</a></p>
-</li>
-<li><p>自旋锁</p>
-<p>虚拟机会让当前线程做几个空循环，在经过若干次循环后如果可以得到锁，那么就会顺利进入临界区，如果不能获得锁会在操作系统层面挂起</p>
-</li>
-<li><p>锁消除</p>
-<p>虚拟机在编译过程中会去除不可能存在共享资源竞争的锁，通过这种措施可以节省毫无意义的请求锁时间。<br>之所以有这一操作，一方面是防止用户的错误使用。 另一方面用户在使用jdk提供的api时，api内部实现可能使用了同步锁</p>
-</li>
-</ul>
-<h3 id="ThreadLocal"><a href="#ThreadLocal" class="headerlink" title="ThreadLocal"></a>ThreadLocal</h3><p>本质是通过增加资源来保证所有对象的线程安全，会为每一个线程保存一份资源的副本，这样就不会产生竞争，但是用完要及时清理资源，不然容易发生内存泄漏。<br>学习链接：<a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1306581251653666">https://www.liaoxuefeng.com/wiki/1252599548343744/1306581251653666</a></p>
-<h3 id="无锁"><a href="#无锁" class="headerlink" title="无锁"></a>无锁</h3><p>乐观锁的思想，它会假设对资源的访问是没有冲突的，无锁的策略使用CAS的技术来鉴别线程冲突，一旦检测到冲突产生就重试当前操作直到没有冲突为止。</p>
-<ul>
-<li><p>CAS</p>
-<p>乐观锁，并没有真的是使用同步锁，当多个线程同时使用CAS操作一个变量时只有一个会胜出，并成功更新，其余均会失败。失败的线程不会被挂起，仅是被告知失败，并且允许再次尝试，也允许放弃操作。</p>
-</li>
-<li><p>安全整数 AtomicInteger</p>
-<p>线程安全的整数，使用CAS操作</p>
-</li>
-<li><p>无锁的对象引用 AtomicReference</p>
-<p>保证修改对象引用时的线程安全性</p>
-<ul>
-<li>缺点：无法解决ABA问题</li>
-</ul>
-</li>
-<li><p>带时间戳的对象引用 AtomicStampedReference</p>
-<ul>
-<li>优势：通过时间戳解决ABA问题</li>
-</ul>
-</li>
-<li><p>无锁数组 AtomicIntegerArray</p>
-</li>
-<li><p>让普通变量也享受原子操作 AtomicIntegerFieldUpdater</p>
-<p>可以对int、long和普通对象引用进行CAS修改；<br>注意事项：<br> 变量必须public 因为底层使用了反射获取变量的值<br>必须被volatile修饰<br>不支持static修饰的变量，因为会通过对象实例中的偏移量直接进行赋值</p>
-</li>
-<li><p>数据交换通道 SynchronousQueue</p>
-<p>学习链接：<a href="https://blog.csdn.net/zmx729618/article/details/52980158">https://blog.csdn.net/zmx729618/article/details/52980158</a></p>
-</li>
-</ul>
-<h2 id="实用工具"><a href="#实用工具" class="headerlink" title="实用工具"></a>实用工具</h2><h3 id="Disruptor-框架"><a href="#Disruptor-框架" class="headerlink" title="Disruptor 框架"></a>Disruptor 框架</h3><p>高效无锁内存队列 可以用来实现高性能的 生产者–消费者模式</p>
-<h3 id="Akka框架"><a href="#Akka框架" class="headerlink" title="Akka框架"></a>Akka框架</h3><p>帮助构建高并发程序</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>多线程</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Wireshark 简明教程</title>
-    <url>/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</url>
-    <content><![CDATA[<h1 id="Wireshark-简明教程"><a href="#Wireshark-简明教程" class="headerlink" title="Wireshark 简明教程"></a>Wireshark 简明教程</h1><p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
-<span id="more"></span>
-
-<h2 id="下载wireshark"><a href="#下载wireshark" class="headerlink" title="下载wireshark"></a>下载wireshark</h2><p><a href="https://www.wireshark.org/download.html">wireshark下载地址</a><br>选择Windows Installer (64-bit)，下载成功后一直点next就可以了。<br><img src="https://img-blog.csdnimg.cn/20210507224116599.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>2.1 选择网卡<br>打开软件，界面如下所示，被红框标记起来的就是网卡列表，如果你使用的是无线网就可以选择WLAN。<br><img src="https://img-blog.csdnimg.cn/20210507224420963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.2 开始抓包<br>双击选中目标网卡就会进入到抓包主界面，如图：<br><img src="https://img-blog.csdnimg.cn/20210507224707882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>被红框选中的就是该网卡发送和接受的网络包了，后续会详细讲解如果通过wireshark抓包学习网络。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Wireshark</tag>
-        <tag>网络</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>【Mybatis源码解读】jdbc包</title>
     <url>/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</url>
     <content><![CDATA[<h1 id="【Mybatis源码解读】jdbc包"><a href="#【Mybatis源码解读】jdbc包" class="headerlink" title="【Mybatis源码解读】jdbc包"></a>【Mybatis源码解读】jdbc包</h1><span id="more"></span>
@@ -790,6 +818,23 @@
       </tags>
   </entry>
   <entry>
+    <title>Wireshark 简明教程</title>
+    <url>/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<h1 id="Wireshark-简明教程"><a href="#Wireshark-简明教程" class="headerlink" title="Wireshark 简明教程"></a>Wireshark 简明教程</h1><p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
+<span id="more"></span>
+
+<h2 id="下载wireshark"><a href="#下载wireshark" class="headerlink" title="下载wireshark"></a>下载wireshark</h2><p><a href="https://www.wireshark.org/download.html">wireshark下载地址</a><br>选择Windows Installer (64-bit)，下载成功后一直点next就可以了。<br><img src="https://img-blog.csdnimg.cn/20210507224116599.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>2.1 选择网卡<br>打开软件，界面如下所示，被红框标记起来的就是网卡列表，如果你使用的是无线网就可以选择WLAN。<br><img src="https://img-blog.csdnimg.cn/20210507224420963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.2 开始抓包<br>双击选中目标网卡就会进入到抓包主界面，如图：<br><img src="https://img-blog.csdnimg.cn/20210507224707882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>被红框选中的就是该网卡发送和接受的网络包了，后续会详细讲解如果通过wireshark抓包学习网络。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Wireshark</tag>
+        <tag>网络</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
     <url>/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</url>
     <content><![CDATA[<h1 id="【通过抓包学网络】TCP三次握手与四次挥手"><a href="#【通过抓包学网络】TCP三次握手与四次挥手" class="headerlink" title="【通过抓包学网络】TCP三次握手与四次挥手"></a>【通过抓包学网络】TCP三次握手与四次挥手</h1><p>本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章<a href="https://blog.csdn.net/qq_43005544/article/details/116504407">wireshark 简易教程</a></p>
@@ -827,6 +872,35 @@
       <tags>
         <tag>Wireshark</tag>
         <tag>网络</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>网站典型故障案例</title>
+    <url>/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/</url>
+    <content><![CDATA[<h1 id="网站典型故障案例"><a href="#网站典型故障案例" class="headerlink" title="网站典型故障案例"></a>网站典型故障案例</h1><span id="more"></span>
+
+<h2 id="1-写日志也会引发故障"><a href="#1-写日志也会引发故障" class="headerlink" title="1.写日志也会引发故障"></a>1.写日志也会引发故障</h2><h3 id="故障现象"><a href="#故障现象" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用服务器在项目发布后不久就出现报警，硬盘可用空间低于警戒值，并且很快就宕机。登录到线上服务器，发现log文件夹里的文件迅速增加，不断消耗磁盘空间。</p>
+<h3 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h3><p>部署完系统后硬盘还剩余几十个G，正常情况下这些磁盘空间足够了，但是该应用的开发人员将l o g输出的level全局配置为Debug。这样一次简单的Web请求就会产生大量的log文件输出，在高并发的用户请求下，很快就消耗完不多的磁盘空间</p>
+<h3 id="经验教训"><a href="#经验教训" class="headerlink" title="经验教训"></a>经验教训</h3><p>应用程序自己的日志输出配置和第三方组件日志输出要分别配置。<br>检查log配置文件，日志输出级别至少为Warn，并且检查log输出代码调用，调用级别要符合其真实日志级别。<br>有些开源的第三方组件也会不恰当地输出太多的Error日志，需要关闭这些第三方库的日志输出，至于哪些第三方库有问题，只有在遇到问题时才知道。</p>
+<h2 id="2-高并发访问数据库引发的故障"><a href="#2-高并发访问数据库引发的故障" class="headerlink" title="2.高并发访问数据库引发的故障"></a>2.高并发访问数据库引发的故障</h2><h3 id="故障现象-1"><a href="#故障现象-1" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用发布后，数据库Load居高不下，远超过正常水平，持续报警。</p>
+<h3 id="原因分析-1"><a href="#原因分析-1" class="headerlink" title="原因分析"></a>原因分析</h3><p>查数据库，发现报警是因为某条SQL引起的，这条SQL是一条简单的有索引的数据查询，不应该引发报警。继续检查，发现这条SQL执行频率非常高，远远超过正常水平。追查这条SQL，发现被网站首页应用调用，首页是被访问最频繁的网页，这条SQL被首页调用，也就被频繁执行了。</p>
+<h3 id="经验教训-1"><a href="#经验教训-1" class="headerlink" title="经验教训"></a>经验教训</h3><p>首页不应该访问数据库，首页需要的数据可以从缓存服务器或者搜索引擎服务器获取。<br>首页最好是静态的。</p>
+<h2 id="3-高并发情况下锁引发的故障"><a href="#3-高并发情况下锁引发的故障" class="headerlink" title="3.高并发情况下锁引发的故障"></a>3.高并发情况下锁引发的故障</h2><h3 id="故障现象-2"><a href="#故障现象-2" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用服务器不定时地因为响应超时而报警，但是很快又超时解除，恢复正常，如此反复，让运维人员非常苦恼。</p>
+<h3 id="原因分析-2"><a href="#原因分析-2" class="headerlink" title="原因分析"></a>原因分析</h3><p>程序中某个单例对象（singleton object）中多处使用了synchronized（this），由于this对象只有一个，所有的并发请求都要排队获得这唯一的一把锁。一般情况下，都是一些简单操作，获得锁，迅速完成操作，释放锁，不会引起线程排队。但是某个需要远程调用的操作也被加了synchronized（this），这个操作只是偶尔会被执行，但是每次执行都需要较长的时间才能完成，这段时间锁被占用，所有的用户线程都要等待，响应超时，这个操作执行完后释放锁，其他线程迅速执行，超时解除。</p>
+<h3 id="经验教训-2"><a href="#经验教训-2" class="headerlink" title="经验教训"></a>经验教训</h3><p>使用锁操作要谨慎</p>
+<h2 id="4-缓存引发的故障"><a href="#4-缓存引发的故障" class="headerlink" title="4.缓存引发的故障"></a>4.缓存引发的故障</h2><h3 id="故障现象-3"><a href="#故障现象-3" class="headerlink" title="故障现象"></a>故障现象</h3><p>没有新应用发布，但是数据库服务器突然Load飙升，并很快失去响应。DBA将数据库访问切换到备机，Load也很快飙升，并失去响应。最终引发网站全部瘫痪</p>
+<h3 id="原因分析-3"><a href="#原因分析-3" class="headerlink" title="原因分析"></a>原因分析</h3><p>缓存服务器在网站服务器集群中的地位一直比较低，服务器配置和管理级别都比其他服务器要低一些。人们都认为缓存是改善性能的手段，丢失一些缓存也没什么问题，有时候关闭一两台缓存服务器也确实对应用没有明显影响，所以长期疏于管理缓存服务器。结果这次一个缺乏经验的工程师关闭了缓存服务器集群中全部的十几台Memcached服务器，导致了网站全部瘫痪的重大事故</p>
+<h3 id="经验教训-3"><a href="#经验教训-3" class="headerlink" title="经验教训"></a>经验教训</h3><p>当缓存已经不仅仅是改善性能，而是成为网站架构不可或缺的一部分时，对缓存的管理就需要提高到和其他服务器一样的级别</p>
+<h2 id="5-大文件读写独占磁盘引发的故障"><a href="#5-大文件读写独占磁盘引发的故障" class="headerlink" title="5.大文件读写独占磁盘引发的故障"></a>5.大文件读写独占磁盘引发的故障</h2><h3 id="故障现象-4"><a href="#故障现象-4" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用主要功能是管理用户图片，接到部分用户投诉，表示上传图片非常慢，原来只需要一两秒，现在需要几十秒，有时等半天结果浏览器显示服务器超时</p>
+<h3 id="原因分析-4"><a href="#原因分析-4" class="headerlink" title="原因分析"></a>原因分析</h3><p>图片需要使用存储，最有可能出错的地方是存储服务器。检查存储服务器，发现大部分文件只有几百KB，而有几个文件非常大，有数百兆，读写这些大文件一次需要几十秒，这段时间，磁盘基本被这个文件操作独占，导致其他用户的文件操作缓慢。</p>
+<h3 id="经验教训-4"><a href="#经验教训-4" class="headerlink" title="经验教训"></a>经验教训</h3><p>存储的使用需要根据不同文件类型和用途进行管理，图片都是小文件，应该使用专用的存储服务器，不能和大文件共用存储。批处理用的大文件可以使用其他类型的分布式文件系统。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
+        <tag>问题记录</tag>
       </tags>
   </entry>
   <entry>
@@ -1042,35 +1116,6 @@
       </categories>
       <tags>
         <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>网站典型故障案例</title>
-    <url>/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/</url>
-    <content><![CDATA[<h1 id="网站典型故障案例"><a href="#网站典型故障案例" class="headerlink" title="网站典型故障案例"></a>网站典型故障案例</h1><span id="more"></span>
-
-<h2 id="1-写日志也会引发故障"><a href="#1-写日志也会引发故障" class="headerlink" title="1.写日志也会引发故障"></a>1.写日志也会引发故障</h2><h3 id="故障现象"><a href="#故障现象" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用服务器在项目发布后不久就出现报警，硬盘可用空间低于警戒值，并且很快就宕机。登录到线上服务器，发现log文件夹里的文件迅速增加，不断消耗磁盘空间。</p>
-<h3 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h3><p>部署完系统后硬盘还剩余几十个G，正常情况下这些磁盘空间足够了，但是该应用的开发人员将l o g输出的level全局配置为Debug。这样一次简单的Web请求就会产生大量的log文件输出，在高并发的用户请求下，很快就消耗完不多的磁盘空间</p>
-<h3 id="经验教训"><a href="#经验教训" class="headerlink" title="经验教训"></a>经验教训</h3><p>应用程序自己的日志输出配置和第三方组件日志输出要分别配置。<br>检查log配置文件，日志输出级别至少为Warn，并且检查log输出代码调用，调用级别要符合其真实日志级别。<br>有些开源的第三方组件也会不恰当地输出太多的Error日志，需要关闭这些第三方库的日志输出，至于哪些第三方库有问题，只有在遇到问题时才知道。</p>
-<h2 id="2-高并发访问数据库引发的故障"><a href="#2-高并发访问数据库引发的故障" class="headerlink" title="2.高并发访问数据库引发的故障"></a>2.高并发访问数据库引发的故障</h2><h3 id="故障现象-1"><a href="#故障现象-1" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用发布后，数据库Load居高不下，远超过正常水平，持续报警。</p>
-<h3 id="原因分析-1"><a href="#原因分析-1" class="headerlink" title="原因分析"></a>原因分析</h3><p>查数据库，发现报警是因为某条SQL引起的，这条SQL是一条简单的有索引的数据查询，不应该引发报警。继续检查，发现这条SQL执行频率非常高，远远超过正常水平。追查这条SQL，发现被网站首页应用调用，首页是被访问最频繁的网页，这条SQL被首页调用，也就被频繁执行了。</p>
-<h3 id="经验教训-1"><a href="#经验教训-1" class="headerlink" title="经验教训"></a>经验教训</h3><p>首页不应该访问数据库，首页需要的数据可以从缓存服务器或者搜索引擎服务器获取。<br>首页最好是静态的。</p>
-<h2 id="3-高并发情况下锁引发的故障"><a href="#3-高并发情况下锁引发的故障" class="headerlink" title="3.高并发情况下锁引发的故障"></a>3.高并发情况下锁引发的故障</h2><h3 id="故障现象-2"><a href="#故障现象-2" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用服务器不定时地因为响应超时而报警，但是很快又超时解除，恢复正常，如此反复，让运维人员非常苦恼。</p>
-<h3 id="原因分析-2"><a href="#原因分析-2" class="headerlink" title="原因分析"></a>原因分析</h3><p>程序中某个单例对象（singleton object）中多处使用了synchronized（this），由于this对象只有一个，所有的并发请求都要排队获得这唯一的一把锁。一般情况下，都是一些简单操作，获得锁，迅速完成操作，释放锁，不会引起线程排队。但是某个需要远程调用的操作也被加了synchronized（this），这个操作只是偶尔会被执行，但是每次执行都需要较长的时间才能完成，这段时间锁被占用，所有的用户线程都要等待，响应超时，这个操作执行完后释放锁，其他线程迅速执行，超时解除。</p>
-<h3 id="经验教训-2"><a href="#经验教训-2" class="headerlink" title="经验教训"></a>经验教训</h3><p>使用锁操作要谨慎</p>
-<h2 id="4-缓存引发的故障"><a href="#4-缓存引发的故障" class="headerlink" title="4.缓存引发的故障"></a>4.缓存引发的故障</h2><h3 id="故障现象-3"><a href="#故障现象-3" class="headerlink" title="故障现象"></a>故障现象</h3><p>没有新应用发布，但是数据库服务器突然Load飙升，并很快失去响应。DBA将数据库访问切换到备机，Load也很快飙升，并失去响应。最终引发网站全部瘫痪</p>
-<h3 id="原因分析-3"><a href="#原因分析-3" class="headerlink" title="原因分析"></a>原因分析</h3><p>缓存服务器在网站服务器集群中的地位一直比较低，服务器配置和管理级别都比其他服务器要低一些。人们都认为缓存是改善性能的手段，丢失一些缓存也没什么问题，有时候关闭一两台缓存服务器也确实对应用没有明显影响，所以长期疏于管理缓存服务器。结果这次一个缺乏经验的工程师关闭了缓存服务器集群中全部的十几台Memcached服务器，导致了网站全部瘫痪的重大事故</p>
-<h3 id="经验教训-3"><a href="#经验教训-3" class="headerlink" title="经验教训"></a>经验教训</h3><p>当缓存已经不仅仅是改善性能，而是成为网站架构不可或缺的一部分时，对缓存的管理就需要提高到和其他服务器一样的级别</p>
-<h2 id="5-大文件读写独占磁盘引发的故障"><a href="#5-大文件读写独占磁盘引发的故障" class="headerlink" title="5.大文件读写独占磁盘引发的故障"></a>5.大文件读写独占磁盘引发的故障</h2><h3 id="故障现象-4"><a href="#故障现象-4" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用主要功能是管理用户图片，接到部分用户投诉，表示上传图片非常慢，原来只需要一两秒，现在需要几十秒，有时等半天结果浏览器显示服务器超时</p>
-<h3 id="原因分析-4"><a href="#原因分析-4" class="headerlink" title="原因分析"></a>原因分析</h3><p>图片需要使用存储，最有可能出错的地方是存储服务器。检查存储服务器，发现大部分文件只有几百KB，而有几个文件非常大，有数百兆，读写这些大文件一次需要几十秒，这段时间，磁盘基本被这个文件操作独占，导致其他用户的文件操作缓慢。</p>
-<h3 id="经验教训-4"><a href="#经验教训-4" class="headerlink" title="经验教训"></a>经验教训</h3><p>存储的使用需要根据不同文件类型和用途进行管理，图片都是小文件，应该使用专用的存储服务器，不能和大文件共用存储。批处理用的大文件可以使用其他类型的分布式文件系统。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-        <tag>问题记录</tag>
       </tags>
   </entry>
   <entry>

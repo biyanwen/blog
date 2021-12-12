@@ -21,20 +21,24 @@
     var CONFIG = {"hostname":"biyw.cf","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="项目如何分包在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。">
+  <meta name="description" content="Hibernate 实战第二版 中文翻译 管理数据篇(一)管理数据entity 持久化过程中的生命周期因为 JPA 是一种透明的持久化机制，classes 不用关心他们自己的持久化行为，这样在写业务代码时就不需要关心数据是会被持久化还是仅仅保存在内存中。 应用层在调用方法时真的没必要关心实体的持久化。例如，你在调用Item#calculate-TotalPrice()业务方法时一点也不用关心持久化">
 <meta property="og:type" content="article">
-<meta property="og:title" content="项目如何分包">
-<meta property="og:url" content="http://biyw.cf/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/index.html">
+<meta property="og:title" content="Hibernate 实战第二版 中文翻译 管理数据篇(一)">
+<meta property="og:url" content="http://biyw.cf/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/index.html">
 <meta property="og:site_name" content="博客">
-<meta property="og:description" content="项目如何分包在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。">
+<meta property="og:description" content="Hibernate 实战第二版 中文翻译 管理数据篇(一)管理数据entity 持久化过程中的生命周期因为 JPA 是一种透明的持久化机制，classes 不用关心他们自己的持久化行为，这样在写业务代码时就不需要关心数据是会被持久化还是仅仅保存在内存中。 应用层在调用方法时真的没必要关心实体的持久化。例如，你在调用Item#calculate-TotalPrice()业务方法时一点也不用关心持久化">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-12-05T03:55:50.836Z">
-<meta property="article:modified_time" content="2021-12-05T06:37:48.886Z">
+<meta property="og:image" content="https://s2.loli.net/2021/12/10/iBpw2yIkGXez3ls.png">
+<meta property="article:published_time" content="2021-12-12T13:33:45.567Z">
+<meta property="article:modified_time" content="2021-12-12T13:39:02.181Z">
 <meta property="article:author" content="Byw">
-<meta property="article:tag" content="架构">
+<meta property="article:tag" content="ORM">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Hibernate">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2021/12/10/iBpw2yIkGXez3ls.png">
 
-<link rel="canonical" href="http://biyw.cf/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/">
+<link rel="canonical" href="http://biyw.cf/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/">
 
 
 <script id="page-configurations">
@@ -47,7 +51,7 @@
   };
 </script>
 
-  <title>项目如何分包 | 博客</title>
+  <title>Hibernate 实战第二版 中文翻译 管理数据篇(一) | 博客</title>
   
 
 
@@ -199,7 +203,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://biyw.cf/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/">
+    <link itemprop="mainEntityOfPage" href="http://biyw.cf/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tx.jpg">
@@ -212,7 +216,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          项目如何分包
+          Hibernate 实战第二版 中文翻译 管理数据篇(一)
         </h1>
 
         <div class="post-meta">
@@ -223,7 +227,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-12-05 11:55:50 / 修改时间：14:37:48" itemprop="dateCreated datePublished" datetime="2021-12-05T11:55:50+08:00">2021-12-05</time>
+              <time title="创建时间：2021-12-12 21:33:45 / 修改时间：21:39:02" itemprop="dateCreated datePublished" datetime="2021-12-12T21:33:45+08:00">2021-12-12</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -232,6 +236,10 @@
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
                   <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/%E7%BF%BB%E8%AF%91/" itemprop="url" rel="index"><span itemprop="name">翻译</span></a>
                 </span>
             </span>
 
@@ -248,14 +256,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>369</span>
+              <span>3.3k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>6 分钟</span>
             </span>
 
         </div>
@@ -267,16 +275,37 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="项目如何分包"><a href="#项目如何分包" class="headerlink" title="项目如何分包"></a>项目如何分包</h1><p>在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。</p>
+        <h1 id="Hibernate-实战第二版-中文翻译-管理数据篇-一"><a href="#Hibernate-实战第二版-中文翻译-管理数据篇-一" class="headerlink" title="Hibernate 实战第二版 中文翻译 管理数据篇(一)"></a>Hibernate 实战第二版 中文翻译 管理数据篇(一)</h1><h2 id="管理数据"><a href="#管理数据" class="headerlink" title="管理数据"></a>管理数据</h2><h3 id="entity-持久化过程中的生命周期"><a href="#entity-持久化过程中的生命周期" class="headerlink" title="entity 持久化过程中的生命周期"></a>entity 持久化过程中的生命周期</h3><p>因为 JPA 是一种透明的持久化机制，classes 不用关心他们自己的持久化行为，这样在写业务代码时就不需要关心数据是会被持久化还是仅仅保存在内存中。</p>
+<p>应用层在调用方法时真的没必要关心实体的持久化。例如，你在调用Item#calculate-TotalPrice()业务方法时一点也不用关心持久化的事情。任何与持久化有关的应用，无论是否要把内存的数据保存到数据库中都必须使用持久化服务。换句话说，你必须使用 Java Persistence 的接口存储和查询数据。</p>
+<p>当调用持久化的方法时，虽然不用关心 entity 是怎么持久化的，但是应用必须关注 entity 实体在持久化机制下的状态和生命周期。我们将用下面这段话作为生命周期的定义：entity 实体的状态将贯穿整个流程。我们也使用<em>工作单元</em>这个专业术语：众多改变状态的操作被认为是同一组操作（我理解这个就是指事务）。另一方面，我们还需要了解持久化服务提供的<em>持久化上下文</em>。把 <em>持久化上下文</em> 想象成一个可以记录你在一个事务中对数据的所有更改以及状态改变情况的服务。</p>
+<p>我们现在要仔细分析这些术语：entity states（实体状态），persistence contexts（持久化上下文），managed scope（管理范围）。你可能更多的是考虑通过 sql 语句去操作数据库，以达到增删改查的目的。但是，能够学会使用 Java Persistence 的关键就是明白它是怎么进行状态管理的，我们会通过这一章节进行学习。</p>
 <span id="more"></span>
 
-<h2 id="1、按照类型方式划分"><a href="#1、按照类型方式划分" class="headerlink" title="1、按照类型方式划分"></a>1、按照类型方式划分</h2><p>例如将所有的接口放入一个包、Controller类放入一个包等等。</p>
-<p>优点：从类型看更为清晰</p>
-<p>缺点：不利于模块化开发，因为会将同一个功能的多个类分散在不同的包中</p>
-<h2 id="2、按照功能方式划分"><a href="#2、按照功能方式划分" class="headerlink" title="2、按照功能方式划分"></a>2、按照功能方式划分</h2><p>将同一个功能的所有类放在同一个包中。</p>
-<p>优点：高内聚，便于模块化开发</p>
-<p>缺点：同一包内类型混乱</p>
-<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>将功能耦合度高的类按照功能进行划分，而功能耦合度低的或者供多个功能使用的类按照类型进行划分。</p>
+<h4 id="Entity-实例的状态"><a href="#Entity-实例的状态" class="headerlink" title="Entity 实例的状态"></a>Entity 实例的状态</h4><p>不同的 ORM 框架会使用不同的专业术语，状态的定义也不一样，甚至在持久化的过程中，状态转换的过程也是不同的。此外，提供给客户端的使用方式也是不一样的。JPA 定义了四种状态，从而隐藏了 Hibernate 复杂的内部实现。下图展示了这些状态是如何转换的。</p>
+<p><img src="https://s2.loli.net/2021/12/10/iBpw2yIkGXez3ls.png" alt="image-20211210131538695"></p>
+<p>上图不仅展示了状态如何转换，也展示了如何通过调用 EntityManager 的 API 来触发状态的转换。我们将在这一章节仔细讲解这个图表；如果在这个过程中你忘记状态如何转换的，你就可以回来参考一下。下面让我们更深入的研究一下状态以及状态的转换。</p>
+<h5 id="瞬时态"><a href="#瞬时态" class="headerlink" title="瞬时态"></a>瞬时态</h5><p>任何刚刚通过 Java 的 new 关键字生成的实例都是<strong>瞬时态</strong>的，这意味着如果没有强引用关联的话，那么很快它就会被垃圾回收清理掉，状态也会丢失。例如，new Item() 操作会创建一个 Item 瞬时态的实例，new Long() 和 new BigDecimal() 也是一样的。Hibernate 没有提供任何关于瞬时态的回调函数，所以如果你修改了处于瞬时态的 Item 实例，那么这次更改将不可能被取消。</p>
+<p>如果一个 entity 实例的状态从瞬时态转换为持久态，那这个状态就是可以被管理的，通过调用  EntityManager#persist() 方法，或者让一个已经开启状态级联操作的持久态的实例引用它都可以达到此目的。</p>
+<h5 id="持久态"><a href="#持久态" class="headerlink" title="持久态"></a>持久态</h5><p>一个持久态的 entity 实例说明它已经跟数据库产生了关联关系。它不是已经被持久化到数据库中了，就是在事务结束后会被持久化到数据库中。这个实例已经与数据库产生了映射关系，这部分内容可以参考 4.2 节内容。它的数据库标识存储在主键上。</p>
+<p>应用可能创建多个实例，然后通过 调用 EntityManager#persist() 方法让它们持久化。当然还有另一种方法进行持久化，就是在已经被 JPA 持久化的实例上创建一个对这些新实例的引用。一个已经被持久化的 entity 实例可以通过查询条件，或者其他实例的级联操作从数据库中查询出来。持久态实例总是跟持久化上下文存在着引用关系，一会儿你就会了解到更多的信息。</p>
+<h5 id="删除态"><a href="#删除态" class="headerlink" title="删除态"></a>删除态</h5><p>你可以通过很多方式将一个持久化实例从数据库中删除：例如，你可以调用  EntityManager#remove() 方法，这个在你开启了删除孤立元素配置的情况下，删除带有级联关系的实例时是非常有用的，它可以让你在没有配置级联操作的情况下，一同删除有级联关系的数据。</p>
+<p>之后实例就会转换成删除态，在事务结束后删除态的实例会被从数据库中删除。在应用执行删除后，你就不应该再对删除态的实例进行操作。</p>
+<h5 id="游离态"><a href="#游离态" class="headerlink" title="游离态"></a>游离态</h5><p>了解游离态之前，需要先明白如何从数据库中加载实例。你可以通过调用 EntityManager#find() 方法进行条件查询，将 entity 实例从数据库中查询出来，查询完成之后关闭持久化上下文。之后应用仍然维持着对这个实例的引用。那现在，这个实例就转换成游离态了，并且这个数据会被认为是旧数据。这个时候你可以放弃继续使用该实例并且让垃圾回收器将其回收。当然，你也可以继续使用该实例，之后调用 merge() 方法去保存你的更改。我们将会在之后的章节专门讨论 merging。</p>
+<p>现在你应该基本理解了 entity 实例的状态以及它们的转换。我们的下一个主题是 <strong>持久化上下文</strong> ：一个非常重要的服务。</p>
+<h4 id="持久化上下文"><a href="#持久化上下文" class="headerlink" title="持久化上下文"></a>持久化上下文</h4><p>在 Java 持久化应用中，每个 EntityManager 都有一个持久化上下文，当你调用 EntityManagerFactory#createEntityManager() 方法时就会创建一个持久化上下文。当你调用 EntityManager#close() 方法时就可以关闭它，在 Jpa 术语中这也被叫做应用程序托管（application-managed）持久化上下文；你的应用要在一个事务中定义持久化上下文的边界。</p>
+<p>持久化上下文监控、管理着所有 entity 的持久态。它是 JPA 许多功能的核心。</p>
+<p>持久化上下文让持久化引擎可以自动检测哪些数据被应用修改了。它通过监控实例可以自动或者在需要的时候将状态同步到数据库中。一个典型场景就是当一个事务结束后，存储在内存中的状态会通过执行 INSERT,UPDATE,DELETE 等 SQL 语句同步到数据库中。当然，状态由内存同步到数据库的操作也可能发生在其他时间。例如，Hibernate 也可能在查询之前将这些同步到数据库中。这会确保查询出来的是当前事务范围内的最新数据。</p>
+<p>持久化上下文作为一级缓存，它会记住哪些 entity 实例在当前事务中被处理过。例如，当你让 Hibernate 用主键去查询数据时，它会第一时间检查当前事务的持久化上下文，如果 Hibernate 从持久化上下文中找到了当前正在查询的实例，那它就会返回这个实例，而不会去数据库中进行查询。连续调用 em.find(Item.class, ITEM_ID) 会得到相同的结果。</p>
+<p>这个缓存会影响所有查询的结果，例如 javax.persistence.Query 接口中定义的查询方法。Hibernate 会读取 sql 的查询结果，然后将结果转换成 entity 实例。程序首先会通过主键在持久化上下文中进行查找。只有在找不到的情况下 Hibernate 才会从结果集中读取。Hibernate 会忽略任何结果集中的新数据，受数据库读已提交的隔离级别影响，实例最新的数据就在当前的持久化上下文中。</p>
+<p>持久化上下文默认开启，并且不可关闭，它可以做到以下几种事情：</p>
+<ul>
+<li>在因为循环引用导致堆栈溢出的情况下持久层依然有效。</li>
+<li>保证线程安全。同一个 entity 实例被多次编辑，入库的时候也不会线程产生问题。</li>
+<li>同一个事务中，数据的更改对其他正在执行的代码是立即可见的。JPA 保证 entity 实例是可重复读的。</li>
+</ul>
+<p><strong>在同一个持久化上下文中</strong>，可以保证每个特定的数据库数据的映射都是唯一的。例如，当前数据 A 的实例叫 entityA ，程序再次查询 A 数据，将实例的取名叫 entityB,  Hibernate 会保证 entityA == entityB 和 entityA.getId().equals(entityB.getId()) 两个条件同时为 true。</p>
+<p>这么做合理吗？在大部分应用中，这么做是最好的选择。在单线程的应用进行操作的过程中保证 entity 实例在内存中是唯一的可以提高缓存的利用率。然而在多线程的应用中，则会产生资源的相互竞争，从而造成资源浪费。不过，让每个线程都有自己单独的持久化上下文副本也是很简单的，同时增加了程序的拓展性。</p>
+<p>entity 实例的生命周期以及持久化上下文的功能在一开始可能是比较难理解的。下面就让我们看下 <strong>脏数据检查</strong>，<strong>进行缓存</strong>以及<strong>如何保证 entity 唯一</strong>的实战代码。</p>
 
     </div>
 
@@ -292,7 +321,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://biyw.cf/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/" title="项目如何分包">http://biyw.cf/项目如何分包/</a>
+    <a href="http://biyw.cf/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/" title="Hibernate 实战第二版 中文翻译 管理数据篇(一)">http://biyw.cf/Hibernate_实战_数据管理1/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -303,7 +332,9 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+              <a href="/tags/ORM/" rel="tag"># ORM</a>
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/Hibernate/" rel="tag"># Hibernate</a>
           </div>
 
         
@@ -312,13 +343,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/%E7%BD%91%E7%AB%99%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F/" rel="prev" title="网站架构模式">
-      <i class="fa fa-chevron-left"></i> 网站架构模式
+    <a href="/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/" rel="prev" title="CountDownLatch，CyclicBarrier，Semaphore及AQS介绍">
+      <i class="fa fa-chevron-left"></i> CountDownLatch，CyclicBarrier，Semaphore及AQS介绍
     </a></div>
-      <div class="post-nav-item">
-    <a href="/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/" rel="next" title="java高并发程序设计">
-      java高并发程序设计 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -378,7 +406,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85"><span class="nav-number">1.</span> <span class="nav-text">项目如何分包</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E6%8C%89%E7%85%A7%E7%B1%BB%E5%9E%8B%E6%96%B9%E5%BC%8F%E5%88%92%E5%88%86"><span class="nav-number">1.1.</span> <span class="nav-text">1、按照类型方式划分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81%E6%8C%89%E7%85%A7%E5%8A%9F%E8%83%BD%E6%96%B9%E5%BC%8F%E5%88%92%E5%88%86"><span class="nav-number">1.2.</span> <span class="nav-text">2、按照功能方式划分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">1.3.</span> <span class="nav-text">最佳实践</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%B8%80"><span class="nav-number">1.</span> <span class="nav-text">Hibernate 实战第二版 中文翻译 管理数据篇(一)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE"><span class="nav-number">1.1.</span> <span class="nav-text">管理数据</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#entity-%E6%8C%81%E4%B9%85%E5%8C%96%E8%BF%87%E7%A8%8B%E4%B8%AD%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">1.1.1.</span> <span class="nav-text">entity 持久化过程中的生命周期</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Entity-%E5%AE%9E%E4%BE%8B%E7%9A%84%E7%8A%B6%E6%80%81"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">Entity 实例的状态</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%9E%AC%E6%97%B6%E6%80%81"><span class="nav-number">1.1.1.1.1.</span> <span class="nav-text">瞬时态</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8C%81%E4%B9%85%E6%80%81"><span class="nav-number">1.1.1.1.2.</span> <span class="nav-text">持久态</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E6%80%81"><span class="nav-number">1.1.1.1.3.</span> <span class="nav-text">删除态</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B8%B8%E7%A6%BB%E6%80%81"><span class="nav-number">1.1.1.1.4.</span> <span class="nav-text">游离态</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8C%81%E4%B9%85%E5%8C%96%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">持久化上下文</span></a></li></ol></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -542,7 +570,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'blog',
       owner       : 'biyanwen',
       admin       : ['biyanwen'],
-      id          : '3741d23654fcf4fafc0f51131ba15f78',
+      id          : 'ea39fb3dbbd855bc107b1888e2585d31',
         language: 'zh-CN',
       distractionFreeMode: true
     });
