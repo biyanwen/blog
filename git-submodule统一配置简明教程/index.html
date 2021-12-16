@@ -29,7 +29,7 @@
 <meta property="og:description" content="随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。 git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-12-05T06:41:25.950Z">
-<meta property="article:modified_time" content="2021-12-05T07:06:03.597Z">
+<meta property="article:modified_time" content="2021-12-16T04:42:13.195Z">
 <meta property="article:author" content="Byw">
 <meta property="article:tag" content="Git">
 <meta name="twitter:card" content="summary">
@@ -221,10 +221,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-12-05 14:41:25 / 修改时间：15:06:03" itemprop="dateCreated datePublished" datetime="2021-12-05T14:41:25+08:00">2021-12-05</time>
+              <time title="创建时间：2021-12-05 14:41:25" itemprop="dateCreated datePublished" datetime="2021-12-05T14:41:25+08:00">2021-12-05</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-12-16 12:42:13" itemprop="dateModified" datetime="2021-12-16T12:42:13+08:00">2021-12-16</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -272,12 +278,11 @@
 <p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
 <span id="more"></span>
 
-<p>﻿# Git-submodule 统一配置简明教程</p>
-<h2 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h2><p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
-<h2 id="2-为什么选用-git-submodule"><a href="#2-为什么选用-git-submodule" class="headerlink" title="2. 为什么选用 git-submodule"></a>2. 为什么选用 git-submodule</h2><p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
+<h2 id="为什么选用-git-submodule"><a href="#为什么选用-git-submodule" class="headerlink" title="为什么选用 git-submodule"></a>为什么选用 git-submodule</h2><p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
 <p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
-<h2 id="3-如果你需要集成-git-submodule-应该如何做"><a href="#3-如果你需要集成-git-submodule-应该如何做" class="headerlink" title="3. 如果你需要集成  git-submodule 应该如何做"></a>3. 如果你需要集成  git-submodule 应该如何做</h2><h3 id="3-1-检查项目中的同名模块"><a href="#3-1-检查项目中的同名模块" class="headerlink" title="3.1 检查项目中的同名模块"></a>3.1 检查项目中的同名模块</h3><p>  git-submodule 是不允许两个或两个以上的模块存在相同名字的情况发生，所以要先做检查。</p>
-<h3 id="3-2-使用-git-submodule-添加子模块"><a href="#3-2-使用-git-submodule-添加子模块" class="headerlink" title="3.2 使用  git-submodule 添加子模块"></a>3.2 使用  git-submodule 添加子模块</h3><p>执行如下命令：</p>
+<h2 id="如果你需要集成-git-submodule-应该如何做"><a href="#如果你需要集成-git-submodule-应该如何做" class="headerlink" title="如果你需要集成  git-submodule 应该如何做"></a>如果你需要集成  git-submodule 应该如何做</h2><h3 id="检查项目中的同名模块"><a href="#检查项目中的同名模块" class="headerlink" title="检查项目中的同名模块"></a>检查项目中的同名模块</h3><p>  git-submodule 是不允许两个或两个以上的模块存在相同名字的情况发生，所以要先做检查。</p>
+<h3 id="使用-git-submodule-添加子模块"><a href="#使用-git-submodule-添加子模块" class="headerlink" title="使用  git-submodule 添加子模块"></a>使用  git-submodule 添加子模块</h3><p>执行如下命令：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git submodule add -b $&#123;分支名字&#125; $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
 
 <p>命令详细解析：</p>
@@ -290,7 +295,7 @@
 <p>以现货为例，最终命令如下：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git submodule add -b prod/dev http://[xxx].git</span><br></pre></td></tr></table></figure>
 
-<h3 id="3-3-拉取子模块代码"><a href="#3-3-拉取子模块代码" class="headerlink" title="3.3 拉取子模块代码"></a>3.3 拉取子模块代码</h3><p>当执行完 3.2 步骤之后我们会发现项目中多个一个空文件夹，没错是它空的， submodule add 命令不会直接将代码也拉取下来，第一次需要我们主动些。</p>
+<h3 id="拉取子模块代码"><a href="#拉取子模块代码" class="headerlink" title="拉取子模块代码"></a>拉取子模块代码</h3><p>当执行完 3.2 步骤之后我们会发现项目中多个一个空文件夹，没错是它空的， submodule add 命令不会直接将代码也拉取下来，第一次需要我们主动些。</p>
 <p>执行如下命令：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git submodule update --init --recursive</span><br></pre></td></tr></table></figure>
 
@@ -299,7 +304,7 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
 
 <p>这样，每次在主模块执行 git pull 的时候，都会去拉取子模块的最新代码。</p>
-<h3 id="3-4-切换子模块分支"><a href="#3-4-切换子模块分支" class="headerlink" title="3.4 切换子模块分支"></a>3.4 切换子模块分支</h3><p>这一步是可选的，是否需要这么做需要你看看你的子模块是否成功关联了对应分支。</p>
+<h3 id="切换子模块分支"><a href="#切换子模块分支" class="headerlink" title="切换子模块分支"></a>切换子模块分支</h3><p>这一步是可选的，是否需要这么做需要你看看你的子模块是否成功关联了对应分支。</p>
 <p>可使用如下命令查看：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git status</span><br></pre></td></tr></table></figure>
 
@@ -309,7 +314,7 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git checkout xxx</span><br></pre></td></tr></table></figure>
 
 <p>xxx 为要切换分支的名字，当然你用各种 git 图形化工具操作也是一样的。</p>
-<h2 id="4-如果你要-clone-一个集成了-git-submodule-的项目应该如何做"><a href="#4-如果你要-clone-一个集成了-git-submodule-的项目应该如何做" class="headerlink" title="4. 如果你要 clone 一个集成了  git-submodule 的项目应该如何做"></a>4. 如果你要 clone 一个集成了  git-submodule 的项目应该如何做</h2><p>推荐使用如下命令：</p>
+<h2 id="如果你要-clone-一个集成了-git-submodule-的项目应该如何做"><a href="#如果你要-clone-一个集成了-git-submodule-的项目应该如何做" class="headerlink" title="如果你要 clone 一个集成了  git-submodule 的项目应该如何做"></a>如果你要 clone 一个集成了  git-submodule 的项目应该如何做</h2><p>推荐使用如下命令：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone --recurse-submodules $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
 
 <p>在 clone 的时候加上 –recurse-submodules 参数，这样就会将子模块的内容都拉取下来。</p>
@@ -317,12 +322,12 @@
 <p>再执行如下命令，保证每次 git pull 的时候都能获取子模块最新代码。</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
 
-<h2 id="5-在子模块上提交代码"><a href="#5-在子模块上提交代码" class="headerlink" title="5. 在子模块上提交代码"></a>5. 在子模块上提交代码</h2><p>子模块就跟其他 git 项目一样，你是可以直接更改代码并提交的，但是这里有一点需要注意，就是如果你在子模块上提交了代码，那么在主模块上也要提交一次，也就是说<strong>要提交两次代码</strong>，这是至关重要的，如果你没有这么做，有可能会让其他人的子模块无法正常工作。</p>
+<h2 id="在子模块上提交代码"><a href="#在子模块上提交代码" class="headerlink" title="在子模块上提交代码"></a>在子模块上提交代码</h2><p>子模块就跟其他 git 项目一样，你是可以直接更改代码并提交的，但是这里有一点需要注意，就是如果你在子模块上提交了代码，那么在主模块上也要提交一次，也就是说<strong>要提交两次代码</strong>，这是至关重要的，如果你没有这么做，有可能会让其他人的子模块无法正常工作。</p>
 <p>例如你在子模块提交代码后，在主模块查看 git 状态时会有如下提示：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">modified:   xxx（模块名） (new commits)</span><br></pre></td></tr></table></figure>
 
 <p>你必须要将这个代码提交到主模块的 git 仓库，这个更改其实是记录着子模块最新提交的 commit id 。用来做版本管理的。</p>
-<h2 id="6-其他"><a href="#6-其他" class="headerlink" title="6. 其他"></a>6. 其他</h2><p>如果想深入了解，可以参考以下文档。</p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>如果想深入了解，可以参考以下文档。</p>
 <p><a target="_blank" rel="noopener" href="https://git-scm.com/docs/git-submodule">参数文档</a></p>
 <p><a target="_blank" rel="noopener" href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">使用文档</a></p>
 
@@ -426,7 +431,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">1. 背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E7%94%A8-git-submodule"><span class="nav-number">2.</span> <span class="nav-text">2. 为什么选用 git-submodule</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%A6%82%E6%9E%9C%E4%BD%A0%E9%9C%80%E8%A6%81%E9%9B%86%E6%88%90-git-submodule-%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E5%81%9A"><span class="nav-number">3.</span> <span class="nav-text">3. 如果你需要集成  git-submodule 应该如何做</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E6%A3%80%E6%9F%A5%E9%A1%B9%E7%9B%AE%E4%B8%AD%E7%9A%84%E5%90%8C%E5%90%8D%E6%A8%A1%E5%9D%97"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 检查项目中的同名模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E4%BD%BF%E7%94%A8-git-submodule-%E6%B7%BB%E5%8A%A0%E5%AD%90%E6%A8%A1%E5%9D%97"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 使用  git-submodule 添加子模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-%E6%8B%89%E5%8F%96%E5%AD%90%E6%A8%A1%E5%9D%97%E4%BB%A3%E7%A0%81"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 拉取子模块代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-%E5%88%87%E6%8D%A2%E5%AD%90%E6%A8%A1%E5%9D%97%E5%88%86%E6%94%AF"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 切换子模块分支</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%A6%82%E6%9E%9C%E4%BD%A0%E8%A6%81-clone-%E4%B8%80%E4%B8%AA%E9%9B%86%E6%88%90%E4%BA%86-git-submodule-%E7%9A%84%E9%A1%B9%E7%9B%AE%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E5%81%9A"><span class="nav-number">4.</span> <span class="nav-text">4. 如果你要 clone 一个集成了  git-submodule 的项目应该如何做</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%9C%A8%E5%AD%90%E6%A8%A1%E5%9D%97%E4%B8%8A%E6%8F%90%E4%BA%A4%E4%BB%A3%E7%A0%81"><span class="nav-number">5.</span> <span class="nav-text">5. 在子模块上提交代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E5%85%B6%E4%BB%96"><span class="nav-number">6.</span> <span class="nav-text">6. 其他</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E7%94%A8-git-submodule"><span class="nav-number">2.</span> <span class="nav-text">为什么选用 git-submodule</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E6%9E%9C%E4%BD%A0%E9%9C%80%E8%A6%81%E9%9B%86%E6%88%90-git-submodule-%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E5%81%9A"><span class="nav-number">3.</span> <span class="nav-text">如果你需要集成  git-submodule 应该如何做</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A3%80%E6%9F%A5%E9%A1%B9%E7%9B%AE%E4%B8%AD%E7%9A%84%E5%90%8C%E5%90%8D%E6%A8%A1%E5%9D%97"><span class="nav-number">3.1.</span> <span class="nav-text">检查项目中的同名模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-git-submodule-%E6%B7%BB%E5%8A%A0%E5%AD%90%E6%A8%A1%E5%9D%97"><span class="nav-number">3.2.</span> <span class="nav-text">使用  git-submodule 添加子模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%89%E5%8F%96%E5%AD%90%E6%A8%A1%E5%9D%97%E4%BB%A3%E7%A0%81"><span class="nav-number">3.3.</span> <span class="nav-text">拉取子模块代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%87%E6%8D%A2%E5%AD%90%E6%A8%A1%E5%9D%97%E5%88%86%E6%94%AF"><span class="nav-number">3.4.</span> <span class="nav-text">切换子模块分支</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E6%9E%9C%E4%BD%A0%E8%A6%81-clone-%E4%B8%80%E4%B8%AA%E9%9B%86%E6%88%90%E4%BA%86-git-submodule-%E7%9A%84%E9%A1%B9%E7%9B%AE%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E5%81%9A"><span class="nav-number">4.</span> <span class="nav-text">如果你要 clone 一个集成了  git-submodule 的项目应该如何做</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8%E5%AD%90%E6%A8%A1%E5%9D%97%E4%B8%8A%E6%8F%90%E4%BA%A4%E4%BB%A3%E7%A0%81"><span class="nav-number">5.</span> <span class="nav-text">在子模块上提交代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">6.</span> <span class="nav-text">其他</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -498,7 +503,7 @@
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">1:36</span>
+    <span title="站点阅读时长">1:35</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>

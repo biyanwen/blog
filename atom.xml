@@ -6,7 +6,7 @@
   <link href="http://biyw.cf/atom.xml" rel="self"/>
   
   <link href="http://biyw.cf/"/>
-  <updated>2021-12-12T13:39:02.181Z</updated>
+  <updated>2021-12-16T04:34:20.737Z</updated>
   <id>http://biyw.cf/</id>
   
   <author>
@@ -21,10 +21,10 @@
     <link href="http://biyw.cf/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/"/>
     <id>http://biyw.cf/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/</id>
     <published>2021-12-12T13:33:45.567Z</published>
-    <updated>2021-12-12T13:39:02.181Z</updated>
+    <updated>2021-12-16T04:34:20.737Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;Hibernate-实战第二版-中文翻译-管理数据篇-一&quot;&gt;&lt;a href=&quot;#Hibernate-实战第二版-中文翻译-管理数据篇-一&quot; class=&quot;headerlink&quot; title=&quot;Hibernate 实战第二版 中文翻译 管理数据篇(一)&quot;&gt;&lt;/a&gt;Hibernate 实战第二版 中文翻译 管理数据篇(一)&lt;/h1&gt;&lt;h2 id=&quot;管理数据&quot;&gt;&lt;a href=&quot;#管理数据&quot; class=&quot;headerlink&quot; title=&quot;管理数据&quot;&gt;&lt;/a&gt;管理数据&lt;/h2&gt;&lt;h3 id=&quot;entity-持久化过程中的生命周期&quot;&gt;&lt;a href=&quot;#entity-持久化过程中的生命周期&quot; class=&quot;headerlink&quot; title=&quot;entity 持久化过程中的生命周期&quot;&gt;&lt;/a&gt;entity 持久化过程中的生命周期&lt;/h3&gt;&lt;p&gt;因为 JPA 是一种透明的持久化机制，classes 不用关心他们自己的持久化行为，这样在写业务代码时就不需要关心数据是会被持久化还是仅仅保存在内存中。&lt;/p&gt;
+    <summary type="html">&lt;h2 id=&quot;管理数据&quot;&gt;&lt;a href=&quot;#管理数据&quot; class=&quot;headerlink&quot; title=&quot;管理数据&quot;&gt;&lt;/a&gt;管理数据&lt;/h2&gt;&lt;h3 id=&quot;entity-持久化过程中的生命周期&quot;&gt;&lt;a href=&quot;#entity-持久化过程中的生命周期&quot; class=&quot;headerlink&quot; title=&quot;entity 持久化过程中的生命周期&quot;&gt;&lt;/a&gt;entity 持久化过程中的生命周期&lt;/h3&gt;&lt;p&gt;因为 JPA 是一种透明的持久化机制，classes 不用关心他们自己的持久化行为，这样在写业务代码时就不需要关心数据是会被持久化还是仅仅保存在内存中。&lt;/p&gt;
 &lt;p&gt;应用层在调用方法时真的没必要关心实体的持久化。例如，你在调用Item#calculate-TotalPrice()业务方法时一点也不用关心持久化的事情。任何与持久化有关的应用，无论是否要把内存的数据保存到数据库中都必须使用持久化服务。换句话说，你必须使用 Java Persistence 的接口存储和查询数据。&lt;/p&gt;
 &lt;p&gt;当调用持久化的方法时，虽然不用关心 entity 是怎么持久化的，但是应用必须关注 entity 实体在持久化机制下的状态和生命周期。我们将用下面这段话作为生命周期的定义：entity 实体的状态将贯穿整个流程。我们也使用&lt;em&gt;工作单元&lt;/em&gt;这个专业术语：众多改变状态的操作被认为是同一组操作（我理解这个就是指事务）。另一方面，我们还需要了解持久化服务提供的&lt;em&gt;持久化上下文&lt;/em&gt;。把 &lt;em&gt;持久化上下文&lt;/em&gt; 想象成一个可以记录你在一个事务中对数据的所有更改以及状态改变情况的服务。&lt;/p&gt;
 &lt;p&gt;我们现在要仔细分析这些术语：entity states（实体状态），persistence contexts（持久化上下文），managed scope（管理范围）。你可能更多的是考虑通过 sql 语句去操作数据库，以达到增删改查的目的。但是，能够学会使用 Java Persistence 的关键就是明白它是怎么进行状态管理的，我们会通过这一章节进行学习。&lt;/p&gt;</summary>
@@ -49,10 +49,10 @@
     <link href="http://biyw.cf/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/"/>
     <id>http://biyw.cf/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/</id>
     <published>2021-12-05T07:10:31.558Z</published>
-    <updated>2021-12-05T07:14:14.428Z</updated>
+    <updated>2021-12-16T04:39:34.433Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;CountDownLatch，CyclicBarrier，Semaphore及AQS介绍&quot;&gt;&lt;a href=&quot;#CountDownLatch，CyclicBarrier，Semaphore及AQS介绍&quot; class=&quot;headerlink&quot; title=&quot;CountDownLatch，CyclicBarrier，Semaphore及AQS介绍&quot;&gt;&lt;/a&gt;CountDownLatch，CyclicBarrier，Semaphore及AQS介绍&lt;/h1&gt;</summary>
+    <summary type="html">&lt;h2 id=&quot;CountDownLatch&quot;&gt;&lt;a href=&quot;#CountDownLatch&quot; class=&quot;headerlink&quot; title=&quot;CountDownLatch&quot;&gt;&lt;/a&gt;CountDownLatch&lt;/h2&gt;&lt;h3 id=&quot;使用场景&quot;&gt;&lt;a href=&quot;#使用场景&quot; class=&quot;headerlink&quot; title=&quot;使用场景&quot;&gt;&lt;/a&gt;使用场景&lt;/h3&gt;&lt;p&gt;CountDownLatch适用于在多线程的场景需要等待所有子线程全部执行完毕之后再做操作的场景。&lt;/p&gt;</summary>
     
     
     
@@ -72,7 +72,7 @@
     <link href="http://biyw.cf/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/"/>
     <id>http://biyw.cf/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/</id>
     <published>2021-12-05T06:57:16.379Z</published>
-    <updated>2021-12-05T07:08:43.446Z</updated>
+    <updated>2021-12-16T04:40:53.454Z</updated>
     
     
     <summary type="html">&lt;p&gt;在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。&lt;/p&gt;</summary>
@@ -95,10 +95,10 @@
     <link href="http://biyw.cf/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/"/>
     <id>http://biyw.cf/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</id>
     <published>2021-12-05T06:47:29.126Z</published>
-    <updated>2021-12-05T07:03:24.592Z</updated>
+    <updated>2021-12-16T04:43:03.222Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;【通过抓包学网络】TCP三次握手与四次挥手&quot;&gt;&lt;a href=&quot;#【通过抓包学网络】TCP三次握手与四次挥手&quot; class=&quot;headerlink&quot; title=&quot;【通过抓包学网络】TCP三次握手与四次挥手&quot;&gt;&lt;/a&gt;【通过抓包学网络】TCP三次握手与四次挥手&lt;/h1&gt;&lt;p&gt;本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章&lt;a href=&quot;https://blog.csdn.net/qq_43005544/article/details/116504407&quot;&gt;wireshark 简易教程&lt;/a&gt;&lt;/p&gt;</summary>
+    <summary type="html">&lt;p&gt;本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章&lt;a href=&quot;https://blog.csdn.net/qq_43005544/article/details/116504407&quot;&gt;wireshark 简易教程&lt;/a&gt;&lt;/p&gt;</summary>
     
     
     
@@ -116,10 +116,10 @@
     <link href="http://biyw.cf/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/"/>
     <id>http://biyw.cf/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</id>
     <published>2021-12-05T06:42:55.422Z</published>
-    <updated>2021-12-05T06:46:53.512Z</updated>
+    <updated>2021-12-16T04:43:41.419Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;Wireshark-简明教程&quot;&gt;&lt;a href=&quot;#Wireshark-简明教程&quot; class=&quot;headerlink&quot; title=&quot;Wireshark 简明教程&quot;&gt;&lt;/a&gt;Wireshark 简明教程&lt;/h1&gt;&lt;p&gt;Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。&lt;/p&gt;</summary>
+    <summary type="html">&lt;p&gt;Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。&lt;/p&gt;</summary>
     
     
     
@@ -137,7 +137,7 @@
     <link href="http://biyw.cf/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/"/>
     <id>http://biyw.cf/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</id>
     <published>2021-12-05T06:41:25.950Z</published>
-    <updated>2021-12-05T07:06:03.597Z</updated>
+    <updated>2021-12-16T04:42:13.195Z</updated>
     
     
     <summary type="html">&lt;p&gt;随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。&lt;/p&gt;
@@ -158,10 +158,10 @@
     <link href="http://biyw.cf/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/"/>
     <id>http://biyw.cf/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</id>
     <published>2021-12-05T06:30:01.964Z</published>
-    <updated>2021-12-05T06:35:43.720Z</updated>
+    <updated>2021-12-16T04:45:24.272Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;【Mybatis源码解读】jdbc包&quot;&gt;&lt;a href=&quot;#【Mybatis源码解读】jdbc包&quot; class=&quot;headerlink&quot; title=&quot;【Mybatis源码解读】jdbc包&quot;&gt;&lt;/a&gt;【Mybatis源码解读】jdbc包&lt;/h1&gt;</summary>
+    <summary type="html">&lt;h2 id=&quot;1-jdbc包的作用&quot;&gt;&lt;a href=&quot;#1-jdbc包的作用&quot; class=&quot;headerlink&quot; title=&quot;1. jdbc包的作用&quot;&gt;&lt;/a&gt;1. jdbc包的作用&lt;/h2&gt;&lt;p&gt;jdbc包作为Mybatis框架的核心包之一可以理解为是&lt;strong&gt;操作Sql的工具包&lt;/strong&gt;，因为通过阅读代码观察到这个jdbc包里面的类并没有被Mybatis框架本身引用，而其本身的作用又是对sql的操作，所以当作工具包来理解是没有什么问题的。&lt;/p&gt;</summary>
     
     
     
@@ -179,10 +179,10 @@
     <link href="http://biyw.cf/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/"/>
     <id>http://biyw.cf/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</id>
     <published>2021-12-05T06:24:20.623Z</published>
-    <updated>2021-12-05T06:25:37.045Z</updated>
+    <updated>2021-12-16T04:45:49.346Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;常见的Web应用攻击手段&quot;&gt;&lt;a href=&quot;#常见的Web应用攻击手段&quot; class=&quot;headerlink&quot; title=&quot;常见的Web应用攻击手段&quot;&gt;&lt;/a&gt;常见的Web应用攻击手段&lt;/h1&gt;</summary>
+    <summary type="html">&lt;h2 id=&quot;1-XSS攻击&quot;&gt;&lt;a href=&quot;#1-XSS攻击&quot; class=&quot;headerlink&quot; title=&quot;1.XSS攻击&quot;&gt;&lt;/a&gt;1.XSS攻击&lt;/h2&gt;&lt;p&gt;XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。&lt;/p&gt;</summary>
     
     
     
@@ -198,10 +198,10 @@
     <link href="http://biyw.cf/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/"/>
     <id>http://biyw.cf/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</id>
     <published>2021-12-05T06:21:36.434Z</published>
-    <updated>2021-12-05T06:36:58.156Z</updated>
+    <updated>2021-12-16T04:44:57.671Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;集群环境下如何管理Session&quot;&gt;&lt;a href=&quot;#集群环境下如何管理Session&quot; class=&quot;headerlink&quot; title=&quot;集群环境下如何管理Session&quot;&gt;&lt;/a&gt;集群环境下如何管理Session&lt;/h1&gt;</summary>
+    <summary type="html">&lt;h2 id=&quot;1-Session复制&quot;&gt;&lt;a href=&quot;#1-Session复制&quot; class=&quot;headerlink&quot; title=&quot;1.Session复制&quot;&gt;&lt;/a&gt;1.Session复制&lt;/h2&gt;&lt;p&gt;应用服务器开启Web容器的Session复制功能，在集群中的几台服务器之间同步Session对象，使得每台服务器上都保存所有用户的Session信息，这样任何一台机器宕机都不会导致Session数据的丢失，而服务器使用Session时，也只需要在本机获取即可&lt;/p&gt;</summary>
     
     
     
@@ -217,10 +217,10 @@
     <link href="http://biyw.cf/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/"/>
     <id>http://biyw.cf/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/</id>
     <published>2021-12-05T06:20:42.235Z</published>
-    <updated>2021-12-05T06:37:10.437Z</updated>
+    <updated>2021-12-16T04:44:41.665Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;网站的高性能架构&quot;&gt;&lt;a href=&quot;#网站的高性能架构&quot; class=&quot;headerlink&quot; title=&quot;网站的高性能架构&quot;&gt;&lt;/a&gt;网站的高性能架构&lt;/h1&gt;&lt;p&gt;网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。&lt;/p&gt;</summary>
+    <summary type="html">&lt;p&gt;网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。&lt;/p&gt;</summary>
     
     
     
@@ -236,10 +236,10 @@
     <link href="http://biyw.cf/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/"/>
     <id>http://biyw.cf/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/</id>
     <published>2021-12-05T06:18:51.996Z</published>
-    <updated>2021-12-05T06:37:26.745Z</updated>
+    <updated>2021-12-16T04:44:31.803Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;网站典型故障案例&quot;&gt;&lt;a href=&quot;#网站典型故障案例&quot; class=&quot;headerlink&quot; title=&quot;网站典型故障案例&quot;&gt;&lt;/a&gt;网站典型故障案例&lt;/h1&gt;</summary>
+    <summary type="html">&lt;h2 id=&quot;1-写日志也会引发故障&quot;&gt;&lt;a href=&quot;#1-写日志也会引发故障&quot; class=&quot;headerlink&quot; title=&quot;1.写日志也会引发故障&quot;&gt;&lt;/a&gt;1.写日志也会引发故障&lt;/h2&gt;&lt;h3 id=&quot;故障现象&quot;&gt;&lt;a href=&quot;#故障现象&quot; class=&quot;headerlink&quot; title=&quot;故障现象&quot;&gt;&lt;/a&gt;故障现象&lt;/h3&gt;&lt;p&gt;某应用服务器在项目发布后不久就出现报警，硬盘可用空间低于警戒值，并且很快就宕机。登录到线上服务器，发现log文件夹里的文件迅速增加，不断消耗磁盘空间。&lt;/p&gt;</summary>
     
     
     
@@ -257,10 +257,10 @@
     <link href="http://biyw.cf/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/"/>
     <id>http://biyw.cf/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/</id>
     <published>2021-12-05T06:16:49.258Z</published>
-    <updated>2021-12-05T06:18:44.534Z</updated>
+    <updated>2021-12-16T04:46:03.334Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;Java内存模型与线程&quot;&gt;&lt;a href=&quot;#Java内存模型与线程&quot; class=&quot;headerlink&quot; title=&quot;Java内存模型与线程&quot;&gt;&lt;/a&gt;Java内存模型与线程&lt;/h1&gt;</summary>
+    <summary type="html">&lt;h2 id=&quot;Java内存模型&quot;&gt;&lt;a href=&quot;#Java内存模型&quot; class=&quot;headerlink&quot; title=&quot;Java内存模型&quot;&gt;&lt;/a&gt;Java内存模型&lt;/h2&gt;&lt;p&gt;内存模型一词可以理解为在特定的操作协议下，对特定的内存或高速缓存进行读写访问的过程抽象；&lt;br&gt;在jdk5发布后Java内存模型才终于成熟、完善起来&lt;/p&gt;</summary>
     
     
     
@@ -276,10 +276,14 @@
     <link href="http://biyw.cf/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/"/>
     <id>http://biyw.cf/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/</id>
     <published>2021-12-05T06:15:11.402Z</published>
-    <updated>2021-12-05T06:16:35.988Z</updated>
+    <updated>2021-12-16T04:46:23.344Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;Java内存区域&quot;&gt;&lt;a href=&quot;#Java内存区域&quot; class=&quot;headerlink&quot; title=&quot;Java内存区域&quot;&gt;&lt;/a&gt;Java内存区域&lt;/h1&gt;</summary>
+    <summary type="html">&lt;h2 id=&quot;运行时数据区域&quot;&gt;&lt;a href=&quot;#运行时数据区域&quot; class=&quot;headerlink&quot; title=&quot;运行时数据区域&quot;&gt;&lt;/a&gt;运行时数据区域&lt;/h2&gt;&lt;h3 id=&quot;程序计数器&quot;&gt;&lt;a href=&quot;#程序计数器&quot; class=&quot;headerlink&quot; title=&quot;程序计数器&quot;&gt;&lt;/a&gt;程序计数器&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;当前线程所执行的字节码的行号指示器，用来选取下一条需要执行的字节码指令&lt;/li&gt;
+&lt;li&gt;线程私有&lt;/li&gt;
+&lt;li&gt;唯一一个不会出现OOM的区域&lt;/li&gt;
+&lt;/ul&gt;</summary>
     
     
     
@@ -295,10 +299,17 @@
     <link href="http://biyw.cf/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/"/>
     <id>http://biyw.cf/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/</id>
     <published>2021-12-05T06:13:31.866Z</published>
-    <updated>2021-12-05T06:15:01.283Z</updated>
+    <updated>2021-12-16T04:46:42.477Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;垃圾收集器与内存分配策略&quot;&gt;&lt;a href=&quot;#垃圾收集器与内存分配策略&quot; class=&quot;headerlink&quot; title=&quot;垃圾收集器与内存分配策略&quot;&gt;&lt;/a&gt;垃圾收集器与内存分配策略&lt;/h1&gt;</summary>
+    <summary type="html">&lt;h2 id=&quot;对象已死？-判断对象是否可以回收&quot;&gt;&lt;a href=&quot;#对象已死？-判断对象是否可以回收&quot; class=&quot;headerlink&quot; title=&quot;对象已死？(判断对象是否可以回收)&quot;&gt;&lt;/a&gt;对象已死？(判断对象是否可以回收)&lt;/h2&gt;&lt;h3 id=&quot;引用&quot;&gt;&lt;a href=&quot;#引用&quot; class=&quot;headerlink&quot; title=&quot;引用&quot;&gt;&lt;/a&gt;引用&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;reference类型的数据中存储的数值代表的是另一块内存的起始地址&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;强引用：代码中的引用赋值 例如 new对象；意义：对象不会被回收&lt;/li&gt;
+&lt;li&gt;软引用：还有用非必须的对象；意义：在系统将要发生内存溢出前回收&lt;/li&gt;
+&lt;li&gt;弱引用：非必须对象；意义：每次垃圾回收时都会被清理&lt;/li&gt;
+&lt;li&gt;虚引用：最弱的一种引用；意义：可以让一个对象被回收时收到一个系统通知&lt;/li&gt;
+&lt;/ul&gt;</summary>
     
     
     
@@ -314,10 +325,10 @@
     <link href="http://biyw.cf/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/"/>
     <id>http://biyw.cf/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/</id>
     <published>2021-12-05T06:12:44.443Z</published>
-    <updated>2021-12-05T06:32:54.639Z</updated>
+    <updated>2021-12-16T04:45:34.091Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;虚拟机类加载机制&quot;&gt;&lt;a href=&quot;#虚拟机类加载机制&quot; class=&quot;headerlink&quot; title=&quot;虚拟机类加载机制&quot;&gt;&lt;/a&gt;虚拟机类加载机制&lt;/h1&gt;&lt;p&gt;java虚拟机把描述类的数据从Class文件加载到内存，并堆数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这个过程被称作虚拟机的类加载机制&lt;/p&gt;</summary>
+    <summary type="html">&lt;p&gt;java虚拟机把描述类的数据从Class文件加载到内存，并堆数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这个过程被称作虚拟机的类加载机制&lt;/p&gt;</summary>
     
     
     
@@ -335,10 +346,10 @@
     <link href="http://biyw.cf/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/"/>
     <id>http://biyw.cf/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/</id>
     <published>2021-12-05T06:09:58.727Z</published>
-    <updated>2021-12-05T06:12:09.479Z</updated>
+    <updated>2021-12-16T04:46:51.848Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;虚拟机字节码执行引擎&quot;&gt;&lt;a href=&quot;#虚拟机字节码执行引擎&quot; class=&quot;headerlink&quot; title=&quot;虚拟机字节码执行引擎&quot;&gt;&lt;/a&gt;虚拟机字节码执行引擎&lt;/h1&gt;&lt;p&gt;虚拟机字节码执行引擎是java虚拟机核心组成部分之一，所有java虚拟机的执行引擎输入、输出都是一致的：输入的是字节码二进制流，处理过程是字节码解析执行的等效过程，输出的是执行结果。&lt;/p&gt;</summary>
+    <summary type="html">&lt;p&gt;虚拟机字节码执行引擎是java虚拟机核心组成部分之一，所有java虚拟机的执行引擎输入、输出都是一致的：输入的是字节码二进制流，处理过程是字节码解析执行的等效过程，输出的是执行结果。&lt;/p&gt;</summary>
     
     
     
@@ -356,10 +367,10 @@
     <link href="http://biyw.cf/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/"/>
     <id>http://biyw.cf/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/</id>
     <published>2021-12-05T04:21:18.434Z</published>
-    <updated>2021-12-05T06:36:29.157Z</updated>
+    <updated>2021-12-16T04:45:08.210Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;java高并发程序设计&quot;&gt;&lt;a href=&quot;#java高并发程序设计&quot; class=&quot;headerlink&quot; title=&quot;java高并发程序设计&quot;&gt;&lt;/a&gt;java高并发程序设计&lt;/h1&gt;&lt;p&gt;高并发是 java 开发必备知识，本篇文章整理出在高并发程序设计中常用的工具。&lt;/p&gt;</summary>
+    <summary type="html">&lt;p&gt;高并发是 java 开发必备知识，本篇文章整理出在高并发程序设计中常用的工具。&lt;/p&gt;</summary>
     
     
     
@@ -377,10 +388,10 @@
     <link href="http://biyw.cf/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/"/>
     <id>http://biyw.cf/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</id>
     <published>2021-12-05T03:55:50.836Z</published>
-    <updated>2021-12-05T06:37:48.886Z</updated>
+    <updated>2021-12-16T04:43:56.836Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;项目如何分包&quot;&gt;&lt;a href=&quot;#项目如何分包&quot; class=&quot;headerlink&quot; title=&quot;项目如何分包&quot;&gt;&lt;/a&gt;项目如何分包&lt;/h1&gt;&lt;p&gt;在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。&lt;/p&gt;</summary>
+    <summary type="html">&lt;p&gt;在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。&lt;/p&gt;</summary>
     
     
     
@@ -396,10 +407,10 @@
     <link href="http://biyw.cf/%E7%BD%91%E7%AB%99%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F/"/>
     <id>http://biyw.cf/%E7%BD%91%E7%AB%99%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F/</id>
     <published>2021-12-02T05:13:15.874Z</published>
-    <updated>2021-12-05T06:37:34.535Z</updated>
+    <updated>2021-12-16T04:44:12.839Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;网站架构模式&quot;&gt;&lt;a href=&quot;#网站架构模式&quot; class=&quot;headerlink&quot; title=&quot;网站架构模式&quot;&gt;&lt;/a&gt;网站架构模式&lt;/h1&gt;&lt;p&gt;大型互联网公司为了实现网站的高性能、高可用、易伸缩、可扩展、安全等各种技术架构目标，提出了很多解决方案，而这些方案又被更多网站重复使用，从而逐渐形成大型网站架构模式，下面对常见的模式进行总结。&lt;/p&gt;</summary>
+    <summary type="html">&lt;p&gt;大型互联网公司为了实现网站的高性能、高可用、易伸缩、可扩展、安全等各种技术架构目标，提出了很多解决方案，而这些方案又被更多网站重复使用，从而逐渐形成大型网站架构模式，下面对常见的模式进行总结。&lt;/p&gt;</summary>
     
     
     
