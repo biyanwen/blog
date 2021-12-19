@@ -209,7 +209,14 @@
 
   
   <url>
-    <loc>http://biyw.cf/tags/ORM/</loc>
+    <loc>http://biyw.cf/tags/Git/</loc>
+    <lastmod>2021-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://biyw.cf/tags/Jvm/</loc>
     <lastmod>2021-12-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -217,13 +224,6 @@
   
   <url>
     <loc>http://biyw.cf/tags/Java/</loc>
-    <lastmod>2021-12-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>http://biyw.cf/tags/Hibernate/</loc>
     <lastmod>2021-12-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -244,14 +244,14 @@
   </url>
   
   <url>
-    <loc>http://biyw.cf/tags/Git/</loc>
+    <loc>http://biyw.cf/tags/ORM/</loc>
     <lastmod>2021-12-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>http://biyw.cf/tags/Jvm/</loc>
+    <loc>http://biyw.cf/tags/Hibernate/</loc>
     <lastmod>2021-12-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -272,6 +272,13 @@
   </url>
   
   <url>
+    <loc>http://biyw.cf/tags/%E6%9E%B6%E6%9E%84/</loc>
+    <lastmod>2021-12-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>http://biyw.cf/tags/Mybatis/</loc>
     <lastmod>2021-12-19</lastmod>
     <changefreq>weekly</changefreq>
@@ -286,13 +293,6 @@
   </url>
   
   <url>
-    <loc>http://biyw.cf/tags/%E6%9E%B6%E6%9E%84/</loc>
-    <lastmod>2021-12-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>http://biyw.cf/tags/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/</loc>
     <lastmod>2021-12-19</lastmod>
     <changefreq>weekly</changefreq>
@@ -300,14 +300,14 @@
   </url>
   
   <url>
-    <loc>http://biyw.cf/tags/%E7%B1%BB%E5%8A%A0%E8%BD%BD/</loc>
+    <loc>http://biyw.cf/tags/%E5%AD%97%E8%8A%82%E7%A0%81/</loc>
     <lastmod>2021-12-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>http://biyw.cf/tags/%E5%AD%97%E8%8A%82%E7%A0%81/</loc>
+    <loc>http://biyw.cf/tags/%E7%B1%BB%E5%8A%A0%E8%BD%BD/</loc>
     <lastmod>2021-12-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
