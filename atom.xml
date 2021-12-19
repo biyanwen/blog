@@ -6,7 +6,7 @@
   <link href="http://biyw.cf/atom.xml" rel="self"/>
   
   <link href="http://biyw.cf/"/>
-  <updated>2021-12-16T04:34:20.737Z</updated>
+  <updated>2021-12-19T12:39:52.609Z</updated>
   <id>http://biyw.cf/</id>
   
   <author>
@@ -17,17 +17,40 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>Hibernate 实战第二版 中文翻译 管理数据篇(二)</title>
+    <link href="http://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/"/>
+    <id>http://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/</id>
+    <published>2021-12-12T13:56:51.000Z</published>
+    <updated>2021-12-19T12:39:52.609Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;EntityManager-接口&quot;&gt;&lt;a href=&quot;#EntityManager-接口&quot; class=&quot;headerlink&quot; title=&quot;EntityManager 接口&quot;&gt;&lt;/a&gt;EntityManager 接口&lt;/h2&gt;&lt;p&gt;任何持久层框架都会提供一个管理持久层的 API。这个 API 一般都会提供基础的增删改查功能，通过它就可以管理持久化上下文。在 Java 持久层框架中，最常使用的接口就是 EntityManager。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    <category term="翻译" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/%E7%BF%BB%E8%AF%91/"/>
+    
+    
+    <category term="ORM" scheme="http://biyw.cf/tags/ORM/"/>
+    
+    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
+    
+    <category term="Hibernate" scheme="http://biyw.cf/tags/Hibernate/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(一)</title>
     <link href="http://biyw.cf/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/"/>
     <id>http://biyw.cf/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/</id>
     <published>2021-12-12T13:33:45.567Z</published>
-    <updated>2021-12-16T04:34:20.737Z</updated>
+    <updated>2021-12-19T12:58:50.995Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;管理数据&quot;&gt;&lt;a href=&quot;#管理数据&quot; class=&quot;headerlink&quot; title=&quot;管理数据&quot;&gt;&lt;/a&gt;管理数据&lt;/h2&gt;&lt;h3 id=&quot;entity-持久化过程中的生命周期&quot;&gt;&lt;a href=&quot;#entity-持久化过程中的生命周期&quot; class=&quot;headerlink&quot; title=&quot;entity 持久化过程中的生命周期&quot;&gt;&lt;/a&gt;entity 持久化过程中的生命周期&lt;/h3&gt;&lt;p&gt;因为 JPA 是一种透明的持久化机制，classes 不用关心他们自己的持久化行为，这样在写业务代码时就不需要关心数据是会被持久化还是仅仅保存在内存中。&lt;/p&gt;
-&lt;p&gt;应用层在调用方法时真的没必要关心实体的持久化。例如，你在调用Item#calculate-TotalPrice()业务方法时一点也不用关心持久化的事情。任何与持久化有关的应用，无论是否要把内存的数据保存到数据库中都必须使用持久化服务。换句话说，你必须使用 Java Persistence 的接口存储和查询数据。&lt;/p&gt;
-&lt;p&gt;当调用持久化的方法时，虽然不用关心 entity 是怎么持久化的，但是应用必须关注 entity 实体在持久化机制下的状态和生命周期。我们将用下面这段话作为生命周期的定义：entity 实体的状态将贯穿整个流程。我们也使用&lt;em&gt;工作单元&lt;/em&gt;这个专业术语：众多改变状态的操作被认为是同一组操作（我理解这个就是指事务）。另一方面，我们还需要了解持久化服务提供的&lt;em&gt;持久化上下文&lt;/em&gt;。把 &lt;em&gt;持久化上下文&lt;/em&gt; 想象成一个可以记录你在一个事务中对数据的所有更改以及状态改变情况的服务。&lt;/p&gt;
-&lt;p&gt;我们现在要仔细分析这些术语：entity states（实体状态），persistence contexts（持久化上下文），managed scope（管理范围）。你可能更多的是考虑通过 sql 语句去操作数据库，以达到增删改查的目的。但是，能够学会使用 Java Persistence 的关键就是明白它是怎么进行状态管理的，我们会通过这一章节进行学习。&lt;/p&gt;</summary>
+&lt;p&gt;应用层在调用方法时真的没必要关心实体的持久化。例如，你在调用Item#calculate-TotalPrice()业务方法时一点也不用关心持久化的事情。任何与持久化有关的应用，无论是否要把内存的数据保存到数据库中都必须使用持久化服务。换句话说，你必须使用 Java Persistence 的接口存储和查询数据。&lt;/p&gt;</summary>
     
     
     

@@ -1,6 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Hibernate 实战第二版 中文翻译 管理数据篇(一)</title>
+    <url>/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/</url>
+    <content><![CDATA[<h2 id="管理数据"><a href="#管理数据" class="headerlink" title="管理数据"></a>管理数据</h2><h3 id="entity-持久化过程中的生命周期"><a href="#entity-持久化过程中的生命周期" class="headerlink" title="entity 持久化过程中的生命周期"></a>entity 持久化过程中的生命周期</h3><p>因为 JPA 是一种透明的持久化机制，classes 不用关心他们自己的持久化行为，这样在写业务代码时就不需要关心数据是会被持久化还是仅仅保存在内存中。</p>
+<p>应用层在调用方法时真的没必要关心实体的持久化。例如，你在调用Item#calculate-TotalPrice()业务方法时一点也不用关心持久化的事情。任何与持久化有关的应用，无论是否要把内存的数据保存到数据库中都必须使用持久化服务。换句话说，你必须使用 Java Persistence 的接口存储和查询数据。</p>
+<span id="more"></span>
+
+<p>当调用持久化的方法时，虽然不用关心 entity 是怎么持久化的，但是应用必须关注 entity 实体在持久化机制下的状态和生命周期。我们将用下面这段话作为生命周期的定义：entity 实体的状态将贯穿整个流程。我们也使用<em>工作单元</em>这个专业术语：众多改变状态的操作被认为是同一组操作（我理解这个就是指事务）。另一方面，我们还需要了解持久化服务提供的<em>持久化上下文</em>。把 <em>持久化上下文</em> 想象成一个可以记录你在一个事务中对数据的所有更改以及状态改变情况的服务。</p>
+<p>我们现在要仔细分析这些术语：entity states（实体状态），persistence contexts（持久化上下文），managed scope（管理范围）。你可能更多的是考虑通过 sql 语句去操作数据库，以达到增删改查的目的。但是，能够学会使用 Java Persistence 的关键就是明白它是怎么进行状态管理的，我们会通过这一章节进行学习。</p>
+<h4 id="Entity-实例的状态"><a href="#Entity-实例的状态" class="headerlink" title="Entity 实例的状态"></a>Entity 实例的状态</h4><p>不同的 ORM 框架会使用不同的专业术语，状态的定义也不一样，甚至在持久化的过程中，状态转换的过程也是不同的。此外，提供给客户端的使用方式也是不一样的。JPA 定义了四种状态，从而隐藏了 Hibernate 复杂的内部实现。下图展示了这些状态是如何转换的。</p>
+<p><img src="https://s2.loli.net/2021/12/10/iBpw2yIkGXez3ls.png" alt="image-20211210131538695"></p>
+<p>上图不仅展示了状态如何转换，也展示了如何通过调用 EntityManager 的 API 来触发状态的转换。我们将在这一章节仔细讲解这个图表；如果在这个过程中你忘记状态如何转换的，你就可以回来参考一下。下面让我们更深入的研究一下状态以及状态的转换。</p>
+<h5 id="瞬时态"><a href="#瞬时态" class="headerlink" title="瞬时态"></a>瞬时态</h5><p>任何刚刚通过 Java 的 new 关键字生成的实例都是<strong>瞬时态</strong>的，这意味着如果没有强引用关联的话，那么很快它就会被垃圾回收清理掉，状态也会丢失。例如，new Item() 操作会创建一个 Item 瞬时态的实例，new Long() 和 new BigDecimal() 也是一样的。Hibernate 没有提供任何关于瞬时态的回调函数，所以如果你修改了处于瞬时态的 Item 实例，那么这次更改将不可能被取消。</p>
+<p>如果一个 entity 实例的状态从瞬时态转换为持久态，那这个状态就是可以被管理的，通过调用  EntityManager#persist() 方法，或者让一个已经开启状态级联操作的持久态的实例引用它都可以达到此目的。</p>
+<h5 id="持久态"><a href="#持久态" class="headerlink" title="持久态"></a>持久态</h5><p>一个持久态的 entity 实例说明它已经跟数据库产生了关联关系。它不是已经被持久化到数据库中了，就是在事务结束后会被持久化到数据库中。这个实例已经与数据库产生了映射关系，这部分内容可以参考 4.2 节内容。它的数据库标识存储在主键上。</p>
+<p>应用可能创建多个实例，然后通过 调用 EntityManager#persist() 方法让它们持久化。当然还有另一种方法进行持久化，就是在已经被 JPA 持久化的实例上创建一个对这些新实例的引用。一个已经被持久化的 entity 实例可以通过查询条件，或者其他实例的级联操作从数据库中查询出来。持久态实例总是跟持久化上下文存在着引用关系，一会儿你就会了解到更多的信息。</p>
+<h5 id="删除态"><a href="#删除态" class="headerlink" title="删除态"></a>删除态</h5><p>你可以通过很多方式将一个持久化实例从数据库中删除：例如，你可以调用  EntityManager#remove() 方法，这个在你开启了删除孤立元素配置的情况下，删除带有级联关系的实例时是非常有用的，它可以让你在没有配置级联操作的情况下，一同删除有级联关系的数据。</p>
+<p>之后实例就会转换成删除态，在事务结束后删除态的实例会被从数据库中删除。在应用执行删除后，你就不应该再对删除态的实例进行操作。</p>
+<h5 id="游离态"><a href="#游离态" class="headerlink" title="游离态"></a>游离态</h5><p>了解游离态之前，需要先明白如何从数据库中加载实例。你可以通过调用 EntityManager#find() 方法进行条件查询，将 entity 实例从数据库中查询出来，查询完成之后关闭持久化上下文。之后应用仍然维持着对这个实例的引用。那现在，这个实例就转换成游离态了，并且这个数据会被认为是旧数据。这个时候你可以放弃继续使用该实例并且让垃圾回收器将其回收。当然，你也可以继续使用该实例，之后调用 merge() 方法去保存你的更改。我们将会在之后的章节专门讨论 merging。</p>
+<p>现在你应该基本理解了 entity 实例的状态以及它们的转换。我们的下一个主题是 <strong>持久化上下文</strong> ：一个非常重要的服务。</p>
+<h4 id="持久化上下文"><a href="#持久化上下文" class="headerlink" title="持久化上下文"></a>持久化上下文</h4><p>在 Java 持久化应用中，每个 EntityManager 都有一个持久化上下文，当你调用 EntityManagerFactory#createEntityManager() 方法时就会创建一个持久化上下文。当你调用 EntityManager#close() 方法时就可以关闭它，在 Jpa 术语中这也被叫做应用程序托管（application-managed）持久化上下文；你的应用要在一个事务中定义持久化上下文的边界。</p>
+<p>持久化上下文监控、管理着所有 entity 的持久态。它是 JPA 许多功能的核心。</p>
+<p>持久化上下文让持久化引擎可以自动检测哪些数据被应用修改了。它通过监控实例可以自动或者在需要的时候将状态同步到数据库中。一个典型场景就是当一个事务结束后，存储在内存中的状态会通过执行 INSERT,UPDATE,DELETE 等 SQL 语句同步到数据库中。当然，状态由内存同步到数据库的操作也可能发生在其他时间。例如，Hibernate 也可能在查询之前将这些同步到数据库中。这会确保查询出来的是当前事务范围内的最新数据。</p>
+<p>持久化上下文作为一级缓存，它会记住哪些 entity 实例在当前事务中被处理过。例如，当你让 Hibernate 用主键去查询数据时，它会第一时间检查当前事务的持久化上下文，如果 Hibernate 从持久化上下文中找到了当前正在查询的实例，那它就会返回这个实例，而不会去数据库中进行查询。连续调用 em.find(Item.class, ITEM_ID) 会得到相同的结果。</p>
+<p>这个缓存会影响所有查询的结果，例如 javax.persistence.Query 接口中定义的查询方法。Hibernate 会读取 sql 的查询结果，然后将结果转换成 entity 实例。程序首先会通过主键在持久化上下文中进行查找。只有在找不到的情况下 Hibernate 才会从结果集中读取。Hibernate 会忽略任何结果集中的新数据，受数据库读已提交的隔离级别影响，实例最新的数据就在当前的持久化上下文中。</p>
+<p>持久化上下文默认开启，并且不可关闭，它可以做到以下几种事情：</p>
+<ul>
+<li>在因为循环引用导致堆栈溢出的情况下持久层依然有效。</li>
+<li>保证线程安全。同一个 entity 实例被多次编辑，入库的时候也不会线程产生问题。</li>
+<li>同一个事务中，数据的更改对其他正在执行的代码是立即可见的。JPA 保证 entity 实例是可重复读的。</li>
+</ul>
+<p><strong>在同一个持久化上下文中</strong>，可以保证每个特定的数据库数据的映射都是唯一的。例如，当前数据 A 的实例叫 entityA ，程序再次查询 A 数据，将实例的取名叫 entityB,  Hibernate 会保证 entityA == entityB 和 entityA.getId().equals(entityB.getId()) 两个条件同时为 true。</p>
+<p>这么做合理吗？在大部分应用中，这么做是最好的选择。在单线程的应用进行操作的过程中保证 entity 实例在内存中是唯一的可以提高缓存的利用率。然而在多线程的应用中，则会产生资源的相互竞争，从而造成资源浪费。不过，让每个线程都有自己单独的持久化上下文副本也是很简单的，同时增加了程序的拓展性。</p>
+<p>entity 实例的生命周期以及持久化上下文的功能在一开始可能是比较难理解的。下面就让我们看下 <strong>脏数据检查</strong>，<strong>进行缓存</strong>以及<strong>如何保证 entity 唯一</strong>的实战代码。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+        <category>翻译</category>
+      </categories>
+      <tags>
+        <tag>ORM</tag>
+        <tag>Java</tag>
+        <tag>Hibernate</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>分布式锁</title>
     <url>/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/</url>
     <content><![CDATA[<p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
@@ -45,51 +90,6 @@
         <tag>Java</tag>
         <tag>分布式</tag>
         <tag>多线程</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Hibernate 实战第二版 中文翻译 管理数据篇(一)</title>
-    <url>/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/</url>
-    <content><![CDATA[<h2 id="管理数据"><a href="#管理数据" class="headerlink" title="管理数据"></a>管理数据</h2><h3 id="entity-持久化过程中的生命周期"><a href="#entity-持久化过程中的生命周期" class="headerlink" title="entity 持久化过程中的生命周期"></a>entity 持久化过程中的生命周期</h3><p>因为 JPA 是一种透明的持久化机制，classes 不用关心他们自己的持久化行为，这样在写业务代码时就不需要关心数据是会被持久化还是仅仅保存在内存中。</p>
-<p>应用层在调用方法时真的没必要关心实体的持久化。例如，你在调用Item#calculate-TotalPrice()业务方法时一点也不用关心持久化的事情。任何与持久化有关的应用，无论是否要把内存的数据保存到数据库中都必须使用持久化服务。换句话说，你必须使用 Java Persistence 的接口存储和查询数据。</p>
-<p>当调用持久化的方法时，虽然不用关心 entity 是怎么持久化的，但是应用必须关注 entity 实体在持久化机制下的状态和生命周期。我们将用下面这段话作为生命周期的定义：entity 实体的状态将贯穿整个流程。我们也使用<em>工作单元</em>这个专业术语：众多改变状态的操作被认为是同一组操作（我理解这个就是指事务）。另一方面，我们还需要了解持久化服务提供的<em>持久化上下文</em>。把 <em>持久化上下文</em> 想象成一个可以记录你在一个事务中对数据的所有更改以及状态改变情况的服务。</p>
-<p>我们现在要仔细分析这些术语：entity states（实体状态），persistence contexts（持久化上下文），managed scope（管理范围）。你可能更多的是考虑通过 sql 语句去操作数据库，以达到增删改查的目的。但是，能够学会使用 Java Persistence 的关键就是明白它是怎么进行状态管理的，我们会通过这一章节进行学习。</p>
-<span id="more"></span>
-
-<h4 id="Entity-实例的状态"><a href="#Entity-实例的状态" class="headerlink" title="Entity 实例的状态"></a>Entity 实例的状态</h4><p>不同的 ORM 框架会使用不同的专业术语，状态的定义也不一样，甚至在持久化的过程中，状态转换的过程也是不同的。此外，提供给客户端的使用方式也是不一样的。JPA 定义了四种状态，从而隐藏了 Hibernate 复杂的内部实现。下图展示了这些状态是如何转换的。</p>
-<p><img src="https://s2.loli.net/2021/12/10/iBpw2yIkGXez3ls.png" alt="image-20211210131538695"></p>
-<p>上图不仅展示了状态如何转换，也展示了如何通过调用 EntityManager 的 API 来触发状态的转换。我们将在这一章节仔细讲解这个图表；如果在这个过程中你忘记状态如何转换的，你就可以回来参考一下。下面让我们更深入的研究一下状态以及状态的转换。</p>
-<h5 id="瞬时态"><a href="#瞬时态" class="headerlink" title="瞬时态"></a>瞬时态</h5><p>任何刚刚通过 Java 的 new 关键字生成的实例都是<strong>瞬时态</strong>的，这意味着如果没有强引用关联的话，那么很快它就会被垃圾回收清理掉，状态也会丢失。例如，new Item() 操作会创建一个 Item 瞬时态的实例，new Long() 和 new BigDecimal() 也是一样的。Hibernate 没有提供任何关于瞬时态的回调函数，所以如果你修改了处于瞬时态的 Item 实例，那么这次更改将不可能被取消。</p>
-<p>如果一个 entity 实例的状态从瞬时态转换为持久态，那这个状态就是可以被管理的，通过调用  EntityManager#persist() 方法，或者让一个已经开启状态级联操作的持久态的实例引用它都可以达到此目的。</p>
-<h5 id="持久态"><a href="#持久态" class="headerlink" title="持久态"></a>持久态</h5><p>一个持久态的 entity 实例说明它已经跟数据库产生了关联关系。它不是已经被持久化到数据库中了，就是在事务结束后会被持久化到数据库中。这个实例已经与数据库产生了映射关系，这部分内容可以参考 4.2 节内容。它的数据库标识存储在主键上。</p>
-<p>应用可能创建多个实例，然后通过 调用 EntityManager#persist() 方法让它们持久化。当然还有另一种方法进行持久化，就是在已经被 JPA 持久化的实例上创建一个对这些新实例的引用。一个已经被持久化的 entity 实例可以通过查询条件，或者其他实例的级联操作从数据库中查询出来。持久态实例总是跟持久化上下文存在着引用关系，一会儿你就会了解到更多的信息。</p>
-<h5 id="删除态"><a href="#删除态" class="headerlink" title="删除态"></a>删除态</h5><p>你可以通过很多方式将一个持久化实例从数据库中删除：例如，你可以调用  EntityManager#remove() 方法，这个在你开启了删除孤立元素配置的情况下，删除带有级联关系的实例时是非常有用的，它可以让你在没有配置级联操作的情况下，一同删除有级联关系的数据。</p>
-<p>之后实例就会转换成删除态，在事务结束后删除态的实例会被从数据库中删除。在应用执行删除后，你就不应该再对删除态的实例进行操作。</p>
-<h5 id="游离态"><a href="#游离态" class="headerlink" title="游离态"></a>游离态</h5><p>了解游离态之前，需要先明白如何从数据库中加载实例。你可以通过调用 EntityManager#find() 方法进行条件查询，将 entity 实例从数据库中查询出来，查询完成之后关闭持久化上下文。之后应用仍然维持着对这个实例的引用。那现在，这个实例就转换成游离态了，并且这个数据会被认为是旧数据。这个时候你可以放弃继续使用该实例并且让垃圾回收器将其回收。当然，你也可以继续使用该实例，之后调用 merge() 方法去保存你的更改。我们将会在之后的章节专门讨论 merging。</p>
-<p>现在你应该基本理解了 entity 实例的状态以及它们的转换。我们的下一个主题是 <strong>持久化上下文</strong> ：一个非常重要的服务。</p>
-<h4 id="持久化上下文"><a href="#持久化上下文" class="headerlink" title="持久化上下文"></a>持久化上下文</h4><p>在 Java 持久化应用中，每个 EntityManager 都有一个持久化上下文，当你调用 EntityManagerFactory#createEntityManager() 方法时就会创建一个持久化上下文。当你调用 EntityManager#close() 方法时就可以关闭它，在 Jpa 术语中这也被叫做应用程序托管（application-managed）持久化上下文；你的应用要在一个事务中定义持久化上下文的边界。</p>
-<p>持久化上下文监控、管理着所有 entity 的持久态。它是 JPA 许多功能的核心。</p>
-<p>持久化上下文让持久化引擎可以自动检测哪些数据被应用修改了。它通过监控实例可以自动或者在需要的时候将状态同步到数据库中。一个典型场景就是当一个事务结束后，存储在内存中的状态会通过执行 INSERT,UPDATE,DELETE 等 SQL 语句同步到数据库中。当然，状态由内存同步到数据库的操作也可能发生在其他时间。例如，Hibernate 也可能在查询之前将这些同步到数据库中。这会确保查询出来的是当前事务范围内的最新数据。</p>
-<p>持久化上下文作为一级缓存，它会记住哪些 entity 实例在当前事务中被处理过。例如，当你让 Hibernate 用主键去查询数据时，它会第一时间检查当前事务的持久化上下文，如果 Hibernate 从持久化上下文中找到了当前正在查询的实例，那它就会返回这个实例，而不会去数据库中进行查询。连续调用 em.find(Item.class, ITEM_ID) 会得到相同的结果。</p>
-<p>这个缓存会影响所有查询的结果，例如 javax.persistence.Query 接口中定义的查询方法。Hibernate 会读取 sql 的查询结果，然后将结果转换成 entity 实例。程序首先会通过主键在持久化上下文中进行查找。只有在找不到的情况下 Hibernate 才会从结果集中读取。Hibernate 会忽略任何结果集中的新数据，受数据库读已提交的隔离级别影响，实例最新的数据就在当前的持久化上下文中。</p>
-<p>持久化上下文默认开启，并且不可关闭，它可以做到以下几种事情：</p>
-<ul>
-<li>在因为循环引用导致堆栈溢出的情况下持久层依然有效。</li>
-<li>保证线程安全。同一个 entity 实例被多次编辑，入库的时候也不会线程产生问题。</li>
-<li>同一个事务中，数据的更改对其他正在执行的代码是立即可见的。JPA 保证 entity 实例是可重复读的。</li>
-</ul>
-<p><strong>在同一个持久化上下文中</strong>，可以保证每个特定的数据库数据的映射都是唯一的。例如，当前数据 A 的实例叫 entityA ，程序再次查询 A 数据，将实例的取名叫 entityB,  Hibernate 会保证 entityA == entityB 和 entityA.getId().equals(entityB.getId()) 两个条件同时为 true。</p>
-<p>这么做合理吗？在大部分应用中，这么做是最好的选择。在单线程的应用进行操作的过程中保证 entity 实例在内存中是唯一的可以提高缓存的利用率。然而在多线程的应用中，则会产生资源的相互竞争，从而造成资源浪费。不过，让每个线程都有自己单独的持久化上下文副本也是很简单的，同时增加了程序的拓展性。</p>
-<p>entity 实例的生命周期以及持久化上下文的功能在一开始可能是比较难理解的。下面就让我们看下 <strong>脏数据检查</strong>，<strong>进行缓存</strong>以及<strong>如何保证 entity 唯一</strong>的实战代码。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-        <category>翻译</category>
-      </categories>
-      <tags>
-        <tag>ORM</tag>
-        <tag>Java</tag>
-        <tag>Hibernate</tag>
       </tags>
   </entry>
   <entry>
@@ -158,147 +158,6 @@
       </categories>
       <tags>
         <tag>Git</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java内存区域</title>
-    <url>/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/</url>
-    <content><![CDATA[<h2 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h2><h3 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h3><ul>
-<li>当前线程所执行的字节码的行号指示器，用来选取下一条需要执行的字节码指令</li>
-<li>线程私有</li>
-<li>唯一一个不会出现OOM的区域</li>
-</ul>
-<span id="more"></span>
-
-<h3 id="虚拟机栈"><a href="#虚拟机栈" class="headerlink" title="虚拟机栈"></a>虚拟机栈</h3><ul>
-<li><p>线程私有</p>
-</li>
-<li><p>每个方法执行时都会创建对应的栈帧入栈，执行完毕后出栈，栈帧用于存储局部变量表、操作数栈、动态连接、方法出口等信息</p>
-</li>
-<li><p>局部变量表</p>
-<ul>
-<li>用来存储基本数据类型、对象引用等信息</li>
-</ul>
-</li>
-</ul>
-<h3 id="本地方法栈"><a href="#本地方法栈" class="headerlink" title="本地方法栈"></a>本地方法栈</h3><ul>
-<li>线程私有</li>
-<li>虚拟机使用到的本地（Native)方法服务（可以是C、C++等语言提供的服务）</li>
-</ul>
-<h3 id="java堆"><a href="#java堆" class="headerlink" title="java堆"></a>java堆</h3><ul>
-<li><p>线程共享</p>
-</li>
-<li><p>唯一目的就是存放对象实例，是内存中最大的一块</p>
-</li>
-<li><p>拥有常量池（jdk1.7 从永久代移动到堆）</p>
-<ul>
-<li><p>字符串常量池</p>
-</li>
-<li><p>运行时常量池</p>
-<p>运行时常量池是方法区的一部分</p>
-<ul>
-<li>存放编译期生成的各种字面量与符号引用</li>
-</ul>
-</li>
-<li><p>Class常量池</p>
-<p>运行时常量池是在类加载完成之后，将每个class常量池中的符号引用值转存到运行时常量池中，也就是说，每个class都有一个运行时常量池，类在解析之后，将符号引用替换成直接引用，与全局常量池中的引用值保持一致</p>
-<ul>
-<li>静态变量（jdk1.7 从永久代移动到堆 跟Class对象在一起）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="方法区-元空间"><a href="#方法区-元空间" class="headerlink" title="方法区/元空间"></a>方法区/元空间</h3><p>jdk7以前也被称为永久代，之后永久代的概念被舍弃,并提出元空间的概念。方法区就在元空间上（元空间和永久代都是方法区的具体实现，类似接口和实现类）</p>
-<ul>
-<li><p>线程共享</p>
-</li>
-<li><p>存储已被虚拟机加载的类型信息、即时编译器编译后的代码缓存数据等等（也叫元数据 包括类的方法代码，变量名，方法名，访问权限，返回值等等都是在方法区的）才是存在方法区的【存疑 】）</p>
-</li>
-<li><p>此区域的垃圾回收主要针对常量池和对类型的卸载</p>
-<p>类型卸载：简单来说就是清理加载到内存中的Class 除非是故意设计不然这种情况发生的概率很低，因为Class是由ClassLoader加载进来的 而java虚拟机不会主动放弃ClassLoader 而Class又被ClassLoader引用，所以永远是“可达”的。</p>
-</li>
-</ul>
-<h3 id="直接内存-堆外内存"><a href="#直接内存-堆外内存" class="headerlink" title="直接内存(堆外内存)"></a>直接内存(堆外内存)</h3><ul>
-<li>直接使用物理内存不受到堆大小的限制，但受本地总内存的限制</li>
-<li>优点：提高性能，避免在java堆和native堆来回复制数据</li>
-<li>缺点：如果直接内存发生OOM排查难度较高</li>
-</ul>
-<h2 id="HotSpot虚拟机对象探秘"><a href="#HotSpot虚拟机对象探秘" class="headerlink" title="HotSpot虚拟机对象探秘"></a>HotSpot虚拟机对象探秘</h2><h3 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h3><ul>
-<li><p>1、类加载：先去常量池找类的符号引用并检查是否已加载</p>
-</li>
-<li><p>2、分配内存</p>
-<ul>
-<li><p>分配方法</p>
-<ul>
-<li><p>2.1 指针碰撞</p>
-<ul>
-<li>堆内存规整时使用，已使用和未使用的内存划分到两边，分配内存时指针向空闲空间移动</li>
-</ul>
-</li>
-<li><p>2.2 空间列表</p>
-<ul>
-<li>堆内存不规整时使用，维护一个内存使用情况列表，分配内存时跟据表数据选取内存空间</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>解决并发安全问题</p>
-<ul>
-<li>同步处理，例如CAS</li>
-<li>预先在堆中为每个线程分配一块内存，只有用完后分配新内存的时候再同步处理</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>3、执行构造函数<init>()</p>
-</li>
-</ul>
-<h3 id="对象内存布局"><a href="#对象内存布局" class="headerlink" title="对象内存布局"></a>对象内存布局</h3><ul>
-<li><p>对象头</p>
-<ul>
-<li>1、存储对象自身运行时数据，如哈希码、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等等</li>
-<li>2、类型指针，虚拟机通过这个指针来确定对象是哪个类的实例</li>
-<li>3、如果是数组还有一块区域记录数组长度，因为虚拟机无法通过元数据推断数组的大小</li>
-</ul>
-</li>
-<li><p>实例数据</p>
-<ul>
-<li>对象真正存储的有效信息，即代码中定义的各种类型的字段内容</li>
-</ul>
-</li>
-<li><p>对齐填充</p>
-<ul>
-<li>占位符的作用，因为对象的大小必须是8字节的整数倍，但实例数据可能不是 所以用它来补全</li>
-</ul>
-</li>
-</ul>
-<h3 id="对象的访问定位"><a href="#对象的访问定位" class="headerlink" title="对象的访问定位"></a>对象的访问定位</h3><ul>
-<li><p>句柄访问</p>
-<ul>
-<li><p>Java堆中划分出一块内存做句柄池，局部变量表中存储句柄地址，句柄中存储对象实例数据与类型数据的内存地址</p>
-<ul>
-<li>优点：如果对象被移动指挥改变句柄中的实例数据指针</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>直接指针访问</p>
-<ul>
-<li><p>堆中对象的内存布局需要存储对应类型数据的地址，局部变量表中存储的是对象地址</p>
-<ul>
-<li>优点：速度快，因为节省了一次定位指针的时间开销</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Jvm</tag>
       </tags>
   </entry>
   <entry>
@@ -759,6 +618,147 @@
       </tags>
   </entry>
   <entry>
+    <title>Java内存区域</title>
+    <url>/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/</url>
+    <content><![CDATA[<h2 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h2><h3 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h3><ul>
+<li>当前线程所执行的字节码的行号指示器，用来选取下一条需要执行的字节码指令</li>
+<li>线程私有</li>
+<li>唯一一个不会出现OOM的区域</li>
+</ul>
+<span id="more"></span>
+
+<h3 id="虚拟机栈"><a href="#虚拟机栈" class="headerlink" title="虚拟机栈"></a>虚拟机栈</h3><ul>
+<li><p>线程私有</p>
+</li>
+<li><p>每个方法执行时都会创建对应的栈帧入栈，执行完毕后出栈，栈帧用于存储局部变量表、操作数栈、动态连接、方法出口等信息</p>
+</li>
+<li><p>局部变量表</p>
+<ul>
+<li>用来存储基本数据类型、对象引用等信息</li>
+</ul>
+</li>
+</ul>
+<h3 id="本地方法栈"><a href="#本地方法栈" class="headerlink" title="本地方法栈"></a>本地方法栈</h3><ul>
+<li>线程私有</li>
+<li>虚拟机使用到的本地（Native)方法服务（可以是C、C++等语言提供的服务）</li>
+</ul>
+<h3 id="java堆"><a href="#java堆" class="headerlink" title="java堆"></a>java堆</h3><ul>
+<li><p>线程共享</p>
+</li>
+<li><p>唯一目的就是存放对象实例，是内存中最大的一块</p>
+</li>
+<li><p>拥有常量池（jdk1.7 从永久代移动到堆）</p>
+<ul>
+<li><p>字符串常量池</p>
+</li>
+<li><p>运行时常量池</p>
+<p>运行时常量池是方法区的一部分</p>
+<ul>
+<li>存放编译期生成的各种字面量与符号引用</li>
+</ul>
+</li>
+<li><p>Class常量池</p>
+<p>运行时常量池是在类加载完成之后，将每个class常量池中的符号引用值转存到运行时常量池中，也就是说，每个class都有一个运行时常量池，类在解析之后，将符号引用替换成直接引用，与全局常量池中的引用值保持一致</p>
+<ul>
+<li>静态变量（jdk1.7 从永久代移动到堆 跟Class对象在一起）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="方法区-元空间"><a href="#方法区-元空间" class="headerlink" title="方法区/元空间"></a>方法区/元空间</h3><p>jdk7以前也被称为永久代，之后永久代的概念被舍弃,并提出元空间的概念。方法区就在元空间上（元空间和永久代都是方法区的具体实现，类似接口和实现类）</p>
+<ul>
+<li><p>线程共享</p>
+</li>
+<li><p>存储已被虚拟机加载的类型信息、即时编译器编译后的代码缓存数据等等（也叫元数据 包括类的方法代码，变量名，方法名，访问权限，返回值等等都是在方法区的）才是存在方法区的【存疑 】）</p>
+</li>
+<li><p>此区域的垃圾回收主要针对常量池和对类型的卸载</p>
+<p>类型卸载：简单来说就是清理加载到内存中的Class 除非是故意设计不然这种情况发生的概率很低，因为Class是由ClassLoader加载进来的 而java虚拟机不会主动放弃ClassLoader 而Class又被ClassLoader引用，所以永远是“可达”的。</p>
+</li>
+</ul>
+<h3 id="直接内存-堆外内存"><a href="#直接内存-堆外内存" class="headerlink" title="直接内存(堆外内存)"></a>直接内存(堆外内存)</h3><ul>
+<li>直接使用物理内存不受到堆大小的限制，但受本地总内存的限制</li>
+<li>优点：提高性能，避免在java堆和native堆来回复制数据</li>
+<li>缺点：如果直接内存发生OOM排查难度较高</li>
+</ul>
+<h2 id="HotSpot虚拟机对象探秘"><a href="#HotSpot虚拟机对象探秘" class="headerlink" title="HotSpot虚拟机对象探秘"></a>HotSpot虚拟机对象探秘</h2><h3 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h3><ul>
+<li><p>1、类加载：先去常量池找类的符号引用并检查是否已加载</p>
+</li>
+<li><p>2、分配内存</p>
+<ul>
+<li><p>分配方法</p>
+<ul>
+<li><p>2.1 指针碰撞</p>
+<ul>
+<li>堆内存规整时使用，已使用和未使用的内存划分到两边，分配内存时指针向空闲空间移动</li>
+</ul>
+</li>
+<li><p>2.2 空间列表</p>
+<ul>
+<li>堆内存不规整时使用，维护一个内存使用情况列表，分配内存时跟据表数据选取内存空间</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>解决并发安全问题</p>
+<ul>
+<li>同步处理，例如CAS</li>
+<li>预先在堆中为每个线程分配一块内存，只有用完后分配新内存的时候再同步处理</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>3、执行构造函数<init>()</p>
+</li>
+</ul>
+<h3 id="对象内存布局"><a href="#对象内存布局" class="headerlink" title="对象内存布局"></a>对象内存布局</h3><ul>
+<li><p>对象头</p>
+<ul>
+<li>1、存储对象自身运行时数据，如哈希码、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等等</li>
+<li>2、类型指针，虚拟机通过这个指针来确定对象是哪个类的实例</li>
+<li>3、如果是数组还有一块区域记录数组长度，因为虚拟机无法通过元数据推断数组的大小</li>
+</ul>
+</li>
+<li><p>实例数据</p>
+<ul>
+<li>对象真正存储的有效信息，即代码中定义的各种类型的字段内容</li>
+</ul>
+</li>
+<li><p>对齐填充</p>
+<ul>
+<li>占位符的作用，因为对象的大小必须是8字节的整数倍，但实例数据可能不是 所以用它来补全</li>
+</ul>
+</li>
+</ul>
+<h3 id="对象的访问定位"><a href="#对象的访问定位" class="headerlink" title="对象的访问定位"></a>对象的访问定位</h3><ul>
+<li><p>句柄访问</p>
+<ul>
+<li><p>Java堆中划分出一块内存做句柄池，局部变量表中存储句柄地址，句柄中存储对象实例数据与类型数据的内存地址</p>
+<ul>
+<li>优点：如果对象被移动指挥改变句柄中的实例数据指针</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>直接指针访问</p>
+<ul>
+<li><p>堆中对象的内存布局需要存储对应类型数据的地址，局部变量表中存储的是对象地址</p>
+<ul>
+<li>优点：速度快，因为节省了一次定位指针的时间开销</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Wireshark 简明教程</title>
     <url>/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</url>
     <content><![CDATA[<p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
@@ -813,6 +813,121 @@
       <tags>
         <tag>Wireshark</tag>
         <tag>网络</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【Mybatis源码解读】jdbc包</title>
+    <url>/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</url>
+    <content><![CDATA[<h2 id="1-jdbc包的作用"><a href="#1-jdbc包的作用" class="headerlink" title="1. jdbc包的作用"></a>1. jdbc包的作用</h2><p>jdbc包作为Mybatis框架的核心包之一可以理解为是<strong>操作Sql的工具包</strong>，因为通过阅读代码观察到这个jdbc包里面的类并没有被Mybatis框架本身引用，而其本身的作用又是对sql的操作，所以当作工具包来理解是没有什么问题的。</p>
+<span id="more"></span>
+
+<h2 id="2-设计思想"><a href="#2-设计思想" class="headerlink" title="2. 设计思想"></a>2. 设计思想</h2><p>利用面向对象的<strong>继承</strong>特性增加功能的<strong>拓展性</strong>。</p>
+<h2 id="3-实现细节"><a href="#3-实现细节" class="headerlink" title="3. 实现细节"></a>3. 实现细节</h2><p>jdbc包里面的类其实很少，去掉过期的和一些辅助类主要的类有三个：<strong>AbstractSQL</strong>、<strong>ScriptRunner</strong>、<strong>SqlRunner</strong>，这里着重介绍<strong>AbstractSQL</strong>类，因为相对于<strong>AbstractSQL</strong>类另外的两个类功能很简单。</p>
+<p><strong>AbstractSQL</strong>的类图:</p>
+<p>可以看出SQL类继承了<strong>AbstractSQL</strong>类，而SafeAppendable 和 SQLStatement 是<strong>AbstractSQL</strong>的内部类，下面逐一介绍。</p>
+<p><img src="https://s2.loli.net/2021/12/05/pJT69AcKPMHEqxf.png" alt="image-20201206170511920"></p>
+<h3 id="SQL类"><a href="#SQL类" class="headerlink" title="SQL类"></a>SQL类</h3><h4 id="3-1-1-简介"><a href="#3-1-1-简介" class="headerlink" title="3.1.1 简介"></a>3.1.1 简介</h4><p>SQL类的实现很简单：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SQL</span> <span class="keyword">extends</span> <span class="title">AbstractSQL</span>&lt;<span class="title">SQL</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> SQL <span class="title">getSelf</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说所有的逻辑实现都写在了它的父类中，那为什么还要SQL类呢？答案就是为了<strong>增加功能的拓展性</strong>，比如你想在生成sql的时候满足一些定制化的需求可以重新创建一个子类继承并拓展它。</p>
+<h4 id="3-1-2-使用"><a href="#3-1-2-使用" class="headerlink" title="3.1.2 使用"></a>3.1.2 使用</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    <span class="meta">@SelectProvider(type = UserProvider.class, method = &quot;queryUsersBySchoolName&quot;)</span></span><br><span class="line">    <span class="function">List&lt;User&gt; <span class="title">queryUsersBySchoolName</span><span class="params">(String schoolName)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserProvider</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">queryUsersBySchoolName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> SQL()</span><br><span class="line">                .SELECT(<span class="string">&quot;*&quot;</span>)</span><br><span class="line">                .FROM(<span class="string">&quot;user&quot;</span>)</span><br><span class="line">                .WHERE(<span class="string">&quot;schoolName = #&#123;schoolName&#125;&quot;</span>)</span><br><span class="line">                .toString();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看出这种方式是直接在每个接口上引入sql，如果项目比较庞大是很难有效管理sql的 ，所以这种使用方式很不常见。</p>
+<h3 id="SafeAppendable"><a href="#SafeAppendable" class="headerlink" title="SafeAppendable"></a>SafeAppendable</h3><h4 id="3-2-1-简介"><a href="#3-2-1-简介" class="headerlink" title="3.2.1 简介"></a>3.2.1 简介</h4><p>看名字就可以了解到这个类里面封装了<strong>拼接</strong>字符的行为，使用了<strong>组合模式</strong>持有了Appendable接口实例的引用，并调用其append方法实现拼接，拼接完成后调用Appendable实例的toString方法获取拼接结果。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SafeAppendable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Appendable a;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> empty = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SafeAppendable</span><span class="params">(Appendable a)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">super</span>();</span><br><span class="line">      <span class="keyword">this</span>.a = a;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SafeAppendable <span class="title">append</span><span class="params">(CharSequence s)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (empty &amp;&amp; s.length() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">          empty = <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        a.append(s);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> empty;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="SQLStatement"><a href="#SQLStatement" class="headerlink" title="SQLStatement"></a>SQLStatement</h3><h4 id="3-3-1-简介"><a href="#3-3-1-简介" class="headerlink" title="3.3.1 简介"></a>3.3.1 简介</h4><p>从下图为此类封装的方法，可以看出此类是拼接sql的主力军。</p>
+<p><img src="https://s2.loli.net/2021/12/05/PtIn4eRMAJwXsVx.png" alt="image-20201206180137582"></p>
+<p>下图这些为此类的属性，从名字可以看出是根据sql关键字进行分类的，存储着相应的值，用来拼接sql时使用。</p>
+<p><img src="https://s2.loli.net/2021/12/05/74HvADUTKCeFadm.png" alt="image-20201206180617860"></p>
+<p>以拼接select为例分析源码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">   <span class="comment">//只接收一个参数就是拼接器，用来拼接字符</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> String <span class="title">selectSQL</span><span class="params">(SafeAppendable builder)</span> </span>&#123;</span><br><span class="line">   <span class="comment">//判断是否需要去重，如果需要就增加 DISTINCT关键字，而select为上图的属性，是一个集合里面存储着相应的值，下面几个参数类似不做赘述，下面会对sqlClause方法做详细解释。</span></span><br><span class="line">     <span class="keyword">if</span> (distinct) &#123;</span><br><span class="line">       sqlClause(builder, <span class="string">&quot;SELECT DISTINCT&quot;</span>, select, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       sqlClause(builder, <span class="string">&quot;SELECT&quot;</span>, select, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     sqlClause(builder, <span class="string">&quot;FROM&quot;</span>, tables, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     <span class="comment">//join语句比较特殊，所以单独创建函数，但是本质也是复用sqlClause函数</span></span><br><span class="line">     joins(builder);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;WHERE&quot;</span>, where, <span class="string">&quot;(&quot;</span>, <span class="string">&quot;)&quot;</span>, <span class="string">&quot; AND &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;GROUP BY&quot;</span>, groupBy, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;HAVING&quot;</span>, having, <span class="string">&quot;(&quot;</span>, <span class="string">&quot;)&quot;</span>, <span class="string">&quot; AND &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;ORDER BY&quot;</span>, orderBy, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     <span class="comment">//利用LIMIT、OFFSET关键字做分页处理</span></span><br><span class="line">     limitingRowsStrategy.appendClause(builder, offset, limit);</span><br><span class="line">     <span class="keyword">return</span> builder.toString();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面是sqlClause 函数的代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//参数一：拼接器；参数二：关键字例如SELECT等等;参数三：sql所需值的集合；参数四和五：参数开始和结束字符 例如where语句需要括号括起来；参数六：参数连接字符例如 AND等等</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">sqlClause</span><span class="params">(SafeAppendable builder, String keyword, List&lt;String&gt; parts, String open, String close,String conjunction)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!parts.isEmpty()) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!builder.isEmpty()) &#123;</span><br><span class="line">      builder.append(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    builder.append(keyword);</span><br><span class="line">    builder.append(<span class="string">&quot; &quot;</span>);</span><br><span class="line">    builder.append(open);</span><br><span class="line">    String last = <span class="string">&quot;________&quot;</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>, n = parts.size(); i &lt; n; i++) &#123;</span><br><span class="line">      String part = parts.get(i);</span><br><span class="line">      <span class="keyword">if</span> (i &gt; <span class="number">0</span> &amp;&amp; !part.equals(AND) &amp;&amp; !part.equals(OR) &amp;&amp; !last.equals(AND) &amp;&amp; !last.equals(OR)) &#123;</span><br><span class="line">        builder.append(conjunction);</span><br><span class="line">      &#125;</span><br><span class="line">      builder.append(part);</span><br><span class="line">      last = part;</span><br><span class="line">    &#125;</span><br><span class="line">    builder.append(close);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="AbstractSQL"><a href="#AbstractSQL" class="headerlink" title="AbstractSQL"></a>AbstractSQL</h3><h4 id="3-4-1-简介"><a href="#3-4-1-简介" class="headerlink" title="3.4.1 简介"></a>3.4.1 简介</h4><p>如果理解了前面三个类的作用那理解此类的作用也就水到渠成了，下面看下此类封装的方法，可以看到所有方法都是以sql语句的关键词命名的</p>
+<p><img src="https://s2.loli.net/2021/12/05/nZctYG87sJqrvmK.png" alt="image-20201207221124727"></p>
+<h4 id="3-4-2-详解"><a href="#3-4-2-详解" class="headerlink" title="3.4.2 详解"></a>3.4.2 详解</h4><p>以SELECT方法为例，当使用如下方法时发生了什么？</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">new</span> SQL()</span><br><span class="line">              .SELECT(<span class="string">&quot;*&quot;</span>)</span><br><span class="line">              .FROM(<span class="string">&quot;user&quot;</span>)</span><br><span class="line">              .WHERE(<span class="string">&quot;schoolName = #&#123;schoolName&#125;&quot;</span>)</span><br><span class="line">              .toString();</span><br></pre></td></tr></table></figure>
+
+<p>当调用AbstractSQL里面封装的方法时其实都将传进来的值存储在了SQLStatement相应关键字的属性中，当最后调用toString方法时就会触发sql的拼接工作，所以可以理解为AbstractSQL是给SQLStatement类做了一层<strong>装饰器</strong>。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">SELECT</span><span class="params">(String columns)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//sql() 方法会返回SQLStatement类的一个实例</span></span><br><span class="line">    <span class="comment">//设置sql类别</span></span><br><span class="line">  sql().statementType = SQLStatement.StatementType.SELECT;</span><br><span class="line">    <span class="comment">//将传入的值存储到SQLStatement类的select属性中</span></span><br><span class="line">  sql().select.add(columns);</span><br><span class="line">    <span class="comment">//返回对象本身</span></span><br><span class="line">  <span class="keyword">return</span> getSelf();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其他关键字方法的调用都是类似的，这里不再赘述，下面介绍一下<strong>如何触发拼接sql的操作</strong>：</p>
+<p>当调用toString方法时就会触发sql拼接操作，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//创建一个字符拼接器</span></span><br><span class="line">  StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    <span class="comment">//调用SQLStatement类的sql方法，此方法会利用StringBuilder拼接sql</span></span><br><span class="line">  sql().sql(sb);</span><br><span class="line">    <span class="comment">//转化为字符串</span></span><br><span class="line">  <span class="keyword">return</span> sb.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//这个方法会根据sql的类型调用相应的拼接方法，而SELECT语句如何拼接的前文已经讲解过，大家可以按照此方法查看一下其他类型sql的拼接过程</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">sql</span><span class="params">(Appendable a)</span> </span>&#123;</span><br><span class="line">  SafeAppendable builder = <span class="keyword">new</span> SafeAppendable(a);</span><br><span class="line">  <span class="keyword">if</span> (statementType == <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  String answer;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">switch</span> (statementType) &#123;</span><br><span class="line">    <span class="keyword">case</span> DELETE:</span><br><span class="line">      answer = deleteSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> INSERT:</span><br><span class="line">      answer = insertSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> SELECT:</span><br><span class="line">      answer = selectSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> UPDATE:</span><br><span class="line">      answer = updateSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      answer = <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> answer;</span><br></pre></td></tr></table></figure>
+
+<p>这里有个细节，为什么AbstractSQL类中的方法都是大写的呢？ 我查阅了相关资料发现这是为了照顾大家写sql时的习惯。</p>
+<p>通过以上知识的学习我们就应该知道 Mybatis 是如何操作 sql 的了。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Mybatis</tag>
+        <tag>源码阅读</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>常见的Web应用攻击手段</title>
+    <url>/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</url>
+    <content><![CDATA[<h2 id="1-XSS攻击"><a href="#1-XSS攻击" class="headerlink" title="1.XSS攻击"></a>1.XSS攻击</h2><p>XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。</p>
+<span id="more"></span>
+
+<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><ul>
+<li><p>1.1 反射型</p>
+<p>攻击者诱使用户点击一个嵌入恶意脚本的链接，达到攻击的目的</p>
+</li>
+<li><p>1.2 持久型</p>
+<p>黑客提交含有恶意脚本的请求，保存在被攻击的Web站点的数据库中，用户浏览网页时，恶意脚本被包含在正常页面中，达到攻击的目的</p>
+</li>
+</ul>
+<h3 id="防护手段"><a href="#防护手段" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
+<li><p>1.3消毒</p>
+<p>XSS攻击者一般都是通过在请求中嵌入恶意脚本达到攻击的目的，这些脚本是一般用户输入中不使用的，如果进行过滤和消毒处理，即对某些html危险字符转义就可以让绝大部分攻击失败</p>
+</li>
+<li><p>1.4HttpOnly</p>
+<p>浏览器禁止页面JavaScript访问带有HttpOnly属性的Cookie，可以防止Cookie中的数据被窃取</p>
+</li>
+</ul>
+<h2 id="2-注入攻击"><a href="#2-注入攻击" class="headerlink" title="2.注入攻击"></a>2.注入攻击</h2><h3 id="分类-1"><a href="#分类-1" class="headerlink" title="分类"></a>分类</h3><ul>
+<li><p>2.1 SQL注入攻击</p>
+<p>攻击者在HTTP请求中注入恶意SQL命令（drop table users;），服务器用请求参数构造数据库SQL命令时，恶意SQL被一起构造，并在数据库中执行。</p>
+</li>
+<li><p>2.2 OS注入攻击</p>
+</li>
+</ul>
+<h3 id="防护手段-1"><a href="#防护手段-1" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
+<li><p>2.3 消毒</p>
+<p>通过正则匹配，过滤请求数据中可能注入的SQL</p>
+</li>
+<li><p>2.4 参数绑定</p>
+<p>使用预编译手段，绑定参数是最好的防SQL注入方法。目前许多数据访问层框架，如IBatis，Hibernate等，都实现SQL预编译和参数绑定，攻击者的恶意SQL会被当做SQL的参数，而不是SQL命令被执行。</p>
+</li>
+</ul>
+<h2 id="3-CSRF攻击"><a href="#3-CSRF攻击" class="headerlink" title="3.CSRF攻击"></a>3.CSRF攻击</h2><p>攻击者通过跨站请求，以合法用户的身份进行非法操作，如转账交易、发表评论等；<br>CSRF的主要手法是利用跨站请求，在用户不知情的情况下，以用户的身份伪造请求。其核心是利用了浏览器Cookie或服务器Session策略，盗取用户身份。</p>
+<h3 id="防护手段-2"><a href="#防护手段-2" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
+<li><p>3.1 Token验证</p>
+<p>通过在请求参数中增加随机数的办法来阻止攻击者获得所有请求参数：在页面表单中增加一个随机数作为Token，每次响应页面的Token都不相同，从正常页面提交的请求会包含该Token值，而伪造的请求无法获得该值，服务器检查请求参数中Token的值是否存在并且正确以确定请求提交者是否合法</p>
+</li>
+<li><p>3.2 验证码</p>
+<p>验证码则更加简单有效；<br>请求提交时，需要用户输入验证码，以避免在用户不知情的情况下被攻击者伪造请求。但是输入验证码是一个糟糕的用户体验，所以请在必要时使用，</p>
+</li>
+<li><p>3.3 Referer check</p>
+<p>HTTP请求头的Referer域中记录着请求来源，可通过检查请求来源，验证其是否合法。</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
@@ -972,64 +1087,6 @@
       </tags>
   </entry>
   <entry>
-    <title>【Mybatis源码解读】jdbc包</title>
-    <url>/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</url>
-    <content><![CDATA[<h2 id="1-jdbc包的作用"><a href="#1-jdbc包的作用" class="headerlink" title="1. jdbc包的作用"></a>1. jdbc包的作用</h2><p>jdbc包作为Mybatis框架的核心包之一可以理解为是<strong>操作Sql的工具包</strong>，因为通过阅读代码观察到这个jdbc包里面的类并没有被Mybatis框架本身引用，而其本身的作用又是对sql的操作，所以当作工具包来理解是没有什么问题的。</p>
-<span id="more"></span>
-
-<h2 id="2-设计思想"><a href="#2-设计思想" class="headerlink" title="2. 设计思想"></a>2. 设计思想</h2><p>利用面向对象的<strong>继承</strong>特性增加功能的<strong>拓展性</strong>。</p>
-<h2 id="3-实现细节"><a href="#3-实现细节" class="headerlink" title="3. 实现细节"></a>3. 实现细节</h2><p>jdbc包里面的类其实很少，去掉过期的和一些辅助类主要的类有三个：<strong>AbstractSQL</strong>、<strong>ScriptRunner</strong>、<strong>SqlRunner</strong>，这里着重介绍<strong>AbstractSQL</strong>类，因为相对于<strong>AbstractSQL</strong>类另外的两个类功能很简单。</p>
-<p><strong>AbstractSQL</strong>的类图:</p>
-<p>可以看出SQL类继承了<strong>AbstractSQL</strong>类，而SafeAppendable 和 SQLStatement 是<strong>AbstractSQL</strong>的内部类，下面逐一介绍。</p>
-<p><img src="https://s2.loli.net/2021/12/05/pJT69AcKPMHEqxf.png" alt="image-20201206170511920"></p>
-<h3 id="SQL类"><a href="#SQL类" class="headerlink" title="SQL类"></a>SQL类</h3><h4 id="3-1-1-简介"><a href="#3-1-1-简介" class="headerlink" title="3.1.1 简介"></a>3.1.1 简介</h4><p>SQL类的实现很简单：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SQL</span> <span class="keyword">extends</span> <span class="title">AbstractSQL</span>&lt;<span class="title">SQL</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> SQL <span class="title">getSelf</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>也就是说所有的逻辑实现都写在了它的父类中，那为什么还要SQL类呢？答案就是为了<strong>增加功能的拓展性</strong>，比如你想在生成sql的时候满足一些定制化的需求可以重新创建一个子类继承并拓展它。</p>
-<h4 id="3-1-2-使用"><a href="#3-1-2-使用" class="headerlink" title="3.1.2 使用"></a>3.1.2 使用</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    <span class="meta">@SelectProvider(type = UserProvider.class, method = &quot;queryUsersBySchoolName&quot;)</span></span><br><span class="line">    <span class="function">List&lt;User&gt; <span class="title">queryUsersBySchoolName</span><span class="params">(String schoolName)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserProvider</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">queryUsersBySchoolName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> SQL()</span><br><span class="line">                .SELECT(<span class="string">&quot;*&quot;</span>)</span><br><span class="line">                .FROM(<span class="string">&quot;user&quot;</span>)</span><br><span class="line">                .WHERE(<span class="string">&quot;schoolName = #&#123;schoolName&#125;&quot;</span>)</span><br><span class="line">                .toString();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可以看出这种方式是直接在每个接口上引入sql，如果项目比较庞大是很难有效管理sql的 ，所以这种使用方式很不常见。</p>
-<h3 id="SafeAppendable"><a href="#SafeAppendable" class="headerlink" title="SafeAppendable"></a>SafeAppendable</h3><h4 id="3-2-1-简介"><a href="#3-2-1-简介" class="headerlink" title="3.2.1 简介"></a>3.2.1 简介</h4><p>看名字就可以了解到这个类里面封装了<strong>拼接</strong>字符的行为，使用了<strong>组合模式</strong>持有了Appendable接口实例的引用，并调用其append方法实现拼接，拼接完成后调用Appendable实例的toString方法获取拼接结果。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SafeAppendable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Appendable a;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> empty = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SafeAppendable</span><span class="params">(Appendable a)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">super</span>();</span><br><span class="line">      <span class="keyword">this</span>.a = a;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SafeAppendable <span class="title">append</span><span class="params">(CharSequence s)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (empty &amp;&amp; s.length() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">          empty = <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        a.append(s);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> empty;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="SQLStatement"><a href="#SQLStatement" class="headerlink" title="SQLStatement"></a>SQLStatement</h3><h4 id="3-3-1-简介"><a href="#3-3-1-简介" class="headerlink" title="3.3.1 简介"></a>3.3.1 简介</h4><p>从下图为此类封装的方法，可以看出此类是拼接sql的主力军。</p>
-<p><img src="https://s2.loli.net/2021/12/05/PtIn4eRMAJwXsVx.png" alt="image-20201206180137582"></p>
-<p>下图这些为此类的属性，从名字可以看出是根据sql关键字进行分类的，存储着相应的值，用来拼接sql时使用。</p>
-<p><img src="https://s2.loli.net/2021/12/05/74HvADUTKCeFadm.png" alt="image-20201206180617860"></p>
-<p>以拼接select为例分析源码：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">   <span class="comment">//只接收一个参数就是拼接器，用来拼接字符</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> String <span class="title">selectSQL</span><span class="params">(SafeAppendable builder)</span> </span>&#123;</span><br><span class="line">   <span class="comment">//判断是否需要去重，如果需要就增加 DISTINCT关键字，而select为上图的属性，是一个集合里面存储着相应的值，下面几个参数类似不做赘述，下面会对sqlClause方法做详细解释。</span></span><br><span class="line">     <span class="keyword">if</span> (distinct) &#123;</span><br><span class="line">       sqlClause(builder, <span class="string">&quot;SELECT DISTINCT&quot;</span>, select, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       sqlClause(builder, <span class="string">&quot;SELECT&quot;</span>, select, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     sqlClause(builder, <span class="string">&quot;FROM&quot;</span>, tables, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     <span class="comment">//join语句比较特殊，所以单独创建函数，但是本质也是复用sqlClause函数</span></span><br><span class="line">     joins(builder);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;WHERE&quot;</span>, where, <span class="string">&quot;(&quot;</span>, <span class="string">&quot;)&quot;</span>, <span class="string">&quot; AND &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;GROUP BY&quot;</span>, groupBy, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;HAVING&quot;</span>, having, <span class="string">&quot;(&quot;</span>, <span class="string">&quot;)&quot;</span>, <span class="string">&quot; AND &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;ORDER BY&quot;</span>, orderBy, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     <span class="comment">//利用LIMIT、OFFSET关键字做分页处理</span></span><br><span class="line">     limitingRowsStrategy.appendClause(builder, offset, limit);</span><br><span class="line">     <span class="keyword">return</span> builder.toString();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<p>下面是sqlClause 函数的代码：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//参数一：拼接器；参数二：关键字例如SELECT等等;参数三：sql所需值的集合；参数四和五：参数开始和结束字符 例如where语句需要括号括起来；参数六：参数连接字符例如 AND等等</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">sqlClause</span><span class="params">(SafeAppendable builder, String keyword, List&lt;String&gt; parts, String open, String close,String conjunction)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!parts.isEmpty()) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!builder.isEmpty()) &#123;</span><br><span class="line">      builder.append(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    builder.append(keyword);</span><br><span class="line">    builder.append(<span class="string">&quot; &quot;</span>);</span><br><span class="line">    builder.append(open);</span><br><span class="line">    String last = <span class="string">&quot;________&quot;</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>, n = parts.size(); i &lt; n; i++) &#123;</span><br><span class="line">      String part = parts.get(i);</span><br><span class="line">      <span class="keyword">if</span> (i &gt; <span class="number">0</span> &amp;&amp; !part.equals(AND) &amp;&amp; !part.equals(OR) &amp;&amp; !last.equals(AND) &amp;&amp; !last.equals(OR)) &#123;</span><br><span class="line">        builder.append(conjunction);</span><br><span class="line">      &#125;</span><br><span class="line">      builder.append(part);</span><br><span class="line">      last = part;</span><br><span class="line">    &#125;</span><br><span class="line">    builder.append(close);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="AbstractSQL"><a href="#AbstractSQL" class="headerlink" title="AbstractSQL"></a>AbstractSQL</h3><h4 id="3-4-1-简介"><a href="#3-4-1-简介" class="headerlink" title="3.4.1 简介"></a>3.4.1 简介</h4><p>如果理解了前面三个类的作用那理解此类的作用也就水到渠成了，下面看下此类封装的方法，可以看到所有方法都是以sql语句的关键词命名的</p>
-<p><img src="https://s2.loli.net/2021/12/05/nZctYG87sJqrvmK.png" alt="image-20201207221124727"></p>
-<h4 id="3-4-2-详解"><a href="#3-4-2-详解" class="headerlink" title="3.4.2 详解"></a>3.4.2 详解</h4><p>以SELECT方法为例，当使用如下方法时发生了什么？</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">new</span> SQL()</span><br><span class="line">              .SELECT(<span class="string">&quot;*&quot;</span>)</span><br><span class="line">              .FROM(<span class="string">&quot;user&quot;</span>)</span><br><span class="line">              .WHERE(<span class="string">&quot;schoolName = #&#123;schoolName&#125;&quot;</span>)</span><br><span class="line">              .toString();</span><br></pre></td></tr></table></figure>
-
-<p>当调用AbstractSQL里面封装的方法时其实都将传进来的值存储在了SQLStatement相应关键字的属性中，当最后调用toString方法时就会触发sql的拼接工作，所以可以理解为AbstractSQL是给SQLStatement类做了一层<strong>装饰器</strong>。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">SELECT</span><span class="params">(String columns)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//sql() 方法会返回SQLStatement类的一个实例</span></span><br><span class="line">    <span class="comment">//设置sql类别</span></span><br><span class="line">  sql().statementType = SQLStatement.StatementType.SELECT;</span><br><span class="line">    <span class="comment">//将传入的值存储到SQLStatement类的select属性中</span></span><br><span class="line">  sql().select.add(columns);</span><br><span class="line">    <span class="comment">//返回对象本身</span></span><br><span class="line">  <span class="keyword">return</span> getSelf();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>其他关键字方法的调用都是类似的，这里不再赘述，下面介绍一下<strong>如何触发拼接sql的操作</strong>：</p>
-<p>当调用toString方法时就会触发sql拼接操作，代码如下：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//创建一个字符拼接器</span></span><br><span class="line">  StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    <span class="comment">//调用SQLStatement类的sql方法，此方法会利用StringBuilder拼接sql</span></span><br><span class="line">  sql().sql(sb);</span><br><span class="line">    <span class="comment">//转化为字符串</span></span><br><span class="line">  <span class="keyword">return</span> sb.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//这个方法会根据sql的类型调用相应的拼接方法，而SELECT语句如何拼接的前文已经讲解过，大家可以按照此方法查看一下其他类型sql的拼接过程</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">sql</span><span class="params">(Appendable a)</span> </span>&#123;</span><br><span class="line">  SafeAppendable builder = <span class="keyword">new</span> SafeAppendable(a);</span><br><span class="line">  <span class="keyword">if</span> (statementType == <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  String answer;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">switch</span> (statementType) &#123;</span><br><span class="line">    <span class="keyword">case</span> DELETE:</span><br><span class="line">      answer = deleteSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> INSERT:</span><br><span class="line">      answer = insertSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> SELECT:</span><br><span class="line">      answer = selectSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> UPDATE:</span><br><span class="line">      answer = updateSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      answer = <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> answer;</span><br></pre></td></tr></table></figure>
-
-<p>这里有个细节，为什么AbstractSQL类中的方法都是大写的呢？ 我查阅了相关资料发现这是为了照顾大家写sql时的习惯。</p>
-<p>通过以上知识的学习我们就应该知道 Mybatis 是如何操作 sql 的了。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Mybatis</tag>
-        <tag>源码阅读</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>网站典型故障案例</title>
     <url>/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/</url>
     <content><![CDATA[<h2 id="1-写日志也会引发故障"><a href="#1-写日志也会引发故障" class="headerlink" title="1.写日志也会引发故障"></a>1.写日志也会引发故障</h2><h3 id="故障现象"><a href="#故障现象" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用服务器在项目发布后不久就出现报警，硬盘可用空间低于警戒值，并且很快就宕机。登录到线上服务器，发现log文件夹里的文件迅速增加，不断消耗磁盘空间。</p>
@@ -1056,151 +1113,6 @@
       <tags>
         <tag>架构</tag>
         <tag>问题记录</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>常见的Web应用攻击手段</title>
-    <url>/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</url>
-    <content><![CDATA[<h2 id="1-XSS攻击"><a href="#1-XSS攻击" class="headerlink" title="1.XSS攻击"></a>1.XSS攻击</h2><p>XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。</p>
-<span id="more"></span>
-
-<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><ul>
-<li><p>1.1 反射型</p>
-<p>攻击者诱使用户点击一个嵌入恶意脚本的链接，达到攻击的目的</p>
-</li>
-<li><p>1.2 持久型</p>
-<p>黑客提交含有恶意脚本的请求，保存在被攻击的Web站点的数据库中，用户浏览网页时，恶意脚本被包含在正常页面中，达到攻击的目的</p>
-</li>
-</ul>
-<h3 id="防护手段"><a href="#防护手段" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
-<li><p>1.3消毒</p>
-<p>XSS攻击者一般都是通过在请求中嵌入恶意脚本达到攻击的目的，这些脚本是一般用户输入中不使用的，如果进行过滤和消毒处理，即对某些html危险字符转义就可以让绝大部分攻击失败</p>
-</li>
-<li><p>1.4HttpOnly</p>
-<p>浏览器禁止页面JavaScript访问带有HttpOnly属性的Cookie，可以防止Cookie中的数据被窃取</p>
-</li>
-</ul>
-<h2 id="2-注入攻击"><a href="#2-注入攻击" class="headerlink" title="2.注入攻击"></a>2.注入攻击</h2><h3 id="分类-1"><a href="#分类-1" class="headerlink" title="分类"></a>分类</h3><ul>
-<li><p>2.1 SQL注入攻击</p>
-<p>攻击者在HTTP请求中注入恶意SQL命令（drop table users;），服务器用请求参数构造数据库SQL命令时，恶意SQL被一起构造，并在数据库中执行。</p>
-</li>
-<li><p>2.2 OS注入攻击</p>
-</li>
-</ul>
-<h3 id="防护手段-1"><a href="#防护手段-1" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
-<li><p>2.3 消毒</p>
-<p>通过正则匹配，过滤请求数据中可能注入的SQL</p>
-</li>
-<li><p>2.4 参数绑定</p>
-<p>使用预编译手段，绑定参数是最好的防SQL注入方法。目前许多数据访问层框架，如IBatis，Hibernate等，都实现SQL预编译和参数绑定，攻击者的恶意SQL会被当做SQL的参数，而不是SQL命令被执行。</p>
-</li>
-</ul>
-<h2 id="3-CSRF攻击"><a href="#3-CSRF攻击" class="headerlink" title="3.CSRF攻击"></a>3.CSRF攻击</h2><p>攻击者通过跨站请求，以合法用户的身份进行非法操作，如转账交易、发表评论等；<br>CSRF的主要手法是利用跨站请求，在用户不知情的情况下，以用户的身份伪造请求。其核心是利用了浏览器Cookie或服务器Session策略，盗取用户身份。</p>
-<h3 id="防护手段-2"><a href="#防护手段-2" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
-<li><p>3.1 Token验证</p>
-<p>通过在请求参数中增加随机数的办法来阻止攻击者获得所有请求参数：在页面表单中增加一个随机数作为Token，每次响应页面的Token都不相同，从正常页面提交的请求会包含该Token值，而伪造的请求无法获得该值，服务器检查请求参数中Token的值是否存在并且正确以确定请求提交者是否合法</p>
-</li>
-<li><p>3.2 验证码</p>
-<p>验证码则更加简单有效；<br>请求提交时，需要用户输入验证码，以避免在用户不知情的情况下被攻击者伪造请求。但是输入验证码是一个糟糕的用户体验，所以请在必要时使用，</p>
-</li>
-<li><p>3.3 Referer check</p>
-<p>HTTP请求头的Referer域中记录着请求来源，可通过检查请求来源，验证其是否合法。</p>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>网站的高性能架构</title>
-    <url>/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/</url>
-    <content><![CDATA[<p>网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。</p>
-<span id="more"></span>
-
-<h2 id="1-网站性能测试"><a href="#1-网站性能测试" class="headerlink" title="1. 网站性能测试"></a>1. 网站性能测试</h2><p>性能测试是性能优化的前提和基础，也是性能优化结果的检查和度量标准。不同视角下的网站性能有不同的标准，也有不同的优化手段。</p>
-<h3 id="1-1不同视角下的网站性能"><a href="#1-1不同视角下的网站性能" class="headerlink" title="1.1不同视角下的网站性能"></a>1.1不同视角下的网站性能</h3><ul>
-<li><p>1.1.1 用户视角的网站性能</p>
-<p>从用户角度，网站性能就是用户在浏览器上直观感受到的网站响应速度快还是慢</p>
-<ul>
-<li><p>优化手段：</p>
-<p>使用一些前端架构优化手段，通过优化页面HTML式样、利用浏览器端的并发和异步特性、调整浏览器缓存策略、使用CDN服务、反向代理等手段，使浏览器尽快地显示用户感兴趣的内容、尽可能近地获取页面内容，即使不优化应用程序和架构，也可以很大程度地改善用户视角下的网站性能</p>
-</li>
-</ul>
-</li>
-<li><p>1.1.2 开发人员视角的网站性能</p>
-<p>开发人员关注的主要是应用程序本身及其相关子系统的性能，包括响应延迟、系统吞吐量、并发处理能力、系统稳定性等技术指标。</p>
-<ul>
-<li><p>优化手段：</p>
-<p>使用缓存加速数据读取，使用集群提高吞吐能力，使用异步消息加快请求响应及实现削峰，使用代码优化手段改善程序性能。</p>
-</li>
-</ul>
-</li>
-<li><p>1.1.3 运维人员视角的网站性能</p>
-<p>运维人员更关注基础设施性能和资源利用率，如网络运营商的带宽能力、服务器硬件的配置、数据中心网络架构、服务器和网络带宽的资源利用率等</p>
-<ul>
-<li><p>优化手段</p>
-<p>建设优化骨干网、使用高性价比定制服务器、利用虚拟化技术优化资源利用等</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="1-2-性能测试指标"><a href="#1-2-性能测试指标" class="headerlink" title="1.2 性能测试指标"></a>1.2 性能测试指标</h3><p>不同视角下有不同的性能标准，不同的标准有不同的性能测试指标，从开发和测试人员的视角，网站性能测试的主要指标有响应时间、并发数、吞吐量、性能计数器等</p>
-<ul>
-<li><p>1.2.1 响应时间</p>
-<p>指应用执行一个操作需要的时间，包括从发出请求开始到收到最后响应数据所需要的时间</p>
-</li>
-<li><p>1.2.2 并发数</p>
-<p>指系统能够同时处理请求的数目，这个数字也反映了系统的负载特性。</p>
-</li>
-<li><p>1.2.3 吞吐量</p>
-<p>单位时间内系统处理的请求数量，体现系统的整体处理能力</p>
-</li>
-<li><p>1.2.4 性能计数器</p>
-<p>它是描述服务器或操作系统性能的一些数据指标。包括SystemLoad、对象与线程数、内存使用、CPU使用、磁盘与网络I/O等指标。这些指标也是系统监控的重要参数，对这些指标设置报警阈值，当监控系统发现性能计数器超过阈值时，就向运维和开发人员报警，及时发现处理系统异常。</p>
-</li>
-</ul>
-<h3 id="1-3-性能测试方法"><a href="#1-3-性能测试方法" class="headerlink" title="1.3 性能测试方法"></a>1.3 性能测试方法</h3><p>性能测试是一个总称，具体可细分为性能测试、负载测试、压力测试、稳定性测试。</p>
-<h2 id="2-Web前端性能优化"><a href="#2-Web前端性能优化" class="headerlink" title="2. Web前端性能优化"></a>2. Web前端性能优化</h2><h3 id="2-1-浏览器访问优化"><a href="#2-1-浏览器访问优化" class="headerlink" title="2.1 浏览器访问优化"></a>2.1 浏览器访问优化</h3><ul>
-<li><p>2.1.1 减少http请求</p>
-<ul>
-<li><p>2.1.1.1 为什么</p>
-<p>HTTP协议是无状态的应用层协议，意味着每次HTTP请求都需要建立通信链路、进行数据传输，而在服务器端，每个HTTP都需要启动独立的线程去处理</p>
-</li>
-<li><p>2.1.1.2 怎么办</p>
-<p>合并CSS、合并JavaScript、合并图片，这样一次请求就可以获取多个需要的文件</p>
-</li>
-</ul>
-</li>
-<li><p>2.1.2 使用浏览器缓存</p>
-<p>将更新的频率都低，而访问平凡的文件缓存在浏览器中，可以极好地改善性能</p>
-</li>
-<li><p>2.1.3 启用压缩</p>
-<p>在服务器端对文件进行压缩，在浏览器端对文件解压缩，可有效减少通信传输的数据量。有利就有弊，压缩对服务器和浏览器产生一定的压力，在通信带宽良好，而服务器资源不足的情况下要权衡考虑。</p>
-</li>
-<li><p>2.1.4 CSS放在页面最上面、JavaScript放在页面最下面</p>
-<p>浏览器会在下载完全部CSS之后才对整个页面进行渲染，因此最好的做法是将CSS放在页面最上面，让浏览器尽快下载CSS。JavaScript则相反，浏览器在加载JavaScript后立即执行，有可能会阻塞整个页面，造成页面显示缓慢，因此JavaScript最好放在页面最下面。</p>
-</li>
-<li><p>2.1.5 减少Cookie传输</p>
-<p>Cookie包含在每次请求和响应中，太大的Cookie会严重影响数据传输</p>
-</li>
-<li><p>2.1.5 CDN加速</p>
-<p>CDN（Content Distribute Network，内容分发网络）的本质仍然是一个缓存，而且将数据缓存在离用户最近的地方，使用户以最快速度获取数据</p>
-</li>
-<li><p>2.1.6 反向代理</p>
-<p>1、可以缓存静态内容，加快web访问；<br>2、保护网站安全，相当于在Web服务器和可能的网络攻击之间建立了一个屏障。</p>
-</li>
-</ul>
-<h2 id="3-应用服务器性能优化"><a href="#3-应用服务器性能优化" class="headerlink" title="3. 应用服务器性能优化"></a>3. 应用服务器性能优化</h2><p>优化手段主要有缓存、集群、异步等。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
@@ -1313,145 +1225,85 @@
       </tags>
   </entry>
   <entry>
-    <title>虚拟机字节码执行引擎</title>
-    <url>/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/</url>
-    <content><![CDATA[<p>虚拟机字节码执行引擎是java虚拟机核心组成部分之一，所有java虚拟机的执行引擎输入、输出都是一致的：输入的是字节码二进制流，处理过程是字节码解析执行的等效过程，输出的是执行结果。</p>
+    <title>网站的高性能架构</title>
+    <url>/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/</url>
+    <content><![CDATA[<p>网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。</p>
 <span id="more"></span>
 
-<h2 id="运行时栈帧结构"><a href="#运行时栈帧结构" class="headerlink" title="运行时栈帧结构"></a>运行时栈帧结构</h2><p>java虚拟机以方法作为最基本的执行单元，栈帧则是用于支持虚拟机进行方法调用和方法执行背后的数据结构，它也是虚拟机运行时数据区中的虚拟机栈的栈元素。栈帧存储了方法的局部变量表、操作数栈、动态连接和方法返回地址等信息，栈帧需要分配多少内存编译期已经确定，并不会收到程序运行期变量数据的影响；以java程序的角度来看，同一时刻、同一线程里面，在调用堆栈的所有方法都同时处于执行状态，但在活动线程中，只有位于栈顶的方法才是在运行的，被称为当前栈帧，执行引擎所运行的字节码执行都只针对当前栈帧进行操作。</p>
-<h3 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h3><p>是一组变量值的存储空间，属于线程私有，用于存放方法参数和方法内部定义的局部变量，在java程序被编译为class文件时就在方法的Code属性的max_locals数据项中确定了该方法所需分配的局部变量表的最大容量，它以变量槽为最小单位，它允许变量槽的长度可以随着处理器、操作系统或虚拟机实现的不同而发生变化</p>
+<h2 id="1-网站性能测试"><a href="#1-网站性能测试" class="headerlink" title="1. 网站性能测试"></a>1. 网站性能测试</h2><p>性能测试是性能优化的前提和基础，也是性能优化结果的检查和度量标准。不同视角下的网站性能有不同的标准，也有不同的优化手段。</p>
+<h3 id="1-1不同视角下的网站性能"><a href="#1-1不同视角下的网站性能" class="headerlink" title="1.1不同视角下的网站性能"></a>1.1不同视角下的网站性能</h3><ul>
+<li><p>1.1.1 用户视角的网站性能</p>
+<p>从用户角度，网站性能就是用户在浏览器上直观感受到的网站响应速度快还是慢</p>
 <ul>
-<li><p>工作机制</p>
-<ul>
-<li>当一个方法被调用时，java虚拟机会使用局部变量表来完成参数值到参数变量的传递过程，即实参到形参的传递。如果执行的是实例方法，那局部变量表的第0位索引的变量槽默认是用于传递方法所属对象实例的引用，可以用this表示，其余参数按照顺序排列，而且局部变量表是可以重用的</li>
-</ul>
+<li><p>优化手段：</p>
+<p>使用一些前端架构优化手段，通过优化页面HTML式样、利用浏览器端的并发和异步特性、调整浏览器缓存策略、使用CDN服务、反向代理等手段，使浏览器尽快地显示用户感兴趣的内容、尽可能近地获取页面内容，即使不优化应用程序和架构，也可以很大程度地改善用户视角下的网站性能</p>
 </li>
 </ul>
-<h3 id="操作数栈"><a href="#操作数栈" class="headerlink" title="操作数栈"></a>操作数栈</h3><p>常被称为操作栈，是一个后入先出栈，它的最大深度在编译的时候已经确定</p>
+</li>
+<li><p>1.1.2 开发人员视角的网站性能</p>
+<p>开发人员关注的主要是应用程序本身及其相关子系统的性能，包括响应延迟、系统吞吐量、并发处理能力、系统稳定性等技术指标。</p>
 <ul>
-<li><p>工作机制</p>
-<ul>
-<li>当一个方法刚刚执行的时候，这个方法的操作数栈是空的，在方法的执行过程中会有各种字节码执行往操作数栈中写入和提取内容（入栈出栈的元素是局部变量表中的局部变量）</li>
-</ul>
+<li><p>优化手段：</p>
+<p>使用缓存加速数据读取，使用集群提高吞吐能力，使用异步消息加快请求响应及实现削峰，使用代码优化手段改善程序性能。</p>
 </li>
 </ul>
-<h3 id="栈帧信息"><a href="#栈帧信息" class="headerlink" title="栈帧信息"></a>栈帧信息</h3><ul>
-<li><p>动态链接</p>
-<p>每个栈帧都包含一个指向运行时常量池中该栈帧所属方法的引用，持有这个过程是为了支持方法调用过程中的动态连接（就是将符号引用转为直接引用）</p>
 </li>
-<li><p>方法返回地址</p>
-<p>方法退出之后都必须返回到最初方法被调用时的位置</p>
-</li>
-<li><p>附加信息</p>
-<p>可以返回一些java虚拟机没有描述的信息</p>
-</li>
-</ul>
-<h2 id="方法调用"><a href="#方法调用" class="headerlink" title="方法调用"></a>方法调用</h2><p>方法调用并不等于方法中的代码被执行，方法调用阶段唯一的任务就是确定被调用方法的版本（即调用哪一个方法），暂时还未涉及方法内部的具体运行过程</p>
-<h3 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h3><p>所有方法调用的目标方法在Class文件中都是一个常量池中的符号引用，在类加载的解析阶段，会将一部分符号引用转化为直接引用，前提是方法在程序真正运行之前就有一个可确定的调用版本，并且在运行期不可改变，这类方法的调用被称为解析；符合“编译期可知，运行期不可变”要求的方法主要静包括态方法和私有方法，这两类都不可能重写出其他版本</p>
+<li><p>1.1.3 运维人员视角的网站性能</p>
+<p>运维人员更关注基础设施性能和资源利用率，如网络运营商的带宽能力、服务器硬件的配置、数据中心网络架构、服务器和网络带宽的资源利用率等</p>
 <ul>
-<li><p>非虚方法</p>
-<p>私有方法、实例构造器、静态方法、父类方法，被final修饰的方法 这5中方法调用会在类加载的时候就可以把符号引用解析为该方法的直接引用。这些方法统称为“非虚方法”</p>
-<ul>
-<li><p>解析调用</p>
-<ul>
-<li>是个静态过程，在编译期就完全确定，在类加载阶段就会将符号引用转变为直接引用</li>
-</ul>
-</li>
-<li><p>分派调用</p>
-<ul>
-<li><p>静态分派</p>
-<ul>
-<li>主要表现为重载，虚拟机在重载时是通过参数的静态类型而不是实际类型作为判定依据的</li>
-</ul>
-</li>
-<li><p>动态分派</p>
-<ul>
-<li>主要表现为重写，在运行期间根据实际类型确定方法执行版本的分派过程叫做动态分派</li>
-</ul>
+<li><p>优化手段</p>
+<p>建设优化骨干网、使用高性价比定制服务器、利用虚拟化技术优化资源利用等</p>
 </li>
 </ul>
 </li>
 </ul>
-</li>
-</ul>
-<h2 id="动态类型语言支持"><a href="#动态类型语言支持" class="headerlink" title="动态类型语言支持"></a>动态类型语言支持</h2><h3 id="动态类型语言"><a href="#动态类型语言" class="headerlink" title="动态类型语言"></a>动态类型语言</h3><p>类型检查的主体过程是在运行期而不是编译期进行的</p>
-<h3 id="java-lang-invoke包"><a href="#java-lang-invoke包" class="headerlink" title="java.lang.invoke包"></a>java.lang.invoke包</h3><p>主要目的是在之前单纯依靠符号引用来确定调用的目标方法这条路外提供一种新的动态确定目标方法的机制，称为方法句柄</p>
+<h3 id="1-2-性能测试指标"><a href="#1-2-性能测试指标" class="headerlink" title="1.2 性能测试指标"></a>1.2 性能测试指标</h3><p>不同视角下有不同的性能标准，不同的标准有不同的性能测试指标，从开发和测试人员的视角，网站性能测试的主要指标有响应时间、并发数、吞吐量、性能计数器等</p>
 <ul>
-<li><p>方法句柄和反射的区别</p>
+<li><p>1.2.1 响应时间</p>
+<p>指应用执行一个操作需要的时间，包括从发出请求开始到收到最后响应数据所需要的时间</p>
+</li>
+<li><p>1.2.2 并发数</p>
+<p>指系统能够同时处理请求的数目，这个数字也反映了系统的负载特性。</p>
+</li>
+<li><p>1.2.3 吞吐量</p>
+<p>单位时间内系统处理的请求数量，体现系统的整体处理能力</p>
+</li>
+<li><p>1.2.4 性能计数器</p>
+<p>它是描述服务器或操作系统性能的一些数据指标。包括SystemLoad、对象与线程数、内存使用、CPU使用、磁盘与网络I/O等指标。这些指标也是系统监控的重要参数，对这些指标设置报警阈值，当监控系统发现性能计数器超过阈值时，就向运维和开发人员报警，及时发现处理系统异常。</p>
+</li>
+</ul>
+<h3 id="1-3-性能测试方法"><a href="#1-3-性能测试方法" class="headerlink" title="1.3 性能测试方法"></a>1.3 性能测试方法</h3><p>性能测试是一个总称，具体可细分为性能测试、负载测试、压力测试、稳定性测试。</p>
+<h2 id="2-Web前端性能优化"><a href="#2-Web前端性能优化" class="headerlink" title="2. Web前端性能优化"></a>2. Web前端性能优化</h2><h3 id="2-1-浏览器访问优化"><a href="#2-1-浏览器访问优化" class="headerlink" title="2.1 浏览器访问优化"></a>2.1 浏览器访问优化</h3><ul>
+<li><p>2.1.1 减少http请求</p>
 <ul>
-<li>1、反射是在模拟java代码层次的方法调用，方法句柄是在模拟字节码层次的方法调用</li>
-<li>2、反射是重量级的，方法句柄是轻量级的</li>
-<li>3、方法句柄可以享受虚拟机的优化策略，因为它是模拟字节码层面的方法调用</li>
-</ul>
+<li><p>2.1.1.1 为什么</p>
+<p>HTTP协议是无状态的应用层协议，意味着每次HTTP请求都需要建立通信链路、进行数据传输，而在服务器端，每个HTTP都需要启动独立的线程去处理</p>
+</li>
+<li><p>2.1.1.2 怎么办</p>
+<p>合并CSS、合并JavaScript、合并图片，这样一次请求就可以获取多个需要的文件</p>
 </li>
 </ul>
-<h2 id="基于栈的字节码解释执行引擎"><a href="#基于栈的字节码解释执行引擎" class="headerlink" title="基于栈的字节码解释执行引擎"></a>基于栈的字节码解释执行引擎</h2><p>主要功能是配合虚拟机执行方法里面的字节码指令的</p>
-<h3 id="解释执行"><a href="#解释执行" class="headerlink" title="解释执行"></a>解释执行</h3><p>java现在已经不能单纯归类于解释执行或者是编译执行，因为两者都有</p>
-<h3 id="基于栈的指令集与基于寄存器的指令集"><a href="#基于栈的指令集与基于寄存器的指令集" class="headerlink" title="基于栈的指令集与基于寄存器的指令集"></a>基于栈的指令集与基于寄存器的指令集</h3><p>javac编译器输出的字节码指令流是一种基于栈的指令集架构</p>
-<ul>
-<li>栈：优点： 1、可移植，因为寄存器由硬件直接提供，程序直接依赖这些硬件寄存器则不可避免的受硬件的约束；2、代码相对更紧凑、编译器实现更加简单。缺点：1、理论上执行速度相对慢一些</li>
-</ul>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Jvm</tag>
-        <tag>字节码</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>集群环境下如何管理Session</title>
-    <url>/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</url>
-    <content><![CDATA[<h2 id="1-Session复制"><a href="#1-Session复制" class="headerlink" title="1.Session复制"></a>1.Session复制</h2><p>应用服务器开启Web容器的Session复制功能，在集群中的几台服务器之间同步Session对象，使得每台服务器上都保存所有用户的Session信息，这样任何一台机器宕机都不会导致Session数据的丢失，而服务器使用Session时，也只需要在本机获取即可</p>
-<span id="more"></span>
-
-<h3 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h3><ul>
-<li>1.方案简单</li>
-<li>2.获取Session速度块</li>
-</ul>
-<h3 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h3><ul>
-<li><p>1.只能在集群规模较小的情况下使用</p>
-<p>如果集群规模大，会导致大量复制Session，会占用网络和服务器大量资源；<br>并且如果出现大量用户同时访问服务的情况可能会出现内存不够用的问题</p>
+</li>
+<li><p>2.1.2 使用浏览器缓存</p>
+<p>将更新的频率都低，而访问平凡的文件缓存在浏览器中，可以极好地改善性能</p>
+</li>
+<li><p>2.1.3 启用压缩</p>
+<p>在服务器端对文件进行压缩，在浏览器端对文件解压缩，可有效减少通信传输的数据量。有利就有弊，压缩对服务器和浏览器产生一定的压力，在通信带宽良好，而服务器资源不足的情况下要权衡考虑。</p>
+</li>
+<li><p>2.1.4 CSS放在页面最上面、JavaScript放在页面最下面</p>
+<p>浏览器会在下载完全部CSS之后才对整个页面进行渲染，因此最好的做法是将CSS放在页面最上面，让浏览器尽快下载CSS。JavaScript则相反，浏览器在加载JavaScript后立即执行，有可能会阻塞整个页面，造成页面显示缓慢，因此JavaScript最好放在页面最下面。</p>
+</li>
+<li><p>2.1.5 减少Cookie传输</p>
+<p>Cookie包含在每次请求和响应中，太大的Cookie会严重影响数据传输</p>
+</li>
+<li><p>2.1.5 CDN加速</p>
+<p>CDN（Content Distribute Network，内容分发网络）的本质仍然是一个缓存，而且将数据缓存在离用户最近的地方，使用户以最快速度获取数据</p>
+</li>
+<li><p>2.1.6 反向代理</p>
+<p>1、可以缓存静态内容，加快web访问；<br>2、保护网站安全，相当于在Web服务器和可能的网络攻击之间建立了一个屏障。</p>
 </li>
 </ul>
-<h2 id="2-Session绑定"><a href="#2-Session绑定" class="headerlink" title="2.Session绑定"></a>2.Session绑定</h2><p>即Session绑定在某台特定服务器上，保证Session总能在这台服务器上获取。这种方法又被称作会话黏滞，负载均衡服务器总是将来源于同一IP的请求分发到同一台服务器上（也可以根据Cookie信息将同一个用户的请求总是分发到同一台服务器上，当然这时负载均衡服务器必须工作在HTTP协议层上）</p>
-<h3 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h3><ul>
-<li><p>不具备高可用的特性</p>
-<p>如果绑定Session的服务器宕机了就会造成Session丢失</p>
-</li>
-</ul>
-<h2 id="3-利用Cookie记录Session"><a href="#3-利用Cookie记录Session" class="headerlink" title="3.利用Cookie记录Session"></a>3.利用Cookie记录Session</h2><p>将Session记录在Cookie中，每次请求服务器的时候，将Session放在请求中发送给服务器，服务器处理完请求后再将修改过的Session响应给客户端。</p>
-<h3 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h3><ul>
-<li>简单易用，可用性高，支持应用服务器的线性伸缩</li>
-</ul>
-<h3 id="缺点：-2"><a href="#缺点：-2" class="headerlink" title="缺点："></a>缺点：</h3><ul>
-<li>1.信息记录有限，因为Cookie有大小限制</li>
-<li>2.影响性能，每次请求响应都需要传输Cookie</li>
-<li>3.受用户行为影响，如果用户关闭Cookie，访问就会不正常</li>
-</ul>
-<h2 id="4-Session服务器"><a href="#4-Session服务器" class="headerlink" title="4.Session服务器"></a>4.Session服务器</h2><p>可用性高、伸缩性好、性能也不错，对信息大小又没有限制的服务器集群Session管理方案。<br>利用独立部署的Session服务器（集群）统一管理Session，应用服务器每次读写Session时，都访问Session服务器。<br>这种解决方案事实上是将应用服务器的状态分离。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>项目如何分包</title>
-    <url>/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</url>
-    <content><![CDATA[<p>在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。</p>
-<span id="more"></span>
-
-<h2 id="1、按照类型方式划分"><a href="#1、按照类型方式划分" class="headerlink" title="1、按照类型方式划分"></a>1、按照类型方式划分</h2><p>例如将所有的接口放入一个包、Controller类放入一个包等等。</p>
-<p>优点：从类型看更为清晰</p>
-<p>缺点：不利于模块化开发，因为会将同一个功能的多个类分散在不同的包中</p>
-<h2 id="2、按照功能方式划分"><a href="#2、按照功能方式划分" class="headerlink" title="2、按照功能方式划分"></a>2、按照功能方式划分</h2><p>将同一个功能的所有类放在同一个包中。</p>
-<p>优点：高内聚，便于模块化开发</p>
-<p>缺点：同一包内类型混乱</p>
-<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>将功能耦合度高的类按照功能进行划分，而功能耦合度低的或者供多个功能使用的类按照类型进行划分。</p>
+<h2 id="3-应用服务器性能优化"><a href="#3-应用服务器性能优化" class="headerlink" title="3. 应用服务器性能优化"></a>3. 应用服务器性能优化</h2><p>优化手段主要有缓存、集群、异步等。</p>
 ]]></content>
       <categories>
         <category>技术</category>
@@ -1636,6 +1488,45 @@
       </tags>
   </entry>
   <entry>
+    <title>集群环境下如何管理Session</title>
+    <url>/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</url>
+    <content><![CDATA[<h2 id="1-Session复制"><a href="#1-Session复制" class="headerlink" title="1.Session复制"></a>1.Session复制</h2><p>应用服务器开启Web容器的Session复制功能，在集群中的几台服务器之间同步Session对象，使得每台服务器上都保存所有用户的Session信息，这样任何一台机器宕机都不会导致Session数据的丢失，而服务器使用Session时，也只需要在本机获取即可</p>
+<span id="more"></span>
+
+<h3 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>1.方案简单</li>
+<li>2.获取Session速度块</li>
+</ul>
+<h3 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li><p>1.只能在集群规模较小的情况下使用</p>
+<p>如果集群规模大，会导致大量复制Session，会占用网络和服务器大量资源；<br>并且如果出现大量用户同时访问服务的情况可能会出现内存不够用的问题</p>
+</li>
+</ul>
+<h2 id="2-Session绑定"><a href="#2-Session绑定" class="headerlink" title="2.Session绑定"></a>2.Session绑定</h2><p>即Session绑定在某台特定服务器上，保证Session总能在这台服务器上获取。这种方法又被称作会话黏滞，负载均衡服务器总是将来源于同一IP的请求分发到同一台服务器上（也可以根据Cookie信息将同一个用户的请求总是分发到同一台服务器上，当然这时负载均衡服务器必须工作在HTTP协议层上）</p>
+<h3 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li><p>不具备高可用的特性</p>
+<p>如果绑定Session的服务器宕机了就会造成Session丢失</p>
+</li>
+</ul>
+<h2 id="3-利用Cookie记录Session"><a href="#3-利用Cookie记录Session" class="headerlink" title="3.利用Cookie记录Session"></a>3.利用Cookie记录Session</h2><p>将Session记录在Cookie中，每次请求服务器的时候，将Session放在请求中发送给服务器，服务器处理完请求后再将修改过的Session响应给客户端。</p>
+<h3 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>简单易用，可用性高，支持应用服务器的线性伸缩</li>
+</ul>
+<h3 id="缺点：-2"><a href="#缺点：-2" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li>1.信息记录有限，因为Cookie有大小限制</li>
+<li>2.影响性能，每次请求响应都需要传输Cookie</li>
+<li>3.受用户行为影响，如果用户关闭Cookie，访问就会不正常</li>
+</ul>
+<h2 id="4-Session服务器"><a href="#4-Session服务器" class="headerlink" title="4.Session服务器"></a>4.Session服务器</h2><p>可用性高、伸缩性好、性能也不错，对信息大小又没有限制的服务器集群Session管理方案。<br>利用独立部署的Session服务器（集群）统一管理Session，应用服务器每次读写Session时，都访问Session服务器。<br>这种解决方案事实上是将应用服务器的状态分离。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>CountDownLatch，CyclicBarrier，Semaphore及AQS介绍</title>
     <url>/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/</url>
     <content><![CDATA[<h2 id="CountDownLatch"><a href="#CountDownLatch" class="headerlink" title="CountDownLatch"></a>CountDownLatch</h2><h3 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h3><p>CountDownLatch适用于在多线程的场景需要等待所有子线程全部执行完毕之后再做操作的场景。</p>
@@ -1716,6 +1607,237 @@
         <tag>Java</tag>
         <tag>多线程</tag>
         <tag>源码阅读</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>虚拟机字节码执行引擎</title>
+    <url>/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/</url>
+    <content><![CDATA[<p>虚拟机字节码执行引擎是java虚拟机核心组成部分之一，所有java虚拟机的执行引擎输入、输出都是一致的：输入的是字节码二进制流，处理过程是字节码解析执行的等效过程，输出的是执行结果。</p>
+<span id="more"></span>
+
+<h2 id="运行时栈帧结构"><a href="#运行时栈帧结构" class="headerlink" title="运行时栈帧结构"></a>运行时栈帧结构</h2><p>java虚拟机以方法作为最基本的执行单元，栈帧则是用于支持虚拟机进行方法调用和方法执行背后的数据结构，它也是虚拟机运行时数据区中的虚拟机栈的栈元素。栈帧存储了方法的局部变量表、操作数栈、动态连接和方法返回地址等信息，栈帧需要分配多少内存编译期已经确定，并不会收到程序运行期变量数据的影响；以java程序的角度来看，同一时刻、同一线程里面，在调用堆栈的所有方法都同时处于执行状态，但在活动线程中，只有位于栈顶的方法才是在运行的，被称为当前栈帧，执行引擎所运行的字节码执行都只针对当前栈帧进行操作。</p>
+<h3 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h3><p>是一组变量值的存储空间，属于线程私有，用于存放方法参数和方法内部定义的局部变量，在java程序被编译为class文件时就在方法的Code属性的max_locals数据项中确定了该方法所需分配的局部变量表的最大容量，它以变量槽为最小单位，它允许变量槽的长度可以随着处理器、操作系统或虚拟机实现的不同而发生变化</p>
+<ul>
+<li><p>工作机制</p>
+<ul>
+<li>当一个方法被调用时，java虚拟机会使用局部变量表来完成参数值到参数变量的传递过程，即实参到形参的传递。如果执行的是实例方法，那局部变量表的第0位索引的变量槽默认是用于传递方法所属对象实例的引用，可以用this表示，其余参数按照顺序排列，而且局部变量表是可以重用的</li>
+</ul>
+</li>
+</ul>
+<h3 id="操作数栈"><a href="#操作数栈" class="headerlink" title="操作数栈"></a>操作数栈</h3><p>常被称为操作栈，是一个后入先出栈，它的最大深度在编译的时候已经确定</p>
+<ul>
+<li><p>工作机制</p>
+<ul>
+<li>当一个方法刚刚执行的时候，这个方法的操作数栈是空的，在方法的执行过程中会有各种字节码执行往操作数栈中写入和提取内容（入栈出栈的元素是局部变量表中的局部变量）</li>
+</ul>
+</li>
+</ul>
+<h3 id="栈帧信息"><a href="#栈帧信息" class="headerlink" title="栈帧信息"></a>栈帧信息</h3><ul>
+<li><p>动态链接</p>
+<p>每个栈帧都包含一个指向运行时常量池中该栈帧所属方法的引用，持有这个过程是为了支持方法调用过程中的动态连接（就是将符号引用转为直接引用）</p>
+</li>
+<li><p>方法返回地址</p>
+<p>方法退出之后都必须返回到最初方法被调用时的位置</p>
+</li>
+<li><p>附加信息</p>
+<p>可以返回一些java虚拟机没有描述的信息</p>
+</li>
+</ul>
+<h2 id="方法调用"><a href="#方法调用" class="headerlink" title="方法调用"></a>方法调用</h2><p>方法调用并不等于方法中的代码被执行，方法调用阶段唯一的任务就是确定被调用方法的版本（即调用哪一个方法），暂时还未涉及方法内部的具体运行过程</p>
+<h3 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h3><p>所有方法调用的目标方法在Class文件中都是一个常量池中的符号引用，在类加载的解析阶段，会将一部分符号引用转化为直接引用，前提是方法在程序真正运行之前就有一个可确定的调用版本，并且在运行期不可改变，这类方法的调用被称为解析；符合“编译期可知，运行期不可变”要求的方法主要静包括态方法和私有方法，这两类都不可能重写出其他版本</p>
+<ul>
+<li><p>非虚方法</p>
+<p>私有方法、实例构造器、静态方法、父类方法，被final修饰的方法 这5中方法调用会在类加载的时候就可以把符号引用解析为该方法的直接引用。这些方法统称为“非虚方法”</p>
+<ul>
+<li><p>解析调用</p>
+<ul>
+<li>是个静态过程，在编译期就完全确定，在类加载阶段就会将符号引用转变为直接引用</li>
+</ul>
+</li>
+<li><p>分派调用</p>
+<ul>
+<li><p>静态分派</p>
+<ul>
+<li>主要表现为重载，虚拟机在重载时是通过参数的静态类型而不是实际类型作为判定依据的</li>
+</ul>
+</li>
+<li><p>动态分派</p>
+<ul>
+<li>主要表现为重写，在运行期间根据实际类型确定方法执行版本的分派过程叫做动态分派</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="动态类型语言支持"><a href="#动态类型语言支持" class="headerlink" title="动态类型语言支持"></a>动态类型语言支持</h2><h3 id="动态类型语言"><a href="#动态类型语言" class="headerlink" title="动态类型语言"></a>动态类型语言</h3><p>类型检查的主体过程是在运行期而不是编译期进行的</p>
+<h3 id="java-lang-invoke包"><a href="#java-lang-invoke包" class="headerlink" title="java.lang.invoke包"></a>java.lang.invoke包</h3><p>主要目的是在之前单纯依靠符号引用来确定调用的目标方法这条路外提供一种新的动态确定目标方法的机制，称为方法句柄</p>
+<ul>
+<li><p>方法句柄和反射的区别</p>
+<ul>
+<li>1、反射是在模拟java代码层次的方法调用，方法句柄是在模拟字节码层次的方法调用</li>
+<li>2、反射是重量级的，方法句柄是轻量级的</li>
+<li>3、方法句柄可以享受虚拟机的优化策略，因为它是模拟字节码层面的方法调用</li>
+</ul>
+</li>
+</ul>
+<h2 id="基于栈的字节码解释执行引擎"><a href="#基于栈的字节码解释执行引擎" class="headerlink" title="基于栈的字节码解释执行引擎"></a>基于栈的字节码解释执行引擎</h2><p>主要功能是配合虚拟机执行方法里面的字节码指令的</p>
+<h3 id="解释执行"><a href="#解释执行" class="headerlink" title="解释执行"></a>解释执行</h3><p>java现在已经不能单纯归类于解释执行或者是编译执行，因为两者都有</p>
+<h3 id="基于栈的指令集与基于寄存器的指令集"><a href="#基于栈的指令集与基于寄存器的指令集" class="headerlink" title="基于栈的指令集与基于寄存器的指令集"></a>基于栈的指令集与基于寄存器的指令集</h3><p>javac编译器输出的字节码指令流是一种基于栈的指令集架构</p>
+<ul>
+<li>栈：优点： 1、可移植，因为寄存器由硬件直接提供，程序直接依赖这些硬件寄存器则不可避免的受硬件的约束；2、代码相对更紧凑、编译器实现更加简单。缺点：1、理论上执行速度相对慢一些</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+        <tag>字节码</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hibernate 实战第二版 中文翻译 管理数据篇(二)</title>
+    <url>/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/</url>
+    <content><![CDATA[<h2 id="EntityManager-接口"><a href="#EntityManager-接口" class="headerlink" title="EntityManager 接口"></a>EntityManager 接口</h2><p>任何持久层框架都会提供一个管理持久层的 API。这个 API 一般都会提供基础的增删改查功能，通过它就可以管理持久化上下文。在 Java 持久层框架中，最常使用的接口就是 EntityManager。</p>
+<span id="more"></span>
+
+<h3 id="工作单元-unit-of-work-的权威解释"><a href="#工作单元-unit-of-work-的权威解释" class="headerlink" title="工作单元(unit of work)的权威解释"></a>工作单元(unit of work)的权威解释</h3><p>（ps: 单元可以理解为一种计量的单位，用来代表工作开始和结束这一过程。我阅读了整个小结，认为这段就是在讲什么是单元，单元其实就是类似事务，事务的开始代表工作开始，事务结束代表工作结束。不同的是，一个工作单元内可以有多个事务）。</p>
+<p>在一些简单的 Java SE 和 Java EE 项目中 ( 例如只有一些 servlet )。你可以通过调用 EntityManagerFactory#createEntityManager() 方法获得一个 EntityManager 。你的应用代码共享 EntityManagerFactory ，这代表了一个持久层单元，或者一次操作数据库的逻辑（CRUD）。很多应用只会有一个EntityManagerFactory 被共享。</p>
+<p>每个线程在操作数据库的时候都创建一个独有的  EntityManager 是很浪费资源的。下面来看下 <strong>工作单元</strong> 的经典代码：</p>
+<p><img src="https://s2.loli.net/2021/12/14/awnmFQNg5YrObzG.png" alt="image-20211214131555083"></p>
+<p>（ TM 类是这本书的工具类，通过它可以方便的使用  JNDI 的  UserTransactionAPI。图中 JPA 类为 共享的 UserTransactionAPI 提供了便捷的访问方式。）</p>
+<p>一个事务中的所有操作都要在 tx.begin() 和 tx.commit() 之间进行。就目前而言，要记住在一个事务区间内的所有 CRUD 的操作，例如利用 Hibernate 执行 Sql 语句，要么全部成功，要么全部失败。现在不要太在意事务相关的代码；你将在下一个章节了解更多关于并发控制的知识。我们将会讲解一些关于事务和异常处理的代码。在发生异常的时候你需要回滚事务并且处理异常，所以 catch 代码块内不要空着。</p>
+<p>创建一个 EntityManager 将开启它的持久化上下文。除非有必要不然 Hibernate 不会访问数据库；直到 Sql 必须执行的时候 </p>
+<p>EntityManager 才会去获取 JDBC 连接。当你不需要操作数据库的时候可以关闭 EntityManager 。当你查找数据或者将持久化上下文中数据的更改同步到数据库中时才会执行 Sql 语句。当提交事务的时候 Hibernate 将对持久化上下文中的数据进行检查，并将更改同步到数据库中。当然，你也可以通过调用 EntityManager#flush() 方法在任意时间将更改强制同步到数据库中。</p>
+<p>你可以通过调用 EntityManager#close() 方法决定持久化上下文的范围。通常你需要在 finally 中调用 close() 方法，避免内存泄漏。</p>
+<h3 id="让数据持久化"><a href="#让数据持久化" class="headerlink" title="让数据持久化"></a>让数据持久化</h3><p>让我们创建一个新的 entity 实例，并让它从瞬时态转换成持久态。</p>
+<p><img src="https://s2.loli.net/2021/12/14/FLsXMcJ8fIyiYg9.png" alt="image-20211214202340897"></p>
+<p>你可以通过下图来看 Item 实例的状态是如何转变的。</p>
+<p><img src="https://s2.loli.net/2021/12/14/oybeM6W1UdzDYQs.png" alt="image-20211214202634457"></p>
+<p>一个新的瞬时态 Item 就是一个普通的实例。当然，你可能在创建 EntityManger 之前创建这个实例，然后你可以通过调用 persist() 方法让它转换成持久态。这时它将被当前持久化上下文管理。</p>
+<p>Hibernate 通过执行 insert 语句来将 Item 实例存储到数据库中。当一个工作单元的事务提交了之后，Hibernate 会刷新持久化上下文，insert 就会在那时执行。Hibernate 甚至可以在 JDBC 层面批量执行 Insert 语句。当你调用 persist() 方法时，只有 Item 的 id 会被赋值。如果你的 ID 生成器没有提前为 ID 赋值，当你调用 persist() 的时候会立即执行 insert 语句。如果你忘记了这些知识可以回顾一下 4.2.5 节。</p>
+<blockquote>
+<p>小贴士：</p>
+<p><strong>通过 ID 判断 entity 的状态</strong></p>
+<p>有时你需要知道一个 entity 实例当前是什么状态。如果 EntityManager#contains(e) 返回 true 说明是持久态。如果 PersistenceUnitUtil#getIdentifier(e) 返回 Null 说明是瞬时态。如果一个实例没有持久化那他就是游离态，使用 PersistenceUnitUtil#getIdentifier(e) 可以返回实例的id值。你可以从 EntityManagerFactory 获取 PersistenceUnitUtil。</p>
+<p>有两个问题需要注意下：第一，id 直到持久化上下文 flush 之后才会被赋值。第二，如果你的 id 使用的是基本数据类型，那么PersistenceUnitUtil#getIdentifier() 永远也不会返回 null。</p>
+</blockquote>
+<p>在用持久化上下文管理 Item 实例时最好先将它初始化。insert sql 语句会包含在调用 persist() 方法那一刻 entity 实例所拥有的属性值。如果你在持久化的时候没有给 Item 的 name 属性赋值，那就可能违反 name 不能为 null 的约束。你可以在调用 persist() 之后再更改 Item 的数据，Hibernate 会生成一个附加的 update 语句将更改同步到数据库中。</p>
+<p>如果在执行 insert 或者 update 操作时 flush 失败，那么 Hibernate 会将在这次事务内对数据库的更改撤销（俗称回滚）。但是 Hibernate 不会回滚内存中的数据。如果，你在调用 persist() 之后修改了 Item#name ，这时事务提交失败了，将不会回滚到以前的 name 。这样做是很正常的，因为正常情况下事务提交失败了是不能恢复的，你必须立即丢弃这次事务相关的持久化上下文和 EntityManager。我们将在下一章讨论如何处理异常。</p>
+<p>接下来，你要加载并且修改存储中的数据。</p>
+<h3 id="查询并且修改持久化数据"><a href="#查询并且修改持久化数据" class="headerlink" title="查询并且修改持久化数据"></a>查询并且修改持久化数据</h3><p>你可以通过 EntityManager 从数据库中查找持久化实例。【我们假设，在前面章节例子中的某处你持有 Item 存储后的 id 属性值，然后你在一个新的工作单元中通过 id 查询相关实例数据：</p>
+<p><img src="https://s2.loli.net/2021/12/15/X5TRCxmEZNo72q4.png" alt="image-20211215194153743"></p>
+<p>下图展示的就是这个过程。</p>
+<p><img src="https://s2.loli.net/2021/12/15/wsGI8KPXoOhqjnS.png" alt="image-20211215204430372"></p>
+<p>你不需要强制类型装换 find() 操作获得的结果。这个方法返回的类型与第一个参数的类型相同。查询出来的 entity 实例是持久态的，你现在可以在工作单元中修改它。</p>
+<p>如果没有与 id 想匹配的持久化实例，那 find() 方法就会返回 null。如果根据查询的 class 类型和 ID 不能在持久化上下文的缓存中命中数据，那就会去查询数据库。entity 实例在查询的过程中会被初始化，它会包含所有游离态转持久态时持有的数据：就像你保存数据后刷新页面一样。（如果开启了二级缓存那 Hibernate 或许不会查询数据库。我们将在 20.2 节进行学习）。</p>
+<p>你可以修改 Item 实例，持久化上下文将会记住这些更改，并且在事务提交的时候执行相关 Sql,  自动将这些更改同步到数据库中。</p>
+<p>Hibernate 在事务结束前，会尽可能晚的将数据同步到数据库中，因为 DML sql 语句会将数据库锁住，直到事务结束后才解开。所以 Hibernate 会尽可能减少锁住数据库的时间。</p>
+<p>Hibernate 会使用 update sql 语句将 Item#name 写入数据库中。默认情况下，Hibernate update 语句会包含 ITEM 所有配置了映射的列，如果某些列还是持有的旧数据的值，那么它们也会再次执行，只不过是用旧值更新了旧值。如果你只想更新被更改的列，你可以启动 sql 动态生成功能，在 4.3.2 节有讨论过。</p>
+<p>当 Item 从数据库中被加载出来时会生成一个副本的快照，Hibernate 通过与快照进行对比就可以发现 Item 的 name 被修改过。如果你的 Item 与快照不同，那就会执行 update 语句。这个快照会消耗持久化上下文的内存。同时通过快照进行脏数据检查也可能非常耗时，因为 Hibernate 在 flush 期间必须在持久化上下文中将所有 entity 实例与它们的快照进行对比。</p>
+<p>你或许想通过拓展点对 Hibernate 脏数据检查的过程做自定义的配置。这个配置是 hibernate.entity_dirtiness_strategy ，你需要在  persistence.xml 中进行配置，它的 value 值应该为 org.hibernate.Custom-EntityDirtinessStrategy 实现类的全限定名。可以通过 Javadoc 了解这个接口的更多信息。同时，你也可以通过实现 org.hibernate.Interceptor 的 findDirty() 方法来自定义脏数据检查。你可以在 13.2.2 小结找到使用示例。</p>
+<p>我们在前文说过，持久化上下文中的 entity 实例是可以重复读的，并且保证 entity 的 id 是唯一的。</p>
+<p><img src="https://s2.loli.net/2021/12/16/6XyTUthC1cWa9GN.png" alt="image-20211216185841037"></p>
+<p>第一次调用 find() 方法，会通过 select sql 将 Item 实例从数据库中查询出来了。第二次调用 find() 方法会从持久化上下文的缓存中查询 Item 实例，并返回查询结果。</p>
+<p>有时，你需要用到某个 entity 实例，但是你并不想查询数据库。当你加载一个 entity 实例的时候，你并不想直接去查询数据库，因为你不确定是否需要完全的初始化它。这时，你可以通过 EntityManager 尝试获取这个实例被代理的引用。</p>
+<p><img src="https://s2.loli.net/2021/12/16/t85TrWcfF2GN6Pn.png" alt="image-20211216191430362"></p>
+<p>如果加载的这个 entity 实例早就已经存在持久化上下文中了，那 getReference() 就会返回内存中的这个实例，而不会去查询数据库。此外，如果当前持久化上下文中没有查询的 entity 实例，那么 Hibernate 将返回一个代理（一个虚拟的占位符）。这意味着 getReference() 方法不会访问数据库，并且它也不会返回 null。这一点与 find() 大不相同。</p>
+<p>Jpa 提供  PersistenceUnitUtil#isLoaded() 方法去确定你正在使用的代理是不是还没有被初始化。</p>
+<p>只要你调用这个代理的任何方法，就像 Item#getName() 方法，那么 Hibernate 就会执行 select 语句将这个占位符初始化。但是这个规则可能因为 id 的 getter 方法而抛出异常，例如 getId()。代理虽然看起来就像是真的 entity 实例一样，但是它只是持有 entity 实例 id 的占位符。如果在代理初始化的时候这条记录已经不在数据库中了，那么 Hibernate 就会抛出 EntityNotFoundException 异常。记住，当调用 Item#getName() 方法时可能会抛出异常。</p>
+<p>Hibernate 提供了一个方便使用的静态方法 initialize() 去加载被代理的数据。</p>
+<p>在持久化上下文关闭以后，item 会转变成游离态。如果你在持久化上下文开启的期间没有初始化这个代理，那么在持久化上下文关闭后你再访问代理就会抛出 LazyInitializationException 。持久化上下文关闭后你就不能继续加载数据了。解决办法也很简单：你在关闭持久化上下文之前加载数据。</p>
+<p>我们会在12章详细介绍代理、懒加载和按需获取。</p>
+<p>如何你想从数据库中删除一个 entity 实例，你必须把它转成瞬时态。</p>
+<h3 id="让数据变瞬时态"><a href="#让数据变瞬时态" class="headerlink" title="让数据变瞬时态"></a>让数据变瞬时态</h3><p>通过调用 EntityManager#remove() 方法可以让 entity 实例变成瞬时态，同时从数据库中删除它。</p>
+<p><img src="https://s2.loli.net/2021/12/16/9oYX1QmvsySTJef.png" alt="image-20211216200443088"></p>
+<p>如果你调用 find() 方法，Hibernate 将通过 select 语句加载 item。如果你调用 getReference() HIbernate 将避免去查询数据库，并返回一个代理。</p>
+<p>调用 remove() 方法可以在工作单元结束后删除这个 entity 实例；之后它会转成删除态。如果对代理使用 remove() 方法，那 Hibernate 将执行 select 语句去加载这个数据。在瞬时态， entity 实例必须完全初始化。你或许使用了生命周期回调函数或者 entity 监听器，实例必须将通过这些拦截器之后才能走完全部生命周期。</p>
+<p>一个 entity 处于删除态就不再属于持久态了。你可以通过 contains() 方法去验证。</p>
+<p>你可以让删除态的实例再一次转为持久态，从而取消这次删除操作。</p>
+<p>当事务提交的时候，Hibernate 会通过 delete 语句将状态的转变同步到数据库中。JVM 的垃圾回收器会检查 item 是否还被 GCRoot 引用，如果没有就会将它们回收。</p>
+<p>下图展示了这个流程：</p>
+<p><img src="https://s2.loli.net/2021/12/16/bn1APtkdDuYSWKF.png" alt="image-20211216203925450"></p>
+<p>默认情况下，Hibernate 在删除时不会改变 entity 实例 id 的数值。这意味着，item.getId() 方法会一直返回当时的数值。有时这是非常有用的，例如，你想要再次保存一个已经被删除的 Item 实例。在持久化上下文 flush 之前你可以掉用 persist() 去保存一个被删除的实例，从而这次取消删除操作。当然如果  persistence.xml 文件中的 hibernate.use_  identifier_  rollback 参数被设置为 true ，那 Hibernate 将会在删除的时候重新设置 id 的值。在前面的例子中，id 将被重新设置成默认值 null。现在 Item 转换成了瞬时态，然后你可以在一个新的持久化上下文中再一次保存它。</p>
+<p>Java 持久层也提供了很多操作手段，可以在执行 delete sql 语句时不用经过拦截器处理。我们将在 20.1 节讨论这些操作。</p>
+<p>假设你从数据库加载出来一个 entity 实例，并且在之后要使用它。因为某些原因，你知道在这个应用中的其他线程已经在数据库中更改了这条数据。下面我们将看下如何刷新内存中的数据。</p>
+<h3 id="刷新数据"><a href="#刷新数据" class="headerlink" title="刷新数据"></a>刷新数据</h3><p>下面是一个刷新持久态  entity 实例的代码样例：</p>
+<p><img src="https://s2.loli.net/2021/12/17/qXRurlM7VPpeDch.png" alt="image-20211217124717461"></p>
+<p>当你加载 entity 实例之后，你了解到有谁更改了数据库的数据。那你就可以调用 refresh() 方法，这时 Hibernate 会执行 select 语句去读取数据库中的数据，并更新内存中的结果集，这样可以将更改重新写入已经加载到内存中的 entity 实例。当然，如果数据库中已经不存在这条数据了（例如某人删除了它），这时调用 refresh()  方法 Hibernate 会抛出 EntityNotFoundException 异常。</p>
+<p>大多数应用都不必手动刷新内存数据；在事务提交时完成数据修改是很典型的场景。所以使用 refresh() 刷新内存的最佳场景是在使用一个被拓展的持久化上下文中，因为它可能横跨多个事务。例如，当你用一个已经创建好的持久化上下文等在用户输入时，数据可能已经过时了，所以在用户和系统交互的过程中需要不断刷新。如果用户关闭了会话，我们也可以用刷新操作来取消在内存中对数据的更改。我们将在 18.3 节对此进行更多的了解。</p>
+<p>另一个非常有用的操作就是 entity 实例的复制操作。</p>
+<h3 id="复制数据"><a href="#复制数据" class="headerlink" title="复制数据"></a>复制数据</h3><p>复制操作是非常有用的，例如，你想从一个数据库中获取数据，然后存储到另外一个数据库中。</p>
+<p>复制操作会在一个持久化上下文中加载游离态实例，然后让他们持久化到另一个持久化上下文中。你通常会从两个不同的 EntityManagerFactory 配置中开启这些上下文，开启两个不同的数据库操作逻辑。为此你需要在这些配置中对 entity 进行映射。</p>
+<p>replicate() 操作只在 Hibernate Session API 中有效。下面的例子就是展示如何从一个持久化上下文中复制数据然后存储到另一个中。</p>
+<p><img src="https://s2.loli.net/2021/12/19/C5PRgjescwLNMzG.png" alt="image-20211219142210341"></p>
+<p>两个数据库的连接可以在同一个事务中。</p>
+<p>ReplicationMode 控制复制过程的细节，提供以下操作：</p>
+<ul>
+<li>IGNORE-如果在数据库中已经有同样 id 的数据了，那就忽略它。</li>
+<li>OVERWRITE-覆盖拥有相同 id 的数据。</li>
+<li>EXCEPTION-如果已经有相同 id 的数据了就抛异常。</li>
+<li>LATEST_VERSION-如果数据库中现有数据的版本低于待复制数据的版本，那就覆盖旧版本数据，否则就忽略它。需要开启 entity 版本控制功能的乐观锁并发控制配置 （可以参考 11.2.2 章节）。</li>
+</ul>
+<p>当你需要把不同数据库中的数据同步成相同的数据时就需要复制操作了。举一个产品升级的例子：当你的新版本应用需要更换成一个新的数据库时，你可能想要一次性的复制并且替换掉已经存在的数据。</p>
+<p>持久化上下文可以为你做很多事情：就像可以在同一个上下文中保证 id 唯一，等等还有很多其他类似的操作。所以你了解它的运行流程是很重要的，这让你可以知道背后发生了什么。</p>
+<h3 id="缓存在持久化上下文中的使用"><a href="#缓存在持久化上下文中的使用" class="headerlink" title="缓存在持久化上下文中的使用"></a>缓存在持久化上下文中的使用</h3><p>持久化上下文其实就是持久化实例的缓存。任何持久态的实例都与持久化上下文密切相关。</p>
+<p>许多人在使用 HIbernate 时忽略了这个简单的事实，导致系统抛出 OutOfMemoryException。当你在一个工作单元中加载了数以千计的 entity 实例，并且没有打算对他们进行修改时就很容易发生。Hibernate 会在持久化上下文中为每个 entity 实例都创建一个快照，这样很容易将内存耗尽。（显然，你如果要更改数以千计的数据，那你需要执行一个批量数据操作，我们将在 20.1 章节进行介绍）。</p>
+<p>持久化上下文缓存不会自动减小。你需要将它的大小设置成不影响系统运行情况下的最小值。通常，很多上下文中的持久化实例都是因为意外情况才被加载出来的。例如，你只需要少量 item ，但是你却加载出很多你并不需要的 item 。一个巨大的图表可以对性能造成很大的影响，并且需要大量的内存去存储 entity 的快照，所以，要检查查询功能是否只返回的你需要的数据，并且考虑通过以下方法控制 Hibernate 缓存的行为。</p>
+<p>调用 EntityManager#detach(i) 可以将一个 entity 实例从持久化上下文中删除。你可以调用 EntityManager#clear() 来清空持久化上下文。</p>
+<p>在 Session api 中你可找到其他一些有用的方法。你可以让持久化上下文变成只读的。这样就不会生成 entity 快照和进行脏数据检查了，同时，也不能将更改写入到数据库了。</p>
+<p><img src="https://s2.loli.net/2021/12/19/ghmaxJjW3IUS9F1.png" alt="image-20211219151042783"></p>
+<p>你也可以只关闭一个 entity 实例的脏数据检查：</p>
+<p><img src="https://s2.loli.net/2021/12/19/PzHO3d9k8vXAfql.png" alt="image-20211219151146830"></p>
+<p>org.hibernate.Query 接口可以返回一个只读结果，Hibernate 不会对它们的更改进行检查。</p>
+<p><img src="https://s2.loli.net/2021/12/19/w7dFe6iu4rNRCnK.png" alt="image-20211219151317561"></p>
+<p>你也可以通过标准 JAP 接口 javax.persistence.Query 获得不做脏数据检查的实例 ，接口如下：</p>
+<p><img src="https://s2.loli.net/2021/12/19/PATRMZfu7KCnjbX.png" alt="image-20211219151721724"></p>
+<p>要注意使用只读的 entity 实例，你通常可以删除它们，但是在集合中更改是很困难的。Hibernate 手册有很多关于集合映射的案例需要你去了解，当然你也将在 14 章看到更多的查询样例。</p>
+<p>到目前为止，在事务提交的时候 flush 操作和持久化上下文的同步都是自动进行的。但是在一些特殊场景中，你需要对同步数据的过程有更多的掌控。</p>
+<h3 id="刷新持久化上下文"><a href="#刷新持久化上下文" class="headerlink" title="刷新持久化上下文"></a>刷新持久化上下文</h3><p>默认情况下，在事务提交的时候 Hibernate 会刷新持久化上下文，并将数据的更改同步到数据库中。在前面几章的例子中都是使用的这个策略。JPA 在以下场景中允许自动同步持久化上下文。</p>
+<p>Hibernate 是 JPA 的一种实现，在以下几种情况会同步数据：</p>
+<ul>
+<li>当参与的 JTA 事务提交时。</li>
+<li>在一个查询执行前–我们的意思不是使用 find() 方法进行查找，而是使用类似 javax.persistence.Query 这种 Hibernate api 进行查询。</li>
+<li>当应用调用 flush() 方法。</li>
+</ul>
+<p>你可以使用 EntityManager 的 FlushModeType 设置控制这些行为：</p>
+<p> <img src="https://s2.loli.net/2021/12/19/IiwZCxjrY5za2FN.png" alt="image-20211219174324733"></p>
+<p>你在①加载了 Item 实例，并在②更改了它的名字。③然后你查询这条数据，并收到它的名字。通常，Hibernate 会在查询之前将内存中的更改同步到数据库中。这是 FlushModeType.AUTO 的行为，而这个行为是 Entity-Manager 参与事务的默认选项。FlushModeType.COMMIT 会关闭这个行为，所以可能导致查询出来的结果与内存中的数据不一致。只有事务提交的时候数据才会被同步到数据库中。</p>
+<p>你可以通过调用 EntityManager#flush() 方法，在事务的任意时刻将数据的更改强制同步到数据库中。</p>
+<p>我们关于瞬时态、持久化、删除 entity 状态以及 EntityManager API 的基本使用的讨论就此结束。控制状态转换的 API 方法必须要了解，每个 JPA 应用都有这些操作。</p>
+<p>下面看下 entity 游离态。我们早就提到过当 entity 实例与持久化上下文彻底失去联系时会有一些问题，例如，不能进行延迟初始化。让我们通过一些样例去研究一下游离态，让你知道当我们在使用已经脱离持久化上下文管理的数据时会发生什么。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+        <category>翻译</category>
+      </categories>
+      <tags>
+        <tag>ORM</tag>
+        <tag>Java</tag>
+        <tag>Hibernate</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>项目如何分包</title>
+    <url>/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</url>
+    <content><![CDATA[<p>在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。</p>
+<span id="more"></span>
+
+<h2 id="1、按照类型方式划分"><a href="#1、按照类型方式划分" class="headerlink" title="1、按照类型方式划分"></a>1、按照类型方式划分</h2><p>例如将所有的接口放入一个包、Controller类放入一个包等等。</p>
+<p>优点：从类型看更为清晰</p>
+<p>缺点：不利于模块化开发，因为会将同一个功能的多个类分散在不同的包中</p>
+<h2 id="2、按照功能方式划分"><a href="#2、按照功能方式划分" class="headerlink" title="2、按照功能方式划分"></a>2、按照功能方式划分</h2><p>将同一个功能的所有类放在同一个包中。</p>
+<p>优点：高内聚，便于模块化开发</p>
+<p>缺点：同一包内类型混乱</p>
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>将功能耦合度高的类按照功能进行划分，而功能耦合度低的或者供多个功能使用的类按照类型进行划分。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
       </tags>
   </entry>
 </search>
