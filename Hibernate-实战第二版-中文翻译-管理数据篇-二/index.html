@@ -45,7 +45,7 @@
 <meta property="og:image" content="https://s2.loli.net/2021/12/19/PATRMZfu7KCnjbX.png">
 <meta property="og:image" content="https://s2.loli.net/2021/12/19/IiwZCxjrY5za2FN.png">
 <meta property="article:published_time" content="2021-12-12T13:56:51.000Z">
-<meta property="article:modified_time" content="2021-12-19T12:39:52.609Z">
+<meta property="article:modified_time" content="2021-12-25T09:05:25.676Z">
 <meta property="article:author" content="Byw">
 <meta property="article:tag" content="ORM">
 <meta property="article:tag" content="Java">
@@ -248,7 +248,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-12-19 20:39:52" itemprop="dateModified" datetime="2021-12-19T20:39:52+08:00">2021-12-19</time>
+                <time title="修改时间：2021-12-25 17:05:25" itemprop="dateModified" datetime="2021-12-25T17:05:25+08:00">2021-12-25</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -299,7 +299,7 @@
         <h2 id="EntityManager-接口"><a href="#EntityManager-接口" class="headerlink" title="EntityManager 接口"></a>EntityManager 接口</h2><p>任何持久层框架都会提供一个管理持久层的 API。这个 API 一般都会提供基础的增删改查功能，通过它就可以管理持久化上下文。在 Java 持久层框架中，最常使用的接口就是 EntityManager。</p>
 <span id="more"></span>
 
-<h3 id="工作单元-unit-of-work-的权威解释"><a href="#工作单元-unit-of-work-的权威解释" class="headerlink" title="工作单元(unit of work)的权威解释"></a>工作单元(unit of work)的权威解释</h3><p>（ps: 单元可以理解为一种计量的单位，用来代表工作开始和结束这一过程。我阅读了整个小结，认为这段就是在讲什么是单元，单元其实就是类似事务，事务的开始代表工作开始，事务结束代表工作结束。不同的是，一个工作单元内可以有多个事务）。</p>
+<h3 id="工作单元-unit-of-work-的权威解释"><a href="#工作单元-unit-of-work-的权威解释" class="headerlink" title="工作单元(unit of work)的权威解释"></a>工作单元(unit of work)的权威解释</h3><p>（ps: 单元可以理解为一种计量的单位，用来代表工作开始和结束这一过程。我阅读了整个小结，认为这段就是在讲什么是单元，单元其实就是类似事务，事务的开始代表工作开始，事务结束代表工作结束）。</p>
 <p>在一些简单的 Java SE 和 Java EE 项目中 ( 例如只有一些 servlet )。你可以通过调用 EntityManagerFactory#createEntityManager() 方法获得一个 EntityManager 。你的应用代码共享 EntityManagerFactory ，这代表了一个持久层单元，或者一次操作数据库的逻辑（CRUD）。很多应用只会有一个EntityManagerFactory 被共享。</p>
 <p>每个线程在操作数据库的时候都创建一个独有的  EntityManager 是很浪费资源的。下面来看下 <strong>工作单元</strong> 的经典代码：</p>
 <p><img src="https://s2.loli.net/2021/12/14/awnmFQNg5YrObzG.png" alt="image-20211214131555083"></p>

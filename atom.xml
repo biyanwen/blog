@@ -46,7 +46,7 @@
     <link href="http://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/"/>
     <id>http://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/</id>
     <published>2021-12-12T13:56:51.000Z</published>
-    <updated>2021-12-19T12:39:52.609Z</updated>
+    <updated>2021-12-25T09:05:25.676Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;EntityManager-接口&quot;&gt;&lt;a href=&quot;#EntityManager-接口&quot; class=&quot;headerlink&quot; title=&quot;EntityManager 接口&quot;&gt;&lt;/a&gt;EntityManager 接口&lt;/h2&gt;&lt;p&gt;任何持久层框架都会提供一个管理持久层的 API。这个 API 一般都会提供基础的增删改查功能，通过它就可以管理持久化上下文。在 Java 持久层框架中，最常使用的接口就是 EntityManager。&lt;/p&gt;</summary>
