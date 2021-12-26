@@ -1921,4 +1921,76 @@
         <tag>Hibernate</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Hibernate 实战第二版 中文翻译 事务和并发篇(一)</title>
+    <url>/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E4%BA%8B%E5%8A%A1%E5%92%8C%E5%B9%B6%E5%8F%91%E7%AF%87-%E4%B8%80/</url>
+    <content><![CDATA[<p>在这章，我们终于要学习事务相关的知识了：在应用中如何创建工作单元并解决并发问题。（ps: 想了解什么是 <a href="https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/">工作单元</a> 请看这里。）工作单元是一个原子操作。事务可以让你设置工作单元的边界，让其不会受其他工作单元影响。在一个拥有许多用户的应用中，或许会有很多人同时访问这些工作单元的情况。</p>
+<p>在处理并发问题之前，我们首先集中精力了解下最基础的工作单元：数据库和系统事务。你将学会使用 Java 代码定义工作单元和事务划分相关的 API。我们将讨论如何保持隔离，并且用乐观锁和悲观锁控制并发访问。</p>
+<span id="more"></span>
+
+<p>最后，我们会看一些在没有事务的情况下访问数据库的特殊案例和 JPA 的特性。</p>
+<h2 id="事务的要素"><a href="#事务的要素" class="headerlink" title="事务的要素"></a>事务的要素</h2><p>在某些场景下应用需要将几件事情一次性做完。例如，当一次拍卖结束后，CaveatEmptor 应用必须执行三个不同的任务：</p>
+<ol>
+<li>寻找拍卖的中标者。</li>
+<li>收取卖方的手续费。</li>
+<li>通知卖方和买方。</li>
+</ol>
+<p>如果因为外部的信用卡系统的问题导致扣款失败会怎样？这个商业需求可能会规定要么所有任务全部成功要么全部失败。因此，可以称这些步骤属于同一个事务或者工作单元。如果其中一个步骤失败了，那么整个工作单元都必须失败。</p>
+<h3 id="ACID-属性"><a href="#ACID-属性" class="headerlink" title="ACID 属性"></a>ACID 属性</h3><p>ACID 是原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）的缩写，代表一个事务中的所有操作都是原子的。此外，事务允许多个用户并发的操作相同的数据，而且不会出现数据不一致的问题。一个正在运行的事务不能访问另一个同时也在运行的事务；他们应该独立的工作。事务中的更改应该是被持久化的，即使在事务完成之后系统崩溃了也不应该有数据丢失。</p>
+<p>另外，你想要事务正确的执行。例如，业务逻辑是应用只能对卖方扣款一次，而不是两次。这个逻辑是合理的，但是你没办法从数据库层面去约束它。因此，事务的正确性只能由应用程序自己保证，而数据库要保证数据的一致性。这些属性一起组成了 ACID 标准。</p>
+<h3 id="数据库与系统事务"><a href="#数据库与系统事务" class="headerlink" title="数据库与系统事务"></a>数据库与系统事务</h3><p>我们之前已经提到过系统和数据库事务了。再回头看下最后提出的那个问题：在一个拍卖功能的事务结束期间，我们或许会在数据库中记录中标金额。之后，在相同的事务中，我们会与一个外部的信用卡系统交互对卖方的账户进行扣款（服务费）。这个事务会横跨多个系统，并且会与很多子事务共同完成这个任务，这些子事务包括但不限于数据库连接的事务、外部扣款系统的事务。</p>
+<p>数据库的事务越短越好，因为它不仅会增加数据库资源的使用，而且在并发访问的情况下独占锁会导致其他访问被阻塞。一般情况下，一批数据操作会使用单独的事务进行控制。</p>
+<p>无论你在事务中执行什么数据库操作，你都必须设置工作单元的边界。你必须开启事务，并且在某个时间点将更改进行提交。无论发生任何异常，你都必须将数据回滚到更改之前的状态。这个过程要依赖于你使用的技术，并且涉及一定程度的人工干预。总之，设置事务的开始和结束这种边界，即可以使用编程式也可以使用声明式。</p>
+<h3 id="JTA"><a href="#JTA" class="headerlink" title="JTA"></a>JTA</h3><p>在 Java SE 中你可以调用 JDBC API 设置事务的边界。你可以通过调用 setAutoCommit(false) 在JDBC 链接上开启一个事务并且在事务结束时调用 commit() 方法。你可以在事务运行的任意时刻调用 rollback() 方法让事务立即回滚。</p>
+<p>在一个需要横跨多个系统对数据进行操作的应用中，有些工作单元可能包含多个事务。在这个场景中，你不能仅仅通过 JDBC 达到原子操作的目的。你需要一个可以在一个系统事务中处理多个事务资源的事务管理器（这里描述的应该是一个分布式事务，这个分布式事务由多个应用的多个事务共同组成）。JTA 标准事务管理器可以对分布式事务进行管理，让你不用关心太多的底层细节。JTA 最主要的 API 是 UserTransaction 接口中的 begin() 方法和 commit() 方法。</p>
+<blockquote>
+<p><strong>关于事务的其他 API</strong></p>
+<p>JTA 提供了一个很好的关于分布式事务系统的抽象。许多开发者仍然以为只能在 Java EE 的应用中使用 JTA。但是，当前有很多高品质独立的 JTA 服务可以使用，例如 Bitronix 和 Atomikos，它们可以被使用在任何 Java 环境中，而且很容易上手。考虑将这些解决方案当做启动 JTA 的数据路连接池。</p>
+<p>你应该尽可能的使用 JTA ，并且要避免使用私有事务 API 例如 org.hibernate.Transaction 或者限制非常多的 javax.persistence.EntityTransaction。这些 API 都会在 JTA 在 EJB运行容器外部还不可用时就会被创建。</p>
+</blockquote>
+<p>在 10.2.1 节我们会再一次学习事务，并且主要学习如何处理异常。下面这些代码展示了发生异常时如何回滚数据。</p>
+<p><img src="https://s2.loli.net/2021/12/25/S6xe14lGWDMI8a7.png" alt="image-20211225234127886"></p>
+<p>这段代码最复杂的地方就是处理异常的部分：我们现在就讨论这部分内容。首先你需要知道事务管理器和 EntityManager 是如何配合使用的。</p>
+<p>EntityManager 是懒加载的，我们在前几章讨论过这个话题，它直到 Sql 必须被执行的时候才会去获取数据库连接。JTA 也是如此：当你没有访问任何事务资源的时候，提交一个空的事务是非常节省资源的。例如，你可以在服务器中这么操作，这样的话，每次请求都不会消耗资源也不会对数据库进行上锁。</p>
+<p>当你创建一个 EntityManager 的时候，它会在当前工作线程中寻找 JTA 事务。如果 EntityManager 找到了这个事务，那么它就会加入这个事务，并且监听事务消息。这就意味着如果你想让上述流程起效，那么你就必须在同一个线程中调用 UserTransaction#begin()  方法和 EntityManagerFactory#createEntityManager() 方法。默认情况下，Hibernate 会像第 10  章所述，会自动提交事务。</p>
+<p>当 EntityManager 在当前线程中无法找到事务时，它就会进入 unsynchronized 模式，在这模式中， JPA 将不会自动提交事务。晚一些我们将会对这种行为进行更深入的讨论；当你在设计很复杂的功能时，这是一个很方便的特性。</p>
+<p>如果一个事务运行的时间太长就会被事务管理器关掉。记住数据库事务要尽可能的短。Bitronix 作为一个 JTA 服务提供者，它的默认超时时间是 60 秒，当前你可以在事务开始前调用 UserTransaction#setTransactionTimeout(). 方法覆盖这个参数。</p>
+<p>我们用前面的代码片段来谈论如何处理异常。</p>
+<h3 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h3><p>如果在调用 EntityManager 时或者事务提交时抛出异常，你必须检查当前系统事务的状态。当异常发生的时候，Hibernate 会让事务进行回滚。这意味着，在这个事务中进行的更改都不会生效。因为是你开启的事务，所以检查事务是否为 STATUS_MARKED_ROLLBACK 状态也是你的工作。如果 Hibernate 回滚失败了那么这个事务仍然会保持 STATUS_ACTIVE 状态。在这个案例中，你也可以调用 UserTransaction#rollback() 去取消执行任何已经发送到数据库的 Sql 语句。</p>
+<p>JPA 的任何操作，包括刷新持久化上下文时都有可能抛出 RuntimeException 异常。但是 UserTransaction#begin(), commit(),  和evenrollback() 方法抛出的是 Exception 异常。 异常在回滚的时候需要进行特殊处理的：你想要捕获这个异常并且将它输出到日志中；否则就会导致回滚失败。你也可以在回滚之后继续将异常往上抛出，这种情况下你可能会有一个拦截器，对异常进行统一处理，例如在屏幕上渲染一些错误信息，或者联系运维团队。在回滚时又出现异常是很难处理的，我们建议将它输出到日志，并且对其进行人工干预。因为回滚失败代表着系统有很多问题。</p>
+<p>Hibaernte 抛出的异常都是 RuntimeException 的子异常，了解它们会对你进行异常处理有很多帮助。</p>
+<ul>
+<li>HibernateException 是很常见的异常。你必须检查这个异常信息，或者通过调用 getCause() 方法获得更多信息。</li>
+<li>JDBCException 一般出现在 Hibernate 与 JDBC 进行交互的时候。这类异常也可能是某些 Sql 导致的，你可以通过调用 getSQL() 方法获取到导致异常发生的 Sql。这个 JDBC 链接抛出的内部异常可以通过调用 getSQLException() 或者 getCause() 方法得到，并且通过调用 getErrorCode() 可以获取数据库特定的异常代码信息。</li>
+<li>JDBCException 及其子类在 Hibernate 中存在一个转换器，可以通过数据库驱动将它转换成更有意义的信息。可以转换的异常有 JDBCConnectionException, SQLGrammarException, LockAcquisitionException,DataException,  和  ConstraintViolationException，主流数据库都为 Hibernate 提供了相应的方言。你也可以通过 SQLExceptionConverterFactory 类为你的数据库或者插件配置自定义的转换器。</li>
+</ul>
+<p>很多开发者看到 Hibernate 对异常有这么详细的类型划分都很高兴。但是这可能让你误入歧途。例如，你或许会为了达到某种校验的目的去捕获 ConstraintViolationException 异常。如果你忘记给 Item#name 属性赋值，同时它对应的数据库字段被设置为 NOT NULL。当你试图去刷新持久化上下文的时候 Hibernate 会抛出异常。这种情况下为什么不能捕获它并且将失败信息（使用自己定义的错误码和描述信息）展示给开发者，让他们改正这个问题？因为这个策略会有两个明显的问题。</p>
+<p>第一，根据数据库抛出的未检查的值来看是什么问题对于一个可拓展的应用来说并不是一个很好的策略。应该在应用层实现一些数据校验工作。第二，异常对于当前工作单元来说是致命的，但是这不应该是让一个应用的使用者去处理它：使用者希望在工作单元内部进行处理。在不了解代码细节的情况下是很难处理的。我们建议你使用细粒度的异常类型去展示致命的异常信息，而不是用于去验证你的猜想。例如，当你捕获 ConstraintViolationException 异常时屏幕展示如下信息：“应用出现了 bug，某人在存储局时没有对数据进行校验，请将这个问题报告给程序员” 对于其他异常信息，你最好在屏幕中生成错误信息。</p>
+<p>这么做对开发者是很有用的，让开发者可以快速判断是应用层出现了问题，还是数据库负载过高（无法获得锁资源）。对于校验，你可以使用 Bean Validation 框架。通过在 entity 上配置一些注解，Hibernate 可以在用户层对数据进行校验，并且可以自动生成 Sql ddl 规则。</p>
+<p>你现在应该知道什么异常应该进行捕获处理了。或许你还有一个问题：你捕获异常后应该做什么，让事务回滚吗？Hibernate 抛出异常是致命的。这意味着你必须关闭当前持久化上下文。你不能继续使用已经抛出异常的 EntityManager。将异常信息输出到屏幕或者日志中，然后让用户使用一个全新的事务和持久化上下文重新开启会话。</p>
+<p>以上所述并不包含所有情况，有些标准异常并不是不可挽回的：</p>
+<ul>
+<li>javax.persistence.NoResultException，这个异常会在 Query 或者 TypedQuery 调用 getSingleResult() 方法但是在数据库找不到对应的数据时被抛出。你可以通过异常处理代码对这个查询进行封装，然后继续使用这个持久化上下文。当前事务不会因为这个异常而进行回滚。</li>
+<li>javax.persistence.NonUniqueResultException，这个异常会在 Query 或者 TypedQuery 调用 getSingleResult() 方法但是数据库放回多条数据时抛出。你可以通过异常处理代码对这个查询进行封装，然后继续使用这个持久化上下文。当前事务不会因为这个异常而进行回滚。</li>
+<li>javax.persistence.QueryTimeoutException，当 Query 或者 TypedQuery 执行太久时抛出。不要让事务回滚。在某些情况下你或许想要再次查询。</li>
+<li>javax.persistence.LockTimeoutException，当无法获取悲观锁时会抛出此异常。或许会发生在与数据库同步数据时候或者通过显式声明锁进行上锁的情况下。事务在这种情况下不回滚，你或许想要再次尝试这个操作。记住，不断重复已经访问数据库失败的操作不会解决问题。</li>
+</ul>
+<p>这个列表中没有包含 javax.persistence.EntityNotFoundException 异常，这个异常会被 EntityManager#getReference()、lock() 和 refresh() 方法抛出。Hibernate 会在你试图访问一个已经从数据库中被删除的数据时抛出此异常。这是一个致命的异常，事务会因此回滚，你必须关闭这个持久化上下文。</p>
+<p>通过编程式进行事务的划分需要使用类似 JTA 的 UserTransaction 接口这样的应用代码才行。但是通过声明式的方式就不需要写多余的代码。</p>
+<h3 id="声明式定义事务"><a href="#声明式定义事务" class="headerlink" title="声明式定义事务"></a>声明式定义事务</h3><p>在 Java EE 中，当你需要一个事务时你可以通过声明的方式获取一个事务。运行环境会负责处理相关的事情。通常情况下你需要在你的组件中配置一些注解，以达到开启事务的目的。</p>
+<p>在 EJB 组件中，你可以使用  @javax.ejb.TransactionAttribute 注解来声明事务的边界。你可以在 18.2.1 中找到相关的代码示例。</p>
+<p>你也可以使用一个较新的注解 @javax.transaction.Transactional 这个注解可以用在任何 Java EE 的应用中。你可以在 19.3.1 节找到相关的示例。</p>
+<p>本章的代码示例可以运行在任意 Java SE 环境中，不需要任何运行容器。从现在开始，你将只能看到编程式的事务划分，直到我们学习 Java EE 的特殊应用例子为止。</p>
+<p>下面让我们学习 ACID 最复杂的功能：如何将正在运行的工作单元相互独立。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+        <category>翻译</category>
+      </categories>
+      <tags>
+        <tag>ORM</tag>
+        <tag>Java</tag>
+        <tag>Hibernate</tag>
+      </tags>
+  </entry>
 </search>

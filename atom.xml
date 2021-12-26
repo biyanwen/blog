@@ -6,7 +6,7 @@
   <link href="http://biyw.cf/atom.xml" rel="self"/>
   
   <link href="http://biyw.cf/"/>
-  <updated>2021-12-24T07:47:51.780Z</updated>
+  <updated>2021-12-26T10:51:41.014Z</updated>
   <id>http://biyw.cf/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Hibernate 实战第二版 中文翻译 事务和并发篇(一)</title>
+    <link href="http://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E4%BA%8B%E5%8A%A1%E5%92%8C%E5%B9%B6%E5%8F%91%E7%AF%87-%E4%B8%80/"/>
+    <id>http://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E4%BA%8B%E5%8A%A1%E5%92%8C%E5%B9%B6%E5%8F%91%E7%AF%87-%E4%B8%80/</id>
+    <published>2021-12-24T08:20:01.000Z</published>
+    <updated>2021-12-26T10:51:41.014Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;在这章，我们终于要学习事务相关的知识了：在应用中如何创建工作单元并解决并发问题。（ps: 想了解什么是 &lt;a href=&quot;https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/&quot;&gt;工作单元&lt;/a&gt; 请看这里。）工作单元是一个原子操作。事务可以让你设置工作单元的边界，让其不会受其他工作单元影响。在一个拥有许多用户的应用中，或许会有很多人同时访问这些工作单元的情况。&lt;/p&gt;
+&lt;p&gt;在处理并发问题之前，我们首先集中精力了解下最基础的工作单元：数据库和系统事务。你将学会使用 Java 代码定义工作单元和事务划分相关的 API。我们将讨论如何保持隔离，并且用乐观锁和悲观锁控制并发访问。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    <category term="翻译" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/%E7%BF%BB%E8%AF%91/"/>
+    
+    
+    <category term="ORM" scheme="http://biyw.cf/tags/ORM/"/>
+    
+    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
+    
+    <category term="Hibernate" scheme="http://biyw.cf/tags/Hibernate/"/>
+    
+  </entry>
   
   <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(三)</title>
@@ -428,25 +454,6 @@
     <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
     
     <category term="多线程" scheme="http://biyw.cf/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>项目如何分包</title>
-    <link href="http://biyw.cf/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/"/>
-    <id>http://biyw.cf/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</id>
-    <published>2021-12-05T03:55:50.836Z</published>
-    <updated>2021-12-16T04:43:56.836Z</updated>
-    
-    
-    <summary type="html">&lt;p&gt;在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
-    
-    
-    <category term="架构" scheme="http://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
     
   </entry>
   
