@@ -6,7 +6,7 @@
   <link href="http://biyw.cf/atom.xml" rel="self"/>
   
   <link href="http://biyw.cf/"/>
-  <updated>2021-12-26T10:51:41.014Z</updated>
+  <updated>2022-01-03T09:02:25.529Z</updated>
   <id>http://biyw.cf/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Java中byte转int为什么要使用&amp;0xFF</title>
+    <link href="http://biyw.cf/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/"/>
+    <id>http://biyw.cf/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/</id>
+    <published>2022-01-03T05:50:35.000Z</published>
+    <updated>2022-01-03T09:02:25.529Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;在 Java 中将十六进制 byte 转成 int 时要使用 &amp;amp;0xFF 操作这是为什么呢？这是因为十六进制的范围是 0x00~0x3FF 没有负数，而 int 的取值范围是包含负数的，所以直接将 byte 强转成 int 可能会得到错误的数值。同时操作系统存储的是二进制原码进行补码后的数值, 所以只有通过 &amp;amp;0xFF 操作才能得到正确的数值。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
+    
+    <category term="计算机原理" scheme="http://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
+    
+  </entry>
   
   <entry>
     <title>Hibernate 实战第二版 中文翻译 事务和并发篇(一)</title>
@@ -433,27 +454,6 @@
     <category term="Jvm" scheme="http://biyw.cf/tags/Jvm/"/>
     
     <category term="字节码" scheme="http://biyw.cf/tags/%E5%AD%97%E8%8A%82%E7%A0%81/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>java高并发程序设计</title>
-    <link href="http://biyw.cf/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/"/>
-    <id>http://biyw.cf/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/</id>
-    <published>2021-12-05T04:21:18.434Z</published>
-    <updated>2021-12-16T04:45:08.210Z</updated>
-    
-    
-    <summary type="html">&lt;p&gt;高并发是 java 开发必备知识，本篇文章整理出在高并发程序设计中常用的工具。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
-    
-    
-    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
-    
-    <category term="多线程" scheme="http://biyw.cf/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
     
   </entry>
   
