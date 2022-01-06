@@ -2026,4 +2026,33 @@
         <tag>计算机原理</tag>
       </tags>
   </entry>
+  <entry>
+    <title>指令详解-地址码</title>
+    <url>/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/</url>
+    <content><![CDATA[<h2 id="指令是什么："><a href="#指令是什么：" class="headerlink" title="指令是什么："></a>指令是什么：</h2><p>可以将指令当做一种编程语言，表现形式为一串二进制码，作用是能让计算机按照指令去工作。</p>
+<p>指令由两部分组成，操作码和地址码，下面我们着重看下<strong>地址码</strong>。</p>
+<span id="more"></span>
+
+<h2 id="操作码（OP）："><a href="#操作码（OP）：" class="headerlink" title="操作码（OP）："></a>操作码（OP）：</h2><p>用于表明这条指令的作用。</p>
+<h2 id="地址码（A）："><a href="#地址码（A）：" class="headerlink" title="地址码（A）："></a>地址码（A）：</h2><p>存储内存地址，用来寻找内存中的数据。</p>
+<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><p>根据地址码的数量进行分类。</p>
+<h4 id="四地址指令"><a href="#四地址指令" class="headerlink" title="四地址指令"></a>四地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/XkvMpVyrgucfNla.png" alt="image-20220106100336187"></p>
+<p>其中A1 第一个操作数的地址、A2 第二个操作数的地址、A3 保存计算结果、A4 下一条待执行指令的地址。<br>公式：（A1）OP （A2）—&gt; A3； A4 指向下一条指令。<br>特点：表意直观，可以明确指出下一条指令的地址，但是长度太大，实际应用中很少采用这种格式。</p>
+<h4 id="三地址指令"><a href="#三地址指令" class="headerlink" title="三地址指令"></a>三地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/e6oJ41ltTj7Kv3y.png" alt="image-20220106100731815"></p>
+<p>其中A1 第一个操作数的地址、A2 第二个操作数的地址、A3 保存计算结果</p>
+<p>公式：（A1）OP （A2）—&gt; A3。<br>这里是没有存储下一条指令的地址，因为指令都是顺序排布的，所以默认下一条指令地址为 （PC）+1 —&gt; PC 。 PC 为程序计数器。<br>特点：指令长度太长，执行一次指令要四次访存，取指令一次，取操作数两次，存结果一次，操作数不会被破坏，因为会用一个单独的地址存储计算结果。</p>
+<h4 id="二地址指令"><a href="#二地址指令" class="headerlink" title="二地址指令"></a>二地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/6pStYCkeoOlqy2u.png" alt="image-20220106101015294"></p>
+<p>用其中一个地址码来保存结果，公式：（A1）OP （A2）—&gt; A1。（PC）+1 —&gt; PC。<br>特点：执行一次指令要四次访存，取指令一次，取操作数两次，存结果一次。执行完成后计算结果会覆盖一个操作数，所以操作数会被破坏。</p>
+<h4 id="一地址指令"><a href="#一地址指令" class="headerlink" title="一地址指令"></a>一地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/rBALognIxNdZEjK.png" alt="image-20220106101121663"></p>
+<p>一般用于累加计算器（Acc），公式：（Acc）OP （A1） —&gt; Acc。（PC）+1 —&gt; PC。<br>特点：执行一次指令只需访存两次，取指令一次，取操作数一次。被操作数和运算结果都放在累加寄存器中，所以对于被操作数的读取和存入都不需要访存。</p>
+<h4 id="零地址指令"><a href="#零地址指令" class="headerlink" title="零地址指令"></a>零地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/EmJ8D2pGORQ4K9n.png" alt="image-20220106101425810"></p>
+<p>特点：一般运用于堆栈计算机中，参与运算的操作数从栈顶弹出，运算后将结果压入堆栈中。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>计算机原理</tag>
+      </tags>
+  </entry>
 </search>

@@ -6,7 +6,7 @@
   <link href="http://biyw.cf/atom.xml" rel="self"/>
   
   <link href="http://biyw.cf/"/>
-  <updated>2022-01-03T09:02:25.529Z</updated>
+  <updated>2022-01-06T02:20:13.933Z</updated>
   <id>http://biyw.cf/</id>
   
   <author>
@@ -15,6 +15,26 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>指令详解-地址码</title>
+    <link href="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/"/>
+    <id>http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/</id>
+    <published>2022-01-16T05:50:35.000Z</published>
+    <updated>2022-01-06T02:20:13.933Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;指令是什么：&quot;&gt;&lt;a href=&quot;#指令是什么：&quot; class=&quot;headerlink&quot; title=&quot;指令是什么：&quot;&gt;&lt;/a&gt;指令是什么：&lt;/h2&gt;&lt;p&gt;可以将指令当做一种编程语言，表现形式为一串二进制码，作用是能让计算机按照指令去工作。&lt;/p&gt;
+&lt;p&gt;指令由两部分组成，操作码和地址码，下面我们着重看下&lt;strong&gt;地址码&lt;/strong&gt;。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="计算机原理" scheme="http://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
+    
+  </entry>
   
   <entry>
     <title>Java中byte转int为什么要使用&amp;0xFF</title>
@@ -433,27 +453,6 @@
     <category term="Jvm" scheme="http://biyw.cf/tags/Jvm/"/>
     
     <category term="类加载" scheme="http://biyw.cf/tags/%E7%B1%BB%E5%8A%A0%E8%BD%BD/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>虚拟机字节码执行引擎</title>
-    <link href="http://biyw.cf/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/"/>
-    <id>http://biyw.cf/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/</id>
-    <published>2021-12-05T06:09:58.727Z</published>
-    <updated>2021-12-16T04:46:51.848Z</updated>
-    
-    
-    <summary type="html">&lt;p&gt;虚拟机字节码执行引擎是java虚拟机核心组成部分之一，所有java虚拟机的执行引擎输入、输出都是一致的：输入的是字节码二进制流，处理过程是字节码解析执行的等效过程，输出的是执行结果。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
-    
-    
-    <category term="Jvm" scheme="http://biyw.cf/tags/Jvm/"/>
-    
-    <category term="字节码" scheme="http://biyw.cf/tags/%E5%AD%97%E8%8A%82%E7%A0%81/"/>
     
   </entry>
   

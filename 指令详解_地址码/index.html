@@ -21,20 +21,26 @@
     var CONFIG = {"hostname":"biyw.cf","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。">
+  <meta name="description" content="指令是什么：可以将指令当做一种编程语言，表现形式为一串二进制码，作用是能让计算机按照指令去工作。 指令由两部分组成，操作码和地址码，下面我们着重看下地址码。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="网站的高性能架构">
-<meta property="og:url" content="http://biyw.cf/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/index.html">
+<meta property="og:title" content="指令详解-地址码">
+<meta property="og:url" content="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/index.html">
 <meta property="og:site_name" content="byw的博客">
-<meta property="og:description" content="网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。">
+<meta property="og:description" content="指令是什么：可以将指令当做一种编程语言，表现形式为一串二进制码，作用是能让计算机按照指令去工作。 指令由两部分组成，操作码和地址码，下面我们着重看下地址码。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-12-05T06:20:42.235Z">
-<meta property="article:modified_time" content="2021-12-16T04:44:41.665Z">
+<meta property="og:image" content="https://s2.loli.net/2022/01/06/XkvMpVyrgucfNla.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/06/e6oJ41ltTj7Kv3y.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/06/6pStYCkeoOlqy2u.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/06/rBALognIxNdZEjK.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/06/EmJ8D2pGORQ4K9n.png">
+<meta property="article:published_time" content="2022-01-16T05:50:35.000Z">
+<meta property="article:modified_time" content="2022-01-06T02:20:13.933Z">
 <meta property="article:author" content="Byw">
-<meta property="article:tag" content="架构">
+<meta property="article:tag" content="计算机原理">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2022/01/06/XkvMpVyrgucfNla.png">
 
-<link rel="canonical" href="http://biyw.cf/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/">
+<link rel="canonical" href="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/">
 
 
 <script id="page-configurations">
@@ -47,7 +53,7 @@
   };
 </script>
 
-  <title>网站的高性能架构 | byw的博客</title>
+  <title>指令详解-地址码 | byw的博客</title>
   
 
 
@@ -199,7 +205,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://biyw.cf/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/">
+    <link itemprop="mainEntityOfPage" href="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tx.jpg">
@@ -212,7 +218,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          网站的高性能架构
+          指令详解-地址码
         </h1>
 
         <div class="post-meta">
@@ -222,14 +228,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2021-12-05 14:20:42" itemprop="dateCreated datePublished" datetime="2021-12-05T14:20:42+08:00">2021-12-05</time>
+              <time title="创建时间：2022-01-16 13:50:35" itemprop="dateCreated datePublished" datetime="2022-01-16T13:50:35+08:00">2022-01-16</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-12-16 12:44:41" itemprop="dateModified" datetime="2021-12-16T12:44:41+08:00">2021-12-16</time>
+                <time title="修改时间：2022-01-06 10:20:13" itemprop="dateModified" datetime="2022-01-06T10:20:13+08:00">2022-01-06</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -254,14 +260,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.7k</span>
+              <span>745</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
+              <span>1 分钟</span>
             </span>
 
         </div>
@@ -273,83 +279,24 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。</p>
+        <h2 id="指令是什么："><a href="#指令是什么：" class="headerlink" title="指令是什么："></a>指令是什么：</h2><p>可以将指令当做一种编程语言，表现形式为一串二进制码，作用是能让计算机按照指令去工作。</p>
+<p>指令由两部分组成，操作码和地址码，下面我们着重看下<strong>地址码</strong>。</p>
 <span id="more"></span>
 
-<h2 id="1-网站性能测试"><a href="#1-网站性能测试" class="headerlink" title="1. 网站性能测试"></a>1. 网站性能测试</h2><p>性能测试是性能优化的前提和基础，也是性能优化结果的检查和度量标准。不同视角下的网站性能有不同的标准，也有不同的优化手段。</p>
-<h3 id="1-1不同视角下的网站性能"><a href="#1-1不同视角下的网站性能" class="headerlink" title="1.1不同视角下的网站性能"></a>1.1不同视角下的网站性能</h3><ul>
-<li><p>1.1.1 用户视角的网站性能</p>
-<p>从用户角度，网站性能就是用户在浏览器上直观感受到的网站响应速度快还是慢</p>
-<ul>
-<li><p>优化手段：</p>
-<p>使用一些前端架构优化手段，通过优化页面HTML式样、利用浏览器端的并发和异步特性、调整浏览器缓存策略、使用CDN服务、反向代理等手段，使浏览器尽快地显示用户感兴趣的内容、尽可能近地获取页面内容，即使不优化应用程序和架构，也可以很大程度地改善用户视角下的网站性能</p>
-</li>
-</ul>
-</li>
-<li><p>1.1.2 开发人员视角的网站性能</p>
-<p>开发人员关注的主要是应用程序本身及其相关子系统的性能，包括响应延迟、系统吞吐量、并发处理能力、系统稳定性等技术指标。</p>
-<ul>
-<li><p>优化手段：</p>
-<p>使用缓存加速数据读取，使用集群提高吞吐能力，使用异步消息加快请求响应及实现削峰，使用代码优化手段改善程序性能。</p>
-</li>
-</ul>
-</li>
-<li><p>1.1.3 运维人员视角的网站性能</p>
-<p>运维人员更关注基础设施性能和资源利用率，如网络运营商的带宽能力、服务器硬件的配置、数据中心网络架构、服务器和网络带宽的资源利用率等</p>
-<ul>
-<li><p>优化手段</p>
-<p>建设优化骨干网、使用高性价比定制服务器、利用虚拟化技术优化资源利用等</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="1-2-性能测试指标"><a href="#1-2-性能测试指标" class="headerlink" title="1.2 性能测试指标"></a>1.2 性能测试指标</h3><p>不同视角下有不同的性能标准，不同的标准有不同的性能测试指标，从开发和测试人员的视角，网站性能测试的主要指标有响应时间、并发数、吞吐量、性能计数器等</p>
-<ul>
-<li><p>1.2.1 响应时间</p>
-<p>指应用执行一个操作需要的时间，包括从发出请求开始到收到最后响应数据所需要的时间</p>
-</li>
-<li><p>1.2.2 并发数</p>
-<p>指系统能够同时处理请求的数目，这个数字也反映了系统的负载特性。</p>
-</li>
-<li><p>1.2.3 吞吐量</p>
-<p>单位时间内系统处理的请求数量，体现系统的整体处理能力</p>
-</li>
-<li><p>1.2.4 性能计数器</p>
-<p>它是描述服务器或操作系统性能的一些数据指标。包括SystemLoad、对象与线程数、内存使用、CPU使用、磁盘与网络I/O等指标。这些指标也是系统监控的重要参数，对这些指标设置报警阈值，当监控系统发现性能计数器超过阈值时，就向运维和开发人员报警，及时发现处理系统异常。</p>
-</li>
-</ul>
-<h3 id="1-3-性能测试方法"><a href="#1-3-性能测试方法" class="headerlink" title="1.3 性能测试方法"></a>1.3 性能测试方法</h3><p>性能测试是一个总称，具体可细分为性能测试、负载测试、压力测试、稳定性测试。</p>
-<h2 id="2-Web前端性能优化"><a href="#2-Web前端性能优化" class="headerlink" title="2. Web前端性能优化"></a>2. Web前端性能优化</h2><h3 id="2-1-浏览器访问优化"><a href="#2-1-浏览器访问优化" class="headerlink" title="2.1 浏览器访问优化"></a>2.1 浏览器访问优化</h3><ul>
-<li><p>2.1.1 减少http请求</p>
-<ul>
-<li><p>2.1.1.1 为什么</p>
-<p>HTTP协议是无状态的应用层协议，意味着每次HTTP请求都需要建立通信链路、进行数据传输，而在服务器端，每个HTTP都需要启动独立的线程去处理</p>
-</li>
-<li><p>2.1.1.2 怎么办</p>
-<p>合并CSS、合并JavaScript、合并图片，这样一次请求就可以获取多个需要的文件</p>
-</li>
-</ul>
-</li>
-<li><p>2.1.2 使用浏览器缓存</p>
-<p>将更新的频率都低，而访问平凡的文件缓存在浏览器中，可以极好地改善性能</p>
-</li>
-<li><p>2.1.3 启用压缩</p>
-<p>在服务器端对文件进行压缩，在浏览器端对文件解压缩，可有效减少通信传输的数据量。有利就有弊，压缩对服务器和浏览器产生一定的压力，在通信带宽良好，而服务器资源不足的情况下要权衡考虑。</p>
-</li>
-<li><p>2.1.4 CSS放在页面最上面、JavaScript放在页面最下面</p>
-<p>浏览器会在下载完全部CSS之后才对整个页面进行渲染，因此最好的做法是将CSS放在页面最上面，让浏览器尽快下载CSS。JavaScript则相反，浏览器在加载JavaScript后立即执行，有可能会阻塞整个页面，造成页面显示缓慢，因此JavaScript最好放在页面最下面。</p>
-</li>
-<li><p>2.1.5 减少Cookie传输</p>
-<p>Cookie包含在每次请求和响应中，太大的Cookie会严重影响数据传输</p>
-</li>
-<li><p>2.1.5 CDN加速</p>
-<p>CDN（Content Distribute Network，内容分发网络）的本质仍然是一个缓存，而且将数据缓存在离用户最近的地方，使用户以最快速度获取数据</p>
-</li>
-<li><p>2.1.6 反向代理</p>
-<p>1、可以缓存静态内容，加快web访问；<br>2、保护网站安全，相当于在Web服务器和可能的网络攻击之间建立了一个屏障。</p>
-</li>
-</ul>
-<h2 id="3-应用服务器性能优化"><a href="#3-应用服务器性能优化" class="headerlink" title="3. 应用服务器性能优化"></a>3. 应用服务器性能优化</h2><p>优化手段主要有缓存、集群、异步等。</p>
+<h2 id="操作码（OP）："><a href="#操作码（OP）：" class="headerlink" title="操作码（OP）："></a>操作码（OP）：</h2><p>用于表明这条指令的作用。</p>
+<h2 id="地址码（A）："><a href="#地址码（A）：" class="headerlink" title="地址码（A）："></a>地址码（A）：</h2><p>存储内存地址，用来寻找内存中的数据。</p>
+<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><p>根据地址码的数量进行分类。</p>
+<h4 id="四地址指令"><a href="#四地址指令" class="headerlink" title="四地址指令"></a>四地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/XkvMpVyrgucfNla.png" alt="image-20220106100336187"></p>
+<p>其中A1 第一个操作数的地址、A2 第二个操作数的地址、A3 保存计算结果、A4 下一条待执行指令的地址。<br>公式：（A1）OP （A2）—&gt; A3； A4 指向下一条指令。<br>特点：表意直观，可以明确指出下一条指令的地址，但是长度太大，实际应用中很少采用这种格式。</p>
+<h4 id="三地址指令"><a href="#三地址指令" class="headerlink" title="三地址指令"></a>三地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/e6oJ41ltTj7Kv3y.png" alt="image-20220106100731815"></p>
+<p>其中A1 第一个操作数的地址、A2 第二个操作数的地址、A3 保存计算结果</p>
+<p>公式：（A1）OP （A2）—&gt; A3。<br>这里是没有存储下一条指令的地址，因为指令都是顺序排布的，所以默认下一条指令地址为 （PC）+1 —&gt; PC 。 PC 为程序计数器。<br>特点：指令长度太长，执行一次指令要四次访存，取指令一次，取操作数两次，存结果一次，操作数不会被破坏，因为会用一个单独的地址存储计算结果。</p>
+<h4 id="二地址指令"><a href="#二地址指令" class="headerlink" title="二地址指令"></a>二地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/6pStYCkeoOlqy2u.png" alt="image-20220106101015294"></p>
+<p>用其中一个地址码来保存结果，公式：（A1）OP （A2）—&gt; A1。（PC）+1 —&gt; PC。<br>特点：执行一次指令要四次访存，取指令一次，取操作数两次，存结果一次。执行完成后计算结果会覆盖一个操作数，所以操作数会被破坏。</p>
+<h4 id="一地址指令"><a href="#一地址指令" class="headerlink" title="一地址指令"></a>一地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/rBALognIxNdZEjK.png" alt="image-20220106101121663"></p>
+<p>一般用于累加计算器（Acc），公式：（Acc）OP （A1） —&gt; Acc。（PC）+1 —&gt; PC。<br>特点：执行一次指令只需访存两次，取指令一次，取操作数一次。被操作数和运算结果都放在累加寄存器中，所以对于被操作数的读取和存入都不需要访存。</p>
+<h4 id="零地址指令"><a href="#零地址指令" class="headerlink" title="零地址指令"></a>零地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/EmJ8D2pGORQ4K9n.png" alt="image-20220106101425810"></p>
+<p>特点：一般运用于堆栈计算机中，参与运算的操作数从栈顶弹出，运算后将结果压入堆栈中。</p>
 
     </div>
 
@@ -365,7 +312,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://biyw.cf/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/" title="网站的高性能架构">http://biyw.cf/网站的高性能架构/</a>
+    <a href="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/" title="指令详解-地址码">http://biyw.cf/指令详解_地址码/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -376,7 +323,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/" rel="tag"># 计算机原理</a>
           </div>
 
         
@@ -385,13 +332,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/" rel="prev" title="网站典型故障案例">
-      <i class="fa fa-chevron-left"></i> 网站典型故障案例
+    <a href="/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/" rel="prev" title="Java中byte转int为什么要使用&0xFF">
+      <i class="fa fa-chevron-left"></i> Java中byte转int为什么要使用&0xFF
     </a></div>
-      <div class="post-nav-item">
-    <a href="/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/" rel="next" title="集群环境下如何管理Session">
-      集群环境下如何管理Session <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -451,7 +395,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E7%BD%91%E7%AB%99%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95"><span class="nav-number">1.</span> <span class="nav-text">1. 网站性能测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1%E4%B8%8D%E5%90%8C%E8%A7%86%E8%A7%92%E4%B8%8B%E7%9A%84%E7%BD%91%E7%AB%99%E6%80%A7%E8%83%BD"><span class="nav-number">1.1.</span> <span class="nav-text">1.1不同视角下的网站性能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E6%8C%87%E6%A0%87"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 性能测试指标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E6%96%B9%E6%B3%95"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 性能测试方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Web%E5%89%8D%E7%AB%AF%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">2. Web前端性能优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E6%B5%8F%E8%A7%88%E5%99%A8%E8%AE%BF%E9%97%AE%E4%BC%98%E5%8C%96"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 浏览器访问优化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">3. 应用服务器性能优化</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%87%E4%BB%A4%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">指令是什么：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E7%A0%81%EF%BC%88OP%EF%BC%89%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">操作码（OP）：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E7%A0%81%EF%BC%88A%EF%BC%89%EF%BC%9A"><span class="nav-number">3.</span> <span class="nav-text">地址码（A）：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%B1%BB"><span class="nav-number">3.1.</span> <span class="nav-text">分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9B%E5%9C%B0%E5%9D%80%E6%8C%87%E4%BB%A4"><span class="nav-number">3.1.1.</span> <span class="nav-text">四地址指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E5%9C%B0%E5%9D%80%E6%8C%87%E4%BB%A4"><span class="nav-number">3.1.2.</span> <span class="nav-text">三地址指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E5%9C%B0%E5%9D%80%E6%8C%87%E4%BB%A4"><span class="nav-number">3.1.3.</span> <span class="nav-text">二地址指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E5%9C%B0%E5%9D%80%E6%8C%87%E4%BB%A4"><span class="nav-number">3.1.4.</span> <span class="nav-text">一地址指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9B%B6%E5%9C%B0%E5%9D%80%E6%8C%87%E4%BB%A4"><span class="nav-number">3.1.5.</span> <span class="nav-text">零地址指令</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -615,7 +559,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'blog',
       owner       : 'biyanwen',
       admin       : ['biyanwen'],
-      id          : '3bcdc68b76127712c4214e43ab8231e9',
+      id          : '646784294551a779d2f99935b32c63d9',
         language: 'zh-CN',
       distractionFreeMode: true
     });
