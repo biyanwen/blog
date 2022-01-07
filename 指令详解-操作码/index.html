@@ -21,17 +21,25 @@
     var CONFIG = {"hostname":"biyw.cf","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="技术、生活类博客，会不定期发布技术及生活类文章">
-<meta property="og:type" content="website">
-<meta property="og:title" content="byw的博客">
-<meta property="og:url" content="http://biyw.cf/tags/Jvm/index.html">
+  <meta name="description" content="定长编码每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。优点：计算机的硬件设计简单，朱令译码和执行速度快。缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。适用环境：适用于字长较长的计算机系统，如 32 位及以上。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="指令详解-操作码">
+<meta property="og:url" content="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/index.html">
 <meta property="og:site_name" content="byw的博客">
-<meta property="og:description" content="技术、生活类博客，会不定期发布技术及生活类文章">
+<meta property="og:description" content="定长编码每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。优点：计算机的硬件设计简单，朱令译码和执行速度快。缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。适用环境：适用于字长较长的计算机系统，如 32 位及以上。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s2.loli.net/2022/01/07/XzuvCTyoSpdbh2V.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/07/EyUX3z4txl7pV5c.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/07/O7QdwhIEz4ibgq8.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/07/AXLxmhVb4iF1nM5.png">
+<meta property="article:published_time" content="2022-01-16T05:50:35.000Z">
+<meta property="article:modified_time" content="2022-01-07T05:01:18.538Z">
 <meta property="article:author" content="Byw">
+<meta property="article:tag" content="计算机原理">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2022/01/07/XzuvCTyoSpdbh2V.png">
 
-<link rel="canonical" href="http://biyw.cf/tags/Jvm/">
+<link rel="canonical" href="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/">
 
 
 <script id="page-configurations">
@@ -39,12 +47,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>标签: Jvm | byw的博客</title>
+  <title>指令详解-操作码 | byw的博客</title>
   
 
 
@@ -189,117 +197,155 @@
         <div class="content-wrap">
           
 
-          <div class="content tag">
+          <div class="content post posts-expand">
             
 
+    
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <h2 class="collection-header">Jvm
-          <small>标签</small>
-        </h2>
-      </div>
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/tx.jpg">
+      <meta itemprop="name" content="Byw">
+      <meta itemprop="description" content="技术、生活类博客，会不定期发布技术及生活类文章">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="byw的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          指令详解-操作码
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-01-16 13:50:35" itemprop="dateCreated datePublished" datetime="2022-01-16T13:50:35+08:00">2022-01-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-01-07 13:01:18" itemprop="dateModified" datetime="2022-01-07T13:01:18+08:00">2022-01-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">技术</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>722</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2021</span>
-    </div>
+        <h2 id="定长编码"><a href="#定长编码" class="headerlink" title="定长编码"></a>定长编码</h2><p>每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。<br>优点：计算机的硬件设计简单，朱令译码和执行速度快。<br>缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。<br>适用环境：适用于字长较长的计算机系统，如 32 位及以上。</p>
+<span id="more"></span>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-12-05T14:15:11+08:00"
-              content="2021-12-05">
-          12-05
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/" itemprop="url">
-            <span itemprop="name">Java内存区域</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-12-05T14:13:31+08:00"
-              content="2021-12-05">
-          12-05
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/" itemprop="url">
-            <span itemprop="name">垃圾收集器与内存分配策略</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-12-05T14:12:44+08:00"
-              content="2021-12-05">
-          12-05
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" itemprop="url">
-            <span itemprop="name">虚拟机类加载机制</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-12-05T14:09:58+08:00"
-              content="2021-12-05">
-          12-05
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/" itemprop="url">
-            <span itemprop="name">虚拟机字节码执行引擎</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
+<p>如图：无论有几个地址码都不会影响操作码的长度。</p>
+<p><img src="https://s2.loli.net/2022/01/07/XzuvCTyoSpdbh2V.png" alt="image-20220107125003587"></p>
+<h2 id="变长编码"><a href="#变长编码" class="headerlink" title="变长编码"></a>变长编码</h2><p>每条指令的操作码的长度不是固定的，是可变的。之所以有变长编码是因为这会让系统更灵活，可以通过变动操作码的长度来保证地址码长度和指令长度不变。<br>如图：四地址指令和三地址指令的指令长度和地址码的长度是一样的。</p>
+<p><img src="https://s2.loli.net/2022/01/07/EyUX3z4txl7pV5c.png" alt="image-20220107125232359"></p>
+<p>优点：在拥有比较短的指令字长的系统中，既能表示出比较多的指令条数又能尽量满足操作数地址的要求。<br>缺点：计算机的硬件设计复杂，指令译码和执行速度较慢。<br>适用环境：适用于字长较短的计算机系统，如 16 位及以下。</p>
+<h3 id="扩展操作码"><a href="#扩展操作码" class="headerlink" title="扩展操作码"></a>扩展操作码</h3><p>为了保证不同类型指令的地址码和指令的长度不变，我们需要增加操作码的长度，这个操作就是扩展操作码。<br>例如现在有两条指令，一条是四地址指令，一条是三地址指令，下面是他们二进制数据的展示情况（为了把更多精力放在操作码上，地址码用 xxx 来表示）：</p>
+<p><img src="https://s2.loli.net/2022/01/07/O7QdwhIEz4ibgq8.png" alt="image-20220107125708122"></p>
+<p>看到上图的时候是不是还没察觉到问题？那么我们将图简化一下：</p>
+<p><img src="https://s2.loli.net/2022/01/07/AXLxmhVb4iF1nM5.png" alt="image-20220107125837964"></p>
+<p>看出来了吗？就是你无法分清这两条指令那条是三地址指令哪条是四地址指令。所以有了一个规定，短码不能是长码的前缀。<br>这个时候一般会预留出一个拓展窗口，例如减少一条四地址指令，让 1111 作为拓展窗口，让四地址指令的操作码最多取到 1110，这时如果你看到操作码是前四位是 1111 你就知道这个肯定不是四地址指令了，当然其他数量的地址指令通过类似的操作也可以解决这个问题，值得注意的是，拓展窗口不一定是一个，也可以是多个。</p>
 
     </div>
-  </div>
-  
-  
-  
 
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Byw
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/" title="指令详解-操作码">http://biyw.cf/指令详解-操作码/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/" rel="tag"># 计算机原理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/" rel="prev" title="Java中byte转int为什么要使用&0xFF">
+      <i class="fa fa-chevron-left"></i> Java中byte转int为什么要使用&0xFF
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/" rel="next" title="指令详解-地址码">
+      指令详解-地址码 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
   
 
 
 
           </div>
           
+    <div class="comments" id="gitalk-container"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -346,6 +392,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E9%95%BF%E7%BC%96%E7%A0%81"><span class="nav-number">1.</span> <span class="nav-text">定长编码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%98%E9%95%BF%E7%BC%96%E7%A0%81"><span class="nav-number">2.</span> <span class="nav-text">变长编码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A9%E5%B1%95%E6%93%8D%E4%BD%9C%E7%A0%81"><span class="nav-number">2.1.</span> <span class="nav-text">扩展操作码</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -498,6 +545,25 @@
 
   
 
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '114cb5f206f807258684',
+      clientSecret: '75dbf95563d5c775175bda9042244742735cbd75',
+      repo        : 'blog',
+      owner       : 'biyanwen',
+      admin       : ['biyanwen'],
+      id          : '0b975ad33381402c0fa4ac95403fd154',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
 
 </body>
 </html>

@@ -37,6 +37,25 @@
   </entry>
   
   <entry>
+    <title>指令详解-操作码</title>
+    <link href="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/"/>
+    <id>http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/</id>
+    <published>2022-01-16T05:50:35.000Z</published>
+    <updated>2022-01-07T05:01:18.538Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;定长编码&quot;&gt;&lt;a href=&quot;#定长编码&quot; class=&quot;headerlink&quot; title=&quot;定长编码&quot;&gt;&lt;/a&gt;定长编码&lt;/h2&gt;&lt;p&gt;每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。&lt;br&gt;优点：计算机的硬件设计简单，朱令译码和执行速度快。&lt;br&gt;缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。&lt;br&gt;适用环境：适用于字长较长的计算机系统，如 32 位及以上。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="计算机原理" scheme="http://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Java中byte转int为什么要使用&amp;0xFF</title>
     <link href="http://biyw.cf/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/"/>
     <id>http://biyw.cf/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/</id>
@@ -432,27 +451,6 @@
     
     
     <category term="Jvm" scheme="http://biyw.cf/tags/Jvm/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>虚拟机类加载机制</title>
-    <link href="http://biyw.cf/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/"/>
-    <id>http://biyw.cf/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/</id>
-    <published>2021-12-05T06:12:44.443Z</published>
-    <updated>2021-12-16T04:45:34.091Z</updated>
-    
-    
-    <summary type="html">&lt;p&gt;java虚拟机把描述类的数据从Class文件加载到内存，并堆数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这个过程被称作虚拟机的类加载机制&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
-    
-    
-    <category term="Jvm" scheme="http://biyw.cf/tags/Jvm/"/>
-    
-    <category term="类加载" scheme="http://biyw.cf/tags/%E7%B1%BB%E5%8A%A0%E8%BD%BD/"/>
     
   </entry>
   
