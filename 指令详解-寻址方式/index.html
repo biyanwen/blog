@@ -21,20 +21,31 @@
     var CONFIG = {"hostname":"biyw.cf","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="1.XSS攻击XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。">
+  <meta name="description" content="数据寻址简单来说就是根据地址码取数据。 指令中通常会增加一个寻址特征字段，这个字段就是告诉操作系统如何取数据的，如图：因为不同寻址方式的实现不同，所以地址码中存储的并不一定是真实的数据地址，所以这里用形式地址代替。  根据寻址特征的不同通常将寻址方式分为以下几类。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="常见的Web应用攻击手段">
-<meta property="og:url" content="http://biyw.cf/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/index.html">
+<meta property="og:title" content="指令详解-寻址方式">
+<meta property="og:url" content="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/index.html">
 <meta property="og:site_name" content="byw的博客">
-<meta property="og:description" content="1.XSS攻击XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。">
+<meta property="og:description" content="数据寻址简单来说就是根据地址码取数据。 指令中通常会增加一个寻址特征字段，这个字段就是告诉操作系统如何取数据的，如图：因为不同寻址方式的实现不同，所以地址码中存储的并不一定是真实的数据地址，所以这里用形式地址代替。  根据寻址特征的不同通常将寻址方式分为以下几类。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-12-05T06:24:20.623Z">
-<meta property="article:modified_time" content="2021-12-16T04:45:49.346Z">
+<meta property="og:image" content="https://s2.loli.net/2022/01/08/buwDO8aYx3I5npg.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/08/v6yKge7ZaRG1bDd.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/08/KwNxtdfUGmeLM39.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/08/l4BnqWbNGPe51tQ.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/08/8TuMsyR91XzCieU.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/08/UQka8cPq9oByJDz.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/08/k7enaVYZXgcFsOx.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/08/wZb5iAOKRzcMBJt.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/08/N1e3ZTXhdYQ9OBg.png">
+<meta property="og:image" content="https://s2.loli.net/2022/01/08/DajzUl8HvnG1JE6.png">
+<meta property="article:published_time" content="2022-01-08T05:50:35.000Z">
+<meta property="article:modified_time" content="2022-01-08T14:41:49.860Z">
 <meta property="article:author" content="Byw">
-<meta property="article:tag" content="架构">
+<meta property="article:tag" content="计算机原理">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2022/01/08/buwDO8aYx3I5npg.png">
 
-<link rel="canonical" href="http://biyw.cf/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/">
+<link rel="canonical" href="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/">
 
 
 <script id="page-configurations">
@@ -47,7 +58,7 @@
   };
 </script>
 
-  <title>常见的Web应用攻击手段 | byw的博客</title>
+  <title>指令详解-寻址方式 | byw的博客</title>
   
 
 
@@ -199,7 +210,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://biyw.cf/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/">
+    <link itemprop="mainEntityOfPage" href="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tx.jpg">
@@ -212,7 +223,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          常见的Web应用攻击手段
+          指令详解-寻址方式
         </h1>
 
         <div class="post-meta">
@@ -221,16 +232,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2021-12-05 14:24:20" itemprop="dateCreated datePublished" datetime="2021-12-05T14:24:20+08:00">2021-12-05</time>
+              <time title="创建时间：2022-01-08 13:50:35 / 修改时间：22:41:49" itemprop="dateCreated datePublished" datetime="2022-01-08T13:50:35+08:00">2022-01-08</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-12-16 12:45:49" itemprop="dateModified" datetime="2021-12-16T12:45:49+08:00">2021-12-16</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -254,7 +259,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1k</span>
+              <span>1.3k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -273,52 +278,52 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="1-XSS攻击"><a href="#1-XSS攻击" class="headerlink" title="1.XSS攻击"></a>1.XSS攻击</h2><p>XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。</p>
+        <h2 id="数据寻址"><a href="#数据寻址" class="headerlink" title="数据寻址"></a>数据寻址</h2><p>简单来说就是根据地址码取数据。</p>
+<p>指令中通常会增加一个寻址特征字段，这个字段就是告诉操作系统如何取数据的，如图：因为不同寻址方式的实现不同，所以地址码中存储的并不一定是真实的数据地址，所以这里用形式地址代替。</p>
+<p><img src="https://s2.loli.net/2022/01/08/buwDO8aYx3I5npg.png" alt="image-20220108103344939"></p>
+<p>根据寻址特征的不同通常将寻址方式分为以下几类。</p>
 <span id="more"></span>
 
-<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><ul>
-<li><p>1.1 反射型</p>
-<p>攻击者诱使用户点击一个嵌入恶意脚本的链接，达到攻击的目的</p>
-</li>
-<li><p>1.2 持久型</p>
-<p>黑客提交含有恶意脚本的请求，保存在被攻击的Web站点的数据库中，用户浏览网页时，恶意脚本被包含在正常页面中，达到攻击的目的</p>
-</li>
+<h3 id="立即寻址特征"><a href="#立即寻址特征" class="headerlink" title="立即寻址特征"></a>立即寻址特征</h3><p>定义：地址码存的就是操作数本身。</p>
+<p><img src="https://s2.loli.net/2022/01/08/v6yKge7ZaRG1bDd.png" alt="image-20220108111245946"></p>
+<h3 id="直接寻址特征"><a href="#直接寻址特征" class="headerlink" title="直接寻址特征"></a>直接寻址特征</h3><p>定义：地址码存储的是操作数的内存地址。</p>
+<p><img src="https://s2.loli.net/2022/01/08/KwNxtdfUGmeLM39.png" alt="image-20220108111313336"></p>
+<h3 id="隐含寻址特性"><a href="#隐含寻址特性" class="headerlink" title="隐含寻址特性"></a>隐含寻址特性</h3><p>定义：运算所需的操作数地址并没有都存储在指令中。</p>
+<p>例如，单地址指令中就不是明显地在地址字段中指出第二操作数的地址，而是规定累加器ACC作为第二操作数，指令格式明显指出的仅是第一操作数的地址。因此，累加器ACC对单地址指令格式来说是隐含地址。</p>
+<p><img src="https://s2.loli.net/2022/01/08/l4BnqWbNGPe51tQ.png" alt="image-20220108111457917"></p>
+<h3 id="间接寻址特性"><a href="#间接寻址特性" class="headerlink" title="间接寻址特性"></a>间接寻址特性</h3><p>定义：操作数需要通过其他指令中存储的地址得到。</p>
+<p>如图所示，指令中的形式地址 A 存储着 EA 操作数的地址，通过这个地址才能间接的找到 EA 的操作数。</p>
+<p><img src="https://s2.loli.net/2022/01/08/8TuMsyR91XzCieU.png" alt="image-20220108112320965"></p>
+<p>ps: 间接地址可以有多个，简单说可能需要多次跳转才能找到 EA 这个操作数。</p>
+<h3 id="寄存器间接寻址特征"><a href="#寄存器间接寻址特征" class="headerlink" title="寄存器间接寻址特征"></a>寄存器间接寻址特征</h3><p>定义：地址码中存储着寄存器的编号，指令所需的操作数的地址存储在寄存器中。</p>
+<p>如图 ：需要先根据地址码中的寄存器地址找到寄存器，之后才能根据寄存器中存储的操作数地址找到操作数。</p>
+<p><img src="https://s2.loli.net/2022/01/08/UQka8cPq9oByJDz.png" alt="image-20220108121433750"></p>
+<h3 id="基址寻址特征"><a href="#基址寻址特征" class="headerlink" title="基址寻址特征"></a>基址寻址特征</h3><p>定义：由一个寄存器存储一个基础内存地址，然后指令中的地址码存储着一个基于基础内存地址的偏移量，真实的操作数地址等于基础内存地址加上偏移量。</p>
+<p>如图，需要在指令中维护一个寄存器的地址，寻址的时候先从寄存器中拿到基础内存地址，然后再加上内存地址的偏移量，就可以找到操作数了。</p>
+<p><img src="https://s2.loli.net/2022/01/08/k7enaVYZXgcFsOx.png" alt="image-20220108122536632"></p>
+<p>特点如下：</p>
+<ul>
+<li>可扩大寻址范围（基础内存地址的位数大于形式地址的位数）；</li>
+<li>用户不必考虑自己的程序存于主存的哪一空间区域；</li>
+<li>基础内存地址由操作系统维护，用户只能更改形式地址；</li>
 </ul>
-<h3 id="防护手段"><a href="#防护手段" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
-<li><p>1.3消毒</p>
-<p>XSS攻击者一般都是通过在请求中嵌入恶意脚本达到攻击的目的，这些脚本是一般用户输入中不使用的，如果进行过滤和消毒处理，即对某些html危险字符转义就可以让绝大部分攻击失败</p>
-</li>
-<li><p>1.4HttpOnly</p>
-<p>浏览器禁止页面JavaScript访问带有HttpOnly属性的Cookie，可以防止Cookie中的数据被窃取</p>
-</li>
+<h3 id="变址寻址特征"><a href="#变址寻址特征" class="headerlink" title="变址寻址特征"></a>变址寻址特征</h3><p>与基址寻址特别相像，最大的不同是内存地址的偏移量是不变的，可变基础内存地址是可变的。</p>
+<p><img src="https://s2.loli.net/2022/01/08/wZb5iAOKRzcMBJt.png" alt="image-20220108123738283"></p>
+<p>特点：</p>
+<ul>
+<li>可扩大寻址范围（基础内存地址的位数大于形式地址的位数）；</li>
+<li>方便处理数组问题和循环程序。例如形式地址 A 为数组的首地址，通过不断改变可变基础地址就能够很容易形成数组中任意数据的地址。</li>
 </ul>
-<h2 id="2-注入攻击"><a href="#2-注入攻击" class="headerlink" title="2.注入攻击"></a>2.注入攻击</h2><h3 id="分类-1"><a href="#分类-1" class="headerlink" title="分类"></a>分类</h3><ul>
-<li><p>2.1 SQL注入攻击</p>
-<p>攻击者在HTTP请求中注入恶意SQL命令（drop table users;），服务器用请求参数构造数据库SQL命令时，恶意SQL被一起构造，并在数据库中执行。</p>
-</li>
-<li><p>2.2 OS注入攻击</p>
-</li>
-</ul>
-<h3 id="防护手段-1"><a href="#防护手段-1" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
-<li><p>2.3 消毒</p>
-<p>通过正则匹配，过滤请求数据中可能注入的SQL</p>
-</li>
-<li><p>2.4 参数绑定</p>
-<p>使用预编译手段，绑定参数是最好的防SQL注入方法。目前许多数据访问层框架，如IBatis，Hibernate等，都实现SQL预编译和参数绑定，攻击者的恶意SQL会被当做SQL的参数，而不是SQL命令被执行。</p>
-</li>
-</ul>
-<h2 id="3-CSRF攻击"><a href="#3-CSRF攻击" class="headerlink" title="3.CSRF攻击"></a>3.CSRF攻击</h2><p>攻击者通过跨站请求，以合法用户的身份进行非法操作，如转账交易、发表评论等；<br>CSRF的主要手法是利用跨站请求，在用户不知情的情况下，以用户的身份伪造请求。其核心是利用了浏览器Cookie或服务器Session策略，盗取用户身份。</p>
-<h3 id="防护手段-2"><a href="#防护手段-2" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
-<li><p>3.1 Token验证</p>
-<p>通过在请求参数中增加随机数的办法来阻止攻击者获得所有请求参数：在页面表单中增加一个随机数作为Token，每次响应页面的Token都不相同，从正常页面提交的请求会包含该Token值，而伪造的请求无法获得该值，服务器检查请求参数中Token的值是否存在并且正确以确定请求提交者是否合法</p>
-</li>
-<li><p>3.2 验证码</p>
-<p>验证码则更加简单有效；<br>请求提交时，需要用户输入验证码，以避免在用户不知情的情况下被攻击者伪造请求。但是输入验证码是一个糟糕的用户体验，所以请在必要时使用，</p>
-</li>
-<li><p>3.3 Referer check</p>
-<p>HTTP请求头的Referer域中记录着请求来源，可通过检查请求来源，验证其是否合法。</p>
-</li>
-</ul>
+<h3 id="相对寻址特征"><a href="#相对寻址特征" class="headerlink" title="相对寻址特征"></a>相对寻址特征</h3><p>相对寻址是把程序计数器PC的内容加上指令格式中的形式地址A而形成操作数的有效地址。</p>
+<p><img src="https://s2.loli.net/2022/01/08/N1e3ZTXhdYQ9OBg.png" alt="image-20220108222644952"></p>
+<p>优点：相对寻址的优点是操作数的地址不是固定的，它随着PC的值得变化而变化，并且与指令地址之间总是相差一个固定值，因此便于程序浮动，相对寻址广泛应用于转移指令。</p>
+<h3 id="堆栈寻址特征"><a href="#堆栈寻址特征" class="headerlink" title="堆栈寻址特征"></a>堆栈寻址特征</h3><p>堆栈是存储器（或专用寄存器组）中一块特定的按“先进后出（LIFO）”原则管理的存储区，该存储区中被读、写单元的地址是用特定的寄存器给出的，该寄存器称为堆栈指针（SP）。堆栈可分为硬堆栈和软堆栈两种。</p>
+<p>寄存器堆栈又称为<strong>硬堆栈</strong>。寄存器堆栈的成本比较高，不适合做大容量的堆栈；而从主存中划出一段区域来做堆栈是最合算且最常用的方法，这种堆栈称为<strong>软堆栈</strong>。</p>
+<p>在采用堆栈结构的计算机系统中，大部分指令表面上都表现为为无操作数指令的形式，因为操作数地址都隐含使用了SP。通常情况下，在读写堆栈中的一个单元的前后都伴有自动完成对SP内容的增量或减量操作。</p>
+<p><img src="https://s2.loli.net/2022/01/08/DajzUl8HvnG1JE6.png" alt="image-20220108223757637"></p>
+<h2 id="指令寻址"><a href="#指令寻址" class="headerlink" title="指令寻址"></a>指令寻址</h2><p>执行完当前指令之后，如何寻找下一条指令的地址。</p>
+<h3 id="顺序寻址"><a href="#顺序寻址" class="headerlink" title="顺序寻址"></a>顺序寻址</h3><p>当前指令的地址加一就是下一条指令的地址。</p>
+<h3 id="跳跃寻址"><a href="#跳跃寻址" class="headerlink" title="跳跃寻址"></a>跳跃寻址</h3><p>下一条指令的地址由本条指令的地址码给出。</p>
 
     </div>
 
@@ -334,7 +339,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://biyw.cf/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/" title="常见的Web应用攻击手段">http://biyw.cf/常见的Web应用攻击手段/</a>
+    <a href="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/" title="指令详解-寻址方式">http://biyw.cf/指令详解-寻址方式/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -345,7 +350,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/" rel="tag"># 计算机原理</a>
           </div>
 
         
@@ -354,13 +359,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/" rel="prev" title="集群环境下如何管理Session">
-      <i class="fa fa-chevron-left"></i> 集群环境下如何管理Session
+    <a href="/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/" rel="prev" title="指令详解-操作码">
+      <i class="fa fa-chevron-left"></i> 指令详解-操作码
     </a></div>
-      <div class="post-nav-item">
-    <a href="/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/" rel="next" title="【Mybatis源码解读】jdbc包">
-      【Mybatis源码解读】jdbc包 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -420,7 +422,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-XSS%E6%94%BB%E5%87%BB"><span class="nav-number">1.</span> <span class="nav-text">1.XSS攻击</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%B1%BB"><span class="nav-number">1.1.</span> <span class="nav-text">分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B2%E6%8A%A4%E6%89%8B%E6%AE%B5"><span class="nav-number">1.2.</span> <span class="nav-text">防护手段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%B3%A8%E5%85%A5%E6%94%BB%E5%87%BB"><span class="nav-number">2.</span> <span class="nav-text">2.注入攻击</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%B1%BB-1"><span class="nav-number">2.1.</span> <span class="nav-text">分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B2%E6%8A%A4%E6%89%8B%E6%AE%B5-1"><span class="nav-number">2.2.</span> <span class="nav-text">防护手段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-CSRF%E6%94%BB%E5%87%BB"><span class="nav-number">3.</span> <span class="nav-text">3.CSRF攻击</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B2%E6%8A%A4%E6%89%8B%E6%AE%B5-2"><span class="nav-number">3.1.</span> <span class="nav-text">防护手段</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%AF%BB%E5%9D%80"><span class="nav-number">1.</span> <span class="nav-text">数据寻址</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AB%8B%E5%8D%B3%E5%AF%BB%E5%9D%80%E7%89%B9%E5%BE%81"><span class="nav-number">1.1.</span> <span class="nav-text">立即寻址特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B4%E6%8E%A5%E5%AF%BB%E5%9D%80%E7%89%B9%E5%BE%81"><span class="nav-number">1.2.</span> <span class="nav-text">直接寻址特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%90%E5%90%AB%E5%AF%BB%E5%9D%80%E7%89%B9%E6%80%A7"><span class="nav-number">1.3.</span> <span class="nav-text">隐含寻址特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%B4%E6%8E%A5%E5%AF%BB%E5%9D%80%E7%89%B9%E6%80%A7"><span class="nav-number">1.4.</span> <span class="nav-text">间接寻址特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E9%97%B4%E6%8E%A5%E5%AF%BB%E5%9D%80%E7%89%B9%E5%BE%81"><span class="nav-number">1.5.</span> <span class="nav-text">寄存器间接寻址特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E5%9D%80%E5%AF%BB%E5%9D%80%E7%89%B9%E5%BE%81"><span class="nav-number">1.6.</span> <span class="nav-text">基址寻址特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E5%9D%80%E5%AF%BB%E5%9D%80%E7%89%B9%E5%BE%81"><span class="nav-number">1.7.</span> <span class="nav-text">变址寻址特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%AF%B9%E5%AF%BB%E5%9D%80%E7%89%B9%E5%BE%81"><span class="nav-number">1.8.</span> <span class="nav-text">相对寻址特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%86%E6%A0%88%E5%AF%BB%E5%9D%80%E7%89%B9%E5%BE%81"><span class="nav-number">1.9.</span> <span class="nav-text">堆栈寻址特征</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%87%E4%BB%A4%E5%AF%BB%E5%9D%80"><span class="nav-number">2.</span> <span class="nav-text">指令寻址</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%BA%E5%BA%8F%E5%AF%BB%E5%9D%80"><span class="nav-number">2.1.</span> <span class="nav-text">顺序寻址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%B3%E8%B7%83%E5%AF%BB%E5%9D%80"><span class="nav-number">2.2.</span> <span class="nav-text">跳跃寻址</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -584,7 +586,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'blog',
       owner       : 'biyanwen',
       admin       : ['biyanwen'],
-      id          : '85197a7b57a2d7bc53179a5154d6aba3',
+      id          : '773602220cef630380a064fd6b27abdd',
         language: 'zh-CN',
       distractionFreeMode: true
     });
