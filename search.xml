@@ -2136,4 +2136,122 @@
         <tag>Hibernate</tag>
       </tags>
   </entry>
+  <entry>
+    <title>位运算学习笔记</title>
+    <url>/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h2 id="位运算符"><a href="#位运算符" class="headerlink" title="位运算符"></a>位运算符</h2><h3 id="位逻辑运算符"><a href="#位逻辑运算符" class="headerlink" title="位逻辑运算符"></a>位逻辑运算符</h3><table>
+<thead>
+<tr>
+<th>运算符</th>
+<th>含义</th>
+<th>举例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&amp;</td>
+<td>与</td>
+<td>a &amp; b</td>
+</tr>
+<tr>
+<td>|</td>
+<td>或</td>
+<td>a | b</td>
+</tr>
+<tr>
+<td>~</td>
+<td>取反</td>
+<td>~a</td>
+</tr>
+<tr>
+<td>^</td>
+<td>异或</td>
+<td>a ^ b</td>
+</tr>
+</tbody></table>
+<h4 id="逻辑运算结果集"><a href="#逻辑运算结果集" class="headerlink" title="逻辑运算结果集"></a>逻辑运算结果集</h4><span id="more"></span>
+
+<p>逻辑运算相对简单，下面用一个表格来展示运算逻辑和结果。</p>
+<p>ps： 前两列为 A、B 的取值； A &amp; B 只有两个值都为1的时候结果才唯一；A|B 只要两个中有一个为1结果就为1；A^B 如果两个值不一样时结果为1；~A 取反。</p>
+<table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>A&amp;B</th>
+<th>A|B</th>
+<th>A^B</th>
+<th>~A</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<h3 id="位移运算符"><a href="#位移运算符" class="headerlink" title="位移运算符"></a>位移运算符</h3><table>
+<thead>
+<tr>
+<th>运算符</th>
+<th>含义</th>
+<th>举例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&lt;&lt;</td>
+<td>左位移</td>
+<td>a &lt;&lt; 2</td>
+</tr>
+<tr>
+<td>&gt;&gt;</td>
+<td>右位移</td>
+<td>b &gt;&gt; 4</td>
+</tr>
+<tr>
+<td>&gt;&gt;&gt;</td>
+<td>无符号右位移</td>
+<td>x &gt;&gt;&gt;2</td>
+</tr>
+</tbody></table>
+<h4 id="左移运算符"><a href="#左移运算符" class="headerlink" title="左移运算符"></a>左移运算符</h4><p><code>&lt;&lt;</code>  为左移运算符。它的作用是将二进制数字整体向左移动；<strong>在符号位不变的情况</strong>下每左移一位相当于在原有基础上乘以2。</p>
+<p>下图为左移运算的示意图，高位益处则舍弃，低位不够则补零。</p>
+<p><img src="https://s2.loli.net/2022/01/09/v4xuoJ17RNWYXIA.png" alt="image-20220109165615031"></p>
+<h4 id="右移运算符"><a href="#右移运算符" class="headerlink" title="右移运算符"></a>右移运算符</h4><p><code>&gt;&gt;</code> 与左移运算符相反，它的作用是将二进制数字整体向右移动；每次右移相当于原来的数字除以2；右移运算符对正负数有不同的策略，如果是正数，最高位会补 0 ，如果是负数最高位补 1，<strong>这样可以保证正数做完运算还是正数，负数做完运算还是负数</strong>。</p>
+<p><img src="https://s2.loli.net/2022/01/09/OjUpcdlGsDZk8bu.png" alt="image-20220109171054303"></p>
+<h4 id="无符号右移"><a href="#无符号右移" class="headerlink" title="无符号右移"></a>无符号右移</h4><p><code>&gt;&gt;&gt;</code> 为无符号右移运算符。运算逻辑与右移运算符相同，唯一的不同是它只会在最高位补 0，这样可能导致负数变正数；<strong>在符号位不变的情况</strong>下每右移一位相当于在原有基础上除以2。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>计算机原理</tag>
+      </tags>
+  </entry>
 </search>

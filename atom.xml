@@ -6,7 +6,7 @@
   <link href="http://biyw.cf/atom.xml" rel="self"/>
   
   <link href="http://biyw.cf/"/>
-  <updated>2022-01-08T14:41:49.860Z</updated>
+  <updated>2022-01-09T09:22:45.208Z</updated>
   <id>http://biyw.cf/</id>
   
   <author>
@@ -15,6 +15,54 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>位运算学习笔记</title>
+    <link href="http://biyw.cf/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    <id>http://biyw.cf/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</id>
+    <published>2022-01-09T08:13:18.000Z</published>
+    <updated>2022-01-09T09:22:45.208Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;位运算符&quot;&gt;&lt;a href=&quot;#位运算符&quot; class=&quot;headerlink&quot; title=&quot;位运算符&quot;&gt;&lt;/a&gt;位运算符&lt;/h2&gt;&lt;h3 id=&quot;位逻辑运算符&quot;&gt;&lt;a href=&quot;#位逻辑运算符&quot; class=&quot;headerlink&quot; title=&quot;位逻辑运算符&quot;&gt;&lt;/a&gt;位逻辑运算符&lt;/h3&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;运算符&lt;/th&gt;
+&lt;th&gt;含义&lt;/th&gt;
+&lt;th&gt;举例&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;&amp;amp;&lt;/td&gt;
+&lt;td&gt;与&lt;/td&gt;
+&lt;td&gt;a &amp;amp; b&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;|&lt;/td&gt;
+&lt;td&gt;或&lt;/td&gt;
+&lt;td&gt;a | b&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;~&lt;/td&gt;
+&lt;td&gt;取反&lt;/td&gt;
+&lt;td&gt;~a&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;^&lt;/td&gt;
+&lt;td&gt;异或&lt;/td&gt;
+&lt;td&gt;a ^ b&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;h4 id=&quot;逻辑运算结果集&quot;&gt;&lt;a href=&quot;#逻辑运算结果集&quot; class=&quot;headerlink&quot; title=&quot;逻辑运算结果集&quot;&gt;&lt;/a&gt;逻辑运算结果集&lt;/h4&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="计算机原理" scheme="http://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
+    
+  </entry>
   
   <entry>
     <title>指令详解-寻址方式</title>
@@ -424,29 +472,6 @@
     
     
     <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Java内存区域</title>
-    <link href="http://biyw.cf/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/"/>
-    <id>http://biyw.cf/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/</id>
-    <published>2021-12-05T06:15:11.402Z</published>
-    <updated>2021-12-16T04:46:23.344Z</updated>
-    
-    
-    <summary type="html">&lt;h2 id=&quot;运行时数据区域&quot;&gt;&lt;a href=&quot;#运行时数据区域&quot; class=&quot;headerlink&quot; title=&quot;运行时数据区域&quot;&gt;&lt;/a&gt;运行时数据区域&lt;/h2&gt;&lt;h3 id=&quot;程序计数器&quot;&gt;&lt;a href=&quot;#程序计数器&quot; class=&quot;headerlink&quot; title=&quot;程序计数器&quot;&gt;&lt;/a&gt;程序计数器&lt;/h3&gt;&lt;ul&gt;
-&lt;li&gt;当前线程所执行的字节码的行号指示器，用来选取下一条需要执行的字节码指令&lt;/li&gt;
-&lt;li&gt;线程私有&lt;/li&gt;
-&lt;li&gt;唯一一个不会出现OOM的区域&lt;/li&gt;
-&lt;/ul&gt;</summary>
-    
-    
-    
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
-    
-    
-    <category term="Jvm" scheme="http://biyw.cf/tags/Jvm/"/>
     
   </entry>
   
