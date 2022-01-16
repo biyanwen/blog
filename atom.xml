@@ -6,7 +6,7 @@
   <link href="http://biyw.cf/atom.xml" rel="self"/>
   
   <link href="http://biyw.cf/"/>
-  <updated>2022-01-09T09:22:45.208Z</updated>
+  <updated>2022-01-16T14:08:47.935Z</updated>
   <id>http://biyw.cf/</id>
   
   <author>
@@ -15,6 +15,26 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Mysql-InnoDB页详解</title>
+    <link href="http://biyw.cf/Mysql-InnoDB%E9%A1%B5%E8%AF%A6%E8%A7%A3/"/>
+    <id>http://biyw.cf/Mysql-InnoDB%E9%A1%B5%E8%AF%A6%E8%A7%A3/</id>
+    <published>2022-01-16T05:53:42.000Z</published>
+    <updated>2022-01-16T14:08:47.935Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;页的作用&quot;&gt;&lt;a href=&quot;#页的作用&quot; class=&quot;headerlink&quot; title=&quot;页的作用&quot;&gt;&lt;/a&gt;页的作用&lt;/h2&gt;&lt;p&gt;什么是页？页是 Mysql 从磁盘中加载数据的最小单位。页的大小为 16 kb。&lt;/p&gt;
+&lt;p&gt;为什么要按页加载数据呢？首先我们都知道磁盘 IO 是比较慢的，如果每查一条数据都要从磁盘中读取数据的话性能是很差的。所以当查询一条数据的时候 Mysql 会从磁盘中将与这条数据相近的数据都加载到内存中，这样可以大幅度提高性能。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Mysql" scheme="http://biyw.cf/tags/Mysql/"/>
+    
+  </entry>
   
   <entry>
     <title>位运算学习笔记</title>
@@ -309,9 +329,9 @@
     <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Wireshark" scheme="http://biyw.cf/tags/Wireshark/"/>
-    
     <category term="网络" scheme="http://biyw.cf/tags/%E7%BD%91%E7%BB%9C/"/>
+    
+    <category term="Wireshark" scheme="http://biyw.cf/tags/Wireshark/"/>
     
   </entry>
   
@@ -330,9 +350,9 @@
     <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Wireshark" scheme="http://biyw.cf/tags/Wireshark/"/>
-    
     <category term="网络" scheme="http://biyw.cf/tags/%E7%BD%91%E7%BB%9C/"/>
+    
+    <category term="Wireshark" scheme="http://biyw.cf/tags/Wireshark/"/>
     
   </entry>
   
@@ -453,25 +473,6 @@
     <category term="架构" scheme="http://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
     
     <category term="问题记录" scheme="http://biyw.cf/tags/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Java内存模型与线程</title>
-    <link href="http://biyw.cf/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/"/>
-    <id>http://biyw.cf/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/</id>
-    <published>2021-12-05T06:16:49.258Z</published>
-    <updated>2021-12-16T04:46:03.334Z</updated>
-    
-    
-    <summary type="html">&lt;h2 id=&quot;Java内存模型&quot;&gt;&lt;a href=&quot;#Java内存模型&quot; class=&quot;headerlink&quot; title=&quot;Java内存模型&quot;&gt;&lt;/a&gt;Java内存模型&lt;/h2&gt;&lt;p&gt;内存模型一词可以理解为在特定的操作协议下，对特定的内存或高速缓存进行读写访问的过程抽象；&lt;br&gt;在jdk5发布后Java内存模型才终于成熟、完善起来&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
-    
-    
-    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
     
   </entry>
   
