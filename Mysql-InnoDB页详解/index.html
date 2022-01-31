@@ -38,7 +38,7 @@
 <meta property="og:image" content="https://s2.loli.net/2022/01/16/Levo56ZiCRqtMg3.png">
 <meta property="og:image" content="https://s2.loli.net/2022/01/16/LjgPYlQzfkKnqFy.png">
 <meta property="article:published_time" content="2022-01-16T05:53:42.000Z">
-<meta property="article:modified_time" content="2022-01-16T14:08:47.935Z">
+<meta property="article:modified_time" content="2022-01-31T10:00:50.829Z">
 <meta property="article:author" content="Byw">
 <meta property="article:tag" content="Mysql">
 <meta name="twitter:card" content="summary">
@@ -231,10 +231,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-01-16 13:53:42 / 修改时间：22:08:47" itemprop="dateCreated datePublished" datetime="2022-01-16T13:53:42+08:00">2022-01-16</time>
+              <time title="创建时间：2022-01-16 13:53:42" itemprop="dateCreated datePublished" datetime="2022-01-16T13:53:42+08:00">2022-01-16</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-01-31 18:00:50" itemprop="dateModified" datetime="2022-01-31T18:00:50+08:00">2022-01-31</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -304,7 +310,7 @@
 
 <p>现在我们都知道页中是通过单链表这种数据结构来存储数据的了，你可能会问，如果数据量很大，链表的查询速度会很慢，Mysql 是如何解决这种问题的呢？</p>
 <h2 id="优化页的查询速度"><a href="#优化页的查询速度" class="headerlink" title="优化页的查询速度"></a>优化页的查询速度</h2><h3 id="Infimum-和-Supremum"><a href="#Infimum-和-Supremum" class="headerlink" title="Infimum 和 Supremum"></a>Infimum 和 Supremum</h3><p>因为页中的数据是按照主键从小到大的顺序排列的，所以我们就能够很快的通过 Supremum 判断出要查找的数据是否在当前页中，如果不在就会直接跳过去下一个页中去查找，</p>
-<p>例如：Supremum 是 10 ，但是你查的数据的 id = 100 ,那明显就不是在这个页中，需要到下一个页中去查找。而页与页的关联关系存储在 <strong>File Header</strong> 中如图：</p>
+<p>例如：Supremum 是 10 ，Supremum 是 80，但是你查的数据的 id = 100 ,那明显就不是在这个页中，需要到下一个页中去查找。而页与页的关联关系存储在 <strong>File Header</strong> 中如图：</p>
 <p><img src="https://s2.loli.net/2022/01/16/jo1xQOkR9t4mcFe.png" alt="image-20220116164123006"></p>
 <h3 id="Page-Directory"><a href="#Page-Directory" class="headerlink" title="Page Directory"></a>Page Directory</h3><p>通过以上方法虽然能将查找的数据锁定在一个页中，但是一个页可以存好多数据呀，那查找起来不是也很慢？为了解决这个问题，Mysql 创建了 Page Directory 页目录这个功能，这个功能的主要思想就是将链表中的数据进行分组，每个组最多只存储 8 条数据（这里有个例外，最小记录的分组只会有一条数据），然后按照从大到小的顺序将每个组有多少条记录的信息汇集在一起，然后通过对比主键的大小就可以将目标数据锁定在某个分组中了，因为分组中的数据很少，所以即使是遍历一次也很快，这就解决了链表查询速度慢的问题了。</p>
 <p>详细介绍页目录之前先介绍一下 <code>n_owned</code>这个字段，每条记录的<strong>辅助信息</strong>部分都维护一个 <code>n_owned</code> 字段，这个字段表示当前这个组有多少条数据，Infimum 的 n_owned 总是 1 ，而每组最大值的 n_owned 字段维护着这个组数据的总数目。而 Mysql 会将每个组的最大数据的引用用数组按照分组的顺序统一维护起来，并将数据中的元素称为槽。</p>
