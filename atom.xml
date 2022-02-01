@@ -6,7 +6,7 @@
   <link href="http://biyw.cf/atom.xml" rel="self"/>
   
   <link href="http://biyw.cf/"/>
-  <updated>2022-01-31T10:00:50.829Z</updated>
+  <updated>2022-02-01T11:18:12.404Z</updated>
   <id>http://biyw.cf/</id>
   
   <author>
@@ -15,6 +15,25 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Mysql-InnoDB索引详解</title>
+    <link href="http://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/"/>
+    <id>http://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/</id>
+    <published>2022-02-01T05:54:01.000Z</published>
+    <updated>2022-02-01T11:18:12.404Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;索引的作用&quot;&gt;&lt;a href=&quot;#索引的作用&quot; class=&quot;headerlink&quot; title=&quot;索引的作用&quot;&gt;&lt;/a&gt;索引的作用&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;索引的作用就是能够让我们快速的查到想要的数据&lt;/strong&gt;。上一篇文章我们介绍了 Mysql 在内存中存储数据的单位&lt;code&gt;页&lt;/code&gt;，Mysql 从磁盘加载数据的时候会在内存中创建以&lt;code&gt;页&lt;/code&gt;为节点的双向链表，我们已经了解到在&lt;code&gt;页&lt;/code&gt;中查找数据可以通过二分查找法快速检索到数据，但是要确定数据在哪个页中就要一个页一个页的查找（如果你对在页中查找数据的过程有疑问，请查看上一篇博客），这个逻辑显然是不合理的，因为 Mysql 是能够存储大量数据的，所以这个双向链表会很长查找速度会很慢。为了解决这个问题，Mysql 的开发者创建了索引这个功能来达到快速查找数据的目的。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Mysql" scheme="http://biyw.cf/tags/Mysql/"/>
+    
+  </entry>
   
   <entry>
     <title>Mysql-InnoDB页详解</title>
@@ -452,27 +471,6 @@
     
     
     <category term="架构" scheme="http://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>网站典型故障案例</title>
-    <link href="http://biyw.cf/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/"/>
-    <id>http://biyw.cf/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/</id>
-    <published>2021-12-05T06:18:51.996Z</published>
-    <updated>2021-12-16T04:44:31.803Z</updated>
-    
-    
-    <summary type="html">&lt;h2 id=&quot;1-写日志也会引发故障&quot;&gt;&lt;a href=&quot;#1-写日志也会引发故障&quot; class=&quot;headerlink&quot; title=&quot;1.写日志也会引发故障&quot;&gt;&lt;/a&gt;1.写日志也会引发故障&lt;/h2&gt;&lt;h3 id=&quot;故障现象&quot;&gt;&lt;a href=&quot;#故障现象&quot; class=&quot;headerlink&quot; title=&quot;故障现象&quot;&gt;&lt;/a&gt;故障现象&lt;/h3&gt;&lt;p&gt;某应用服务器在项目发布后不久就出现报警，硬盘可用空间低于警戒值，并且很快就宕机。登录到线上服务器，发现log文件夹里的文件迅速增加，不断消耗磁盘空间。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
-    
-    
-    <category term="架构" scheme="http://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
-    
-    <category term="问题记录" scheme="http://biyw.cf/tags/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/"/>
     
   </entry>
   
