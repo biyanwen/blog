@@ -126,14 +126,15 @@
   </entry>
   
   <entry>
-    <title>指令详解-操作码</title>
-    <link href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/"/>
-    <id>https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/</id>
+    <title>指令详解-地址码</title>
+    <link href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/"/>
+    <id>https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/</id>
     <published>2022-01-08T05:50:35.000Z</published>
-    <updated>2022-01-08T14:42:58.971Z</updated>
+    <updated>2022-01-08T14:43:07.906Z</updated>
     
     
-    <summary type="html">&lt;h2 id=&quot;定长编码&quot;&gt;&lt;a href=&quot;#定长编码&quot; class=&quot;headerlink&quot; title=&quot;定长编码&quot;&gt;&lt;/a&gt;定长编码&lt;/h2&gt;&lt;p&gt;每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。&lt;br&gt;优点：计算机的硬件设计简单，朱令译码和执行速度快。&lt;br&gt;缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。&lt;br&gt;适用环境：适用于字长较长的计算机系统，如 32 位及以上。&lt;/p&gt;</summary>
+    <summary type="html">&lt;h2 id=&quot;指令是什么：&quot;&gt;&lt;a href=&quot;#指令是什么：&quot; class=&quot;headerlink&quot; title=&quot;指令是什么：&quot;&gt;&lt;/a&gt;指令是什么：&lt;/h2&gt;&lt;p&gt;可以将指令当做一种编程语言，表现形式为一串二进制码，作用是能让计算机按照指令去工作。&lt;/p&gt;
+&lt;p&gt;指令由两部分组成，操作码和地址码，下面我们着重看下&lt;strong&gt;地址码&lt;/strong&gt;。&lt;/p&gt;</summary>
     
     
     
@@ -145,15 +146,14 @@
   </entry>
   
   <entry>
-    <title>指令详解-地址码</title>
-    <link href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/"/>
-    <id>https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/</id>
+    <title>指令详解-操作码</title>
+    <link href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/"/>
+    <id>https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/</id>
     <published>2022-01-08T05:50:35.000Z</published>
-    <updated>2022-01-08T14:43:07.906Z</updated>
+    <updated>2022-01-08T14:42:58.971Z</updated>
     
     
-    <summary type="html">&lt;h2 id=&quot;指令是什么：&quot;&gt;&lt;a href=&quot;#指令是什么：&quot; class=&quot;headerlink&quot; title=&quot;指令是什么：&quot;&gt;&lt;/a&gt;指令是什么：&lt;/h2&gt;&lt;p&gt;可以将指令当做一种编程语言，表现形式为一串二进制码，作用是能让计算机按照指令去工作。&lt;/p&gt;
-&lt;p&gt;指令由两部分组成，操作码和地址码，下面我们着重看下&lt;strong&gt;地址码&lt;/strong&gt;。&lt;/p&gt;</summary>
+    <summary type="html">&lt;h2 id=&quot;定长编码&quot;&gt;&lt;a href=&quot;#定长编码&quot; class=&quot;headerlink&quot; title=&quot;定长编码&quot;&gt;&lt;/a&gt;定长编码&lt;/h2&gt;&lt;p&gt;每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。&lt;br&gt;优点：计算机的硬件设计简单，朱令译码和执行速度快。&lt;br&gt;缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。&lt;br&gt;适用环境：适用于字长较长的计算机系统，如 32 位及以上。&lt;/p&gt;</summary>
     
     
     

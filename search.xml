@@ -1,6 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Hibernate 实战第二版 中文翻译 事务和并发篇(一)</title>
+    <url>/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E4%BA%8B%E5%8A%A1%E5%92%8C%E5%B9%B6%E5%8F%91%E7%AF%87-%E4%B8%80/</url>
+    <content><![CDATA[<p>在这章，我们终于要学习事务相关的知识了：在应用中如何创建工作单元并解决并发问题。（ps: 想了解什么是 <a href="https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/">工作单元</a> 请看这里。）工作单元是一个原子操作。事务可以让你设置工作单元的边界，让其不会受其他工作单元影响。在一个拥有许多用户的应用中，或许会有很多人同时访问这些工作单元的情况。</p>
+<p>在处理并发问题之前，我们首先集中精力了解下最基础的工作单元：数据库和系统事务。你将学会使用 Java 代码定义工作单元和事务划分相关的 API。我们将讨论如何保持隔离，并且用乐观锁和悲观锁控制并发访问。</p>
+<span id="more"></span>
+
+<p>最后，我们会看一些在没有事务的情况下访问数据库的特殊案例和 JPA 的特性。</p>
+<h2 id="事务的要素"><a href="#事务的要素" class="headerlink" title="事务的要素"></a>事务的要素</h2><p>在某些场景下应用需要将几件事情一次性做完。例如，当一次拍卖结束后，CaveatEmptor 应用必须执行三个不同的任务：</p>
+<ol>
+<li>寻找拍卖的中标者。</li>
+<li>收取卖方的手续费。</li>
+<li>通知卖方和买方。</li>
+</ol>
+<p>如果因为外部的信用卡系统的问题导致扣款失败会怎样？这个商业需求可能会规定要么所有任务全部成功要么全部失败。因此，可以称这些步骤属于同一个事务或者工作单元。如果其中一个步骤失败了，那么整个工作单元都必须失败。</p>
+<h3 id="ACID-属性"><a href="#ACID-属性" class="headerlink" title="ACID 属性"></a>ACID 属性</h3><p>ACID 是原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）的缩写，代表一个事务中的所有操作都是原子的。此外，事务允许多个用户并发的操作相同的数据，而且不会出现数据不一致的问题。一个正在运行的事务不能访问另一个同时也在运行的事务；他们应该独立的工作。事务中的更改应该是被持久化的，即使在事务完成之后系统崩溃了也不应该有数据丢失。</p>
+<p>另外，你想要事务正确的执行。例如，业务逻辑是应用只能对卖方扣款一次，而不是两次。这个逻辑是合理的，但是你没办法从数据库层面去约束它。因此，事务的正确性只能由应用程序自己保证，而数据库要保证数据的一致性。这些属性一起组成了 ACID 标准。</p>
+<h3 id="数据库与系统事务"><a href="#数据库与系统事务" class="headerlink" title="数据库与系统事务"></a>数据库与系统事务</h3><p>我们之前已经提到过系统和数据库事务了。再回头看下最后提出的那个问题：在一个拍卖功能的事务结束期间，我们或许会在数据库中记录中标金额。之后，在相同的事务中，我们会与一个外部的信用卡系统交互对卖方的账户进行扣款（服务费）。这个事务会横跨多个系统，并且会与很多子事务共同完成这个任务，这些子事务包括但不限于数据库连接的事务、外部扣款系统的事务。</p>
+<p>数据库的事务越短越好，因为它不仅会增加数据库资源的使用，而且在并发访问的情况下独占锁会导致其他访问被阻塞。一般情况下，一批数据操作会使用单独的事务进行控制。</p>
+<p>无论你在事务中执行什么数据库操作，你都必须设置工作单元的边界。你必须开启事务，并且在某个时间点将更改进行提交。无论发生任何异常，你都必须将数据回滚到更改之前的状态。这个过程要依赖于你使用的技术，并且涉及一定程度的人工干预。总之，设置事务的开始和结束这种边界，即可以使用编程式也可以使用声明式。</p>
+<h3 id="JTA"><a href="#JTA" class="headerlink" title="JTA"></a>JTA</h3><p>在 Java SE 中你可以调用 JDBC API 设置事务的边界。你可以通过调用 setAutoCommit(false) 在JDBC 链接上开启一个事务并且在事务结束时调用 commit() 方法。你可以在事务运行的任意时刻调用 rollback() 方法让事务立即回滚。</p>
+<p>在一个需要横跨多个系统对数据进行操作的应用中，有些工作单元可能包含多个事务。在这个场景中，你不能仅仅通过 JDBC 达到原子操作的目的。你需要一个可以在一个系统事务中处理多个事务资源的事务管理器（这里描述的应该是一个分布式事务，这个分布式事务由多个应用的多个事务共同组成）。JTA 标准事务管理器可以对分布式事务进行管理，让你不用关心太多的底层细节。JTA 最主要的 API 是 UserTransaction 接口中的 begin() 方法和 commit() 方法。</p>
+<blockquote>
+<p><strong>关于事务的其他 API</strong></p>
+<p>JTA 提供了一个很好的关于分布式事务系统的抽象。许多开发者仍然以为只能在 Java EE 的应用中使用 JTA。但是，当前有很多高品质独立的 JTA 服务可以使用，例如 Bitronix 和 Atomikos，它们可以被使用在任何 Java 环境中，而且很容易上手。考虑将这些解决方案当做启动 JTA 的数据路连接池。</p>
+<p>你应该尽可能的使用 JTA ，并且要避免使用私有事务 API 例如 org.hibernate.Transaction 或者限制非常多的 javax.persistence.EntityTransaction。这些 API 都会在 JTA 在 EJB运行容器外部还不可用时就会被创建。</p>
+</blockquote>
+<p>在 10.2.1 节我们会再一次学习事务，并且主要学习如何处理异常。下面这些代码展示了发生异常时如何回滚数据。</p>
+<p><img src="https://s2.loli.net/2021/12/25/S6xe14lGWDMI8a7.png" alt="image-20211225234127886"></p>
+<p>这段代码最复杂的地方就是处理异常的部分：我们现在就讨论这部分内容。首先你需要知道事务管理器和 EntityManager 是如何配合使用的。</p>
+<p>EntityManager 是懒加载的，我们在前几章讨论过这个话题，它直到 Sql 必须被执行的时候才会去获取数据库连接。JTA 也是如此：当你没有访问任何事务资源的时候，提交一个空的事务是非常节省资源的。例如，你可以在服务器中这么操作，这样的话，每次请求都不会消耗资源也不会对数据库进行上锁。</p>
+<p>当你创建一个 EntityManager 的时候，它会在当前工作线程中寻找 JTA 事务。如果 EntityManager 找到了这个事务，那么它就会加入这个事务，并且监听事务消息。这就意味着如果你想让上述流程起效，那么你就必须在同一个线程中调用 UserTransaction#begin()  方法和 EntityManagerFactory#createEntityManager() 方法。默认情况下，Hibernate 会像第 10  章所述，会自动提交事务。</p>
+<p>当 EntityManager 在当前线程中无法找到事务时，它就会进入 unsynchronized 模式，在这模式中， JPA 将不会自动提交事务。晚一些我们将会对这种行为进行更深入的讨论；当你在设计很复杂的功能时，这是一个很方便的特性。</p>
+<p>如果一个事务运行的时间太长就会被事务管理器关掉。记住数据库事务要尽可能的短。Bitronix 作为一个 JTA 服务提供者，它的默认超时时间是 60 秒，当前你可以在事务开始前调用 UserTransaction#setTransactionTimeout(). 方法覆盖这个参数。</p>
+<p>我们用前面的代码片段来谈论如何处理异常。</p>
+<h3 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h3><p>如果在调用 EntityManager 时或者事务提交时抛出异常，你必须检查当前系统事务的状态。当异常发生的时候，Hibernate 会让事务进行回滚。这意味着，在这个事务中进行的更改都不会生效。因为是你开启的事务，所以检查事务是否为 STATUS_MARKED_ROLLBACK 状态也是你的工作。如果 Hibernate 回滚失败了那么这个事务仍然会保持 STATUS_ACTIVE 状态。在这个案例中，你也可以调用 UserTransaction#rollback() 去取消执行任何已经发送到数据库的 Sql 语句。</p>
+<p>JPA 的任何操作，包括刷新持久化上下文时都有可能抛出 RuntimeException 异常。但是 UserTransaction#begin(), commit(),  和evenrollback() 方法抛出的是 Exception 异常。 异常在回滚的时候需要进行特殊处理的：你想要捕获这个异常并且将它输出到日志中；否则就会导致回滚失败。你也可以在回滚之后继续将异常往上抛出，这种情况下你可能会有一个拦截器，对异常进行统一处理，例如在屏幕上渲染一些错误信息，或者联系运维团队。在回滚时又出现异常是很难处理的，我们建议将它输出到日志，并且对其进行人工干预。因为回滚失败代表着系统有很多问题。</p>
+<p>Hibaernte 抛出的异常都是 RuntimeException 的子异常，了解它们会对你进行异常处理有很多帮助。</p>
+<ul>
+<li>HibernateException 是很常见的异常。你必须检查这个异常信息，或者通过调用 getCause() 方法获得更多信息。</li>
+<li>JDBCException 一般出现在 Hibernate 与 JDBC 进行交互的时候。这类异常也可能是某些 Sql 导致的，你可以通过调用 getSQL() 方法获取到导致异常发生的 Sql。这个 JDBC 链接抛出的内部异常可以通过调用 getSQLException() 或者 getCause() 方法得到，并且通过调用 getErrorCode() 可以获取数据库特定的异常代码信息。</li>
+<li>JDBCException 及其子类在 Hibernate 中存在一个转换器，可以通过数据库驱动将它转换成更有意义的信息。可以转换的异常有 JDBCConnectionException, SQLGrammarException, LockAcquisitionException,DataException,  和  ConstraintViolationException，主流数据库都为 Hibernate 提供了相应的方言。你也可以通过 SQLExceptionConverterFactory 类为你的数据库或者插件配置自定义的转换器。</li>
+</ul>
+<p>很多开发者看到 Hibernate 对异常有这么详细的类型划分都很高兴。但是这可能让你误入歧途。例如，你或许会为了达到某种校验的目的去捕获 ConstraintViolationException 异常。如果你忘记给 Item#name 属性赋值，同时它对应的数据库字段被设置为 NOT NULL。当你试图去刷新持久化上下文的时候 Hibernate 会抛出异常。这种情况下为什么不能捕获它并且将失败信息（使用自己定义的错误码和描述信息）展示给开发者，让他们改正这个问题？因为这个策略会有两个明显的问题。</p>
+<p>第一，根据数据库抛出的未检查的值来看是什么问题对于一个可拓展的应用来说并不是一个很好的策略。应该在应用层实现一些数据校验工作。第二，异常对于当前工作单元来说是致命的，但是这不应该是让一个应用的使用者去处理它：使用者希望在工作单元内部进行处理。在不了解代码细节的情况下是很难处理的。我们建议你使用细粒度的异常类型去展示致命的异常信息，而不是用于去验证你的猜想。例如，当你捕获 ConstraintViolationException 异常时屏幕展示如下信息：“应用出现了 bug，某人在存储局时没有对数据进行校验，请将这个问题报告给程序员” 对于其他异常信息，你最好在屏幕中生成错误信息。</p>
+<p>这么做对开发者是很有用的，让开发者可以快速判断是应用层出现了问题，还是数据库负载过高（无法获得锁资源）。对于校验，你可以使用 Bean Validation 框架。通过在 entity 上配置一些注解，Hibernate 可以在用户层对数据进行校验，并且可以自动生成 Sql ddl 规则。</p>
+<p>你现在应该知道什么异常应该进行捕获处理了。或许你还有一个问题：你捕获异常后应该做什么，让事务回滚吗？Hibernate 抛出异常是致命的。这意味着你必须关闭当前持久化上下文。你不能继续使用已经抛出异常的 EntityManager。将异常信息输出到屏幕或者日志中，然后让用户使用一个全新的事务和持久化上下文重新开启会话。</p>
+<p>以上所述并不包含所有情况，有些标准异常并不是不可挽回的：</p>
+<ul>
+<li>javax.persistence.NoResultException，这个异常会在 Query 或者 TypedQuery 调用 getSingleResult() 方法但是在数据库找不到对应的数据时被抛出。你可以通过异常处理代码对这个查询进行封装，然后继续使用这个持久化上下文。当前事务不会因为这个异常而进行回滚。</li>
+<li>javax.persistence.NonUniqueResultException，这个异常会在 Query 或者 TypedQuery 调用 getSingleResult() 方法但是数据库放回多条数据时抛出。你可以通过异常处理代码对这个查询进行封装，然后继续使用这个持久化上下文。当前事务不会因为这个异常而进行回滚。</li>
+<li>javax.persistence.QueryTimeoutException，当 Query 或者 TypedQuery 执行太久时抛出。不要让事务回滚。在某些情况下你或许想要再次查询。</li>
+<li>javax.persistence.LockTimeoutException，当无法获取悲观锁时会抛出此异常。或许会发生在与数据库同步数据时候或者通过显式声明锁进行上锁的情况下。事务在这种情况下不回滚，你或许想要再次尝试这个操作。记住，不断重复已经访问数据库失败的操作不会解决问题。</li>
+</ul>
+<p>这个列表中没有包含 javax.persistence.EntityNotFoundException 异常，这个异常会被 EntityManager#getReference()、lock() 和 refresh() 方法抛出。Hibernate 会在你试图访问一个已经从数据库中被删除的数据时抛出此异常。这是一个致命的异常，事务会因此回滚，你必须关闭这个持久化上下文。</p>
+<p>通过编程式进行事务的划分需要使用类似 JTA 的 UserTransaction 接口这样的应用代码才行。但是通过声明式的方式就不需要写多余的代码。</p>
+<h3 id="声明式定义事务"><a href="#声明式定义事务" class="headerlink" title="声明式定义事务"></a>声明式定义事务</h3><p>在 Java EE 中，当你需要一个事务时你可以通过声明的方式获取一个事务。运行环境会负责处理相关的事情。通常情况下你需要在你的组件中配置一些注解，以达到开启事务的目的。</p>
+<p>在 EJB 组件中，你可以使用  @javax.ejb.TransactionAttribute 注解来声明事务的边界。你可以在 18.2.1 中找到相关的代码示例。</p>
+<p>你也可以使用一个较新的注解 @javax.transaction.Transactional 这个注解可以用在任何 Java EE 的应用中。你可以在 19.3.1 节找到相关的示例。</p>
+<p>本章的代码示例可以运行在任意 Java SE 环境中，不需要任何运行容器。从现在开始，你将只能看到编程式的事务划分，直到我们学习 Java EE 的特殊应用例子为止。</p>
+<p>下面让我们学习 ACID 最复杂的功能：如何将正在运行的工作单元相互独立。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+        <category>翻译</category>
+      </categories>
+      <tags>
+        <tag>ORM</tag>
+        <tag>Java</tag>
+        <tag>Hibernate</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java中byte转int为什么要使用&amp;0xFF</title>
+    <url>/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/</url>
+    <content><![CDATA[<p>在 Java 中将十六进制 byte 转成 int 时要使用 &amp;0xFF 操作这是为什么呢？这是因为十六进制的范围是 0x00~0x3FF 没有负数，而 int 的取值范围是包含负数的，所以直接将 byte 强转成 int 可能会得到错误的数值。同时操作系统存储的是二进制原码进行补码后的数值, 所以只有通过 &amp;0xFF 操作才能得到正确的数值。</p>
+<span id="more"></span>
+
+<p>至于为什么就要先知道什么是补码。</p>
+<h2 id="补码"><a href="#补码" class="headerlink" title="补码"></a>补码</h2><p>下图以 -7 为例子展示了补码是如何计算的，简单说 -7 在计算机存储的二进制数据其实不是 <code>10000111</code> 而是 <code>11111001</code> 。<strong>但是这个流程值针对负数的，正数无论是反码还是补码都是一样的。</strong></p>
+<p><img src="https://s2.loli.net/2022/01/03/oAWgmL3xRZ1QODh.png" alt="image-20220103151025334"></p>
+<p>ps: 这里补充一个基础知识，原码其实是由两部分组成的，如下图最高位和数值位组成，因为二进制只能存储 0、1所以没有办法用正负号表示数值的正负，所以采用了这种办法。</p>
+<p><img src="https://s2.loli.net/2022/01/03/BW45N7Hc2GQogJ8.png" alt="image-20220103151943112"></p>
+<h2 id="为什么要用补码"><a href="#为什么要用补码" class="headerlink" title="为什么要用补码"></a>为什么要用补码</h2><p>使用补码是为了简化计算机底层的设计。因为我们人可以很清楚的知道最高位是符号位，但是对于计算机基础电路设计来说判别第一位是符号位是非常难和复杂的事情。所以人们为了让实现变得简单就想让符号位也参与运算，并且只保留加法，我们知道减法相当于加上一个负数。</p>
+<p>例如：</p>
+<p><code>1 - 1 = 1 + （ -1） = 0</code></p>
+<h3 id="原码计算"><a href="#原码计算" class="headerlink" title="原码计算"></a>原码计算</h3><p>我们都知道上面的等式是成立的，但是如果用<strong>原码</strong>直接进行运算会得到什么结果呢？</p>
+<p><code>0000 0001 + 1000 0001 = 1000 0010 = -2 </code></p>
+<p>得到了错误的结果。为了解决这个问题创建了反码。</p>
+<h3 id="反码计算"><a href="#反码计算" class="headerlink" title="反码计算"></a>反码计算</h3><p>原码：0000 0001 + 1000 0001 = 反码：0000 0001 + 1111 1110 =  反码：1111 1111  = 原码： 1000 0000 = -0 。</p>
+<p>根据以上等式我们看出来，使用反码进行计算可以得到正确的结果，但是虽然人们可以理解 +0 和 -0 是一样的但是这会引发两个问题 ，一方面为 0 标注正负是没有任何意义的，另一方面会出现 0000 0000 和 1000 0000 两个编码都表示 0 的现象，这会增加计算机设计的复杂度而且没有必要。所以为了解决这个问题 设计出了<strong>补码</strong>。</p>
+<h3 id="补码计算"><a href="#补码计算" class="headerlink" title="补码计算"></a>补码计算</h3><p>原码：0000 0001 + 1000 0001 = 补码：0000 0001 + 1111 1111  =  补码： 0000 0000 = 原码：0000 0000 = 0 。</p>
+<p>这样就解决了所有的问题，可以轻松愉快的带入符号进行计算了。</p>
+<h2 id="amp-0xFF-的作用"><a href="#amp-0xFF-的作用" class="headerlink" title="&amp;0xFF 的作用"></a>&amp;0xFF 的作用</h2><p>主要作用就是保证补码的完整性。</p>
+<p>因为 byte 是一个字节而 int 是四个字节，所以 byte 转 int 需要进行数据扩展。Java 采用的是<strong>符号位扩展</strong>。以 -127 为例：</p>
+<p>-127 的补码为 <code>10000001</code>, 数据扩展之后是 <code>11111111 11111111 11111111 10000001</code> 这个二进制数值明显不对，所以为了得到正确的结果让其和 0xFF 进行与运算将补位的 1 全部换成 0 最后得到 <code>00000000 00000000 00000000 10000001</code> 这个就是我们需要的结果了。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>计算机原理</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(三)</title>
     <url>/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%B8%89/</url>
     <content><![CDATA[<h2 id="使用游离态"><a href="#使用游离态" class="headerlink" title="使用游离态"></a>使用游离态</h2><p>如果一个 entity 实例脱离了持久化上下文的管理，我们就称它为游离态。当持久化上下文关闭之后，它就不再提供 id 映射服务。当你使用游离态的 entity 实例时可能会遇到一些问题，所以，一定要保证你明白如何处理游离态实例。</p>
@@ -82,78 +187,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Hibernate 实战第二版 中文翻译 事务和并发篇(一)</title>
-    <url>/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E4%BA%8B%E5%8A%A1%E5%92%8C%E5%B9%B6%E5%8F%91%E7%AF%87-%E4%B8%80/</url>
-    <content><![CDATA[<p>在这章，我们终于要学习事务相关的知识了：在应用中如何创建工作单元并解决并发问题。（ps: 想了解什么是 <a href="https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/">工作单元</a> 请看这里。）工作单元是一个原子操作。事务可以让你设置工作单元的边界，让其不会受其他工作单元影响。在一个拥有许多用户的应用中，或许会有很多人同时访问这些工作单元的情况。</p>
-<p>在处理并发问题之前，我们首先集中精力了解下最基础的工作单元：数据库和系统事务。你将学会使用 Java 代码定义工作单元和事务划分相关的 API。我们将讨论如何保持隔离，并且用乐观锁和悲观锁控制并发访问。</p>
-<span id="more"></span>
-
-<p>最后，我们会看一些在没有事务的情况下访问数据库的特殊案例和 JPA 的特性。</p>
-<h2 id="事务的要素"><a href="#事务的要素" class="headerlink" title="事务的要素"></a>事务的要素</h2><p>在某些场景下应用需要将几件事情一次性做完。例如，当一次拍卖结束后，CaveatEmptor 应用必须执行三个不同的任务：</p>
-<ol>
-<li>寻找拍卖的中标者。</li>
-<li>收取卖方的手续费。</li>
-<li>通知卖方和买方。</li>
-</ol>
-<p>如果因为外部的信用卡系统的问题导致扣款失败会怎样？这个商业需求可能会规定要么所有任务全部成功要么全部失败。因此，可以称这些步骤属于同一个事务或者工作单元。如果其中一个步骤失败了，那么整个工作单元都必须失败。</p>
-<h3 id="ACID-属性"><a href="#ACID-属性" class="headerlink" title="ACID 属性"></a>ACID 属性</h3><p>ACID 是原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）的缩写，代表一个事务中的所有操作都是原子的。此外，事务允许多个用户并发的操作相同的数据，而且不会出现数据不一致的问题。一个正在运行的事务不能访问另一个同时也在运行的事务；他们应该独立的工作。事务中的更改应该是被持久化的，即使在事务完成之后系统崩溃了也不应该有数据丢失。</p>
-<p>另外，你想要事务正确的执行。例如，业务逻辑是应用只能对卖方扣款一次，而不是两次。这个逻辑是合理的，但是你没办法从数据库层面去约束它。因此，事务的正确性只能由应用程序自己保证，而数据库要保证数据的一致性。这些属性一起组成了 ACID 标准。</p>
-<h3 id="数据库与系统事务"><a href="#数据库与系统事务" class="headerlink" title="数据库与系统事务"></a>数据库与系统事务</h3><p>我们之前已经提到过系统和数据库事务了。再回头看下最后提出的那个问题：在一个拍卖功能的事务结束期间，我们或许会在数据库中记录中标金额。之后，在相同的事务中，我们会与一个外部的信用卡系统交互对卖方的账户进行扣款（服务费）。这个事务会横跨多个系统，并且会与很多子事务共同完成这个任务，这些子事务包括但不限于数据库连接的事务、外部扣款系统的事务。</p>
-<p>数据库的事务越短越好，因为它不仅会增加数据库资源的使用，而且在并发访问的情况下独占锁会导致其他访问被阻塞。一般情况下，一批数据操作会使用单独的事务进行控制。</p>
-<p>无论你在事务中执行什么数据库操作，你都必须设置工作单元的边界。你必须开启事务，并且在某个时间点将更改进行提交。无论发生任何异常，你都必须将数据回滚到更改之前的状态。这个过程要依赖于你使用的技术，并且涉及一定程度的人工干预。总之，设置事务的开始和结束这种边界，即可以使用编程式也可以使用声明式。</p>
-<h3 id="JTA"><a href="#JTA" class="headerlink" title="JTA"></a>JTA</h3><p>在 Java SE 中你可以调用 JDBC API 设置事务的边界。你可以通过调用 setAutoCommit(false) 在JDBC 链接上开启一个事务并且在事务结束时调用 commit() 方法。你可以在事务运行的任意时刻调用 rollback() 方法让事务立即回滚。</p>
-<p>在一个需要横跨多个系统对数据进行操作的应用中，有些工作单元可能包含多个事务。在这个场景中，你不能仅仅通过 JDBC 达到原子操作的目的。你需要一个可以在一个系统事务中处理多个事务资源的事务管理器（这里描述的应该是一个分布式事务，这个分布式事务由多个应用的多个事务共同组成）。JTA 标准事务管理器可以对分布式事务进行管理，让你不用关心太多的底层细节。JTA 最主要的 API 是 UserTransaction 接口中的 begin() 方法和 commit() 方法。</p>
-<blockquote>
-<p><strong>关于事务的其他 API</strong></p>
-<p>JTA 提供了一个很好的关于分布式事务系统的抽象。许多开发者仍然以为只能在 Java EE 的应用中使用 JTA。但是，当前有很多高品质独立的 JTA 服务可以使用，例如 Bitronix 和 Atomikos，它们可以被使用在任何 Java 环境中，而且很容易上手。考虑将这些解决方案当做启动 JTA 的数据路连接池。</p>
-<p>你应该尽可能的使用 JTA ，并且要避免使用私有事务 API 例如 org.hibernate.Transaction 或者限制非常多的 javax.persistence.EntityTransaction。这些 API 都会在 JTA 在 EJB运行容器外部还不可用时就会被创建。</p>
-</blockquote>
-<p>在 10.2.1 节我们会再一次学习事务，并且主要学习如何处理异常。下面这些代码展示了发生异常时如何回滚数据。</p>
-<p><img src="https://s2.loli.net/2021/12/25/S6xe14lGWDMI8a7.png" alt="image-20211225234127886"></p>
-<p>这段代码最复杂的地方就是处理异常的部分：我们现在就讨论这部分内容。首先你需要知道事务管理器和 EntityManager 是如何配合使用的。</p>
-<p>EntityManager 是懒加载的，我们在前几章讨论过这个话题，它直到 Sql 必须被执行的时候才会去获取数据库连接。JTA 也是如此：当你没有访问任何事务资源的时候，提交一个空的事务是非常节省资源的。例如，你可以在服务器中这么操作，这样的话，每次请求都不会消耗资源也不会对数据库进行上锁。</p>
-<p>当你创建一个 EntityManager 的时候，它会在当前工作线程中寻找 JTA 事务。如果 EntityManager 找到了这个事务，那么它就会加入这个事务，并且监听事务消息。这就意味着如果你想让上述流程起效，那么你就必须在同一个线程中调用 UserTransaction#begin()  方法和 EntityManagerFactory#createEntityManager() 方法。默认情况下，Hibernate 会像第 10  章所述，会自动提交事务。</p>
-<p>当 EntityManager 在当前线程中无法找到事务时，它就会进入 unsynchronized 模式，在这模式中， JPA 将不会自动提交事务。晚一些我们将会对这种行为进行更深入的讨论；当你在设计很复杂的功能时，这是一个很方便的特性。</p>
-<p>如果一个事务运行的时间太长就会被事务管理器关掉。记住数据库事务要尽可能的短。Bitronix 作为一个 JTA 服务提供者，它的默认超时时间是 60 秒，当前你可以在事务开始前调用 UserTransaction#setTransactionTimeout(). 方法覆盖这个参数。</p>
-<p>我们用前面的代码片段来谈论如何处理异常。</p>
-<h3 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h3><p>如果在调用 EntityManager 时或者事务提交时抛出异常，你必须检查当前系统事务的状态。当异常发生的时候，Hibernate 会让事务进行回滚。这意味着，在这个事务中进行的更改都不会生效。因为是你开启的事务，所以检查事务是否为 STATUS_MARKED_ROLLBACK 状态也是你的工作。如果 Hibernate 回滚失败了那么这个事务仍然会保持 STATUS_ACTIVE 状态。在这个案例中，你也可以调用 UserTransaction#rollback() 去取消执行任何已经发送到数据库的 Sql 语句。</p>
-<p>JPA 的任何操作，包括刷新持久化上下文时都有可能抛出 RuntimeException 异常。但是 UserTransaction#begin(), commit(),  和evenrollback() 方法抛出的是 Exception 异常。 异常在回滚的时候需要进行特殊处理的：你想要捕获这个异常并且将它输出到日志中；否则就会导致回滚失败。你也可以在回滚之后继续将异常往上抛出，这种情况下你可能会有一个拦截器，对异常进行统一处理，例如在屏幕上渲染一些错误信息，或者联系运维团队。在回滚时又出现异常是很难处理的，我们建议将它输出到日志，并且对其进行人工干预。因为回滚失败代表着系统有很多问题。</p>
-<p>Hibaernte 抛出的异常都是 RuntimeException 的子异常，了解它们会对你进行异常处理有很多帮助。</p>
-<ul>
-<li>HibernateException 是很常见的异常。你必须检查这个异常信息，或者通过调用 getCause() 方法获得更多信息。</li>
-<li>JDBCException 一般出现在 Hibernate 与 JDBC 进行交互的时候。这类异常也可能是某些 Sql 导致的，你可以通过调用 getSQL() 方法获取到导致异常发生的 Sql。这个 JDBC 链接抛出的内部异常可以通过调用 getSQLException() 或者 getCause() 方法得到，并且通过调用 getErrorCode() 可以获取数据库特定的异常代码信息。</li>
-<li>JDBCException 及其子类在 Hibernate 中存在一个转换器，可以通过数据库驱动将它转换成更有意义的信息。可以转换的异常有 JDBCConnectionException, SQLGrammarException, LockAcquisitionException,DataException,  和  ConstraintViolationException，主流数据库都为 Hibernate 提供了相应的方言。你也可以通过 SQLExceptionConverterFactory 类为你的数据库或者插件配置自定义的转换器。</li>
-</ul>
-<p>很多开发者看到 Hibernate 对异常有这么详细的类型划分都很高兴。但是这可能让你误入歧途。例如，你或许会为了达到某种校验的目的去捕获 ConstraintViolationException 异常。如果你忘记给 Item#name 属性赋值，同时它对应的数据库字段被设置为 NOT NULL。当你试图去刷新持久化上下文的时候 Hibernate 会抛出异常。这种情况下为什么不能捕获它并且将失败信息（使用自己定义的错误码和描述信息）展示给开发者，让他们改正这个问题？因为这个策略会有两个明显的问题。</p>
-<p>第一，根据数据库抛出的未检查的值来看是什么问题对于一个可拓展的应用来说并不是一个很好的策略。应该在应用层实现一些数据校验工作。第二，异常对于当前工作单元来说是致命的，但是这不应该是让一个应用的使用者去处理它：使用者希望在工作单元内部进行处理。在不了解代码细节的情况下是很难处理的。我们建议你使用细粒度的异常类型去展示致命的异常信息，而不是用于去验证你的猜想。例如，当你捕获 ConstraintViolationException 异常时屏幕展示如下信息：“应用出现了 bug，某人在存储局时没有对数据进行校验，请将这个问题报告给程序员” 对于其他异常信息，你最好在屏幕中生成错误信息。</p>
-<p>这么做对开发者是很有用的，让开发者可以快速判断是应用层出现了问题，还是数据库负载过高（无法获得锁资源）。对于校验，你可以使用 Bean Validation 框架。通过在 entity 上配置一些注解，Hibernate 可以在用户层对数据进行校验，并且可以自动生成 Sql ddl 规则。</p>
-<p>你现在应该知道什么异常应该进行捕获处理了。或许你还有一个问题：你捕获异常后应该做什么，让事务回滚吗？Hibernate 抛出异常是致命的。这意味着你必须关闭当前持久化上下文。你不能继续使用已经抛出异常的 EntityManager。将异常信息输出到屏幕或者日志中，然后让用户使用一个全新的事务和持久化上下文重新开启会话。</p>
-<p>以上所述并不包含所有情况，有些标准异常并不是不可挽回的：</p>
-<ul>
-<li>javax.persistence.NoResultException，这个异常会在 Query 或者 TypedQuery 调用 getSingleResult() 方法但是在数据库找不到对应的数据时被抛出。你可以通过异常处理代码对这个查询进行封装，然后继续使用这个持久化上下文。当前事务不会因为这个异常而进行回滚。</li>
-<li>javax.persistence.NonUniqueResultException，这个异常会在 Query 或者 TypedQuery 调用 getSingleResult() 方法但是数据库放回多条数据时抛出。你可以通过异常处理代码对这个查询进行封装，然后继续使用这个持久化上下文。当前事务不会因为这个异常而进行回滚。</li>
-<li>javax.persistence.QueryTimeoutException，当 Query 或者 TypedQuery 执行太久时抛出。不要让事务回滚。在某些情况下你或许想要再次查询。</li>
-<li>javax.persistence.LockTimeoutException，当无法获取悲观锁时会抛出此异常。或许会发生在与数据库同步数据时候或者通过显式声明锁进行上锁的情况下。事务在这种情况下不回滚，你或许想要再次尝试这个操作。记住，不断重复已经访问数据库失败的操作不会解决问题。</li>
-</ul>
-<p>这个列表中没有包含 javax.persistence.EntityNotFoundException 异常，这个异常会被 EntityManager#getReference()、lock() 和 refresh() 方法抛出。Hibernate 会在你试图访问一个已经从数据库中被删除的数据时抛出此异常。这是一个致命的异常，事务会因此回滚，你必须关闭这个持久化上下文。</p>
-<p>通过编程式进行事务的划分需要使用类似 JTA 的 UserTransaction 接口这样的应用代码才行。但是通过声明式的方式就不需要写多余的代码。</p>
-<h3 id="声明式定义事务"><a href="#声明式定义事务" class="headerlink" title="声明式定义事务"></a>声明式定义事务</h3><p>在 Java EE 中，当你需要一个事务时你可以通过声明的方式获取一个事务。运行环境会负责处理相关的事情。通常情况下你需要在你的组件中配置一些注解，以达到开启事务的目的。</p>
-<p>在 EJB 组件中，你可以使用  @javax.ejb.TransactionAttribute 注解来声明事务的边界。你可以在 18.2.1 中找到相关的代码示例。</p>
-<p>你也可以使用一个较新的注解 @javax.transaction.Transactional 这个注解可以用在任何 Java EE 的应用中。你可以在 19.3.1 节找到相关的示例。</p>
-<p>本章的代码示例可以运行在任意 Java SE 环境中，不需要任何运行容器。从现在开始，你将只能看到编程式的事务划分，直到我们学习 Java EE 的特殊应用例子为止。</p>
-<p>下面让我们学习 ACID 最复杂的功能：如何将正在运行的工作单元相互独立。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-        <category>翻译</category>
-      </categories>
-      <tags>
-        <tag>ORM</tag>
-        <tag>Java</tag>
-        <tag>Hibernate</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(一)</title>
     <url>/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/</url>
     <content><![CDATA[<h2 id="管理数据"><a href="#管理数据" class="headerlink" title="管理数据"></a>管理数据</h2><h3 id="entity-持久化过程中的生命周期"><a href="#entity-持久化过程中的生命周期" class="headerlink" title="entity 持久化过程中的生命周期"></a>entity 持久化过程中的生命周期</h3><p>因为 JPA 是一种透明的持久化机制，classes 不用关心他们自己的持久化行为，这样在写业务代码时就不需要关心数据是会被持久化还是仅仅保存在内存中。</p>
@@ -199,36 +232,59 @@
       </tags>
   </entry>
   <entry>
-    <title>Java中byte转int为什么要使用&amp;0xFF</title>
-    <url>/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/</url>
-    <content><![CDATA[<p>在 Java 中将十六进制 byte 转成 int 时要使用 &amp;0xFF 操作这是为什么呢？这是因为十六进制的范围是 0x00~0x3FF 没有负数，而 int 的取值范围是包含负数的，所以直接将 byte 强转成 int 可能会得到错误的数值。同时操作系统存储的是二进制原码进行补码后的数值, 所以只有通过 &amp;0xFF 操作才能得到正确的数值。</p>
+    <title>Mysql-InnoDB页详解</title>
+    <url>/Mysql-InnoDB%E9%A1%B5%E8%AF%A6%E8%A7%A3/</url>
+    <content><![CDATA[<h2 id="页的作用"><a href="#页的作用" class="headerlink" title="页的作用"></a>页的作用</h2><p>什么是页？页是 Mysql 从磁盘中加载数据的最小单位。页的大小为 16 kb。</p>
+<p>为什么要按页加载数据呢？首先我们都知道磁盘 IO 是比较慢的，如果每查一条数据都要从磁盘中读取数据的话性能是很差的。所以当查询一条数据的时候 Mysql 会从磁盘中将与这条数据相近的数据都加载到内存中，这样可以大幅度提高性能。</p>
 <span id="more"></span>
 
-<p>至于为什么就要先知道什么是补码。</p>
-<h2 id="补码"><a href="#补码" class="headerlink" title="补码"></a>补码</h2><p>下图以 -7 为例子展示了补码是如何计算的，简单说 -7 在计算机存储的二进制数据其实不是 <code>10000111</code> 而是 <code>11111001</code> 。<strong>但是这个流程值针对负数的，正数无论是反码还是补码都是一样的。</strong></p>
-<p><img src="https://s2.loli.net/2022/01/03/oAWgmL3xRZ1QODh.png" alt="image-20220103151025334"></p>
-<p>ps: 这里补充一个基础知识，原码其实是由两部分组成的，如下图最高位和数值位组成，因为二进制只能存储 0、1所以没有办法用正负号表示数值的正负，所以采用了这种办法。</p>
-<p><img src="https://s2.loli.net/2022/01/03/BW45N7Hc2GQogJ8.png" alt="image-20220103151943112"></p>
-<h2 id="为什么要用补码"><a href="#为什么要用补码" class="headerlink" title="为什么要用补码"></a>为什么要用补码</h2><p>使用补码是为了简化计算机底层的设计。因为我们人可以很清楚的知道最高位是符号位，但是对于计算机基础电路设计来说判别第一位是符号位是非常难和复杂的事情。所以人们为了让实现变得简单就想让符号位也参与运算，并且只保留加法，我们知道减法相当于加上一个负数。</p>
-<p>例如：</p>
-<p><code>1 - 1 = 1 + （ -1） = 0</code></p>
-<h3 id="原码计算"><a href="#原码计算" class="headerlink" title="原码计算"></a>原码计算</h3><p>我们都知道上面的等式是成立的，但是如果用<strong>原码</strong>直接进行运算会得到什么结果呢？</p>
-<p><code>0000 0001 + 1000 0001 = 1000 0010 = -2 </code></p>
-<p>得到了错误的结果。为了解决这个问题创建了反码。</p>
-<h3 id="反码计算"><a href="#反码计算" class="headerlink" title="反码计算"></a>反码计算</h3><p>原码：0000 0001 + 1000 0001 = 反码：0000 0001 + 1111 1110 =  反码：1111 1111  = 原码： 1000 0000 = -0 。</p>
-<p>根据以上等式我们看出来，使用反码进行计算可以得到正确的结果，但是虽然人们可以理解 +0 和 -0 是一样的但是这会引发两个问题 ，一方面为 0 标注正负是没有任何意义的，另一方面会出现 0000 0000 和 1000 0000 两个编码都表示 0 的现象，这会增加计算机设计的复杂度而且没有必要。所以为了解决这个问题 设计出了<strong>补码</strong>。</p>
-<h3 id="补码计算"><a href="#补码计算" class="headerlink" title="补码计算"></a>补码计算</h3><p>原码：0000 0001 + 1000 0001 = 补码：0000 0001 + 1111 1111  =  补码： 0000 0000 = 原码：0000 0000 = 0 。</p>
-<p>这样就解决了所有的问题，可以轻松愉快的带入符号进行计算了。</p>
-<h2 id="amp-0xFF-的作用"><a href="#amp-0xFF-的作用" class="headerlink" title="&amp;0xFF 的作用"></a>&amp;0xFF 的作用</h2><p>主要作用就是保证补码的完整性。</p>
-<p>因为 byte 是一个字节而 int 是四个字节，所以 byte 转 int 需要进行数据扩展。Java 采用的是<strong>符号位扩展</strong>。以 -127 为例：</p>
-<p>-127 的补码为 <code>10000001</code>, 数据扩展之后是 <code>11111111 11111111 11111111 10000001</code> 这个二进制数值明显不对，所以为了得到正确的结果让其和 0xFF 进行与运算将补位的 1 全部换成 0 最后得到 <code>00000000 00000000 00000000 10000001</code> 这个就是我们需要的结果了。</p>
+<h2 id="页是如何存储数据的"><a href="#页是如何存储数据的" class="headerlink" title="页是如何存储数据的"></a>页是如何存储数据的</h2><p> 页是使用<strong>单链表</strong>来存储数据的，并且数据是按照<strong>主键</strong>从小到大的顺序排列的。同时为了方便管理数据 Mysql 会在页中自动生成两条伪数据 Infimum 和 Supremum。Infimum 代表最小值，比真实数据的最小值要小， Supremum 代表最大值，比真实数据的最大值要大。如图：</p>
+<img src="https://s2.loli.net/2022/01/16/m2UuVw6TJj3n4DN.png" style="zoom:50%;" />
+
+<p><strong>下面我们有一个疑问，下一条数据的<code>引用</code>是怎么存储在本条数据中的？</strong></p>
+<p>其实，每条记录主要分为两个部分，一个部分就是用来<strong>记录真实数据的</strong>，另一个部分是用来<strong>记录一些辅助信息的</strong>。如图：</p>
+<img src="https://s2.loli.net/2022/01/16/4oQcxBLRvNiXpVn.png" alt="image-20220116151922425" style="zoom:67%;" />
+
+
+
+<p>辅助信息这部分有很多用来记录信息的字段，而用来记录下一条记录的引用的字段叫做 <strong>next_record</strong>。所以数据之间的连接关系可以补充为下图这样：</p>
+<img src="https://s2.loli.net/2022/01/16/qgZujyKwhvsGmVR.png" alt="image-20220116152755131" style="zoom:50%;" />
+
+<p>同时，页中的数据并不是一开始就全部被填充进去的，因为要形成链表所以数据是一条一条插入的，而这个时候就涉及到内存分配的问题了，Mysql 将存储真实数据的部分叫做 <code>User Records</code> 然而 User Records 每次插入数据的时候都需要到 <code>Free Space</code> 去申请，这时 Free Space 会将一部分内存分配给 User Records 让其存储数据，当 Free Space 用完时就需要再创建一个页了。</p>
+<p>内存分配流程如下图：</p>
+<img src="https://s2.loli.net/2022/01/16/yv8cYiJaUhlwTdR.png" alt="image-20220116162143889" style="zoom:57%;" />
+
+<p>所以，以我们目前的知识可以知道页的布局如下：</p>
+<img src="https://s2.loli.net/2022/01/16/TAygI59sGi3tXLE.png" alt="image-20220116160339069" style="zoom:60%;" />
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">其实这里我有一个疑问，为什么要设计 Free Space 这个功能呢？就只有 User Records 不行吗？通过 User Records 的剩余空间是否可以插入下一条数据来判断是否需要创建一个新的页不行吗？可惜我还没有找到答案 o(╥﹏╥)o</span><br></pre></td></tr></table></figure>
+
+<p>现在我们都知道页中是通过单链表这种数据结构来存储数据的了，你可能会问，如果数据量很大，链表的查询速度会很慢，Mysql 是如何解决这种问题的呢？</p>
+<h2 id="优化页的查询速度"><a href="#优化页的查询速度" class="headerlink" title="优化页的查询速度"></a>优化页的查询速度</h2><h3 id="Infimum-和-Supremum"><a href="#Infimum-和-Supremum" class="headerlink" title="Infimum 和 Supremum"></a>Infimum 和 Supremum</h3><p>因为页中的数据是按照主键从小到大的顺序排列的，所以我们就能够很快的通过 Supremum 判断出要查找的数据是否在当前页中，如果不在就会直接跳过去下一个页中去查找，</p>
+<p>例如：Supremum 是 10 ，Supremum 是 80，但是你查的数据的 id = 100 ,那明显就不是在这个页中，需要到下一个页中去查找。而页与页的关联关系存储在 <strong>File Header</strong> 中如图：</p>
+<p><img src="https://s2.loli.net/2022/01/16/jo1xQOkR9t4mcFe.png" alt="image-20220116164123006"></p>
+<h3 id="Page-Directory"><a href="#Page-Directory" class="headerlink" title="Page Directory"></a>Page Directory</h3><p>通过以上方法虽然能将查找的数据锁定在一个页中，但是一个页可以存好多数据呀，那查找起来不是也很慢？为了解决这个问题，Mysql 创建了 Page Directory 页目录这个功能，这个功能的主要思想就是将链表中的数据进行分组，每个组最多只存储 8 条数据（这里有个例外，最小记录的分组只会有一条数据），然后按照从大到小的顺序将每个组有多少条记录的信息汇集在一起，然后通过对比主键的大小就可以将目标数据锁定在某个分组中了，因为分组中的数据很少，所以即使是遍历一次也很快，这就解决了链表查询速度慢的问题了。</p>
+<p>详细介绍页目录之前先介绍一下 <code>n_owned</code>这个字段，每条记录的<strong>辅助信息</strong>部分都维护一个 <code>n_owned</code> 字段，这个字段表示当前这个组有多少条数据，Infimum 的 n_owned 总是 1 ，而每组最大值的 n_owned 字段维护着这个组数据的总数目。而 Mysql 会将每个组的最大数据的引用用数组按照分组的顺序统一维护起来，并将数据中的元素称为槽。</p>
+<p>如下图，总共有五条记录，它们被 Mysql 分成两组，<u>最小记录</u> 总是被单独分一组所以它的 n_owned 是 1，剩下的 <u>记录1、2、3 及最大记录</u>四条记录被分为一组，所以第二组的最大值 Supremum 中的 n_owned 的数值是4。</p>
+<img src="https://s2.loli.net/2022/01/16/JmVZt469NpCI52q.png" alt="image-20220116213753322" style="zoom:67%;" />
+
+<p>因为为了方便举例子所以我们目前只有两个分组，实际上分组可能有成千上万甚至更多，当我们要在一个页中查找数据时就可以对页目录用<strong>二分查找法进行查找</strong>，每次取到中间的槽然后根据引用找到对应的数据并用主键进行比较，这样就可以很快的将数据锁定在某个数据分组中，而我们都知道每个组中最多有8条数据，所以即使都遍历一遍也不会很慢。</p>
+<p>到这里我们就又找到了一块拼图，可以将页的结构再完善一下，如图：</p>
+<img src="https://s2.loli.net/2022/01/16/Levo56ZiCRqtMg3.png" alt="image-20220116214517277" style="zoom:67%;" />
+
+<p>说完了数据查询，但是数据库不只是查询数据的，它也可以对数据进行更改，并且将数据同步到磁盘的最小单位也是页，但是如果同步到一半突然断电了怎么办？如果不增加验证的措施可能会录入不完整的数据，下面我们就来看下 Mysql 如何解决这个问题。</p>
+<h2 id="File-Trailer"><a href="#File-Trailer" class="headerlink" title="File Trailer"></a>File Trailer</h2><p>为了检验一个页中的数据是否完整的同步到磁盘中了，Mysql 在每个页中都增加了 File Trailer 部分。在数据开始同步前，Mysql 会针对页数据生成一个校验码，这个校验码在 File Header 和 File Trailer 中各存一份，当一个页的数据同步完成后，数据首部和尾部的校验码如果一致就说明数据同步成功，否则就代表失败。</p>
+<p>我们在页结构中补充上这一部分，如图：</p>
+<img src="https://s2.loli.net/2022/01/16/LjgPYlQzfkKnqFy.png" alt="image-20220116215711976" style="zoom:67%;" />
+
+<p>当然 Page Header 中不只存储着校验码，它还存储着一些其他的状态信息，例如本页中存储了多少条记录，第一条记录的内存地址，总共有多少个槽等等这些信息。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我在学习页的相关知识时也在网上看了很多同类型的博客，他们都有一个共同的问题就是大量罗列参数。好像学习页就是要记住每一个参数一样，我对此有不同的观点，如果你看到这里你可能会发现，我并没有把参数都罗列出来然后一个一个解释，甚至很多参数我都没有介绍，因为我们真正要学的不是参数，而是它的设计思想，比如如何优化链表查询，如何验证数据是否完整等等，而具体的参数你可以在需要的时候在网上查一下就好了，没必要死记硬背，这样反而让学习别的枯燥、痛苦。毕竟写代码也不是闭卷考试对吧。</p>
 ]]></content>
       <categories>
         <category>技术</category>
       </categories>
       <tags>
-        <tag>Java</tag>
-        <tag>计算机原理</tag>
+        <tag>Mysql</tag>
       </tags>
   </entry>
   <entry>
@@ -294,62 +350,6 @@
 <li>当你对索引列进行增删改的时候，Mysql 也需要对索引进行增删改的操作，在一定程度上会影响性能，<strong>所以索引字段应尽可能的少。</strong></li>
 <li>当新数据的索引列不是最大的时候，Mysql 需要到索引树中去找到合适的位置去插入这条数据，有可能还会涉及页分裂等需要移动数据的操作，<strong>所以我们的索引列最好要自增，这样 Mysql 可以直接追加，而不用调整索引列的顺序。</strong></li>
 </ol>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Mysql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Mysql-InnoDB页详解</title>
-    <url>/Mysql-InnoDB%E9%A1%B5%E8%AF%A6%E8%A7%A3/</url>
-    <content><![CDATA[<h2 id="页的作用"><a href="#页的作用" class="headerlink" title="页的作用"></a>页的作用</h2><p>什么是页？页是 Mysql 从磁盘中加载数据的最小单位。页的大小为 16 kb。</p>
-<p>为什么要按页加载数据呢？首先我们都知道磁盘 IO 是比较慢的，如果每查一条数据都要从磁盘中读取数据的话性能是很差的。所以当查询一条数据的时候 Mysql 会从磁盘中将与这条数据相近的数据都加载到内存中，这样可以大幅度提高性能。</p>
-<span id="more"></span>
-
-<h2 id="页是如何存储数据的"><a href="#页是如何存储数据的" class="headerlink" title="页是如何存储数据的"></a>页是如何存储数据的</h2><p> 页是使用<strong>单链表</strong>来存储数据的，并且数据是按照<strong>主键</strong>从小到大的顺序排列的。同时为了方便管理数据 Mysql 会在页中自动生成两条伪数据 Infimum 和 Supremum。Infimum 代表最小值，比真实数据的最小值要小， Supremum 代表最大值，比真实数据的最大值要大。如图：</p>
-<img src="https://s2.loli.net/2022/01/16/m2UuVw6TJj3n4DN.png" style="zoom:50%;" />
-
-<p><strong>下面我们有一个疑问，下一条数据的<code>引用</code>是怎么存储在本条数据中的？</strong></p>
-<p>其实，每条记录主要分为两个部分，一个部分就是用来<strong>记录真实数据的</strong>，另一个部分是用来<strong>记录一些辅助信息的</strong>。如图：</p>
-<img src="https://s2.loli.net/2022/01/16/4oQcxBLRvNiXpVn.png" alt="image-20220116151922425" style="zoom:67%;" />
-
-
-
-<p>辅助信息这部分有很多用来记录信息的字段，而用来记录下一条记录的引用的字段叫做 <strong>next_record</strong>。所以数据之间的连接关系可以补充为下图这样：</p>
-<img src="https://s2.loli.net/2022/01/16/qgZujyKwhvsGmVR.png" alt="image-20220116152755131" style="zoom:50%;" />
-
-<p>同时，页中的数据并不是一开始就全部被填充进去的，因为要形成链表所以数据是一条一条插入的，而这个时候就涉及到内存分配的问题了，Mysql 将存储真实数据的部分叫做 <code>User Records</code> 然而 User Records 每次插入数据的时候都需要到 <code>Free Space</code> 去申请，这时 Free Space 会将一部分内存分配给 User Records 让其存储数据，当 Free Space 用完时就需要再创建一个页了。</p>
-<p>内存分配流程如下图：</p>
-<img src="https://s2.loli.net/2022/01/16/yv8cYiJaUhlwTdR.png" alt="image-20220116162143889" style="zoom:57%;" />
-
-<p>所以，以我们目前的知识可以知道页的布局如下：</p>
-<img src="https://s2.loli.net/2022/01/16/TAygI59sGi3tXLE.png" alt="image-20220116160339069" style="zoom:60%;" />
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">其实这里我有一个疑问，为什么要设计 Free Space 这个功能呢？就只有 User Records 不行吗？通过 User Records 的剩余空间是否可以插入下一条数据来判断是否需要创建一个新的页不行吗？可惜我还没有找到答案 o(╥﹏╥)o</span><br></pre></td></tr></table></figure>
-
-<p>现在我们都知道页中是通过单链表这种数据结构来存储数据的了，你可能会问，如果数据量很大，链表的查询速度会很慢，Mysql 是如何解决这种问题的呢？</p>
-<h2 id="优化页的查询速度"><a href="#优化页的查询速度" class="headerlink" title="优化页的查询速度"></a>优化页的查询速度</h2><h3 id="Infimum-和-Supremum"><a href="#Infimum-和-Supremum" class="headerlink" title="Infimum 和 Supremum"></a>Infimum 和 Supremum</h3><p>因为页中的数据是按照主键从小到大的顺序排列的，所以我们就能够很快的通过 Supremum 判断出要查找的数据是否在当前页中，如果不在就会直接跳过去下一个页中去查找，</p>
-<p>例如：Supremum 是 10 ，Supremum 是 80，但是你查的数据的 id = 100 ,那明显就不是在这个页中，需要到下一个页中去查找。而页与页的关联关系存储在 <strong>File Header</strong> 中如图：</p>
-<p><img src="https://s2.loli.net/2022/01/16/jo1xQOkR9t4mcFe.png" alt="image-20220116164123006"></p>
-<h3 id="Page-Directory"><a href="#Page-Directory" class="headerlink" title="Page Directory"></a>Page Directory</h3><p>通过以上方法虽然能将查找的数据锁定在一个页中，但是一个页可以存好多数据呀，那查找起来不是也很慢？为了解决这个问题，Mysql 创建了 Page Directory 页目录这个功能，这个功能的主要思想就是将链表中的数据进行分组，每个组最多只存储 8 条数据（这里有个例外，最小记录的分组只会有一条数据），然后按照从大到小的顺序将每个组有多少条记录的信息汇集在一起，然后通过对比主键的大小就可以将目标数据锁定在某个分组中了，因为分组中的数据很少，所以即使是遍历一次也很快，这就解决了链表查询速度慢的问题了。</p>
-<p>详细介绍页目录之前先介绍一下 <code>n_owned</code>这个字段，每条记录的<strong>辅助信息</strong>部分都维护一个 <code>n_owned</code> 字段，这个字段表示当前这个组有多少条数据，Infimum 的 n_owned 总是 1 ，而每组最大值的 n_owned 字段维护着这个组数据的总数目。而 Mysql 会将每个组的最大数据的引用用数组按照分组的顺序统一维护起来，并将数据中的元素称为槽。</p>
-<p>如下图，总共有五条记录，它们被 Mysql 分成两组，<u>最小记录</u> 总是被单独分一组所以它的 n_owned 是 1，剩下的 <u>记录1、2、3 及最大记录</u>四条记录被分为一组，所以第二组的最大值 Supremum 中的 n_owned 的数值是4。</p>
-<img src="https://s2.loli.net/2022/01/16/JmVZt469NpCI52q.png" alt="image-20220116213753322" style="zoom:67%;" />
-
-<p>因为为了方便举例子所以我们目前只有两个分组，实际上分组可能有成千上万甚至更多，当我们要在一个页中查找数据时就可以对页目录用<strong>二分查找法进行查找</strong>，每次取到中间的槽然后根据引用找到对应的数据并用主键进行比较，这样就可以很快的将数据锁定在某个数据分组中，而我们都知道每个组中最多有8条数据，所以即使都遍历一遍也不会很慢。</p>
-<p>到这里我们就又找到了一块拼图，可以将页的结构再完善一下，如图：</p>
-<img src="https://s2.loli.net/2022/01/16/Levo56ZiCRqtMg3.png" alt="image-20220116214517277" style="zoom:67%;" />
-
-<p>说完了数据查询，但是数据库不只是查询数据的，它也可以对数据进行更改，并且将数据同步到磁盘的最小单位也是页，但是如果同步到一半突然断电了怎么办？如果不增加验证的措施可能会录入不完整的数据，下面我们就来看下 Mysql 如何解决这个问题。</p>
-<h2 id="File-Trailer"><a href="#File-Trailer" class="headerlink" title="File Trailer"></a>File Trailer</h2><p>为了检验一个页中的数据是否完整的同步到磁盘中了，Mysql 在每个页中都增加了 File Trailer 部分。在数据开始同步前，Mysql 会针对页数据生成一个校验码，这个校验码在 File Header 和 File Trailer 中各存一份，当一个页的数据同步完成后，数据首部和尾部的校验码如果一致就说明数据同步成功，否则就代表失败。</p>
-<p>我们在页结构中补充上这一部分，如图：</p>
-<img src="https://s2.loli.net/2022/01/16/LjgPYlQzfkKnqFy.png" alt="image-20220116215711976" style="zoom:67%;" />
-
-<p>当然 Page Header 中不只存储着校验码，它还存储着一些其他的状态信息，例如本页中存储了多少条记录，第一条记录的内存地址，总共有多少个槽等等这些信息。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我在学习页的相关知识时也在网上看了很多同类型的博客，他们都有一个共同的问题就是大量罗列参数。好像学习页就是要记住每一个参数一样，我对此有不同的观点，如果你看到这里你可能会发现，我并没有把参数都罗列出来然后一个一个解释，甚至很多参数我都没有介绍，因为我们真正要学的不是参数，而是它的设计思想，比如如何优化链表查询，如何验证数据是否完整等等，而具体的参数你可以在需要的时候在网上查一下就好了，没必要死记硬背，这样反而让学习别的枯燥、痛苦。毕竟写代码也不是闭卷考试对吧。</p>
 ]]></content>
       <categories>
         <category>技术</category>
@@ -612,6 +612,23 @@
       </categories>
       <tags>
         <tag>Jvm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Wireshark 简明教程</title>
+    <url>/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
+<span id="more"></span>
+
+<h2 id="下载wireshark"><a href="#下载wireshark" class="headerlink" title="下载wireshark"></a>下载wireshark</h2><p><a href="https://www.wireshark.org/download.html">wireshark下载地址</a><br>选择Windows Installer (64-bit)，下载成功后一直点next就可以了。<br><img src="https://img-blog.csdnimg.cn/20210507224116599.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>2.1 选择网卡<br>打开软件，界面如下所示，被红框标记起来的就是网卡列表，如果你使用的是无线网就可以选择WLAN。<br><img src="https://img-blog.csdnimg.cn/20210507224420963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.2 开始抓包<br>双击选中目标网卡就会进入到抓包主界面，如图：<br><img src="https://img-blog.csdnimg.cn/20210507224707882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>被红框选中的就是该网卡发送和接受的网络包了，后续会详细讲解如果通过wireshark抓包学习网络。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Wireshark</tag>
+        <tag>网络</tag>
       </tags>
   </entry>
   <entry>
@@ -1072,23 +1089,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Wireshark 简明教程</title>
-    <url>/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</url>
-    <content><![CDATA[<p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
-<span id="more"></span>
-
-<h2 id="下载wireshark"><a href="#下载wireshark" class="headerlink" title="下载wireshark"></a>下载wireshark</h2><p><a href="https://www.wireshark.org/download.html">wireshark下载地址</a><br>选择Windows Installer (64-bit)，下载成功后一直点next就可以了。<br><img src="https://img-blog.csdnimg.cn/20210507224116599.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>2.1 选择网卡<br>打开软件，界面如下所示，被红框标记起来的就是网卡列表，如果你使用的是无线网就可以选择WLAN。<br><img src="https://img-blog.csdnimg.cn/20210507224420963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.2 开始抓包<br>双击选中目标网卡就会进入到抓包主界面，如图：<br><img src="https://img-blog.csdnimg.cn/20210507224707882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>被红框选中的就是该网卡发送和接受的网络包了，后续会详细讲解如果通过wireshark抓包学习网络。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Wireshark</tag>
-        <tag>网络</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>【Mybatis源码解读】jdbc包</title>
     <url>/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</url>
     <content><![CDATA[<h2 id="1-jdbc包的作用"><a href="#1-jdbc包的作用" class="headerlink" title="1. jdbc包的作用"></a>1. jdbc包的作用</h2><p>jdbc包作为Mybatis框架的核心包之一可以理解为是<strong>操作Sql的工具包</strong>，因为通过阅读代码观察到这个jdbc包里面的类并没有被Mybatis框架本身引用，而其本身的作用又是对sql的操作，所以当作工具包来理解是没有什么问题的。</p>
@@ -1144,6 +1144,164 @@
       <tags>
         <tag>Mybatis</tag>
         <tag>源码阅读</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
+    <url>/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</url>
+    <content><![CDATA[<p>本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章<a href="https://blog.csdn.net/qq_43005544/article/details/116504407">wireshark 简易教程</a></p>
+<span id="more"></span>
+
+<p><strong>正文开始</strong></p>
+<h1 id="1-首先抓个包"><a href="#1-首先抓个包" class="headerlink" title="1.首先抓个包"></a>1.首先抓个包</h1><p>通过上一篇文章大家应该都能打开对应网卡的抓包页面了哈；我们利用DNS服务可以将域名解析成IP的功能来演示如何抓到我们想要的包。</p>
+<h2 id="1-1-开始抓包"><a href="#1-1-开始抓包" class="headerlink" title="1.1 开始抓包"></a>1.1 开始抓包</h2><p>如果进入抓包页面没有自动开始抓包，就点击左上角的开始抓包按钮，如图：<br><img src="https://img-blog.csdnimg.cn/20210507235225375.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="1-2-打开命令行界面"><a href="#1-2-打开命令行界面" class="headerlink" title="1.2 打开命令行界面"></a>1.2 打开命令行界面</h2><p>博主用的win10操作系统，所以打开的就是CMD了，输入以下命令</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;nslookup</span><br><span class="line">&gt;<span class="built_in">set</span> vc</span><br><span class="line">&gt;www.baidu.com</span><br></pre></td></tr></table></figure>
+<p>命令执行情况如图：<br><img src="https://img-blog.csdnimg.cn/20210507233243944.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70"></p>
+<h2 id="1-3-停止抓包"><a href="#1-3-停止抓包" class="headerlink" title="1.3 停止抓包"></a>1.3 停止抓包</h2><p>点击红框标记的按钮：<br><img src="https://img-blog.csdnimg.cn/20210507235328579.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="1-4-筛选"><a href="#1-4-筛选" class="headerlink" title="1.4 筛选"></a>1.4 筛选</h2><p>这个时候可以看到界面上抓到很多包，但是有很多是其他应用进行的网络请求，并不是我们想要的，所以要进行筛选。<br>在筛选框我们用Ip进行筛选，表达式为<strong>ip.addr == 116.199.0.200</strong>，如图<br><img src="https://img-blog.csdnimg.cn/20210507235517845.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>116.199.0.200是我本机DNS的ip，你可以通过刚在输入的nslookup命令得到，如图<br><img src="https://img-blog.csdnimg.cn/20210507235651897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>但是通过筛选后发现还是有很多包不是我们想要的，我们通过info列来找到我们请求DNS的包，如图：<br>找到DNS协议info这列有我们刚才输入需要解析的域名这两行，这两行就是DNS解析域名的过程，我们从这两行的Info就可以很清晰的看出DNS解析域名的过程，首先192.168.1.107询问DNS <a href="http://www.baidu.com的ip是多少,然后dns在下一行进行回复./">www.baidu.com的IP是多少，然后DNS在下一行进行回复。</a><br><img src="https://img-blog.csdnimg.cn/20210509113130576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="1-5-找到三次握手的包"><a href="#1-5-找到三次握手的包" class="headerlink" title="1.5 找到三次握手的包"></a>1.5 找到三次握手的包</h2><p>在1.4小节中我们找到的926和927号包的上面就是三次握手的包，分别是921，922，923这三个包，如图：<br><img src="https://img-blog.csdnimg.cn/20210509161642786.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>你可能想问是怎么看出来的，好问题，主要是看Seq和Ack的值，三次握手的时候Seq的相对值是为0的（注意是相对值）。找到了三次握手的网络包，我们就来分析一下三次握手吧。</p>
+<h1 id="2-分析三次握手"><a href="#2-分析三次握手" class="headerlink" title="2. 分析三次握手"></a>2. 分析三次握手</h1><h2 id="2-1-TCP-参数介绍"><a href="#2-1-TCP-参数介绍" class="headerlink" title="2.1 TCP 参数介绍"></a>2.1 TCP 参数介绍</h2><p>要学习TCP首先要学习它的参数。</p>
+<p><strong>Seq</strong>：标识改数据段的序号。因为TCP的传输是有序的，接收者可以通过Seq对包进行排序。</p>
+<p><strong>Len</strong>：表示Seq对应数据的长度。</p>
+<p><strong>Ack</strong>：确认号，向数据提供者表明收到了哪些包（实际收到包的Seq序号需要 Ack - 1，因为Seq是从0开始的，例如Ack = 2说明已经收到 第0段和第1段需要包，下一个需要接收的序号包Seq 需要为 2）。</p>
+<p><strong>SYN</strong>：表示携带这个参数的数据包正在发起连接请求。</p>
+<p><strong>FIN</strong>：表示携带这个参数的包正在请求停止连接。</p>
+<h2 id="2-2-三次握手过程"><a href="#2-2-三次握手过程" class="headerlink" title="2.2 三次握手过程"></a>2.2 三次握手过程</h2><p>用来分析的数据包如图：<br><img src="https://img-blog.csdnimg.cn/2021050917000075.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><strong>第一次握手</strong> 192.168.1.107 向 116.119.0.200 发送携带 SYN; Seq = 0;len = 0的请求。SYN表示这是在请求连接，Seq表示目前发送的是第0段数据包，len表示数据包的长度为0。</p>
+<p><strong>第二次握手</strong> 116.119.0.200 向192.168.1.107发送携带SYN;Seq = 0;Len = 0; Ack = 1的请求。因为TCP是双向连接，所以双方都要维护各自的参数，除了Ack其他参数在第一次握手的时候讲过了，Ack表示已经接收到Seq = 0 的数据包了，下一次请从Seq = 1 的数据包发送。</p>
+<p><strong>第三次握手</strong>：192.168.1.107 向 116.119.0.200 发送携带Ack = 1; Seq = 1; len = 0;的请求，表示已经收到Seq = 0 的数据包了，下一次请从Seq = 1 的数据包发送。<br>这时连接已经成功建立。</p>
+<p>这样就通过三次握手建立了一个连接，<strong>至于面试常问的为什么不是两次或者四次相信你已经知道答案了</strong>，因为<strong>两次不可靠</strong>，可能在第二次握手的时候超时了，对方并没有收到请求，而发送方并不知道，以为已经成功建立了连接，所以会向对方发送数据，但是对方因为其他原因没有接收到第二次握手，所以不会接受数据发送方发送的数据。<strong>至于四次没必要</strong>，因为所有想做的事情已经做完了。</p>
+<h1 id="3-分析四次挥手"><a href="#3-分析四次挥手" class="headerlink" title="3. 分析四次挥手"></a>3. 分析四次挥手</h1><h2 id="3-1-找到四次挥手的数据包"><a href="#3-1-找到四次挥手的数据包" class="headerlink" title="3.1 找到四次挥手的数据包"></a>3.1 找到四次挥手的数据包</h2><p>四次挥手的数据包就是928至931，你又想问这是怎么看出来的？好问题，讲三次握手的时候介绍过 <strong>FIN</strong>参数就代表着请求断开连接，那我们就找离DNS解析域名数据包最近的携带FIN参数的数据包。<br><img src="https://img-blog.csdnimg.cn/20210509174830567.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="3-2-分析四次挥手"><a href="#3-2-分析四次挥手" class="headerlink" title="3.2 分析四次挥手"></a>3.2 分析四次挥手</h2><p><strong>第一次挥手</strong>：192.168.1.107 向 116.119.0.200 发送携带FIN; Seq = 34; Ack = 93; 的数据包，FIN表示请求断开连接，Seq = 34表示这个数据包是第34段，Ack = 93表示已经收到93段之前的数据包了，下一次请求第93段数据包开始发送。</p>
+<p><strong>第二次挥手</strong>： 116.119.0.200 向192.168.1.107发送携带Seq = 93; Ack = 35;的数据包，表示请求已经收到 Seq和Ack参数就不解释了。</p>
+<p><strong>第三次挥手</strong>：116.119.0.200 向192.168.1.107发送携带FIN; Seq = 93; Ack = 35; 的数据包，表示请求断开连接。</p>
+<p><strong>第四次挥手</strong>：192.168.1.107 向 116.119.0.200 发送携带Seq = 35; Ack = 94;的数据包，表示已经接收到请求。</p>
+<p>通过四次挥手完成了连接的断开，<strong>面试的时候常问为什么不能是三次挥手</strong>，这里已经很明确了，因为116.119.0.200这台服务器需要连续发送两个数据包，那为什么是两个呢？因为可能还有一些网络数据没有处理完，不能马上断开连接，只能先回应请求收到了，等处理完数据后再发送断开连接请求。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Wireshark</tag>
+        <tag>网络</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>位运算学习笔记</title>
+    <url>/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h2 id="位运算符"><a href="#位运算符" class="headerlink" title="位运算符"></a>位运算符</h2><h3 id="位逻辑运算符"><a href="#位逻辑运算符" class="headerlink" title="位逻辑运算符"></a>位逻辑运算符</h3><table>
+<thead>
+<tr>
+<th>运算符</th>
+<th>含义</th>
+<th>举例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&amp;</td>
+<td>与</td>
+<td>a &amp; b</td>
+</tr>
+<tr>
+<td>|</td>
+<td>或</td>
+<td>a | b</td>
+</tr>
+<tr>
+<td>~</td>
+<td>取反</td>
+<td>~a</td>
+</tr>
+<tr>
+<td>^</td>
+<td>异或</td>
+<td>a ^ b</td>
+</tr>
+</tbody></table>
+<h4 id="逻辑运算结果集"><a href="#逻辑运算结果集" class="headerlink" title="逻辑运算结果集"></a>逻辑运算结果集</h4><span id="more"></span>
+
+<p>逻辑运算相对简单，下面用一个表格来展示运算逻辑和结果。</p>
+<p>ps： 前两列为 A、B 的取值； A &amp; B 只有两个值都为1的时候结果才唯一；A|B 只要两个中有一个为1结果就为1；A^B 如果两个值不一样时结果为1；~A 取反。</p>
+<table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>A&amp;B</th>
+<th>A|B</th>
+<th>A^B</th>
+<th>~A</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<h3 id="位移运算符"><a href="#位移运算符" class="headerlink" title="位移运算符"></a>位移运算符</h3><table>
+<thead>
+<tr>
+<th>运算符</th>
+<th>含义</th>
+<th>举例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&lt;&lt;</td>
+<td>左位移</td>
+<td>a &lt;&lt; 2</td>
+</tr>
+<tr>
+<td>&gt;&gt;</td>
+<td>右位移</td>
+<td>b &gt;&gt; 4</td>
+</tr>
+<tr>
+<td>&gt;&gt;&gt;</td>
+<td>无符号右位移</td>
+<td>x &gt;&gt;&gt;2</td>
+</tr>
+</tbody></table>
+<h4 id="左移运算符"><a href="#左移运算符" class="headerlink" title="左移运算符"></a>左移运算符</h4><p><code>&lt;&lt;</code>  为左移运算符。它的作用是将二进制数字整体向左移动；<strong>在符号位不变的情况</strong>下每左移一位相当于在原有基础上乘以2。</p>
+<p>下图为左移运算的示意图，高位益处则舍弃，低位不够则补零。</p>
+<p><img src="https://s2.loli.net/2022/01/09/v4xuoJ17RNWYXIA.png" alt="image-20220109165615031"></p>
+<h4 id="右移运算符"><a href="#右移运算符" class="headerlink" title="右移运算符"></a>右移运算符</h4><p><code>&gt;&gt;</code> 与左移运算符相反，它的作用是将二进制数字整体向右移动；每次右移相当于原来的数字除以2；右移运算符对正负数有不同的策略，如果是正数，最高位会补 0 ，如果是负数最高位补 1，<strong>这样可以保证正数做完运算还是正数，负数做完运算还是负数</strong>。</p>
+<p><img src="https://s2.loli.net/2022/01/09/OjUpcdlGsDZk8bu.png" alt="image-20220109171054303"></p>
+<h4 id="无符号右移"><a href="#无符号右移" class="headerlink" title="无符号右移"></a>无符号右移</h4><p><code>&gt;&gt;&gt;</code> 为无符号右移运算符。运算逻辑与右移运算符相同，唯一的不同是它只会在最高位补 0，这样可能导致负数变正数；<strong>在符号位不变的情况</strong>下每右移一位相当于在原有基础上除以2。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>计算机原理</tag>
       </tags>
   </entry>
   <entry>
@@ -1303,221 +1461,6 @@
       </tags>
   </entry>
   <entry>
-    <title>位运算学习笔记</title>
-    <url>/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<h2 id="位运算符"><a href="#位运算符" class="headerlink" title="位运算符"></a>位运算符</h2><h3 id="位逻辑运算符"><a href="#位逻辑运算符" class="headerlink" title="位逻辑运算符"></a>位逻辑运算符</h3><table>
-<thead>
-<tr>
-<th>运算符</th>
-<th>含义</th>
-<th>举例</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>&amp;</td>
-<td>与</td>
-<td>a &amp; b</td>
-</tr>
-<tr>
-<td>|</td>
-<td>或</td>
-<td>a | b</td>
-</tr>
-<tr>
-<td>~</td>
-<td>取反</td>
-<td>~a</td>
-</tr>
-<tr>
-<td>^</td>
-<td>异或</td>
-<td>a ^ b</td>
-</tr>
-</tbody></table>
-<h4 id="逻辑运算结果集"><a href="#逻辑运算结果集" class="headerlink" title="逻辑运算结果集"></a>逻辑运算结果集</h4><span id="more"></span>
-
-<p>逻辑运算相对简单，下面用一个表格来展示运算逻辑和结果。</p>
-<p>ps： 前两列为 A、B 的取值； A &amp; B 只有两个值都为1的时候结果才唯一；A|B 只要两个中有一个为1结果就为1；A^B 如果两个值不一样时结果为1；~A 取反。</p>
-<table>
-<thead>
-<tr>
-<th>A</th>
-<th>B</th>
-<th>A&amp;B</th>
-<th>A|B</th>
-<th>A^B</th>
-<th>~A</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
-</tr>
-<tr>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-</tr>
-<tr>
-<td>0</td>
-<td>1</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-</tr>
-</tbody></table>
-<h3 id="位移运算符"><a href="#位移运算符" class="headerlink" title="位移运算符"></a>位移运算符</h3><table>
-<thead>
-<tr>
-<th>运算符</th>
-<th>含义</th>
-<th>举例</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>&lt;&lt;</td>
-<td>左位移</td>
-<td>a &lt;&lt; 2</td>
-</tr>
-<tr>
-<td>&gt;&gt;</td>
-<td>右位移</td>
-<td>b &gt;&gt; 4</td>
-</tr>
-<tr>
-<td>&gt;&gt;&gt;</td>
-<td>无符号右位移</td>
-<td>x &gt;&gt;&gt;2</td>
-</tr>
-</tbody></table>
-<h4 id="左移运算符"><a href="#左移运算符" class="headerlink" title="左移运算符"></a>左移运算符</h4><p><code>&lt;&lt;</code>  为左移运算符。它的作用是将二进制数字整体向左移动；<strong>在符号位不变的情况</strong>下每左移一位相当于在原有基础上乘以2。</p>
-<p>下图为左移运算的示意图，高位益处则舍弃，低位不够则补零。</p>
-<p><img src="https://s2.loli.net/2022/01/09/v4xuoJ17RNWYXIA.png" alt="image-20220109165615031"></p>
-<h4 id="右移运算符"><a href="#右移运算符" class="headerlink" title="右移运算符"></a>右移运算符</h4><p><code>&gt;&gt;</code> 与左移运算符相反，它的作用是将二进制数字整体向右移动；每次右移相当于原来的数字除以2；右移运算符对正负数有不同的策略，如果是正数，最高位会补 0 ，如果是负数最高位补 1，<strong>这样可以保证正数做完运算还是正数，负数做完运算还是负数</strong>。</p>
-<p><img src="https://s2.loli.net/2022/01/09/OjUpcdlGsDZk8bu.png" alt="image-20220109171054303"></p>
-<h4 id="无符号右移"><a href="#无符号右移" class="headerlink" title="无符号右移"></a>无符号右移</h4><p><code>&gt;&gt;&gt;</code> 为无符号右移运算符。运算逻辑与右移运算符相同，唯一的不同是它只会在最高位补 0，这样可能导致负数变正数；<strong>在符号位不变的情况</strong>下每右移一位相当于在原有基础上除以2。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>计算机原理</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
-    <url>/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</url>
-    <content><![CDATA[<p>本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章<a href="https://blog.csdn.net/qq_43005544/article/details/116504407">wireshark 简易教程</a></p>
-<span id="more"></span>
-
-<p><strong>正文开始</strong></p>
-<h1 id="1-首先抓个包"><a href="#1-首先抓个包" class="headerlink" title="1.首先抓个包"></a>1.首先抓个包</h1><p>通过上一篇文章大家应该都能打开对应网卡的抓包页面了哈；我们利用DNS服务可以将域名解析成IP的功能来演示如何抓到我们想要的包。</p>
-<h2 id="1-1-开始抓包"><a href="#1-1-开始抓包" class="headerlink" title="1.1 开始抓包"></a>1.1 开始抓包</h2><p>如果进入抓包页面没有自动开始抓包，就点击左上角的开始抓包按钮，如图：<br><img src="https://img-blog.csdnimg.cn/20210507235225375.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="1-2-打开命令行界面"><a href="#1-2-打开命令行界面" class="headerlink" title="1.2 打开命令行界面"></a>1.2 打开命令行界面</h2><p>博主用的win10操作系统，所以打开的就是CMD了，输入以下命令</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;nslookup</span><br><span class="line">&gt;<span class="built_in">set</span> vc</span><br><span class="line">&gt;www.baidu.com</span><br></pre></td></tr></table></figure>
-<p>命令执行情况如图：<br><img src="https://img-blog.csdnimg.cn/20210507233243944.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70"></p>
-<h2 id="1-3-停止抓包"><a href="#1-3-停止抓包" class="headerlink" title="1.3 停止抓包"></a>1.3 停止抓包</h2><p>点击红框标记的按钮：<br><img src="https://img-blog.csdnimg.cn/20210507235328579.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="1-4-筛选"><a href="#1-4-筛选" class="headerlink" title="1.4 筛选"></a>1.4 筛选</h2><p>这个时候可以看到界面上抓到很多包，但是有很多是其他应用进行的网络请求，并不是我们想要的，所以要进行筛选。<br>在筛选框我们用Ip进行筛选，表达式为<strong>ip.addr == 116.199.0.200</strong>，如图<br><img src="https://img-blog.csdnimg.cn/20210507235517845.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>116.199.0.200是我本机DNS的ip，你可以通过刚在输入的nslookup命令得到，如图<br><img src="https://img-blog.csdnimg.cn/20210507235651897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>但是通过筛选后发现还是有很多包不是我们想要的，我们通过info列来找到我们请求DNS的包，如图：<br>找到DNS协议info这列有我们刚才输入需要解析的域名这两行，这两行就是DNS解析域名的过程，我们从这两行的Info就可以很清晰的看出DNS解析域名的过程，首先192.168.1.107询问DNS <a href="http://www.baidu.com的ip是多少,然后dns在下一行进行回复./">www.baidu.com的IP是多少，然后DNS在下一行进行回复。</a><br><img src="https://img-blog.csdnimg.cn/20210509113130576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="1-5-找到三次握手的包"><a href="#1-5-找到三次握手的包" class="headerlink" title="1.5 找到三次握手的包"></a>1.5 找到三次握手的包</h2><p>在1.4小节中我们找到的926和927号包的上面就是三次握手的包，分别是921，922，923这三个包，如图：<br><img src="https://img-blog.csdnimg.cn/20210509161642786.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>你可能想问是怎么看出来的，好问题，主要是看Seq和Ack的值，三次握手的时候Seq的相对值是为0的（注意是相对值）。找到了三次握手的网络包，我们就来分析一下三次握手吧。</p>
-<h1 id="2-分析三次握手"><a href="#2-分析三次握手" class="headerlink" title="2. 分析三次握手"></a>2. 分析三次握手</h1><h2 id="2-1-TCP-参数介绍"><a href="#2-1-TCP-参数介绍" class="headerlink" title="2.1 TCP 参数介绍"></a>2.1 TCP 参数介绍</h2><p>要学习TCP首先要学习它的参数。</p>
-<p><strong>Seq</strong>：标识改数据段的序号。因为TCP的传输是有序的，接收者可以通过Seq对包进行排序。</p>
-<p><strong>Len</strong>：表示Seq对应数据的长度。</p>
-<p><strong>Ack</strong>：确认号，向数据提供者表明收到了哪些包（实际收到包的Seq序号需要 Ack - 1，因为Seq是从0开始的，例如Ack = 2说明已经收到 第0段和第1段需要包，下一个需要接收的序号包Seq 需要为 2）。</p>
-<p><strong>SYN</strong>：表示携带这个参数的数据包正在发起连接请求。</p>
-<p><strong>FIN</strong>：表示携带这个参数的包正在请求停止连接。</p>
-<h2 id="2-2-三次握手过程"><a href="#2-2-三次握手过程" class="headerlink" title="2.2 三次握手过程"></a>2.2 三次握手过程</h2><p>用来分析的数据包如图：<br><img src="https://img-blog.csdnimg.cn/2021050917000075.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><strong>第一次握手</strong> 192.168.1.107 向 116.119.0.200 发送携带 SYN; Seq = 0;len = 0的请求。SYN表示这是在请求连接，Seq表示目前发送的是第0段数据包，len表示数据包的长度为0。</p>
-<p><strong>第二次握手</strong> 116.119.0.200 向192.168.1.107发送携带SYN;Seq = 0;Len = 0; Ack = 1的请求。因为TCP是双向连接，所以双方都要维护各自的参数，除了Ack其他参数在第一次握手的时候讲过了，Ack表示已经接收到Seq = 0 的数据包了，下一次请从Seq = 1 的数据包发送。</p>
-<p><strong>第三次握手</strong>：192.168.1.107 向 116.119.0.200 发送携带Ack = 1; Seq = 1; len = 0;的请求，表示已经收到Seq = 0 的数据包了，下一次请从Seq = 1 的数据包发送。<br>这时连接已经成功建立。</p>
-<p>这样就通过三次握手建立了一个连接，<strong>至于面试常问的为什么不是两次或者四次相信你已经知道答案了</strong>，因为<strong>两次不可靠</strong>，可能在第二次握手的时候超时了，对方并没有收到请求，而发送方并不知道，以为已经成功建立了连接，所以会向对方发送数据，但是对方因为其他原因没有接收到第二次握手，所以不会接受数据发送方发送的数据。<strong>至于四次没必要</strong>，因为所有想做的事情已经做完了。</p>
-<h1 id="3-分析四次挥手"><a href="#3-分析四次挥手" class="headerlink" title="3. 分析四次挥手"></a>3. 分析四次挥手</h1><h2 id="3-1-找到四次挥手的数据包"><a href="#3-1-找到四次挥手的数据包" class="headerlink" title="3.1 找到四次挥手的数据包"></a>3.1 找到四次挥手的数据包</h2><p>四次挥手的数据包就是928至931，你又想问这是怎么看出来的？好问题，讲三次握手的时候介绍过 <strong>FIN</strong>参数就代表着请求断开连接，那我们就找离DNS解析域名数据包最近的携带FIN参数的数据包。<br><img src="https://img-blog.csdnimg.cn/20210509174830567.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="3-2-分析四次挥手"><a href="#3-2-分析四次挥手" class="headerlink" title="3.2 分析四次挥手"></a>3.2 分析四次挥手</h2><p><strong>第一次挥手</strong>：192.168.1.107 向 116.119.0.200 发送携带FIN; Seq = 34; Ack = 93; 的数据包，FIN表示请求断开连接，Seq = 34表示这个数据包是第34段，Ack = 93表示已经收到93段之前的数据包了，下一次请求第93段数据包开始发送。</p>
-<p><strong>第二次挥手</strong>： 116.119.0.200 向192.168.1.107发送携带Seq = 93; Ack = 35;的数据包，表示请求已经收到 Seq和Ack参数就不解释了。</p>
-<p><strong>第三次挥手</strong>：116.119.0.200 向192.168.1.107发送携带FIN; Seq = 93; Ack = 35; 的数据包，表示请求断开连接。</p>
-<p><strong>第四次挥手</strong>：192.168.1.107 向 116.119.0.200 发送携带Seq = 35; Ack = 94;的数据包，表示已经接收到请求。</p>
-<p>通过四次挥手完成了连接的断开，<strong>面试的时候常问为什么不能是三次挥手</strong>，这里已经很明确了，因为116.119.0.200这台服务器需要连续发送两个数据包，那为什么是两个呢？因为可能还有一些网络数据没有处理完，不能马上断开连接，只能先回应请求收到了，等处理完数据后再发送断开连接请求。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Wireshark</tag>
-        <tag>网络</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>常见的Web应用攻击手段</title>
-    <url>/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</url>
-    <content><![CDATA[<h2 id="1-XSS攻击"><a href="#1-XSS攻击" class="headerlink" title="1.XSS攻击"></a>1.XSS攻击</h2><p>XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。</p>
-<span id="more"></span>
-
-<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><ul>
-<li><p>1.1 反射型</p>
-<p>攻击者诱使用户点击一个嵌入恶意脚本的链接，达到攻击的目的</p>
-</li>
-<li><p>1.2 持久型</p>
-<p>黑客提交含有恶意脚本的请求，保存在被攻击的Web站点的数据库中，用户浏览网页时，恶意脚本被包含在正常页面中，达到攻击的目的</p>
-</li>
-</ul>
-<h3 id="防护手段"><a href="#防护手段" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
-<li><p>1.3消毒</p>
-<p>XSS攻击者一般都是通过在请求中嵌入恶意脚本达到攻击的目的，这些脚本是一般用户输入中不使用的，如果进行过滤和消毒处理，即对某些html危险字符转义就可以让绝大部分攻击失败</p>
-</li>
-<li><p>1.4HttpOnly</p>
-<p>浏览器禁止页面JavaScript访问带有HttpOnly属性的Cookie，可以防止Cookie中的数据被窃取</p>
-</li>
-</ul>
-<h2 id="2-注入攻击"><a href="#2-注入攻击" class="headerlink" title="2.注入攻击"></a>2.注入攻击</h2><h3 id="分类-1"><a href="#分类-1" class="headerlink" title="分类"></a>分类</h3><ul>
-<li><p>2.1 SQL注入攻击</p>
-<p>攻击者在HTTP请求中注入恶意SQL命令（drop table users;），服务器用请求参数构造数据库SQL命令时，恶意SQL被一起构造，并在数据库中执行。</p>
-</li>
-<li><p>2.2 OS注入攻击</p>
-</li>
-</ul>
-<h3 id="防护手段-1"><a href="#防护手段-1" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
-<li><p>2.3 消毒</p>
-<p>通过正则匹配，过滤请求数据中可能注入的SQL</p>
-</li>
-<li><p>2.4 参数绑定</p>
-<p>使用预编译手段，绑定参数是最好的防SQL注入方法。目前许多数据访问层框架，如IBatis，Hibernate等，都实现SQL预编译和参数绑定，攻击者的恶意SQL会被当做SQL的参数，而不是SQL命令被执行。</p>
-</li>
-</ul>
-<h2 id="3-CSRF攻击"><a href="#3-CSRF攻击" class="headerlink" title="3.CSRF攻击"></a>3.CSRF攻击</h2><p>攻击者通过跨站请求，以合法用户的身份进行非法操作，如转账交易、发表评论等；<br>CSRF的主要手法是利用跨站请求，在用户不知情的情况下，以用户的身份伪造请求。其核心是利用了浏览器Cookie或服务器Session策略，盗取用户身份。</p>
-<h3 id="防护手段-2"><a href="#防护手段-2" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
-<li><p>3.1 Token验证</p>
-<p>通过在请求参数中增加随机数的办法来阻止攻击者获得所有请求参数：在页面表单中增加一个随机数作为Token，每次响应页面的Token都不相同，从正常页面提交的请求会包含该Token值，而伪造的请求无法获得该值，服务器检查请求参数中Token的值是否存在并且正确以确定请求提交者是否合法</p>
-</li>
-<li><p>3.2 验证码</p>
-<p>验证码则更加简单有效；<br>请求提交时，需要用户输入验证码，以避免在用户不知情的情况下被攻击者伪造请求。但是输入验证码是一个糟糕的用户体验，所以请在必要时使用，</p>
-</li>
-<li><p>3.3 Referer check</p>
-<p>HTTP请求头的Referer域中记录着请求来源，可通过检查请求来源，验证其是否合法。</p>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>指令详解-寻址方式</title>
     <url>/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/</url>
     <content><![CDATA[<h2 id="数据寻址"><a href="#数据寻址" class="headerlink" title="数据寻址"></a>数据寻址</h2><p>简单来说就是根据地址码取数据。</p>
@@ -1575,30 +1518,6 @@
       </tags>
   </entry>
   <entry>
-    <title>指令详解-操作码</title>
-    <url>/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/</url>
-    <content><![CDATA[<h2 id="定长编码"><a href="#定长编码" class="headerlink" title="定长编码"></a>定长编码</h2><p>每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。<br>优点：计算机的硬件设计简单，朱令译码和执行速度快。<br>缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。<br>适用环境：适用于字长较长的计算机系统，如 32 位及以上。</p>
-<span id="more"></span>
-
-<p>如图：无论有几个地址码都不会影响操作码的长度。</p>
-<p><img src="https://s2.loli.net/2022/01/07/XzuvCTyoSpdbh2V.png" alt="image-20220107125003587"></p>
-<h2 id="变长编码"><a href="#变长编码" class="headerlink" title="变长编码"></a>变长编码</h2><p>每条指令的操作码的长度不是固定的，是可变的。之所以有变长编码是因为这会让系统更灵活，可以通过变动操作码的长度来保证地址码长度和指令长度不变。<br>如图：四地址指令和三地址指令的指令长度和地址码的长度是一样的。</p>
-<p><img src="https://s2.loli.net/2022/01/07/EyUX3z4txl7pV5c.png" alt="image-20220107125232359"></p>
-<p>优点：在拥有比较短的指令字长的系统中，既能表示出比较多的指令条数又能尽量满足操作数地址的要求。<br>缺点：计算机的硬件设计复杂，指令译码和执行速度较慢。<br>适用环境：适用于字长较短的计算机系统，如 16 位及以下。</p>
-<h3 id="扩展操作码"><a href="#扩展操作码" class="headerlink" title="扩展操作码"></a>扩展操作码</h3><p>为了保证不同类型指令的地址码和指令的长度不变，我们需要增加操作码的长度，这个操作就是扩展操作码。<br>例如现在有两条指令，一条是四地址指令，一条是三地址指令，下面是他们二进制数据的展示情况（为了把更多精力放在操作码上，地址码用 xxx 来表示）：</p>
-<p><img src="https://s2.loli.net/2022/01/07/O7QdwhIEz4ibgq8.png" alt="image-20220107125708122"></p>
-<p>看到上图的时候是不是还没察觉到问题？那么我们将图简化一下：</p>
-<p><img src="https://s2.loli.net/2022/01/07/AXLxmhVb4iF1nM5.png" alt="image-20220107125837964"></p>
-<p>看出来了吗？就是你无法分清这两条指令那条是三地址指令哪条是四地址指令。所以有了一个规定，短码不能是长码的前缀。<br>这个时候一般会预留出一个拓展窗口，例如减少一条四地址指令，让 1111 作为拓展窗口，让四地址指令的操作码最多取到 1110，这时如果你看到操作码是前四位是 1111 你就知道这个肯定不是四地址指令了，当然其他数量的地址指令通过类似的操作也可以解决这个问题，值得注意的是，拓展窗口不一定是一个，也可以是多个。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>计算机原理</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>指令详解-地址码</title>
     <url>/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/</url>
     <content><![CDATA[<h2 id="指令是什么："><a href="#指令是什么：" class="headerlink" title="指令是什么："></a>指令是什么：</h2><p>可以将指令当做一种编程语言，表现形式为一串二进制码，作用是能让计算机按照指令去工作。</p>
@@ -1625,6 +1544,87 @@
       </categories>
       <tags>
         <tag>计算机原理</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>指令详解-操作码</title>
+    <url>/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/</url>
+    <content><![CDATA[<h2 id="定长编码"><a href="#定长编码" class="headerlink" title="定长编码"></a>定长编码</h2><p>每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。<br>优点：计算机的硬件设计简单，朱令译码和执行速度快。<br>缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。<br>适用环境：适用于字长较长的计算机系统，如 32 位及以上。</p>
+<span id="more"></span>
+
+<p>如图：无论有几个地址码都不会影响操作码的长度。</p>
+<p><img src="https://s2.loli.net/2022/01/07/XzuvCTyoSpdbh2V.png" alt="image-20220107125003587"></p>
+<h2 id="变长编码"><a href="#变长编码" class="headerlink" title="变长编码"></a>变长编码</h2><p>每条指令的操作码的长度不是固定的，是可变的。之所以有变长编码是因为这会让系统更灵活，可以通过变动操作码的长度来保证地址码长度和指令长度不变。<br>如图：四地址指令和三地址指令的指令长度和地址码的长度是一样的。</p>
+<p><img src="https://s2.loli.net/2022/01/07/EyUX3z4txl7pV5c.png" alt="image-20220107125232359"></p>
+<p>优点：在拥有比较短的指令字长的系统中，既能表示出比较多的指令条数又能尽量满足操作数地址的要求。<br>缺点：计算机的硬件设计复杂，指令译码和执行速度较慢。<br>适用环境：适用于字长较短的计算机系统，如 16 位及以下。</p>
+<h3 id="扩展操作码"><a href="#扩展操作码" class="headerlink" title="扩展操作码"></a>扩展操作码</h3><p>为了保证不同类型指令的地址码和指令的长度不变，我们需要增加操作码的长度，这个操作就是扩展操作码。<br>例如现在有两条指令，一条是四地址指令，一条是三地址指令，下面是他们二进制数据的展示情况（为了把更多精力放在操作码上，地址码用 xxx 来表示）：</p>
+<p><img src="https://s2.loli.net/2022/01/07/O7QdwhIEz4ibgq8.png" alt="image-20220107125708122"></p>
+<p>看到上图的时候是不是还没察觉到问题？那么我们将图简化一下：</p>
+<p><img src="https://s2.loli.net/2022/01/07/AXLxmhVb4iF1nM5.png" alt="image-20220107125837964"></p>
+<p>看出来了吗？就是你无法分清这两条指令那条是三地址指令哪条是四地址指令。所以有了一个规定，短码不能是长码的前缀。<br>这个时候一般会预留出一个拓展窗口，例如减少一条四地址指令，让 1111 作为拓展窗口，让四地址指令的操作码最多取到 1110，这时如果你看到操作码是前四位是 1111 你就知道这个肯定不是四地址指令了，当然其他数量的地址指令通过类似的操作也可以解决这个问题，值得注意的是，拓展窗口不一定是一个，也可以是多个。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>计算机原理</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>常见的Web应用攻击手段</title>
+    <url>/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</url>
+    <content><![CDATA[<h2 id="1-XSS攻击"><a href="#1-XSS攻击" class="headerlink" title="1.XSS攻击"></a>1.XSS攻击</h2><p>XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。</p>
+<span id="more"></span>
+
+<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><ul>
+<li><p>1.1 反射型</p>
+<p>攻击者诱使用户点击一个嵌入恶意脚本的链接，达到攻击的目的</p>
+</li>
+<li><p>1.2 持久型</p>
+<p>黑客提交含有恶意脚本的请求，保存在被攻击的Web站点的数据库中，用户浏览网页时，恶意脚本被包含在正常页面中，达到攻击的目的</p>
+</li>
+</ul>
+<h3 id="防护手段"><a href="#防护手段" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
+<li><p>1.3消毒</p>
+<p>XSS攻击者一般都是通过在请求中嵌入恶意脚本达到攻击的目的，这些脚本是一般用户输入中不使用的，如果进行过滤和消毒处理，即对某些html危险字符转义就可以让绝大部分攻击失败</p>
+</li>
+<li><p>1.4HttpOnly</p>
+<p>浏览器禁止页面JavaScript访问带有HttpOnly属性的Cookie，可以防止Cookie中的数据被窃取</p>
+</li>
+</ul>
+<h2 id="2-注入攻击"><a href="#2-注入攻击" class="headerlink" title="2.注入攻击"></a>2.注入攻击</h2><h3 id="分类-1"><a href="#分类-1" class="headerlink" title="分类"></a>分类</h3><ul>
+<li><p>2.1 SQL注入攻击</p>
+<p>攻击者在HTTP请求中注入恶意SQL命令（drop table users;），服务器用请求参数构造数据库SQL命令时，恶意SQL被一起构造，并在数据库中执行。</p>
+</li>
+<li><p>2.2 OS注入攻击</p>
+</li>
+</ul>
+<h3 id="防护手段-1"><a href="#防护手段-1" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
+<li><p>2.3 消毒</p>
+<p>通过正则匹配，过滤请求数据中可能注入的SQL</p>
+</li>
+<li><p>2.4 参数绑定</p>
+<p>使用预编译手段，绑定参数是最好的防SQL注入方法。目前许多数据访问层框架，如IBatis，Hibernate等，都实现SQL预编译和参数绑定，攻击者的恶意SQL会被当做SQL的参数，而不是SQL命令被执行。</p>
+</li>
+</ul>
+<h2 id="3-CSRF攻击"><a href="#3-CSRF攻击" class="headerlink" title="3.CSRF攻击"></a>3.CSRF攻击</h2><p>攻击者通过跨站请求，以合法用户的身份进行非法操作，如转账交易、发表评论等；<br>CSRF的主要手法是利用跨站请求，在用户不知情的情况下，以用户的身份伪造请求。其核心是利用了浏览器Cookie或服务器Session策略，盗取用户身份。</p>
+<h3 id="防护手段-2"><a href="#防护手段-2" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
+<li><p>3.1 Token验证</p>
+<p>通过在请求参数中增加随机数的办法来阻止攻击者获得所有请求参数：在页面表单中增加一个随机数作为Token，每次响应页面的Token都不相同，从正常页面提交的请求会包含该Token值，而伪造的请求无法获得该值，服务器检查请求参数中Token的值是否存在并且正确以确定请求提交者是否合法</p>
+</li>
+<li><p>3.2 验证码</p>
+<p>验证码则更加简单有效；<br>请求提交时，需要用户输入验证码，以避免在用户不知情的情况下被攻击者伪造请求。但是输入验证码是一个糟糕的用户体验，所以请在必要时使用，</p>
+</li>
+<li><p>3.3 Referer check</p>
+<p>HTTP请求头的Referer域中记录着请求来源，可通过检查请求来源，验证其是否合法。</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
@@ -1757,6 +1757,203 @@
 </ul>
 <h2 id="7、冗余"><a href="#7、冗余" class="headerlink" title="7、冗余"></a>7、冗余</h2><p>沉余包括服务器冗余运行，数据冗余备份。网站需要不间断的提供服务，因此必须保证在有服务器宕机的情况下可以将服务和数据转移到其他机器上，以保证服务的高可用和数据的不丢失</p>
 <h2 id="8、自动化"><a href="#8、自动化" class="headerlink" title="8、自动化"></a>8、自动化</h2><p>包括但不限于以下部分：<br>1、自动化代码管理；2、自动化测试；3、自动化安全检测；4、自动化部署；<br>5、自动化监控 等等。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>虚拟机字节码执行引擎</title>
+    <url>/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/</url>
+    <content><![CDATA[<p>虚拟机字节码执行引擎是java虚拟机核心组成部分之一，所有java虚拟机的执行引擎输入、输出都是一致的：输入的是字节码二进制流，处理过程是字节码解析执行的等效过程，输出的是执行结果。</p>
+<span id="more"></span>
+
+<h2 id="运行时栈帧结构"><a href="#运行时栈帧结构" class="headerlink" title="运行时栈帧结构"></a>运行时栈帧结构</h2><p>java虚拟机以方法作为最基本的执行单元，栈帧则是用于支持虚拟机进行方法调用和方法执行背后的数据结构，它也是虚拟机运行时数据区中的虚拟机栈的栈元素。栈帧存储了方法的局部变量表、操作数栈、动态连接和方法返回地址等信息，栈帧需要分配多少内存编译期已经确定，并不会收到程序运行期变量数据的影响；以java程序的角度来看，同一时刻、同一线程里面，在调用堆栈的所有方法都同时处于执行状态，但在活动线程中，只有位于栈顶的方法才是在运行的，被称为当前栈帧，执行引擎所运行的字节码执行都只针对当前栈帧进行操作。</p>
+<h3 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h3><p>是一组变量值的存储空间，属于线程私有，用于存放方法参数和方法内部定义的局部变量，在java程序被编译为class文件时就在方法的Code属性的max_locals数据项中确定了该方法所需分配的局部变量表的最大容量，它以变量槽为最小单位，它允许变量槽的长度可以随着处理器、操作系统或虚拟机实现的不同而发生变化</p>
+<ul>
+<li><p>工作机制</p>
+<ul>
+<li>当一个方法被调用时，java虚拟机会使用局部变量表来完成参数值到参数变量的传递过程，即实参到形参的传递。如果执行的是实例方法，那局部变量表的第0位索引的变量槽默认是用于传递方法所属对象实例的引用，可以用this表示，其余参数按照顺序排列，而且局部变量表是可以重用的</li>
+</ul>
+</li>
+</ul>
+<h3 id="操作数栈"><a href="#操作数栈" class="headerlink" title="操作数栈"></a>操作数栈</h3><p>常被称为操作栈，是一个后入先出栈，它的最大深度在编译的时候已经确定</p>
+<ul>
+<li><p>工作机制</p>
+<ul>
+<li>当一个方法刚刚执行的时候，这个方法的操作数栈是空的，在方法的执行过程中会有各种字节码执行往操作数栈中写入和提取内容（入栈出栈的元素是局部变量表中的局部变量）</li>
+</ul>
+</li>
+</ul>
+<h3 id="栈帧信息"><a href="#栈帧信息" class="headerlink" title="栈帧信息"></a>栈帧信息</h3><ul>
+<li><p>动态链接</p>
+<p>每个栈帧都包含一个指向运行时常量池中该栈帧所属方法的引用，持有这个过程是为了支持方法调用过程中的动态连接（就是将符号引用转为直接引用）</p>
+</li>
+<li><p>方法返回地址</p>
+<p>方法退出之后都必须返回到最初方法被调用时的位置</p>
+</li>
+<li><p>附加信息</p>
+<p>可以返回一些java虚拟机没有描述的信息</p>
+</li>
+</ul>
+<h2 id="方法调用"><a href="#方法调用" class="headerlink" title="方法调用"></a>方法调用</h2><p>方法调用并不等于方法中的代码被执行，方法调用阶段唯一的任务就是确定被调用方法的版本（即调用哪一个方法），暂时还未涉及方法内部的具体运行过程</p>
+<h3 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h3><p>所有方法调用的目标方法在Class文件中都是一个常量池中的符号引用，在类加载的解析阶段，会将一部分符号引用转化为直接引用，前提是方法在程序真正运行之前就有一个可确定的调用版本，并且在运行期不可改变，这类方法的调用被称为解析；符合“编译期可知，运行期不可变”要求的方法主要静包括态方法和私有方法，这两类都不可能重写出其他版本</p>
+<ul>
+<li><p>非虚方法</p>
+<p>私有方法、实例构造器、静态方法、父类方法，被final修饰的方法 这5中方法调用会在类加载的时候就可以把符号引用解析为该方法的直接引用。这些方法统称为“非虚方法”</p>
+<ul>
+<li><p>解析调用</p>
+<ul>
+<li>是个静态过程，在编译期就完全确定，在类加载阶段就会将符号引用转变为直接引用</li>
+</ul>
+</li>
+<li><p>分派调用</p>
+<ul>
+<li><p>静态分派</p>
+<ul>
+<li>主要表现为重载，虚拟机在重载时是通过参数的静态类型而不是实际类型作为判定依据的</li>
+</ul>
+</li>
+<li><p>动态分派</p>
+<ul>
+<li>主要表现为重写，在运行期间根据实际类型确定方法执行版本的分派过程叫做动态分派</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="动态类型语言支持"><a href="#动态类型语言支持" class="headerlink" title="动态类型语言支持"></a>动态类型语言支持</h2><h3 id="动态类型语言"><a href="#动态类型语言" class="headerlink" title="动态类型语言"></a>动态类型语言</h3><p>类型检查的主体过程是在运行期而不是编译期进行的</p>
+<h3 id="java-lang-invoke包"><a href="#java-lang-invoke包" class="headerlink" title="java.lang.invoke包"></a>java.lang.invoke包</h3><p>主要目的是在之前单纯依靠符号引用来确定调用的目标方法这条路外提供一种新的动态确定目标方法的机制，称为方法句柄</p>
+<ul>
+<li><p>方法句柄和反射的区别</p>
+<ul>
+<li>1、反射是在模拟java代码层次的方法调用，方法句柄是在模拟字节码层次的方法调用</li>
+<li>2、反射是重量级的，方法句柄是轻量级的</li>
+<li>3、方法句柄可以享受虚拟机的优化策略，因为它是模拟字节码层面的方法调用</li>
+</ul>
+</li>
+</ul>
+<h2 id="基于栈的字节码解释执行引擎"><a href="#基于栈的字节码解释执行引擎" class="headerlink" title="基于栈的字节码解释执行引擎"></a>基于栈的字节码解释执行引擎</h2><p>主要功能是配合虚拟机执行方法里面的字节码指令的</p>
+<h3 id="解释执行"><a href="#解释执行" class="headerlink" title="解释执行"></a>解释执行</h3><p>java现在已经不能单纯归类于解释执行或者是编译执行，因为两者都有</p>
+<h3 id="基于栈的指令集与基于寄存器的指令集"><a href="#基于栈的指令集与基于寄存器的指令集" class="headerlink" title="基于栈的指令集与基于寄存器的指令集"></a>基于栈的指令集与基于寄存器的指令集</h3><p>javac编译器输出的字节码指令流是一种基于栈的指令集架构</p>
+<ul>
+<li>栈：优点： 1、可移植，因为寄存器由硬件直接提供，程序直接依赖这些硬件寄存器则不可避免的受硬件的约束；2、代码相对更紧凑、编译器实现更加简单。缺点：1、理论上执行速度相对慢一些</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+        <tag>字节码</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>网站的高性能架构</title>
+    <url>/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/</url>
+    <content><![CDATA[<p>网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。</p>
+<span id="more"></span>
+
+<h2 id="1-网站性能测试"><a href="#1-网站性能测试" class="headerlink" title="1. 网站性能测试"></a>1. 网站性能测试</h2><p>性能测试是性能优化的前提和基础，也是性能优化结果的检查和度量标准。不同视角下的网站性能有不同的标准，也有不同的优化手段。</p>
+<h3 id="1-1不同视角下的网站性能"><a href="#1-1不同视角下的网站性能" class="headerlink" title="1.1不同视角下的网站性能"></a>1.1不同视角下的网站性能</h3><ul>
+<li><p>1.1.1 用户视角的网站性能</p>
+<p>从用户角度，网站性能就是用户在浏览器上直观感受到的网站响应速度快还是慢</p>
+<ul>
+<li><p>优化手段：</p>
+<p>使用一些前端架构优化手段，通过优化页面HTML式样、利用浏览器端的并发和异步特性、调整浏览器缓存策略、使用CDN服务、反向代理等手段，使浏览器尽快地显示用户感兴趣的内容、尽可能近地获取页面内容，即使不优化应用程序和架构，也可以很大程度地改善用户视角下的网站性能</p>
+</li>
+</ul>
+</li>
+<li><p>1.1.2 开发人员视角的网站性能</p>
+<p>开发人员关注的主要是应用程序本身及其相关子系统的性能，包括响应延迟、系统吞吐量、并发处理能力、系统稳定性等技术指标。</p>
+<ul>
+<li><p>优化手段：</p>
+<p>使用缓存加速数据读取，使用集群提高吞吐能力，使用异步消息加快请求响应及实现削峰，使用代码优化手段改善程序性能。</p>
+</li>
+</ul>
+</li>
+<li><p>1.1.3 运维人员视角的网站性能</p>
+<p>运维人员更关注基础设施性能和资源利用率，如网络运营商的带宽能力、服务器硬件的配置、数据中心网络架构、服务器和网络带宽的资源利用率等</p>
+<ul>
+<li><p>优化手段</p>
+<p>建设优化骨干网、使用高性价比定制服务器、利用虚拟化技术优化资源利用等</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-2-性能测试指标"><a href="#1-2-性能测试指标" class="headerlink" title="1.2 性能测试指标"></a>1.2 性能测试指标</h3><p>不同视角下有不同的性能标准，不同的标准有不同的性能测试指标，从开发和测试人员的视角，网站性能测试的主要指标有响应时间、并发数、吞吐量、性能计数器等</p>
+<ul>
+<li><p>1.2.1 响应时间</p>
+<p>指应用执行一个操作需要的时间，包括从发出请求开始到收到最后响应数据所需要的时间</p>
+</li>
+<li><p>1.2.2 并发数</p>
+<p>指系统能够同时处理请求的数目，这个数字也反映了系统的负载特性。</p>
+</li>
+<li><p>1.2.3 吞吐量</p>
+<p>单位时间内系统处理的请求数量，体现系统的整体处理能力</p>
+</li>
+<li><p>1.2.4 性能计数器</p>
+<p>它是描述服务器或操作系统性能的一些数据指标。包括SystemLoad、对象与线程数、内存使用、CPU使用、磁盘与网络I/O等指标。这些指标也是系统监控的重要参数，对这些指标设置报警阈值，当监控系统发现性能计数器超过阈值时，就向运维和开发人员报警，及时发现处理系统异常。</p>
+</li>
+</ul>
+<h3 id="1-3-性能测试方法"><a href="#1-3-性能测试方法" class="headerlink" title="1.3 性能测试方法"></a>1.3 性能测试方法</h3><p>性能测试是一个总称，具体可细分为性能测试、负载测试、压力测试、稳定性测试。</p>
+<h2 id="2-Web前端性能优化"><a href="#2-Web前端性能优化" class="headerlink" title="2. Web前端性能优化"></a>2. Web前端性能优化</h2><h3 id="2-1-浏览器访问优化"><a href="#2-1-浏览器访问优化" class="headerlink" title="2.1 浏览器访问优化"></a>2.1 浏览器访问优化</h3><ul>
+<li><p>2.1.1 减少http请求</p>
+<ul>
+<li><p>2.1.1.1 为什么</p>
+<p>HTTP协议是无状态的应用层协议，意味着每次HTTP请求都需要建立通信链路、进行数据传输，而在服务器端，每个HTTP都需要启动独立的线程去处理</p>
+</li>
+<li><p>2.1.1.2 怎么办</p>
+<p>合并CSS、合并JavaScript、合并图片，这样一次请求就可以获取多个需要的文件</p>
+</li>
+</ul>
+</li>
+<li><p>2.1.2 使用浏览器缓存</p>
+<p>将更新的频率都低，而访问平凡的文件缓存在浏览器中，可以极好地改善性能</p>
+</li>
+<li><p>2.1.3 启用压缩</p>
+<p>在服务器端对文件进行压缩，在浏览器端对文件解压缩，可有效减少通信传输的数据量。有利就有弊，压缩对服务器和浏览器产生一定的压力，在通信带宽良好，而服务器资源不足的情况下要权衡考虑。</p>
+</li>
+<li><p>2.1.4 CSS放在页面最上面、JavaScript放在页面最下面</p>
+<p>浏览器会在下载完全部CSS之后才对整个页面进行渲染，因此最好的做法是将CSS放在页面最上面，让浏览器尽快下载CSS。JavaScript则相反，浏览器在加载JavaScript后立即执行，有可能会阻塞整个页面，造成页面显示缓慢，因此JavaScript最好放在页面最下面。</p>
+</li>
+<li><p>2.1.5 减少Cookie传输</p>
+<p>Cookie包含在每次请求和响应中，太大的Cookie会严重影响数据传输</p>
+</li>
+<li><p>2.1.5 CDN加速</p>
+<p>CDN（Content Distribute Network，内容分发网络）的本质仍然是一个缓存，而且将数据缓存在离用户最近的地方，使用户以最快速度获取数据</p>
+</li>
+<li><p>2.1.6 反向代理</p>
+<p>1、可以缓存静态内容，加快web访问；<br>2、保护网站安全，相当于在Web服务器和可能的网络攻击之间建立了一个屏障。</p>
+</li>
+</ul>
+<h2 id="3-应用服务器性能优化"><a href="#3-应用服务器性能优化" class="headerlink" title="3. 应用服务器性能优化"></a>3. 应用服务器性能优化</h2><p>优化手段主要有缓存、集群、异步等。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>项目如何分包</title>
+    <url>/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</url>
+    <content><![CDATA[<p>在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。</p>
+<span id="more"></span>
+
+<h2 id="1、按照类型方式划分"><a href="#1、按照类型方式划分" class="headerlink" title="1、按照类型方式划分"></a>1、按照类型方式划分</h2><p>例如将所有的接口放入一个包、Controller类放入一个包等等。</p>
+<p>优点：从类型看更为清晰</p>
+<p>缺点：不利于模块化开发，因为会将同一个功能的多个类分散在不同的包中</p>
+<h2 id="2、按照功能方式划分"><a href="#2、按照功能方式划分" class="headerlink" title="2、按照功能方式划分"></a>2、按照功能方式划分</h2><p>将同一个功能的所有类放在同一个包中。</p>
+<p>优点：高内聚，便于模块化开发</p>
+<p>缺点：同一包内类型混乱</p>
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>将功能耦合度高的类按照功能进行划分，而功能耦合度低的或者供多个功能使用的类按照类型进行划分。</p>
 ]]></content>
       <categories>
         <category>技术</category>
@@ -1941,94 +2138,6 @@
       </tags>
   </entry>
   <entry>
-    <title>网站的高性能架构</title>
-    <url>/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/</url>
-    <content><![CDATA[<p>网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。</p>
-<span id="more"></span>
-
-<h2 id="1-网站性能测试"><a href="#1-网站性能测试" class="headerlink" title="1. 网站性能测试"></a>1. 网站性能测试</h2><p>性能测试是性能优化的前提和基础，也是性能优化结果的检查和度量标准。不同视角下的网站性能有不同的标准，也有不同的优化手段。</p>
-<h3 id="1-1不同视角下的网站性能"><a href="#1-1不同视角下的网站性能" class="headerlink" title="1.1不同视角下的网站性能"></a>1.1不同视角下的网站性能</h3><ul>
-<li><p>1.1.1 用户视角的网站性能</p>
-<p>从用户角度，网站性能就是用户在浏览器上直观感受到的网站响应速度快还是慢</p>
-<ul>
-<li><p>优化手段：</p>
-<p>使用一些前端架构优化手段，通过优化页面HTML式样、利用浏览器端的并发和异步特性、调整浏览器缓存策略、使用CDN服务、反向代理等手段，使浏览器尽快地显示用户感兴趣的内容、尽可能近地获取页面内容，即使不优化应用程序和架构，也可以很大程度地改善用户视角下的网站性能</p>
-</li>
-</ul>
-</li>
-<li><p>1.1.2 开发人员视角的网站性能</p>
-<p>开发人员关注的主要是应用程序本身及其相关子系统的性能，包括响应延迟、系统吞吐量、并发处理能力、系统稳定性等技术指标。</p>
-<ul>
-<li><p>优化手段：</p>
-<p>使用缓存加速数据读取，使用集群提高吞吐能力，使用异步消息加快请求响应及实现削峰，使用代码优化手段改善程序性能。</p>
-</li>
-</ul>
-</li>
-<li><p>1.1.3 运维人员视角的网站性能</p>
-<p>运维人员更关注基础设施性能和资源利用率，如网络运营商的带宽能力、服务器硬件的配置、数据中心网络架构、服务器和网络带宽的资源利用率等</p>
-<ul>
-<li><p>优化手段</p>
-<p>建设优化骨干网、使用高性价比定制服务器、利用虚拟化技术优化资源利用等</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="1-2-性能测试指标"><a href="#1-2-性能测试指标" class="headerlink" title="1.2 性能测试指标"></a>1.2 性能测试指标</h3><p>不同视角下有不同的性能标准，不同的标准有不同的性能测试指标，从开发和测试人员的视角，网站性能测试的主要指标有响应时间、并发数、吞吐量、性能计数器等</p>
-<ul>
-<li><p>1.2.1 响应时间</p>
-<p>指应用执行一个操作需要的时间，包括从发出请求开始到收到最后响应数据所需要的时间</p>
-</li>
-<li><p>1.2.2 并发数</p>
-<p>指系统能够同时处理请求的数目，这个数字也反映了系统的负载特性。</p>
-</li>
-<li><p>1.2.3 吞吐量</p>
-<p>单位时间内系统处理的请求数量，体现系统的整体处理能力</p>
-</li>
-<li><p>1.2.4 性能计数器</p>
-<p>它是描述服务器或操作系统性能的一些数据指标。包括SystemLoad、对象与线程数、内存使用、CPU使用、磁盘与网络I/O等指标。这些指标也是系统监控的重要参数，对这些指标设置报警阈值，当监控系统发现性能计数器超过阈值时，就向运维和开发人员报警，及时发现处理系统异常。</p>
-</li>
-</ul>
-<h3 id="1-3-性能测试方法"><a href="#1-3-性能测试方法" class="headerlink" title="1.3 性能测试方法"></a>1.3 性能测试方法</h3><p>性能测试是一个总称，具体可细分为性能测试、负载测试、压力测试、稳定性测试。</p>
-<h2 id="2-Web前端性能优化"><a href="#2-Web前端性能优化" class="headerlink" title="2. Web前端性能优化"></a>2. Web前端性能优化</h2><h3 id="2-1-浏览器访问优化"><a href="#2-1-浏览器访问优化" class="headerlink" title="2.1 浏览器访问优化"></a>2.1 浏览器访问优化</h3><ul>
-<li><p>2.1.1 减少http请求</p>
-<ul>
-<li><p>2.1.1.1 为什么</p>
-<p>HTTP协议是无状态的应用层协议，意味着每次HTTP请求都需要建立通信链路、进行数据传输，而在服务器端，每个HTTP都需要启动独立的线程去处理</p>
-</li>
-<li><p>2.1.1.2 怎么办</p>
-<p>合并CSS、合并JavaScript、合并图片，这样一次请求就可以获取多个需要的文件</p>
-</li>
-</ul>
-</li>
-<li><p>2.1.2 使用浏览器缓存</p>
-<p>将更新的频率都低，而访问平凡的文件缓存在浏览器中，可以极好地改善性能</p>
-</li>
-<li><p>2.1.3 启用压缩</p>
-<p>在服务器端对文件进行压缩，在浏览器端对文件解压缩，可有效减少通信传输的数据量。有利就有弊，压缩对服务器和浏览器产生一定的压力，在通信带宽良好，而服务器资源不足的情况下要权衡考虑。</p>
-</li>
-<li><p>2.1.4 CSS放在页面最上面、JavaScript放在页面最下面</p>
-<p>浏览器会在下载完全部CSS之后才对整个页面进行渲染，因此最好的做法是将CSS放在页面最上面，让浏览器尽快下载CSS。JavaScript则相反，浏览器在加载JavaScript后立即执行，有可能会阻塞整个页面，造成页面显示缓慢，因此JavaScript最好放在页面最下面。</p>
-</li>
-<li><p>2.1.5 减少Cookie传输</p>
-<p>Cookie包含在每次请求和响应中，太大的Cookie会严重影响数据传输</p>
-</li>
-<li><p>2.1.5 CDN加速</p>
-<p>CDN（Content Distribute Network，内容分发网络）的本质仍然是一个缓存，而且将数据缓存在离用户最近的地方，使用户以最快速度获取数据</p>
-</li>
-<li><p>2.1.6 反向代理</p>
-<p>1、可以缓存静态内容，加快web访问；<br>2、保护网站安全，相当于在Web服务器和可能的网络攻击之间建立了一个屏障。</p>
-</li>
-</ul>
-<h2 id="3-应用服务器性能优化"><a href="#3-应用服务器性能优化" class="headerlink" title="3. 应用服务器性能优化"></a>3. 应用服务器性能优化</h2><p>优化手段主要有缓存、集群、异步等。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>集群环境下如何管理Session</title>
     <url>/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</url>
     <content><![CDATA[<h2 id="1-Session复制"><a href="#1-Session复制" class="headerlink" title="1.Session复制"></a>1.Session复制</h2><p>应用服务器开启Web容器的Session复制功能，在集群中的几台服务器之间同步Session对象，使得每台服务器上都保存所有用户的Session信息，这样任何一台机器宕机都不会导致Session数据的丢失，而服务器使用Session时，也只需要在本机获取即可</p>
@@ -2065,115 +2174,6 @@
       </categories>
       <tags>
         <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>项目如何分包</title>
-    <url>/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</url>
-    <content><![CDATA[<p>在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。</p>
-<span id="more"></span>
-
-<h2 id="1、按照类型方式划分"><a href="#1、按照类型方式划分" class="headerlink" title="1、按照类型方式划分"></a>1、按照类型方式划分</h2><p>例如将所有的接口放入一个包、Controller类放入一个包等等。</p>
-<p>优点：从类型看更为清晰</p>
-<p>缺点：不利于模块化开发，因为会将同一个功能的多个类分散在不同的包中</p>
-<h2 id="2、按照功能方式划分"><a href="#2、按照功能方式划分" class="headerlink" title="2、按照功能方式划分"></a>2、按照功能方式划分</h2><p>将同一个功能的所有类放在同一个包中。</p>
-<p>优点：高内聚，便于模块化开发</p>
-<p>缺点：同一包内类型混乱</p>
-<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>将功能耦合度高的类按照功能进行划分，而功能耦合度低的或者供多个功能使用的类按照类型进行划分。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>虚拟机字节码执行引擎</title>
-    <url>/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/</url>
-    <content><![CDATA[<p>虚拟机字节码执行引擎是java虚拟机核心组成部分之一，所有java虚拟机的执行引擎输入、输出都是一致的：输入的是字节码二进制流，处理过程是字节码解析执行的等效过程，输出的是执行结果。</p>
-<span id="more"></span>
-
-<h2 id="运行时栈帧结构"><a href="#运行时栈帧结构" class="headerlink" title="运行时栈帧结构"></a>运行时栈帧结构</h2><p>java虚拟机以方法作为最基本的执行单元，栈帧则是用于支持虚拟机进行方法调用和方法执行背后的数据结构，它也是虚拟机运行时数据区中的虚拟机栈的栈元素。栈帧存储了方法的局部变量表、操作数栈、动态连接和方法返回地址等信息，栈帧需要分配多少内存编译期已经确定，并不会收到程序运行期变量数据的影响；以java程序的角度来看，同一时刻、同一线程里面，在调用堆栈的所有方法都同时处于执行状态，但在活动线程中，只有位于栈顶的方法才是在运行的，被称为当前栈帧，执行引擎所运行的字节码执行都只针对当前栈帧进行操作。</p>
-<h3 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h3><p>是一组变量值的存储空间，属于线程私有，用于存放方法参数和方法内部定义的局部变量，在java程序被编译为class文件时就在方法的Code属性的max_locals数据项中确定了该方法所需分配的局部变量表的最大容量，它以变量槽为最小单位，它允许变量槽的长度可以随着处理器、操作系统或虚拟机实现的不同而发生变化</p>
-<ul>
-<li><p>工作机制</p>
-<ul>
-<li>当一个方法被调用时，java虚拟机会使用局部变量表来完成参数值到参数变量的传递过程，即实参到形参的传递。如果执行的是实例方法，那局部变量表的第0位索引的变量槽默认是用于传递方法所属对象实例的引用，可以用this表示，其余参数按照顺序排列，而且局部变量表是可以重用的</li>
-</ul>
-</li>
-</ul>
-<h3 id="操作数栈"><a href="#操作数栈" class="headerlink" title="操作数栈"></a>操作数栈</h3><p>常被称为操作栈，是一个后入先出栈，它的最大深度在编译的时候已经确定</p>
-<ul>
-<li><p>工作机制</p>
-<ul>
-<li>当一个方法刚刚执行的时候，这个方法的操作数栈是空的，在方法的执行过程中会有各种字节码执行往操作数栈中写入和提取内容（入栈出栈的元素是局部变量表中的局部变量）</li>
-</ul>
-</li>
-</ul>
-<h3 id="栈帧信息"><a href="#栈帧信息" class="headerlink" title="栈帧信息"></a>栈帧信息</h3><ul>
-<li><p>动态链接</p>
-<p>每个栈帧都包含一个指向运行时常量池中该栈帧所属方法的引用，持有这个过程是为了支持方法调用过程中的动态连接（就是将符号引用转为直接引用）</p>
-</li>
-<li><p>方法返回地址</p>
-<p>方法退出之后都必须返回到最初方法被调用时的位置</p>
-</li>
-<li><p>附加信息</p>
-<p>可以返回一些java虚拟机没有描述的信息</p>
-</li>
-</ul>
-<h2 id="方法调用"><a href="#方法调用" class="headerlink" title="方法调用"></a>方法调用</h2><p>方法调用并不等于方法中的代码被执行，方法调用阶段唯一的任务就是确定被调用方法的版本（即调用哪一个方法），暂时还未涉及方法内部的具体运行过程</p>
-<h3 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h3><p>所有方法调用的目标方法在Class文件中都是一个常量池中的符号引用，在类加载的解析阶段，会将一部分符号引用转化为直接引用，前提是方法在程序真正运行之前就有一个可确定的调用版本，并且在运行期不可改变，这类方法的调用被称为解析；符合“编译期可知，运行期不可变”要求的方法主要静包括态方法和私有方法，这两类都不可能重写出其他版本</p>
-<ul>
-<li><p>非虚方法</p>
-<p>私有方法、实例构造器、静态方法、父类方法，被final修饰的方法 这5中方法调用会在类加载的时候就可以把符号引用解析为该方法的直接引用。这些方法统称为“非虚方法”</p>
-<ul>
-<li><p>解析调用</p>
-<ul>
-<li>是个静态过程，在编译期就完全确定，在类加载阶段就会将符号引用转变为直接引用</li>
-</ul>
-</li>
-<li><p>分派调用</p>
-<ul>
-<li><p>静态分派</p>
-<ul>
-<li>主要表现为重载，虚拟机在重载时是通过参数的静态类型而不是实际类型作为判定依据的</li>
-</ul>
-</li>
-<li><p>动态分派</p>
-<ul>
-<li>主要表现为重写，在运行期间根据实际类型确定方法执行版本的分派过程叫做动态分派</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="动态类型语言支持"><a href="#动态类型语言支持" class="headerlink" title="动态类型语言支持"></a>动态类型语言支持</h2><h3 id="动态类型语言"><a href="#动态类型语言" class="headerlink" title="动态类型语言"></a>动态类型语言</h3><p>类型检查的主体过程是在运行期而不是编译期进行的</p>
-<h3 id="java-lang-invoke包"><a href="#java-lang-invoke包" class="headerlink" title="java.lang.invoke包"></a>java.lang.invoke包</h3><p>主要目的是在之前单纯依靠符号引用来确定调用的目标方法这条路外提供一种新的动态确定目标方法的机制，称为方法句柄</p>
-<ul>
-<li><p>方法句柄和反射的区别</p>
-<ul>
-<li>1、反射是在模拟java代码层次的方法调用，方法句柄是在模拟字节码层次的方法调用</li>
-<li>2、反射是重量级的，方法句柄是轻量级的</li>
-<li>3、方法句柄可以享受虚拟机的优化策略，因为它是模拟字节码层面的方法调用</li>
-</ul>
-</li>
-</ul>
-<h2 id="基于栈的字节码解释执行引擎"><a href="#基于栈的字节码解释执行引擎" class="headerlink" title="基于栈的字节码解释执行引擎"></a>基于栈的字节码解释执行引擎</h2><p>主要功能是配合虚拟机执行方法里面的字节码指令的</p>
-<h3 id="解释执行"><a href="#解释执行" class="headerlink" title="解释执行"></a>解释执行</h3><p>java现在已经不能单纯归类于解释执行或者是编译执行，因为两者都有</p>
-<h3 id="基于栈的指令集与基于寄存器的指令集"><a href="#基于栈的指令集与基于寄存器的指令集" class="headerlink" title="基于栈的指令集与基于寄存器的指令集"></a>基于栈的指令集与基于寄存器的指令集</h3><p>javac编译器输出的字节码指令流是一种基于栈的指令集架构</p>
-<ul>
-<li>栈：优点： 1、可移植，因为寄存器由硬件直接提供，程序直接依赖这些硬件寄存器则不可避免的受硬件的约束；2、代码相对更紧凑、编译器实现更加简单。缺点：1、理论上执行速度相对慢一些</li>
-</ul>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Jvm</tag>
-        <tag>字节码</tag>
       </tags>
   </entry>
   <entry>
