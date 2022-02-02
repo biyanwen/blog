@@ -24,7 +24,7 @@
   <meta name="description" content="索引的作用索引的作用就是能够让我们快速的查到想要的数据。上一篇文章我们介绍了 Mysql 在内存中存储数据的单位页，Mysql 从磁盘加载数据的时候会在内存中创建以页为节点的双向链表，我们已经了解到在页中查找数据可以通过二分查找法快速检索到数据，但是要确定数据在哪个页中就要一个页一个页的查找（如果你对在页中查找数据的过程有疑问，请查看上一篇博客），这个逻辑显然是不合理的，因为 Mysql 是能够存">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Mysql-InnoDB索引详解">
-<meta property="og:url" content="http://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:url" content="https://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/index.html">
 <meta property="og:site_name" content="byw的博客">
 <meta property="og:description" content="索引的作用索引的作用就是能够让我们快速的查到想要的数据。上一篇文章我们介绍了 Mysql 在内存中存储数据的单位页，Mysql 从磁盘加载数据的时候会在内存中创建以页为节点的双向链表，我们已经了解到在页中查找数据可以通过二分查找法快速检索到数据，但是要确定数据在哪个页中就要一个页一个页的查找（如果你对在页中查找数据的过程有疑问，请查看上一篇博客），这个逻辑显然是不合理的，因为 Mysql 是能够存">
 <meta property="og:locale" content="zh_CN">
@@ -42,7 +42,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220201152114735.png">
 
-<link rel="canonical" href="http://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/">
+<link rel="canonical" href="https://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/">
 
 
 <script id="page-configurations">
@@ -207,7 +207,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/">
+    <link itemprop="mainEntityOfPage" href="https://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tx.jpg">
@@ -350,7 +350,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/" title="Mysql-InnoDB索引详解">http://biyw.cf/Mysql-InnoDB索引详解/</a>
+    <a href="https://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/" title="Mysql-InnoDB索引详解">https://biyw.cf/Mysql-InnoDB索引详解/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！

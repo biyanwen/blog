@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>byw的博客</title>
-  <icon>http://biyw.cf/icon.png</icon>
+  <icon>https://biyw.cf/icon.png</icon>
   <subtitle>道阻且长，行则将至</subtitle>
-  <link href="http://biyw.cf/atom.xml" rel="self"/>
+  <link href="https://biyw.cf/atom.xml" rel="self"/>
   
-  <link href="http://biyw.cf/"/>
+  <link href="https://biyw.cf/"/>
   <updated>2022-02-01T11:18:12.404Z</updated>
-  <id>http://biyw.cf/</id>
+  <id>https://biyw.cf/</id>
   
   <author>
     <name>Byw</name>
@@ -18,8 +18,8 @@
   
   <entry>
     <title>Mysql-InnoDB索引详解</title>
-    <link href="http://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/"/>
-    <id>http://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/</id>
+    <link href="https://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/"/>
+    <id>https://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/</id>
     <published>2022-02-01T05:54:01.000Z</published>
     <updated>2022-02-01T11:18:12.404Z</updated>
     
@@ -28,17 +28,17 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Mysql" scheme="http://biyw.cf/tags/Mysql/"/>
+    <category term="Mysql" scheme="https://biyw.cf/tags/Mysql/"/>
     
   </entry>
   
   <entry>
     <title>Mysql-InnoDB页详解</title>
-    <link href="http://biyw.cf/Mysql-InnoDB%E9%A1%B5%E8%AF%A6%E8%A7%A3/"/>
-    <id>http://biyw.cf/Mysql-InnoDB%E9%A1%B5%E8%AF%A6%E8%A7%A3/</id>
+    <link href="https://biyw.cf/Mysql-InnoDB%E9%A1%B5%E8%AF%A6%E8%A7%A3/"/>
+    <id>https://biyw.cf/Mysql-InnoDB%E9%A1%B5%E8%AF%A6%E8%A7%A3/</id>
     <published>2022-01-16T05:53:42.000Z</published>
     <updated>2022-01-31T10:00:50.829Z</updated>
     
@@ -48,17 +48,17 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Mysql" scheme="http://biyw.cf/tags/Mysql/"/>
+    <category term="Mysql" scheme="https://biyw.cf/tags/Mysql/"/>
     
   </entry>
   
   <entry>
     <title>位运算学习笔记</title>
-    <link href="http://biyw.cf/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
-    <id>http://biyw.cf/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</id>
+    <link href="https://biyw.cf/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
+    <id>https://biyw.cf/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</id>
     <published>2022-01-09T08:13:18.000Z</published>
     <updated>2022-01-09T09:22:45.208Z</updated>
     
@@ -96,17 +96,17 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="计算机原理" scheme="http://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
+    <category term="计算机原理" scheme="https://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
     
   </entry>
   
   <entry>
     <title>指令详解-寻址方式</title>
-    <link href="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/"/>
-    <id>http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/</id>
+    <link href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/"/>
+    <id>https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/</id>
     <published>2022-01-08T05:50:35.000Z</published>
     <updated>2022-01-08T14:41:49.860Z</updated>
     
@@ -118,17 +118,17 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="计算机原理" scheme="http://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
+    <category term="计算机原理" scheme="https://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
     
   </entry>
   
   <entry>
     <title>指令详解-操作码</title>
-    <link href="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/"/>
-    <id>http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/</id>
+    <link href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/"/>
+    <id>https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/</id>
     <published>2022-01-08T05:50:35.000Z</published>
     <updated>2022-01-08T14:42:58.971Z</updated>
     
@@ -137,17 +137,17 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="计算机原理" scheme="http://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
+    <category term="计算机原理" scheme="https://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
     
   </entry>
   
   <entry>
     <title>指令详解-地址码</title>
-    <link href="http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/"/>
-    <id>http://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/</id>
+    <link href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/"/>
+    <id>https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/</id>
     <published>2022-01-08T05:50:35.000Z</published>
     <updated>2022-01-08T14:43:07.906Z</updated>
     
@@ -157,17 +157,17 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="计算机原理" scheme="http://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
+    <category term="计算机原理" scheme="https://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
     
   </entry>
   
   <entry>
     <title>Java中byte转int为什么要使用&amp;0xFF</title>
-    <link href="http://biyw.cf/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/"/>
-    <id>http://biyw.cf/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/</id>
+    <link href="https://biyw.cf/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/"/>
+    <id>https://biyw.cf/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/</id>
     <published>2022-01-03T05:50:35.000Z</published>
     <updated>2022-01-03T09:02:25.529Z</updated>
     
@@ -176,19 +176,19 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
+    <category term="Java" scheme="https://biyw.cf/tags/Java/"/>
     
-    <category term="计算机原理" scheme="http://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
+    <category term="计算机原理" scheme="https://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
     
   </entry>
   
   <entry>
     <title>Hibernate 实战第二版 中文翻译 事务和并发篇(一)</title>
-    <link href="http://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E4%BA%8B%E5%8A%A1%E5%92%8C%E5%B9%B6%E5%8F%91%E7%AF%87-%E4%B8%80/"/>
-    <id>http://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E4%BA%8B%E5%8A%A1%E5%92%8C%E5%B9%B6%E5%8F%91%E7%AF%87-%E4%B8%80/</id>
+    <link href="https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E4%BA%8B%E5%8A%A1%E5%92%8C%E5%B9%B6%E5%8F%91%E7%AF%87-%E4%B8%80/"/>
+    <id>https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E4%BA%8B%E5%8A%A1%E5%92%8C%E5%B9%B6%E5%8F%91%E7%AF%87-%E4%B8%80/</id>
     <published>2021-12-24T08:20:01.000Z</published>
     <updated>2021-12-26T10:51:41.014Z</updated>
     
@@ -198,23 +198,23 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
-    <category term="翻译" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/%E7%BF%BB%E8%AF%91/"/>
+    <category term="翻译" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/%E7%BF%BB%E8%AF%91/"/>
     
     
-    <category term="ORM" scheme="http://biyw.cf/tags/ORM/"/>
+    <category term="ORM" scheme="https://biyw.cf/tags/ORM/"/>
     
-    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
+    <category term="Java" scheme="https://biyw.cf/tags/Java/"/>
     
-    <category term="Hibernate" scheme="http://biyw.cf/tags/Hibernate/"/>
+    <category term="Hibernate" scheme="https://biyw.cf/tags/Hibernate/"/>
     
   </entry>
   
   <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(三)</title>
-    <link href="http://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%B8%89/"/>
-    <id>http://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%B8%89/</id>
+    <link href="https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%B8%89/"/>
+    <id>https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%B8%89/</id>
     <published>2021-12-19T14:05:23.000Z</published>
     <updated>2021-12-24T07:47:51.780Z</updated>
     
@@ -223,23 +223,23 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
-    <category term="翻译" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/%E7%BF%BB%E8%AF%91/"/>
+    <category term="翻译" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/%E7%BF%BB%E8%AF%91/"/>
     
     
-    <category term="ORM" scheme="http://biyw.cf/tags/ORM/"/>
+    <category term="ORM" scheme="https://biyw.cf/tags/ORM/"/>
     
-    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
+    <category term="Java" scheme="https://biyw.cf/tags/Java/"/>
     
-    <category term="Hibernate" scheme="http://biyw.cf/tags/Hibernate/"/>
+    <category term="Hibernate" scheme="https://biyw.cf/tags/Hibernate/"/>
     
   </entry>
   
   <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(二)</title>
-    <link href="http://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/"/>
-    <id>http://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/</id>
+    <link href="https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/"/>
+    <id>https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/</id>
     <published>2021-12-12T13:56:51.000Z</published>
     <updated>2021-12-25T09:05:25.676Z</updated>
     
@@ -248,23 +248,23 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
-    <category term="翻译" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/%E7%BF%BB%E8%AF%91/"/>
+    <category term="翻译" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/%E7%BF%BB%E8%AF%91/"/>
     
     
-    <category term="ORM" scheme="http://biyw.cf/tags/ORM/"/>
+    <category term="ORM" scheme="https://biyw.cf/tags/ORM/"/>
     
-    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
+    <category term="Java" scheme="https://biyw.cf/tags/Java/"/>
     
-    <category term="Hibernate" scheme="http://biyw.cf/tags/Hibernate/"/>
+    <category term="Hibernate" scheme="https://biyw.cf/tags/Hibernate/"/>
     
   </entry>
   
   <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(一)</title>
-    <link href="http://biyw.cf/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/"/>
-    <id>http://biyw.cf/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/</id>
+    <link href="https://biyw.cf/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/"/>
+    <id>https://biyw.cf/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/</id>
     <published>2021-12-12T13:33:45.567Z</published>
     <updated>2021-12-19T12:58:50.995Z</updated>
     
@@ -274,23 +274,23 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
-    <category term="翻译" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/%E7%BF%BB%E8%AF%91/"/>
+    <category term="翻译" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/%E7%BF%BB%E8%AF%91/"/>
     
     
-    <category term="ORM" scheme="http://biyw.cf/tags/ORM/"/>
+    <category term="ORM" scheme="https://biyw.cf/tags/ORM/"/>
     
-    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
+    <category term="Java" scheme="https://biyw.cf/tags/Java/"/>
     
-    <category term="Hibernate" scheme="http://biyw.cf/tags/Hibernate/"/>
+    <category term="Hibernate" scheme="https://biyw.cf/tags/Hibernate/"/>
     
   </entry>
   
   <entry>
     <title>CountDownLatch，CyclicBarrier，Semaphore及AQS介绍</title>
-    <link href="http://biyw.cf/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/"/>
-    <id>http://biyw.cf/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/</id>
+    <link href="https://biyw.cf/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/"/>
+    <id>https://biyw.cf/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/</id>
     <published>2021-12-05T07:10:31.558Z</published>
     <updated>2021-12-16T04:39:34.433Z</updated>
     
@@ -299,21 +299,21 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
+    <category term="Java" scheme="https://biyw.cf/tags/Java/"/>
     
-    <category term="多线程" scheme="http://biyw.cf/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
+    <category term="多线程" scheme="https://biyw.cf/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
     
-    <category term="源码阅读" scheme="http://biyw.cf/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
+    <category term="源码阅读" scheme="https://biyw.cf/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
     
   </entry>
   
   <entry>
     <title>分布式锁</title>
-    <link href="http://biyw.cf/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/"/>
-    <id>http://biyw.cf/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/</id>
+    <link href="https://biyw.cf/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/"/>
+    <id>https://biyw.cf/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/</id>
     <published>2021-12-05T06:57:16.379Z</published>
     <updated>2021-12-16T04:40:53.454Z</updated>
     
@@ -322,21 +322,21 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Java" scheme="http://biyw.cf/tags/Java/"/>
+    <category term="Java" scheme="https://biyw.cf/tags/Java/"/>
     
-    <category term="分布式" scheme="http://biyw.cf/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
+    <category term="分布式" scheme="https://biyw.cf/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
     
-    <category term="多线程" scheme="http://biyw.cf/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
+    <category term="多线程" scheme="https://biyw.cf/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
     
   </entry>
   
   <entry>
     <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
-    <link href="http://biyw.cf/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/"/>
-    <id>http://biyw.cf/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</id>
+    <link href="https://biyw.cf/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/"/>
+    <id>https://biyw.cf/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</id>
     <published>2021-12-05T06:47:29.126Z</published>
     <updated>2021-12-16T04:43:03.222Z</updated>
     
@@ -345,19 +345,19 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="网络" scheme="http://biyw.cf/tags/%E7%BD%91%E7%BB%9C/"/>
+    <category term="Wireshark" scheme="https://biyw.cf/tags/Wireshark/"/>
     
-    <category term="Wireshark" scheme="http://biyw.cf/tags/Wireshark/"/>
+    <category term="网络" scheme="https://biyw.cf/tags/%E7%BD%91%E7%BB%9C/"/>
     
   </entry>
   
   <entry>
     <title>Wireshark 简明教程</title>
-    <link href="http://biyw.cf/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/"/>
-    <id>http://biyw.cf/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</id>
+    <link href="https://biyw.cf/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/"/>
+    <id>https://biyw.cf/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</id>
     <published>2021-12-05T06:42:55.422Z</published>
     <updated>2021-12-16T04:43:41.419Z</updated>
     
@@ -366,19 +366,19 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="网络" scheme="http://biyw.cf/tags/%E7%BD%91%E7%BB%9C/"/>
+    <category term="Wireshark" scheme="https://biyw.cf/tags/Wireshark/"/>
     
-    <category term="Wireshark" scheme="http://biyw.cf/tags/Wireshark/"/>
+    <category term="网络" scheme="https://biyw.cf/tags/%E7%BD%91%E7%BB%9C/"/>
     
   </entry>
   
   <entry>
     <title>Git-submodule 统一配置简明教程</title>
-    <link href="http://biyw.cf/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/"/>
-    <id>http://biyw.cf/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</id>
+    <link href="https://biyw.cf/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/"/>
+    <id>https://biyw.cf/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</id>
     <published>2021-12-05T06:41:25.950Z</published>
     <updated>2021-12-16T04:42:13.195Z</updated>
     
@@ -389,17 +389,17 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Git" scheme="http://biyw.cf/tags/Git/"/>
+    <category term="Git" scheme="https://biyw.cf/tags/Git/"/>
     
   </entry>
   
   <entry>
     <title>【Mybatis源码解读】jdbc包</title>
-    <link href="http://biyw.cf/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/"/>
-    <id>http://biyw.cf/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</id>
+    <link href="https://biyw.cf/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/"/>
+    <id>https://biyw.cf/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</id>
     <published>2021-12-05T06:30:01.964Z</published>
     <updated>2021-12-16T04:45:24.272Z</updated>
     
@@ -408,19 +408,19 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="Mybatis" scheme="http://biyw.cf/tags/Mybatis/"/>
+    <category term="Mybatis" scheme="https://biyw.cf/tags/Mybatis/"/>
     
-    <category term="源码阅读" scheme="http://biyw.cf/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
+    <category term="源码阅读" scheme="https://biyw.cf/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
     
   </entry>
   
   <entry>
     <title>常见的Web应用攻击手段</title>
-    <link href="http://biyw.cf/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/"/>
-    <id>http://biyw.cf/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</id>
+    <link href="https://biyw.cf/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/"/>
+    <id>https://biyw.cf/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</id>
     <published>2021-12-05T06:24:20.623Z</published>
     <updated>2021-12-16T04:45:49.346Z</updated>
     
@@ -429,17 +429,17 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="架构" scheme="http://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
+    <category term="架构" scheme="https://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
     
   </entry>
   
   <entry>
     <title>集群环境下如何管理Session</title>
-    <link href="http://biyw.cf/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/"/>
-    <id>http://biyw.cf/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</id>
+    <link href="https://biyw.cf/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/"/>
+    <id>https://biyw.cf/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</id>
     <published>2021-12-05T06:21:36.434Z</published>
     <updated>2021-12-16T04:44:57.671Z</updated>
     
@@ -448,17 +448,17 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="架构" scheme="http://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
+    <category term="架构" scheme="https://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
     
   </entry>
   
   <entry>
     <title>网站的高性能架构</title>
-    <link href="http://biyw.cf/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/"/>
-    <id>http://biyw.cf/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/</id>
+    <link href="https://biyw.cf/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/"/>
+    <id>https://biyw.cf/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/</id>
     <published>2021-12-05T06:20:42.235Z</published>
     <updated>2021-12-16T04:44:41.665Z</updated>
     
@@ -467,10 +467,10 @@
     
     
     
-    <category term="技术" scheme="http://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
     
     
-    <category term="架构" scheme="http://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
+    <category term="架构" scheme="https://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
     
   </entry>
   

@@ -24,7 +24,7 @@
   <meta name="description" content="对象已死？(判断对象是否可以回收)引用 reference类型的数据中存储的数值代表的是另一块内存的起始地址  强引用：代码中的引用赋值 例如 new对象；意义：对象不会被回收 软引用：还有用非必须的对象；意义：在系统将要发生内存溢出前回收 弱引用：非必须对象；意义：每次垃圾回收时都会被清理 虚引用：最弱的一种引用；意义：可以让一个对象被回收时收到一个系统通知">
 <meta property="og:type" content="article">
 <meta property="og:title" content="垃圾收集器与内存分配策略">
-<meta property="og:url" content="http://biyw.cf/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/index.html">
+<meta property="og:url" content="https://biyw.cf/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/index.html">
 <meta property="og:site_name" content="byw的博客">
 <meta property="og:description" content="对象已死？(判断对象是否可以回收)引用 reference类型的数据中存储的数值代表的是另一块内存的起始地址  强引用：代码中的引用赋值 例如 new对象；意义：对象不会被回收 软引用：还有用非必须的对象；意义：在系统将要发生内存溢出前回收 弱引用：非必须对象；意义：每次垃圾回收时都会被清理 虚引用：最弱的一种引用；意义：可以让一个对象被回收时收到一个系统通知">
 <meta property="og:locale" content="zh_CN">
@@ -34,7 +34,7 @@
 <meta property="article:tag" content="Jvm">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://biyw.cf/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/">
+<link rel="canonical" href="https://biyw.cf/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/">
 
 
 <script id="page-configurations">
@@ -199,7 +199,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://biyw.cf/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/">
+    <link itemprop="mainEntityOfPage" href="https://biyw.cf/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tx.jpg">
@@ -433,7 +433,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://biyw.cf/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/" title="垃圾收集器与内存分配策略">http://biyw.cf/垃圾收集器与内存分配策略/</a>
+    <a href="https://biyw.cf/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/" title="垃圾收集器与内存分配策略">https://biyw.cf/垃圾收集器与内存分配策略/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
