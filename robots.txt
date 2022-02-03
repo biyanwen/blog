@@ -1,3 +1,2 @@
 Sitemap: https://biyw.cf/sitemap.xml
 User-agent: *
-Allow: /

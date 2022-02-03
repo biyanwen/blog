@@ -1,78 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Hibernate 实战第二版 中文翻译 事务和并发篇(一)</title>
-    <url>/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E4%BA%8B%E5%8A%A1%E5%92%8C%E5%B9%B6%E5%8F%91%E7%AF%87-%E4%B8%80/</url>
-    <content><![CDATA[<p>在这章，我们终于要学习事务相关的知识了：在应用中如何创建工作单元并解决并发问题。（ps: 想了解什么是 <a href="https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/">工作单元</a> 请看这里。）工作单元是一个原子操作。事务可以让你设置工作单元的边界，让其不会受其他工作单元影响。在一个拥有许多用户的应用中，或许会有很多人同时访问这些工作单元的情况。</p>
-<p>在处理并发问题之前，我们首先集中精力了解下最基础的工作单元：数据库和系统事务。你将学会使用 Java 代码定义工作单元和事务划分相关的 API。我们将讨论如何保持隔离，并且用乐观锁和悲观锁控制并发访问。</p>
-<span id="more"></span>
-
-<p>最后，我们会看一些在没有事务的情况下访问数据库的特殊案例和 JPA 的特性。</p>
-<h2 id="事务的要素"><a href="#事务的要素" class="headerlink" title="事务的要素"></a>事务的要素</h2><p>在某些场景下应用需要将几件事情一次性做完。例如，当一次拍卖结束后，CaveatEmptor 应用必须执行三个不同的任务：</p>
-<ol>
-<li>寻找拍卖的中标者。</li>
-<li>收取卖方的手续费。</li>
-<li>通知卖方和买方。</li>
-</ol>
-<p>如果因为外部的信用卡系统的问题导致扣款失败会怎样？这个商业需求可能会规定要么所有任务全部成功要么全部失败。因此，可以称这些步骤属于同一个事务或者工作单元。如果其中一个步骤失败了，那么整个工作单元都必须失败。</p>
-<h3 id="ACID-属性"><a href="#ACID-属性" class="headerlink" title="ACID 属性"></a>ACID 属性</h3><p>ACID 是原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）的缩写，代表一个事务中的所有操作都是原子的。此外，事务允许多个用户并发的操作相同的数据，而且不会出现数据不一致的问题。一个正在运行的事务不能访问另一个同时也在运行的事务；他们应该独立的工作。事务中的更改应该是被持久化的，即使在事务完成之后系统崩溃了也不应该有数据丢失。</p>
-<p>另外，你想要事务正确的执行。例如，业务逻辑是应用只能对卖方扣款一次，而不是两次。这个逻辑是合理的，但是你没办法从数据库层面去约束它。因此，事务的正确性只能由应用程序自己保证，而数据库要保证数据的一致性。这些属性一起组成了 ACID 标准。</p>
-<h3 id="数据库与系统事务"><a href="#数据库与系统事务" class="headerlink" title="数据库与系统事务"></a>数据库与系统事务</h3><p>我们之前已经提到过系统和数据库事务了。再回头看下最后提出的那个问题：在一个拍卖功能的事务结束期间，我们或许会在数据库中记录中标金额。之后，在相同的事务中，我们会与一个外部的信用卡系统交互对卖方的账户进行扣款（服务费）。这个事务会横跨多个系统，并且会与很多子事务共同完成这个任务，这些子事务包括但不限于数据库连接的事务、外部扣款系统的事务。</p>
-<p>数据库的事务越短越好，因为它不仅会增加数据库资源的使用，而且在并发访问的情况下独占锁会导致其他访问被阻塞。一般情况下，一批数据操作会使用单独的事务进行控制。</p>
-<p>无论你在事务中执行什么数据库操作，你都必须设置工作单元的边界。你必须开启事务，并且在某个时间点将更改进行提交。无论发生任何异常，你都必须将数据回滚到更改之前的状态。这个过程要依赖于你使用的技术，并且涉及一定程度的人工干预。总之，设置事务的开始和结束这种边界，即可以使用编程式也可以使用声明式。</p>
-<h3 id="JTA"><a href="#JTA" class="headerlink" title="JTA"></a>JTA</h3><p>在 Java SE 中你可以调用 JDBC API 设置事务的边界。你可以通过调用 setAutoCommit(false) 在JDBC 链接上开启一个事务并且在事务结束时调用 commit() 方法。你可以在事务运行的任意时刻调用 rollback() 方法让事务立即回滚。</p>
-<p>在一个需要横跨多个系统对数据进行操作的应用中，有些工作单元可能包含多个事务。在这个场景中，你不能仅仅通过 JDBC 达到原子操作的目的。你需要一个可以在一个系统事务中处理多个事务资源的事务管理器（这里描述的应该是一个分布式事务，这个分布式事务由多个应用的多个事务共同组成）。JTA 标准事务管理器可以对分布式事务进行管理，让你不用关心太多的底层细节。JTA 最主要的 API 是 UserTransaction 接口中的 begin() 方法和 commit() 方法。</p>
-<blockquote>
-<p><strong>关于事务的其他 API</strong></p>
-<p>JTA 提供了一个很好的关于分布式事务系统的抽象。许多开发者仍然以为只能在 Java EE 的应用中使用 JTA。但是，当前有很多高品质独立的 JTA 服务可以使用，例如 Bitronix 和 Atomikos，它们可以被使用在任何 Java 环境中，而且很容易上手。考虑将这些解决方案当做启动 JTA 的数据路连接池。</p>
-<p>你应该尽可能的使用 JTA ，并且要避免使用私有事务 API 例如 org.hibernate.Transaction 或者限制非常多的 javax.persistence.EntityTransaction。这些 API 都会在 JTA 在 EJB运行容器外部还不可用时就会被创建。</p>
-</blockquote>
-<p>在 10.2.1 节我们会再一次学习事务，并且主要学习如何处理异常。下面这些代码展示了发生异常时如何回滚数据。</p>
-<p><img src="https://s2.loli.net/2021/12/25/S6xe14lGWDMI8a7.png" alt="image-20211225234127886"></p>
-<p>这段代码最复杂的地方就是处理异常的部分：我们现在就讨论这部分内容。首先你需要知道事务管理器和 EntityManager 是如何配合使用的。</p>
-<p>EntityManager 是懒加载的，我们在前几章讨论过这个话题，它直到 Sql 必须被执行的时候才会去获取数据库连接。JTA 也是如此：当你没有访问任何事务资源的时候，提交一个空的事务是非常节省资源的。例如，你可以在服务器中这么操作，这样的话，每次请求都不会消耗资源也不会对数据库进行上锁。</p>
-<p>当你创建一个 EntityManager 的时候，它会在当前工作线程中寻找 JTA 事务。如果 EntityManager 找到了这个事务，那么它就会加入这个事务，并且监听事务消息。这就意味着如果你想让上述流程起效，那么你就必须在同一个线程中调用 UserTransaction#begin()  方法和 EntityManagerFactory#createEntityManager() 方法。默认情况下，Hibernate 会像第 10  章所述，会自动提交事务。</p>
-<p>当 EntityManager 在当前线程中无法找到事务时，它就会进入 unsynchronized 模式，在这模式中， JPA 将不会自动提交事务。晚一些我们将会对这种行为进行更深入的讨论；当你在设计很复杂的功能时，这是一个很方便的特性。</p>
-<p>如果一个事务运行的时间太长就会被事务管理器关掉。记住数据库事务要尽可能的短。Bitronix 作为一个 JTA 服务提供者，它的默认超时时间是 60 秒，当前你可以在事务开始前调用 UserTransaction#setTransactionTimeout(). 方法覆盖这个参数。</p>
-<p>我们用前面的代码片段来谈论如何处理异常。</p>
-<h3 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h3><p>如果在调用 EntityManager 时或者事务提交时抛出异常，你必须检查当前系统事务的状态。当异常发生的时候，Hibernate 会让事务进行回滚。这意味着，在这个事务中进行的更改都不会生效。因为是你开启的事务，所以检查事务是否为 STATUS_MARKED_ROLLBACK 状态也是你的工作。如果 Hibernate 回滚失败了那么这个事务仍然会保持 STATUS_ACTIVE 状态。在这个案例中，你也可以调用 UserTransaction#rollback() 去取消执行任何已经发送到数据库的 Sql 语句。</p>
-<p>JPA 的任何操作，包括刷新持久化上下文时都有可能抛出 RuntimeException 异常。但是 UserTransaction#begin(), commit(),  和evenrollback() 方法抛出的是 Exception 异常。 异常在回滚的时候需要进行特殊处理的：你想要捕获这个异常并且将它输出到日志中；否则就会导致回滚失败。你也可以在回滚之后继续将异常往上抛出，这种情况下你可能会有一个拦截器，对异常进行统一处理，例如在屏幕上渲染一些错误信息，或者联系运维团队。在回滚时又出现异常是很难处理的，我们建议将它输出到日志，并且对其进行人工干预。因为回滚失败代表着系统有很多问题。</p>
-<p>Hibaernte 抛出的异常都是 RuntimeException 的子异常，了解它们会对你进行异常处理有很多帮助。</p>
-<ul>
-<li>HibernateException 是很常见的异常。你必须检查这个异常信息，或者通过调用 getCause() 方法获得更多信息。</li>
-<li>JDBCException 一般出现在 Hibernate 与 JDBC 进行交互的时候。这类异常也可能是某些 Sql 导致的，你可以通过调用 getSQL() 方法获取到导致异常发生的 Sql。这个 JDBC 链接抛出的内部异常可以通过调用 getSQLException() 或者 getCause() 方法得到，并且通过调用 getErrorCode() 可以获取数据库特定的异常代码信息。</li>
-<li>JDBCException 及其子类在 Hibernate 中存在一个转换器，可以通过数据库驱动将它转换成更有意义的信息。可以转换的异常有 JDBCConnectionException, SQLGrammarException, LockAcquisitionException,DataException,  和  ConstraintViolationException，主流数据库都为 Hibernate 提供了相应的方言。你也可以通过 SQLExceptionConverterFactory 类为你的数据库或者插件配置自定义的转换器。</li>
-</ul>
-<p>很多开发者看到 Hibernate 对异常有这么详细的类型划分都很高兴。但是这可能让你误入歧途。例如，你或许会为了达到某种校验的目的去捕获 ConstraintViolationException 异常。如果你忘记给 Item#name 属性赋值，同时它对应的数据库字段被设置为 NOT NULL。当你试图去刷新持久化上下文的时候 Hibernate 会抛出异常。这种情况下为什么不能捕获它并且将失败信息（使用自己定义的错误码和描述信息）展示给开发者，让他们改正这个问题？因为这个策略会有两个明显的问题。</p>
-<p>第一，根据数据库抛出的未检查的值来看是什么问题对于一个可拓展的应用来说并不是一个很好的策略。应该在应用层实现一些数据校验工作。第二，异常对于当前工作单元来说是致命的，但是这不应该是让一个应用的使用者去处理它：使用者希望在工作单元内部进行处理。在不了解代码细节的情况下是很难处理的。我们建议你使用细粒度的异常类型去展示致命的异常信息，而不是用于去验证你的猜想。例如，当你捕获 ConstraintViolationException 异常时屏幕展示如下信息：“应用出现了 bug，某人在存储局时没有对数据进行校验，请将这个问题报告给程序员” 对于其他异常信息，你最好在屏幕中生成错误信息。</p>
-<p>这么做对开发者是很有用的，让开发者可以快速判断是应用层出现了问题，还是数据库负载过高（无法获得锁资源）。对于校验，你可以使用 Bean Validation 框架。通过在 entity 上配置一些注解，Hibernate 可以在用户层对数据进行校验，并且可以自动生成 Sql ddl 规则。</p>
-<p>你现在应该知道什么异常应该进行捕获处理了。或许你还有一个问题：你捕获异常后应该做什么，让事务回滚吗？Hibernate 抛出异常是致命的。这意味着你必须关闭当前持久化上下文。你不能继续使用已经抛出异常的 EntityManager。将异常信息输出到屏幕或者日志中，然后让用户使用一个全新的事务和持久化上下文重新开启会话。</p>
-<p>以上所述并不包含所有情况，有些标准异常并不是不可挽回的：</p>
-<ul>
-<li>javax.persistence.NoResultException，这个异常会在 Query 或者 TypedQuery 调用 getSingleResult() 方法但是在数据库找不到对应的数据时被抛出。你可以通过异常处理代码对这个查询进行封装，然后继续使用这个持久化上下文。当前事务不会因为这个异常而进行回滚。</li>
-<li>javax.persistence.NonUniqueResultException，这个异常会在 Query 或者 TypedQuery 调用 getSingleResult() 方法但是数据库放回多条数据时抛出。你可以通过异常处理代码对这个查询进行封装，然后继续使用这个持久化上下文。当前事务不会因为这个异常而进行回滚。</li>
-<li>javax.persistence.QueryTimeoutException，当 Query 或者 TypedQuery 执行太久时抛出。不要让事务回滚。在某些情况下你或许想要再次查询。</li>
-<li>javax.persistence.LockTimeoutException，当无法获取悲观锁时会抛出此异常。或许会发生在与数据库同步数据时候或者通过显式声明锁进行上锁的情况下。事务在这种情况下不回滚，你或许想要再次尝试这个操作。记住，不断重复已经访问数据库失败的操作不会解决问题。</li>
-</ul>
-<p>这个列表中没有包含 javax.persistence.EntityNotFoundException 异常，这个异常会被 EntityManager#getReference()、lock() 和 refresh() 方法抛出。Hibernate 会在你试图访问一个已经从数据库中被删除的数据时抛出此异常。这是一个致命的异常，事务会因此回滚，你必须关闭这个持久化上下文。</p>
-<p>通过编程式进行事务的划分需要使用类似 JTA 的 UserTransaction 接口这样的应用代码才行。但是通过声明式的方式就不需要写多余的代码。</p>
-<h3 id="声明式定义事务"><a href="#声明式定义事务" class="headerlink" title="声明式定义事务"></a>声明式定义事务</h3><p>在 Java EE 中，当你需要一个事务时你可以通过声明的方式获取一个事务。运行环境会负责处理相关的事情。通常情况下你需要在你的组件中配置一些注解，以达到开启事务的目的。</p>
-<p>在 EJB 组件中，你可以使用  @javax.ejb.TransactionAttribute 注解来声明事务的边界。你可以在 18.2.1 中找到相关的代码示例。</p>
-<p>你也可以使用一个较新的注解 @javax.transaction.Transactional 这个注解可以用在任何 Java EE 的应用中。你可以在 19.3.1 节找到相关的示例。</p>
-<p>本章的代码示例可以运行在任意 Java SE 环境中，不需要任何运行容器。从现在开始，你将只能看到编程式的事务划分，直到我们学习 Java EE 的特殊应用例子为止。</p>
-<p>下面让我们学习 ACID 最复杂的功能：如何将正在运行的工作单元相互独立。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-        <category>翻译</category>
-      </categories>
-      <tags>
-        <tag>ORM</tag>
-        <tag>Java</tag>
-        <tag>Hibernate</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(三)</title>
     <url>/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%B8%89/</url>
     <content><![CDATA[<h2 id="使用游离态"><a href="#使用游离态" class="headerlink" title="使用游离态"></a>使用游离态</h2><p>如果一个 entity 实例脱离了持久化上下文的管理，我们就称它为游离态。当持久化上下文关闭之后，它就不再提供 id 映射服务。当你使用游离态的 entity 实例时可能会遇到一些问题，所以，一定要保证你明白如何处理游离态实例。</p>
@@ -154,6 +82,78 @@
       </tags>
   </entry>
   <entry>
+    <title>Hibernate 实战第二版 中文翻译 事务和并发篇(一)</title>
+    <url>/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E4%BA%8B%E5%8A%A1%E5%92%8C%E5%B9%B6%E5%8F%91%E7%AF%87-%E4%B8%80/</url>
+    <content><![CDATA[<p>在这章，我们终于要学习事务相关的知识了：在应用中如何创建工作单元并解决并发问题。（ps: 想了解什么是 <a href="https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/">工作单元</a> 请看这里。）工作单元是一个原子操作。事务可以让你设置工作单元的边界，让其不会受其他工作单元影响。在一个拥有许多用户的应用中，或许会有很多人同时访问这些工作单元的情况。</p>
+<p>在处理并发问题之前，我们首先集中精力了解下最基础的工作单元：数据库和系统事务。你将学会使用 Java 代码定义工作单元和事务划分相关的 API。我们将讨论如何保持隔离，并且用乐观锁和悲观锁控制并发访问。</p>
+<span id="more"></span>
+
+<p>最后，我们会看一些在没有事务的情况下访问数据库的特殊案例和 JPA 的特性。</p>
+<h2 id="事务的要素"><a href="#事务的要素" class="headerlink" title="事务的要素"></a>事务的要素</h2><p>在某些场景下应用需要将几件事情一次性做完。例如，当一次拍卖结束后，CaveatEmptor 应用必须执行三个不同的任务：</p>
+<ol>
+<li>寻找拍卖的中标者。</li>
+<li>收取卖方的手续费。</li>
+<li>通知卖方和买方。</li>
+</ol>
+<p>如果因为外部的信用卡系统的问题导致扣款失败会怎样？这个商业需求可能会规定要么所有任务全部成功要么全部失败。因此，可以称这些步骤属于同一个事务或者工作单元。如果其中一个步骤失败了，那么整个工作单元都必须失败。</p>
+<h3 id="ACID-属性"><a href="#ACID-属性" class="headerlink" title="ACID 属性"></a>ACID 属性</h3><p>ACID 是原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）的缩写，代表一个事务中的所有操作都是原子的。此外，事务允许多个用户并发的操作相同的数据，而且不会出现数据不一致的问题。一个正在运行的事务不能访问另一个同时也在运行的事务；他们应该独立的工作。事务中的更改应该是被持久化的，即使在事务完成之后系统崩溃了也不应该有数据丢失。</p>
+<p>另外，你想要事务正确的执行。例如，业务逻辑是应用只能对卖方扣款一次，而不是两次。这个逻辑是合理的，但是你没办法从数据库层面去约束它。因此，事务的正确性只能由应用程序自己保证，而数据库要保证数据的一致性。这些属性一起组成了 ACID 标准。</p>
+<h3 id="数据库与系统事务"><a href="#数据库与系统事务" class="headerlink" title="数据库与系统事务"></a>数据库与系统事务</h3><p>我们之前已经提到过系统和数据库事务了。再回头看下最后提出的那个问题：在一个拍卖功能的事务结束期间，我们或许会在数据库中记录中标金额。之后，在相同的事务中，我们会与一个外部的信用卡系统交互对卖方的账户进行扣款（服务费）。这个事务会横跨多个系统，并且会与很多子事务共同完成这个任务，这些子事务包括但不限于数据库连接的事务、外部扣款系统的事务。</p>
+<p>数据库的事务越短越好，因为它不仅会增加数据库资源的使用，而且在并发访问的情况下独占锁会导致其他访问被阻塞。一般情况下，一批数据操作会使用单独的事务进行控制。</p>
+<p>无论你在事务中执行什么数据库操作，你都必须设置工作单元的边界。你必须开启事务，并且在某个时间点将更改进行提交。无论发生任何异常，你都必须将数据回滚到更改之前的状态。这个过程要依赖于你使用的技术，并且涉及一定程度的人工干预。总之，设置事务的开始和结束这种边界，即可以使用编程式也可以使用声明式。</p>
+<h3 id="JTA"><a href="#JTA" class="headerlink" title="JTA"></a>JTA</h3><p>在 Java SE 中你可以调用 JDBC API 设置事务的边界。你可以通过调用 setAutoCommit(false) 在JDBC 链接上开启一个事务并且在事务结束时调用 commit() 方法。你可以在事务运行的任意时刻调用 rollback() 方法让事务立即回滚。</p>
+<p>在一个需要横跨多个系统对数据进行操作的应用中，有些工作单元可能包含多个事务。在这个场景中，你不能仅仅通过 JDBC 达到原子操作的目的。你需要一个可以在一个系统事务中处理多个事务资源的事务管理器（这里描述的应该是一个分布式事务，这个分布式事务由多个应用的多个事务共同组成）。JTA 标准事务管理器可以对分布式事务进行管理，让你不用关心太多的底层细节。JTA 最主要的 API 是 UserTransaction 接口中的 begin() 方法和 commit() 方法。</p>
+<blockquote>
+<p><strong>关于事务的其他 API</strong></p>
+<p>JTA 提供了一个很好的关于分布式事务系统的抽象。许多开发者仍然以为只能在 Java EE 的应用中使用 JTA。但是，当前有很多高品质独立的 JTA 服务可以使用，例如 Bitronix 和 Atomikos，它们可以被使用在任何 Java 环境中，而且很容易上手。考虑将这些解决方案当做启动 JTA 的数据路连接池。</p>
+<p>你应该尽可能的使用 JTA ，并且要避免使用私有事务 API 例如 org.hibernate.Transaction 或者限制非常多的 javax.persistence.EntityTransaction。这些 API 都会在 JTA 在 EJB运行容器外部还不可用时就会被创建。</p>
+</blockquote>
+<p>在 10.2.1 节我们会再一次学习事务，并且主要学习如何处理异常。下面这些代码展示了发生异常时如何回滚数据。</p>
+<p><img src="https://s2.loli.net/2021/12/25/S6xe14lGWDMI8a7.png" alt="image-20211225234127886"></p>
+<p>这段代码最复杂的地方就是处理异常的部分：我们现在就讨论这部分内容。首先你需要知道事务管理器和 EntityManager 是如何配合使用的。</p>
+<p>EntityManager 是懒加载的，我们在前几章讨论过这个话题，它直到 Sql 必须被执行的时候才会去获取数据库连接。JTA 也是如此：当你没有访问任何事务资源的时候，提交一个空的事务是非常节省资源的。例如，你可以在服务器中这么操作，这样的话，每次请求都不会消耗资源也不会对数据库进行上锁。</p>
+<p>当你创建一个 EntityManager 的时候，它会在当前工作线程中寻找 JTA 事务。如果 EntityManager 找到了这个事务，那么它就会加入这个事务，并且监听事务消息。这就意味着如果你想让上述流程起效，那么你就必须在同一个线程中调用 UserTransaction#begin()  方法和 EntityManagerFactory#createEntityManager() 方法。默认情况下，Hibernate 会像第 10  章所述，会自动提交事务。</p>
+<p>当 EntityManager 在当前线程中无法找到事务时，它就会进入 unsynchronized 模式，在这模式中， JPA 将不会自动提交事务。晚一些我们将会对这种行为进行更深入的讨论；当你在设计很复杂的功能时，这是一个很方便的特性。</p>
+<p>如果一个事务运行的时间太长就会被事务管理器关掉。记住数据库事务要尽可能的短。Bitronix 作为一个 JTA 服务提供者，它的默认超时时间是 60 秒，当前你可以在事务开始前调用 UserTransaction#setTransactionTimeout(). 方法覆盖这个参数。</p>
+<p>我们用前面的代码片段来谈论如何处理异常。</p>
+<h3 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h3><p>如果在调用 EntityManager 时或者事务提交时抛出异常，你必须检查当前系统事务的状态。当异常发生的时候，Hibernate 会让事务进行回滚。这意味着，在这个事务中进行的更改都不会生效。因为是你开启的事务，所以检查事务是否为 STATUS_MARKED_ROLLBACK 状态也是你的工作。如果 Hibernate 回滚失败了那么这个事务仍然会保持 STATUS_ACTIVE 状态。在这个案例中，你也可以调用 UserTransaction#rollback() 去取消执行任何已经发送到数据库的 Sql 语句。</p>
+<p>JPA 的任何操作，包括刷新持久化上下文时都有可能抛出 RuntimeException 异常。但是 UserTransaction#begin(), commit(),  和evenrollback() 方法抛出的是 Exception 异常。 异常在回滚的时候需要进行特殊处理的：你想要捕获这个异常并且将它输出到日志中；否则就会导致回滚失败。你也可以在回滚之后继续将异常往上抛出，这种情况下你可能会有一个拦截器，对异常进行统一处理，例如在屏幕上渲染一些错误信息，或者联系运维团队。在回滚时又出现异常是很难处理的，我们建议将它输出到日志，并且对其进行人工干预。因为回滚失败代表着系统有很多问题。</p>
+<p>Hibaernte 抛出的异常都是 RuntimeException 的子异常，了解它们会对你进行异常处理有很多帮助。</p>
+<ul>
+<li>HibernateException 是很常见的异常。你必须检查这个异常信息，或者通过调用 getCause() 方法获得更多信息。</li>
+<li>JDBCException 一般出现在 Hibernate 与 JDBC 进行交互的时候。这类异常也可能是某些 Sql 导致的，你可以通过调用 getSQL() 方法获取到导致异常发生的 Sql。这个 JDBC 链接抛出的内部异常可以通过调用 getSQLException() 或者 getCause() 方法得到，并且通过调用 getErrorCode() 可以获取数据库特定的异常代码信息。</li>
+<li>JDBCException 及其子类在 Hibernate 中存在一个转换器，可以通过数据库驱动将它转换成更有意义的信息。可以转换的异常有 JDBCConnectionException, SQLGrammarException, LockAcquisitionException,DataException,  和  ConstraintViolationException，主流数据库都为 Hibernate 提供了相应的方言。你也可以通过 SQLExceptionConverterFactory 类为你的数据库或者插件配置自定义的转换器。</li>
+</ul>
+<p>很多开发者看到 Hibernate 对异常有这么详细的类型划分都很高兴。但是这可能让你误入歧途。例如，你或许会为了达到某种校验的目的去捕获 ConstraintViolationException 异常。如果你忘记给 Item#name 属性赋值，同时它对应的数据库字段被设置为 NOT NULL。当你试图去刷新持久化上下文的时候 Hibernate 会抛出异常。这种情况下为什么不能捕获它并且将失败信息（使用自己定义的错误码和描述信息）展示给开发者，让他们改正这个问题？因为这个策略会有两个明显的问题。</p>
+<p>第一，根据数据库抛出的未检查的值来看是什么问题对于一个可拓展的应用来说并不是一个很好的策略。应该在应用层实现一些数据校验工作。第二，异常对于当前工作单元来说是致命的，但是这不应该是让一个应用的使用者去处理它：使用者希望在工作单元内部进行处理。在不了解代码细节的情况下是很难处理的。我们建议你使用细粒度的异常类型去展示致命的异常信息，而不是用于去验证你的猜想。例如，当你捕获 ConstraintViolationException 异常时屏幕展示如下信息：“应用出现了 bug，某人在存储局时没有对数据进行校验，请将这个问题报告给程序员” 对于其他异常信息，你最好在屏幕中生成错误信息。</p>
+<p>这么做对开发者是很有用的，让开发者可以快速判断是应用层出现了问题，还是数据库负载过高（无法获得锁资源）。对于校验，你可以使用 Bean Validation 框架。通过在 entity 上配置一些注解，Hibernate 可以在用户层对数据进行校验，并且可以自动生成 Sql ddl 规则。</p>
+<p>你现在应该知道什么异常应该进行捕获处理了。或许你还有一个问题：你捕获异常后应该做什么，让事务回滚吗？Hibernate 抛出异常是致命的。这意味着你必须关闭当前持久化上下文。你不能继续使用已经抛出异常的 EntityManager。将异常信息输出到屏幕或者日志中，然后让用户使用一个全新的事务和持久化上下文重新开启会话。</p>
+<p>以上所述并不包含所有情况，有些标准异常并不是不可挽回的：</p>
+<ul>
+<li>javax.persistence.NoResultException，这个异常会在 Query 或者 TypedQuery 调用 getSingleResult() 方法但是在数据库找不到对应的数据时被抛出。你可以通过异常处理代码对这个查询进行封装，然后继续使用这个持久化上下文。当前事务不会因为这个异常而进行回滚。</li>
+<li>javax.persistence.NonUniqueResultException，这个异常会在 Query 或者 TypedQuery 调用 getSingleResult() 方法但是数据库放回多条数据时抛出。你可以通过异常处理代码对这个查询进行封装，然后继续使用这个持久化上下文。当前事务不会因为这个异常而进行回滚。</li>
+<li>javax.persistence.QueryTimeoutException，当 Query 或者 TypedQuery 执行太久时抛出。不要让事务回滚。在某些情况下你或许想要再次查询。</li>
+<li>javax.persistence.LockTimeoutException，当无法获取悲观锁时会抛出此异常。或许会发生在与数据库同步数据时候或者通过显式声明锁进行上锁的情况下。事务在这种情况下不回滚，你或许想要再次尝试这个操作。记住，不断重复已经访问数据库失败的操作不会解决问题。</li>
+</ul>
+<p>这个列表中没有包含 javax.persistence.EntityNotFoundException 异常，这个异常会被 EntityManager#getReference()、lock() 和 refresh() 方法抛出。Hibernate 会在你试图访问一个已经从数据库中被删除的数据时抛出此异常。这是一个致命的异常，事务会因此回滚，你必须关闭这个持久化上下文。</p>
+<p>通过编程式进行事务的划分需要使用类似 JTA 的 UserTransaction 接口这样的应用代码才行。但是通过声明式的方式就不需要写多余的代码。</p>
+<h3 id="声明式定义事务"><a href="#声明式定义事务" class="headerlink" title="声明式定义事务"></a>声明式定义事务</h3><p>在 Java EE 中，当你需要一个事务时你可以通过声明的方式获取一个事务。运行环境会负责处理相关的事情。通常情况下你需要在你的组件中配置一些注解，以达到开启事务的目的。</p>
+<p>在 EJB 组件中，你可以使用  @javax.ejb.TransactionAttribute 注解来声明事务的边界。你可以在 18.2.1 中找到相关的代码示例。</p>
+<p>你也可以使用一个较新的注解 @javax.transaction.Transactional 这个注解可以用在任何 Java EE 的应用中。你可以在 19.3.1 节找到相关的示例。</p>
+<p>本章的代码示例可以运行在任意 Java SE 环境中，不需要任何运行容器。从现在开始，你将只能看到编程式的事务划分，直到我们学习 Java EE 的特殊应用例子为止。</p>
+<p>下面让我们学习 ACID 最复杂的功能：如何将正在运行的工作单元相互独立。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+        <category>翻译</category>
+      </categories>
+      <tags>
+        <tag>ORM</tag>
+        <tag>Java</tag>
+        <tag>Hibernate</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(一)</title>
     <url>/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/</url>
     <content><![CDATA[<h2 id="管理数据"><a href="#管理数据" class="headerlink" title="管理数据"></a>管理数据</h2><h3 id="entity-持久化过程中的生命周期"><a href="#entity-持久化过程中的生命周期" class="headerlink" title="entity 持久化过程中的生命周期"></a>entity 持久化过程中的生命周期</h3><p>因为 JPA 是一种透明的持久化机制，classes 不用关心他们自己的持久化行为，这样在写业务代码时就不需要关心数据是会被持久化还是仅仅保存在内存中。</p>
@@ -196,6 +196,39 @@
         <tag>ORM</tag>
         <tag>Java</tag>
         <tag>Hibernate</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java中byte转int为什么要使用&amp;0xFF</title>
+    <url>/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/</url>
+    <content><![CDATA[<p>在 Java 中将十六进制 byte 转成 int 时要使用 &amp;0xFF 操作这是为什么呢？这是因为十六进制的范围是 0x00~0x3FF 没有负数，而 int 的取值范围是包含负数的，所以直接将 byte 强转成 int 可能会得到错误的数值。同时操作系统存储的是二进制原码进行补码后的数值, 所以只有通过 &amp;0xFF 操作才能得到正确的数值。</p>
+<span id="more"></span>
+
+<p>至于为什么就要先知道什么是补码。</p>
+<h2 id="补码"><a href="#补码" class="headerlink" title="补码"></a>补码</h2><p>下图以 -7 为例子展示了补码是如何计算的，简单说 -7 在计算机存储的二进制数据其实不是 <code>10000111</code> 而是 <code>11111001</code> 。<strong>但是这个流程值针对负数的，正数无论是反码还是补码都是一样的。</strong></p>
+<p><img src="https://s2.loli.net/2022/01/03/oAWgmL3xRZ1QODh.png" alt="image-20220103151025334"></p>
+<p>ps: 这里补充一个基础知识，原码其实是由两部分组成的，如下图最高位和数值位组成，因为二进制只能存储 0、1所以没有办法用正负号表示数值的正负，所以采用了这种办法。</p>
+<p><img src="https://s2.loli.net/2022/01/03/BW45N7Hc2GQogJ8.png" alt="image-20220103151943112"></p>
+<h2 id="为什么要用补码"><a href="#为什么要用补码" class="headerlink" title="为什么要用补码"></a>为什么要用补码</h2><p>使用补码是为了简化计算机底层的设计。因为我们人可以很清楚的知道最高位是符号位，但是对于计算机基础电路设计来说判别第一位是符号位是非常难和复杂的事情。所以人们为了让实现变得简单就想让符号位也参与运算，并且只保留加法，我们知道减法相当于加上一个负数。</p>
+<p>例如：</p>
+<p><code>1 - 1 = 1 + （ -1） = 0</code></p>
+<h3 id="原码计算"><a href="#原码计算" class="headerlink" title="原码计算"></a>原码计算</h3><p>我们都知道上面的等式是成立的，但是如果用<strong>原码</strong>直接进行运算会得到什么结果呢？</p>
+<p><code>0000 0001 + 1000 0001 = 1000 0010 = -2 </code></p>
+<p>得到了错误的结果。为了解决这个问题创建了反码。</p>
+<h3 id="反码计算"><a href="#反码计算" class="headerlink" title="反码计算"></a>反码计算</h3><p>原码：0000 0001 + 1000 0001 = 反码：0000 0001 + 1111 1110 =  反码：1111 1111  = 原码： 1000 0000 = -0 。</p>
+<p>根据以上等式我们看出来，使用反码进行计算可以得到正确的结果，但是虽然人们可以理解 +0 和 -0 是一样的但是这会引发两个问题 ，一方面为 0 标注正负是没有任何意义的，另一方面会出现 0000 0000 和 1000 0000 两个编码都表示 0 的现象，这会增加计算机设计的复杂度而且没有必要。所以为了解决这个问题 设计出了<strong>补码</strong>。</p>
+<h3 id="补码计算"><a href="#补码计算" class="headerlink" title="补码计算"></a>补码计算</h3><p>原码：0000 0001 + 1000 0001 = 补码：0000 0001 + 1111 1111  =  补码： 0000 0000 = 原码：0000 0000 = 0 。</p>
+<p>这样就解决了所有的问题，可以轻松愉快的带入符号进行计算了。</p>
+<h2 id="amp-0xFF-的作用"><a href="#amp-0xFF-的作用" class="headerlink" title="&amp;0xFF 的作用"></a>&amp;0xFF 的作用</h2><p>主要作用就是保证补码的完整性。</p>
+<p>因为 byte 是一个字节而 int 是四个字节，所以 byte 转 int 需要进行数据扩展。Java 采用的是<strong>符号位扩展</strong>。以 -127 为例：</p>
+<p>-127 的补码为 <code>10000001</code>, 数据扩展之后是 <code>11111111 11111111 11111111 10000001</code> 这个二进制数值明显不对，所以为了得到正确的结果让其和 0xFF 进行与运算将补位的 1 全部换成 0 最后得到 <code>00000000 00000000 00000000 10000001</code> 这个就是我们需要的结果了。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>计算机原理</tag>
       </tags>
   </entry>
   <entry>
@@ -270,129 +303,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Mysql-InnoDB表空间详解</title>
-    <url>/Mysql-InnoDB%E8%A1%A8%E7%A9%BA%E9%97%B4%E8%AF%A6%E8%A7%A3/</url>
-    <content><![CDATA[<h2 id="什么是表空间"><a href="#什么是表空间" class="headerlink" title="什么是表空间"></a>什么是表空间</h2><p>表空间是 Mysql 的一个抽象概念，在你新建一个表的时候，Mysql （5.7 + 版本）会为这个表创建一个后缀为 ibd 的文件，这个文件的名字就是表空间，构成表空间的最小单位就是页，所以表空间是实际存储索引和用户数据的地方。因为一个页最多 16k 大小，所以一个表空间拥有页的数量会特别巨大，为了更方便的对页进行管理，Mysql 的作者发明了<code>区</code>的概念。</p>
-<span id="more"></span>
-
-<h2 id="区"><a href="#区" class="headerlink" title="区"></a>区</h2><p>区的作用就是为了更方便的管理表空间中的页，表空间会被划分成很多连续的区，一个区由 64 个页构成，大小为 1M。256个区被划分为一组，每组的第一个区的前几个页的类型是固定了，为了方便存储一些全局数据，后续会展开讲解。</p>
-<h3 id="区的分类"><a href="#区的分类" class="headerlink" title="区的分类"></a>区的分类</h3><ul>
-<li>空闲的区：表示区内没有存储任何数据。</li>
-<li>有剩余空间的碎片区：已经存有数据，但是还可以继续存储数据的区。</li>
-<li>没有剩余空间的碎片区：已经不能继续存储数据了。</li>
-<li>附属于某个段的区：这个后面详细讲。</li>
-</ul>
-<h3 id="存储区的数据结构"><a href="#存储区的数据结构" class="headerlink" title="存储区的数据结构"></a>存储区的数据结构</h3><p>为了方便对区进行操作，Mysql 的作者为其设计了一个特殊的数据结构，名字叫 XDES Entry。总共由四个部分组成，如图：</p>
-<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203112524580.png" alt="image-20220203112524580" style="zoom:67%;" />
-
-<p>上一节我们说<code>区</code>分了四个种类，所以在写入数据的时候要先写入到<code>有剩余空间的碎片区</code>中，如果已经没有碎片区可以用了，那再去<code>空闲的区</code>申请空间。那现在问题来了，<strong>表空间这么大如何快速找到不同种类的区呢？</strong></p>
-<h3 id="如何快速找到不同种类的区"><a href="#如何快速找到不同种类的区" class="headerlink" title="如何快速找到不同种类的区"></a>如何快速找到不同种类的区</h3><p>答案是利用 XDES Entry 的 List Node 字段，<strong>表空间会利用这个字段形成三个表空间的链表</strong>，这三个链表的类型分别是：Free (空闲的区)、FreeFrag （有空闲的碎片区）、FullFrag （没有空闲的碎片区）。当要写入数据的时候就先找到 FreeFrag 类型的区，如果将这个区的剩余空间都用完了，就将这个区挂载到 FullFrag 链表中，然后从 Free 中拿到一个节点挂载到 FreeFrag 中继续写入数据。链表的样子大概如下图所示：</p>
-<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203115239807.png" alt="image-20220203115239807" style="zoom:70%;" />
-
-<p><strong>现在问题又来了，如何找到这三种类型的链表呢？</strong> </p>
-<h4 id="如何找到不同类型的链表"><a href="#如何找到不同类型的链表" class="headerlink" title="如何找到不同类型的链表"></a>如何找到不同类型的链表</h4><p>为了解决这个问题，Mysql 的作者设计了名为 LisiBaseNode 的数据结构，这个数据结构存储着链表的<strong>头结点、尾结点和链表总共有多少个节点的信息。</strong>并将 LisiBaseNode <strong>存储在表空间的第一个页中</strong>，这个页的页号为 0 ，类型为 FSP_HDR，也是表空间分组中的第一组的第一个区的第一个页。这样就可以在表空间中快速找到不同类型的区啦~~。</p>
-<h2 id="段"><a href="#段" class="headerlink" title="段"></a>段</h2><p>段是由区和单独的页构成的。<strong>段的主要作用就是为了增加表空间读写数据的性能</strong>，因为表空间可能特别大，所以区与区之间可能距离特别远，当 Mysql 批量操作数据的时候就需要跨越很远的距离去查找数据，这种情况叫做<code>随机 IO</code>这是很慢的，而段的特点是会分配一段连续的内存空间在这段空间内再创建区，这样区与区的距离就不会特别远，可以达到<code>顺序 IO</code>的效果，可以极大的增加数据库的性能。</p>
-<p>我们都知道 B+ 树有叶子节点和非叶子节点的区别，为了进一步增加数据库性能，<strong>就让叶子节点和非叶子节点分别创建各自的段。</strong></p>
-<p><strong>如何区分一个段是属于叶子节点还是非叶子节点的呢？</strong>其实<code>段</code>是由专门的页结构存储的，而这个页的 Page Header 就会标注清楚哪些段是叶子节点的，哪些是非叶子节点的。</p>
-<h3 id="存储段的数据结构"><a href="#存储段的数据结构" class="headerlink" title="存储段的数据结构"></a>存储段的数据结构</h3><p>为了方便对<code>段</code>进行管理，Mysql 的作者设计了一个特殊的数据结构用来存储段的信息，这个数据结构叫做 INODE ENtity ，结构如下图所示：</p>
-<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203124353554.png" alt="image-20220203124353554" style="zoom:67%;" />
-
-<p>下面对结构进行详细的解释。</p>
-<h4 id="List-Base-Node"><a href="#List-Base-Node" class="headerlink" title="List Base Node"></a>List Base Node</h4><p>为了能够快速分辨哪些段还可以继续写入数据，哪些段已经满了，Mysql 的设计者也对段进行了与区相同的分类，分为 Free(空闲)、NotFull(有一些数据，但是还可以继续写入)、Full(已经完全满了)。同样为了方便快速定位不同类型的链表设计者直接将三种类型链表的 ListBaseNode 节点放在了段的数据结构中。</p>
-<h4 id="Fragement-Array-Entry"><a href="#Fragement-Array-Entry" class="headerlink" title="Fragement Array Entry"></a>Fragement Array Entry</h4><p>你可能有因为，为什么段中还直接保存页呀？不是应该只保存区吗？<strong>这么做是为了更好的利用存储空间</strong>，段默认会分配 1M 大小，如果不够可以继续增加，但是如果你的数据特别少也用 1M 是不是就太浪费空间了呀？所以，设计者们提出了<code>碎片区</code>的概念，这个区内的页可以属于任何段，只有一个段占用的碎片区达到一定大小的时候才会分配一个完整区给这个段，这样可以更高效的利用存储空间。</p>
-<h3 id="INODE-ENtity-存储在什么地方"><a href="#INODE-ENtity-存储在什么地方" class="headerlink" title="INODE ENtity 存储在什么地方"></a>INODE ENtity 存储在什么地方</h3><p> INODE ENtity  也存储在页中，这个页位于表空间第一个分组的第一个区的第三个页中存储着所有 INODE ENtity 的基础信息（也可能是链表，因为有可能一个页无法存储所有段的基础信息）。这个页的类型为 INODE。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>为了方便大家理解，下面用一个图来表示表空间、区分组、区、段这些信息是如何存储的。</p>
-<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203130935197.png" alt="image-20220203130935197" style="zoom:67%;" />
-
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Mysql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java中byte转int为什么要使用&amp;0xFF</title>
-    <url>/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/</url>
-    <content><![CDATA[<p>在 Java 中将十六进制 byte 转成 int 时要使用 &amp;0xFF 操作这是为什么呢？这是因为十六进制的范围是 0x00~0x3FF 没有负数，而 int 的取值范围是包含负数的，所以直接将 byte 强转成 int 可能会得到错误的数值。同时操作系统存储的是二进制原码进行补码后的数值, 所以只有通过 &amp;0xFF 操作才能得到正确的数值。</p>
-<span id="more"></span>
-
-<p>至于为什么就要先知道什么是补码。</p>
-<h2 id="补码"><a href="#补码" class="headerlink" title="补码"></a>补码</h2><p>下图以 -7 为例子展示了补码是如何计算的，简单说 -7 在计算机存储的二进制数据其实不是 <code>10000111</code> 而是 <code>11111001</code> 。<strong>但是这个流程值针对负数的，正数无论是反码还是补码都是一样的。</strong></p>
-<p><img src="https://s2.loli.net/2022/01/03/oAWgmL3xRZ1QODh.png" alt="image-20220103151025334"></p>
-<p>ps: 这里补充一个基础知识，原码其实是由两部分组成的，如下图最高位和数值位组成，因为二进制只能存储 0、1所以没有办法用正负号表示数值的正负，所以采用了这种办法。</p>
-<p><img src="https://s2.loli.net/2022/01/03/BW45N7Hc2GQogJ8.png" alt="image-20220103151943112"></p>
-<h2 id="为什么要用补码"><a href="#为什么要用补码" class="headerlink" title="为什么要用补码"></a>为什么要用补码</h2><p>使用补码是为了简化计算机底层的设计。因为我们人可以很清楚的知道最高位是符号位，但是对于计算机基础电路设计来说判别第一位是符号位是非常难和复杂的事情。所以人们为了让实现变得简单就想让符号位也参与运算，并且只保留加法，我们知道减法相当于加上一个负数。</p>
-<p>例如：</p>
-<p><code>1 - 1 = 1 + （ -1） = 0</code></p>
-<h3 id="原码计算"><a href="#原码计算" class="headerlink" title="原码计算"></a>原码计算</h3><p>我们都知道上面的等式是成立的，但是如果用<strong>原码</strong>直接进行运算会得到什么结果呢？</p>
-<p><code>0000 0001 + 1000 0001 = 1000 0010 = -2 </code></p>
-<p>得到了错误的结果。为了解决这个问题创建了反码。</p>
-<h3 id="反码计算"><a href="#反码计算" class="headerlink" title="反码计算"></a>反码计算</h3><p>原码：0000 0001 + 1000 0001 = 反码：0000 0001 + 1111 1110 =  反码：1111 1111  = 原码： 1000 0000 = -0 。</p>
-<p>根据以上等式我们看出来，使用反码进行计算可以得到正确的结果，但是虽然人们可以理解 +0 和 -0 是一样的但是这会引发两个问题 ，一方面为 0 标注正负是没有任何意义的，另一方面会出现 0000 0000 和 1000 0000 两个编码都表示 0 的现象，这会增加计算机设计的复杂度而且没有必要。所以为了解决这个问题 设计出了<strong>补码</strong>。</p>
-<h3 id="补码计算"><a href="#补码计算" class="headerlink" title="补码计算"></a>补码计算</h3><p>原码：0000 0001 + 1000 0001 = 补码：0000 0001 + 1111 1111  =  补码： 0000 0000 = 原码：0000 0000 = 0 。</p>
-<p>这样就解决了所有的问题，可以轻松愉快的带入符号进行计算了。</p>
-<h2 id="amp-0xFF-的作用"><a href="#amp-0xFF-的作用" class="headerlink" title="&amp;0xFF 的作用"></a>&amp;0xFF 的作用</h2><p>主要作用就是保证补码的完整性。</p>
-<p>因为 byte 是一个字节而 int 是四个字节，所以 byte 转 int 需要进行数据扩展。Java 采用的是<strong>符号位扩展</strong>。以 -127 为例：</p>
-<p>-127 的补码为 <code>10000001</code>, 数据扩展之后是 <code>11111111 11111111 11111111 10000001</code> 这个二进制数值明显不对，所以为了得到正确的结果让其和 0xFF 进行与运算将补位的 1 全部换成 0 最后得到 <code>00000000 00000000 00000000 10000001</code> 这个就是我们需要的结果了。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>计算机原理</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>分布式锁</title>
-    <url>/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/</url>
-    <content><![CDATA[<p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
-<span id="more"></span>
-
-<h2 id="为什么需要分布式锁"><a href="#为什么需要分布式锁" class="headerlink" title="为什么需要分布式锁"></a>为什么需要分布式锁</h2><p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
-<h2 id="2-常用分布式锁"><a href="#2-常用分布式锁" class="headerlink" title="2. 常用分布式锁"></a>2. 常用分布式锁</h2><h3 id="2-1-Redis实现分布式锁"><a href="#2-1-Redis实现分布式锁" class="headerlink" title="2.1 Redis实现分布式锁"></a>2.1 Redis实现分布式锁</h3><h4 id="2-1-1-Redis实现分布式锁原理"><a href="#2-1-1-Redis实现分布式锁原理" class="headerlink" title="2.1.1 Redis实现分布式锁原理"></a>2.1.1 Redis实现分布式锁原理</h4><p>Redis实现分布式锁主要是使用Redis提供的setnx命令，setnx 是『SET if Not eXists』(如果不存在，则 SET)的简写。 命令格式：SETNX key value；使用：只在键 key 不存在的情况下，将键 key 的值设置为 value 。若键 key 已经存在， 则 SETNX 命令不做任何动作。返回值：命令在设置成功时返回 1 ，设置失败时返回 0 ，Redis保证setnx的原子性，所以如果setnx返回1就说明获取到锁，如果0就说明获取锁失败。</p>
-<h4 id="2-1-2-Redis实现分布式锁潜在问题"><a href="#2-1-2-Redis实现分布式锁潜在问题" class="headerlink" title="2.1.2 Redis实现分布式锁潜在问题"></a>2.1.2 Redis实现分布式锁潜在问题</h4><p>主要问题就是<strong>超时</strong>，例如当业务执行时间大于key的过期时间就可能产生并发问题，同时也可能将其他线程持有的锁误删。</p>
-<h4 id="2-1-2-超时问题解决方案"><a href="#2-1-2-超时问题解决方案" class="headerlink" title="2.1.2 超时问题解决方案"></a>2.1.2 超时问题解决方案</h4><p>解决方案就是<strong>自动续期</strong>，当线程成功获得锁后就开启一个WatchDog监听当前线程，如果key超时之前不能完成业务逻辑那就将key的过期时间延长，同时如果持有锁的服务宕机就不自动续期，让Redis将key删除，当然这个功能已经有现成的实现方式了，就是<strong>Redisson</strong>。</p>
-<h4 id="2-1-3-利用Redisson实现Redis分布式锁"><a href="#2-1-3-利用Redisson实现Redis分布式锁" class="headerlink" title="2.1.3 利用Redisson实现Redis分布式锁"></a>2.1.3 利用Redisson实现Redis分布式锁</h4><p>首先引入Redisson依赖</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;!-- https:<span class="comment">//mvnrepository.com/artifact/org.redisson/redisson --&gt;</span></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.redisson&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;redisson&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">3.15</span><span class="number">.1</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
-<p>实现方式</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> RedissonClient redissonClient;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">    	<span class="comment">//添加Redis配置信息</span></span><br><span class="line">        Config config = <span class="keyword">new</span> Config();</span><br><span class="line">        config.useSingleServer().setAddress(<span class="string">&quot;redis://127.0.0.1:6379&quot;</span>);</span><br><span class="line">        redissonClient = Redisson.create(config);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread myThread1 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread2 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread3 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread4 = <span class="keyword">new</span> MyThread();</span><br><span class="line"></span><br><span class="line">        myThread1.start();</span><br><span class="line">        myThread2.start();</span><br><span class="line">        myThread3.start();</span><br><span class="line">        myThread4.start();</span><br><span class="line"></span><br><span class="line">        myThread1.join();</span><br><span class="line">        myThread2.join();</span><br><span class="line">        myThread3.join();</span><br><span class="line">        myThread4.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        	<span class="comment">//初始化锁对象</span></span><br><span class="line">            RLock watchDogLock = redissonClient.getLock(<span class="string">&quot;watchDogLock&quot;</span>);</span><br><span class="line">            <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">            	<span class="comment">//利用Redisson的API成功获取锁时Redisson会自动启动WatchDog监听当前线程，底层实现是通过Lua脚本。</span></span><br><span class="line">                <span class="keyword">boolean</span> success = watchDogLock.tryLock();</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 是否成功获取锁：&quot;</span> + success);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (success) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 开始执行业务逻辑&quot;</span>);</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                        System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 业务执行成功，进行解锁&quot;</span>);</span><br><span class="line">                        watchDogLock.unlock();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 获取锁失败&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="2-2-Zookeeper实现分布式锁"><a href="#2-2-Zookeeper实现分布式锁" class="headerlink" title="2.2 Zookeeper实现分布式锁"></a>2.2 Zookeeper实现分布式锁</h3><h4 id="2-2-1-Zookeeper实现分布式锁原理"><a href="#2-2-1-Zookeeper实现分布式锁原理" class="headerlink" title="2.2.1  Zookeeper实现分布式锁原理"></a>2.2.1  Zookeeper实现分布式锁原理</h4><ol>
-<li><strong>数据结构</strong>：Zookeeper内部维护一个树形的数据结构，用户可以根据其提供的Api创建或者删除节点，并且Zookeeper会为每个节点生成一个不会重复并且根据创建顺序由小到大排列的序号。</li>
-<li><strong>永久节点和临时节点</strong>：永久节点除非手动删除，不然不会自动删除；临时节点会在客户端断开一段时间后自动删除，如果客户端没有断开链接，或者没有手动删除就会一直存在，同时永久节点下面可以创建临时节点，但是临时节点下面不能创建永久节点。</li>
-<li><strong>Watch机制</strong>：子节点可以在上一个节点创建一个监听器，同时传入一个回调方法，当前一个节点改变时（例如，删除，更新）会收到通知，并且执行回调方法。</li>
-</ol>
-<p>就是因为临时节点的特性，所以Zookeeper不会遇到和Redis相同的问题，如果客户端运行正常运行就不会删除临时节点，也就不会释放锁，如果客户端宕机那临时节点就会在客户端断开一段时间后自动删除。</p>
-<h4 id="2-2-2-Zookeeper分布式锁工作流程"><a href="#2-2-2-Zookeeper分布式锁工作流程" class="headerlink" title="2.2.2 Zookeeper分布式锁工作流程"></a>2.2.2 Zookeeper分布式锁工作流程</h4><ol>
-<li>当需要对资源进行加锁时，实际上就是在父节点之下创建一个临时顺序节点。</li>
-<li>客户端A来对资源加锁，首先判断当前创建的节点是否为最小节点，如果是，那么加锁成功，后续加锁线程阻塞等待。</li>
-<li>此时，客户端B也来尝试加锁，由于客户端A已经加锁成功，所以客户端B发现自己的节点并不是最小节点，就会去取到上一个节点，并且对上一节点注册监听。</li>
-<li>当客户端A操作完成，释放锁的操作就是删除这个节点，这样就可以触发监听事件，客户端B就会得到通知，同样，客户端B判断自己是否为最小节点，如果是，那么则加锁成功。</li>
-</ol>
-<h4 id="2-2-3-代码示例"><a href="#2-2-3-代码示例" class="headerlink" title="2.2.3 代码示例"></a>2.2.3 代码示例</h4><p>代码使用了Curator包，这个包封装了底层Zookeeper的操作，使用起来更加方便，可以有效减少样板代码。</p>
-<p>首先引入依赖</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;!-- https:<span class="comment">//mvnrepository.com/artifact/org.apache.curator/curator-recipes --&gt;</span></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.curator&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;curator-recipes&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">5.1</span><span class="number">.0</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
-<p>代码示例</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> CuratorFramework ZK_CLIENT;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">    	<span class="comment">//初始化Zookeeper配置</span></span><br><span class="line">        String zkServerAddress = <span class="string">&quot;127.0.0.1:12181&quot;</span>;</span><br><span class="line">        ExponentialBackoffRetry retryPolicy = <span class="keyword">new</span> ExponentialBackoffRetry(<span class="number">1000</span>, <span class="number">3</span>, <span class="number">5000</span>);</span><br><span class="line">        ZK_CLIENT = CuratorFrameworkFactory.builder()</span><br><span class="line">                .connectString(zkServerAddress)</span><br><span class="line">                .sessionTimeoutMs(<span class="number">5000</span>)</span><br><span class="line">                .connectionTimeoutMs(<span class="number">5000</span>)</span><br><span class="line">                .retryPolicy(retryPolicy)</span><br><span class="line">                .build();</span><br><span class="line">        ZK_CLIENT.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String LOCK_PATH = <span class="string">&quot;/myLock&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//创建锁对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> InterProcessMutex LOCK = <span class="keyword">new</span> InterProcessMutex(ZK_CLIENT, LOCK_PATH);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread myThread1 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread2 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread3 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread4 = <span class="keyword">new</span> MyThread();</span><br><span class="line"></span><br><span class="line">        myThread1.start();</span><br><span class="line">        myThread2.start();</span><br><span class="line">        myThread3.start();</span><br><span class="line">        myThread4.start();</span><br><span class="line"></span><br><span class="line">        myThread1.join();</span><br><span class="line">        myThread2.join();</span><br><span class="line">        myThread3.join();</span><br><span class="line">        myThread4.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                	<span class="comment">//加锁</span></span><br><span class="line">                    LOCK.acquire();</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 获取到锁&quot;</span>);</span><br><span class="line">                    Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 释放锁&quot;</span>);</span><br><span class="line">                        <span class="comment">//解锁</span></span><br><span class="line">                        LOCK.release();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="3-总结"><a href="#3-总结" class="headerlink" title="3 总结"></a>3 总结</h2><p>Redis和Zookeeper都能够实现分布式锁，但是他们之间有相同点和不同点，使用的时候需要根据需求来选择。<br><strong>相同点</strong>：由于工具封装的都比较好，实现起来都很简单。</p>
-<p><strong>不同点</strong>：</p>
-<ol>
-<li><strong>可靠性</strong>：Zookeeper可靠性高于Redis，因为Zookeeper的实现方式而言，本身就是保证数据一致性的，可靠性更高，而Redis不是数据强一致性的，某些极端场景下还是可能会存在问题。</li>
-<li><strong>性能</strong>：Redis性能比Zookeeper好，因为Zookeeper需要频繁创建和删除节点，性能略低。</li>
-</ol>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>分布式</tag>
-        <tag>多线程</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Mysql-InnoDB页详解</title>
     <url>/Mysql-InnoDB%E9%A1%B5%E8%AF%A6%E8%A7%A3/</url>
     <content><![CDATA[<h2 id="页的作用"><a href="#页的作用" class="headerlink" title="页的作用"></a>页的作用</h2><p>什么是页？页是 Mysql 从磁盘中加载数据的最小单位。页的大小为 16 kb。</p>
@@ -446,6 +356,96 @@
       </categories>
       <tags>
         <tag>Mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Mysql-InnoDB表空间详解</title>
+    <url>/Mysql-InnoDB%E8%A1%A8%E7%A9%BA%E9%97%B4%E8%AF%A6%E8%A7%A3/</url>
+    <content><![CDATA[<h2 id="什么是表空间"><a href="#什么是表空间" class="headerlink" title="什么是表空间"></a>什么是表空间</h2><p>表空间是 Mysql 的一个抽象概念，在你新建一个表的时候，Mysql （5.7 + 版本）会为这个表创建一个后缀为 ibd 的文件，这个文件的名字就是表空间，构成表空间的最小单位就是页，所以表空间是实际存储索引和用户数据的地方。因为一个页最多 16k 大小，所以一个表空间拥有页的数量会特别巨大，为了更方便的对页进行管理，Mysql 的作者发明了<code>区</code>的概念。</p>
+<span id="more"></span>
+
+<h2 id="区"><a href="#区" class="headerlink" title="区"></a>区</h2><p>区的作用就是为了更方便的管理表空间中的页，表空间会被划分成很多连续的区，一个区由 64 个页构成，大小为 1M。256个区被划分为一组，每组的第一个区的前几个页的类型是固定了，为了方便存储一些全局数据，后续会展开讲解。</p>
+<h3 id="区的分类"><a href="#区的分类" class="headerlink" title="区的分类"></a>区的分类</h3><ul>
+<li>空闲的区：表示区内没有存储任何数据。</li>
+<li>有剩余空间的碎片区：已经存有数据，但是还可以继续存储数据的区。</li>
+<li>没有剩余空间的碎片区：已经不能继续存储数据了。</li>
+<li>附属于某个段的区：这个后面详细讲。</li>
+</ul>
+<h3 id="存储区的数据结构"><a href="#存储区的数据结构" class="headerlink" title="存储区的数据结构"></a>存储区的数据结构</h3><p>为了方便对区进行操作，Mysql 的作者为其设计了一个特殊的数据结构，名字叫 XDES Entry。总共由四个部分组成，如图：</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203112524580.png" alt="image-20220203112524580" style="zoom:67%;" />
+
+<p>上一节我们说<code>区</code>分了四个种类，所以在写入数据的时候要先写入到<code>有剩余空间的碎片区</code>中，如果已经没有碎片区可以用了，那再去<code>空闲的区</code>申请空间。那现在问题来了，<strong>表空间这么大如何快速找到不同种类的区呢？</strong></p>
+<h3 id="如何快速找到不同种类的区"><a href="#如何快速找到不同种类的区" class="headerlink" title="如何快速找到不同种类的区"></a>如何快速找到不同种类的区</h3><p>答案是利用 XDES Entry 的 List Node 字段，<strong>表空间会利用这个字段形成三个表空间的链表</strong>，这三个链表的类型分别是：Free (空闲的区)、FreeFrag （有空闲的碎片区）、FullFrag （没有空闲的碎片区）。当要写入数据的时候就先找到 FreeFrag 类型的区，如果将这个区的剩余空间都用完了，就将这个区挂载到 FullFrag 链表中，然后从 Free 中拿到一个节点挂载到 FreeFrag 中继续写入数据。链表的样子大概如下图所示：</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203115239807.png" alt="image-20220203115239807" style="zoom:70%;" />
+
+<p><strong>现在问题又来了，如何找到这三种类型的链表呢？</strong> </p>
+<h4 id="如何找到不同类型的链表"><a href="#如何找到不同类型的链表" class="headerlink" title="如何找到不同类型的链表"></a>如何找到不同类型的链表</h4><p>为了解决这个问题，Mysql 的作者设计了名为 LisiBaseNode 的数据结构，这个数据结构存储着链表的<strong>头结点、尾结点和链表总共有多少个节点的信息。</strong>并将 LisiBaseNode <strong>存储在表空间的第一个页中</strong>，这个页的页号为 0 ，类型为 FSP_HDR，也是表空间分组中的第一组的第一个区的第一个页。这样就可以在表空间中快速找到不同类型的区啦~~。</p>
+<h2 id="段"><a href="#段" class="headerlink" title="段"></a>段</h2><p>段是由区和单独的页构成的。<strong>段的主要作用就是为了增加表空间读写数据的性能</strong>，因为表空间可能特别大，所以区与区之间可能距离特别远，当 Mysql 批量操作数据的时候就需要跨越很远的距离去查找数据，这种情况叫做<code>随机 IO</code>这是很慢的，而段的特点是会分配一段连续的内存空间在这段空间内再创建区，这样区与区的距离就不会特别远，可以达到<code>顺序 IO</code>的效果，可以极大的增加数据库的性能。</p>
+<p>我们都知道 B+ 树有叶子节点和非叶子节点的区别，为了进一步增加数据库性能，<strong>就让叶子节点和非叶子节点分别创建各自的段。</strong></p>
+<p><strong>如何区分一个段是属于叶子节点还是非叶子节点的呢？</strong>其实<code>段</code>是由专门的页结构存储的，而这个页的 Page Header 就会标注清楚哪些段是叶子节点的，哪些是非叶子节点的。</p>
+<h3 id="存储段的数据结构"><a href="#存储段的数据结构" class="headerlink" title="存储段的数据结构"></a>存储段的数据结构</h3><p>为了方便对<code>段</code>进行管理，Mysql 的作者设计了一个特殊的数据结构用来存储段的信息，这个数据结构叫做 INODE ENtity ，结构如下图所示：</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203124353554.png" alt="image-20220203124353554" style="zoom:67%;" />
+
+<p>下面对结构进行详细的解释。</p>
+<h4 id="List-Base-Node"><a href="#List-Base-Node" class="headerlink" title="List Base Node"></a>List Base Node</h4><p>为了能够快速分辨哪些段还可以继续写入数据，哪些段已经满了，Mysql 的设计者也对段进行了与区相同的分类，分为 Free(空闲)、NotFull(有一些数据，但是还可以继续写入)、Full(已经完全满了)。同样为了方便快速定位不同类型的链表设计者直接将三种类型链表的 ListBaseNode 节点放在了段的数据结构中。</p>
+<h4 id="Fragement-Array-Entry"><a href="#Fragement-Array-Entry" class="headerlink" title="Fragement Array Entry"></a>Fragement Array Entry</h4><p>你可能有因为，为什么段中还直接保存页呀？不是应该只保存区吗？<strong>这么做是为了更好的利用存储空间</strong>，段默认会分配 1M 大小，如果不够可以继续增加，但是如果你的数据特别少也用 1M 是不是就太浪费空间了呀？所以，设计者们提出了<code>碎片区</code>的概念，这个区内的页可以属于任何段，只有一个段占用的碎片区达到一定大小的时候才会分配一个完整区给这个段，这样可以更高效的利用存储空间。</p>
+<h3 id="INODE-ENtity-存储在什么地方"><a href="#INODE-ENtity-存储在什么地方" class="headerlink" title="INODE ENtity 存储在什么地方"></a>INODE ENtity 存储在什么地方</h3><p> INODE ENtity  也存储在页中，这个页位于表空间第一个分组的第一个区的第三个页中存储着所有 INODE ENtity 的基础信息（也可能是链表，因为有可能一个页无法存储所有段的基础信息）。这个页的类型为 INODE。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>为了方便大家理解，下面用一个图来表示表空间、区分组、区、段这些信息是如何存储的。</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203130935197.png" alt="image-20220203130935197" style="zoom:67%;" />
+
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>分布式锁</title>
+    <url>/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/</url>
+    <content><![CDATA[<p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
+<span id="more"></span>
+
+<h2 id="为什么需要分布式锁"><a href="#为什么需要分布式锁" class="headerlink" title="为什么需要分布式锁"></a>为什么需要分布式锁</h2><p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
+<h2 id="2-常用分布式锁"><a href="#2-常用分布式锁" class="headerlink" title="2. 常用分布式锁"></a>2. 常用分布式锁</h2><h3 id="2-1-Redis实现分布式锁"><a href="#2-1-Redis实现分布式锁" class="headerlink" title="2.1 Redis实现分布式锁"></a>2.1 Redis实现分布式锁</h3><h4 id="2-1-1-Redis实现分布式锁原理"><a href="#2-1-1-Redis实现分布式锁原理" class="headerlink" title="2.1.1 Redis实现分布式锁原理"></a>2.1.1 Redis实现分布式锁原理</h4><p>Redis实现分布式锁主要是使用Redis提供的setnx命令，setnx 是『SET if Not eXists』(如果不存在，则 SET)的简写。 命令格式：SETNX key value；使用：只在键 key 不存在的情况下，将键 key 的值设置为 value 。若键 key 已经存在， 则 SETNX 命令不做任何动作。返回值：命令在设置成功时返回 1 ，设置失败时返回 0 ，Redis保证setnx的原子性，所以如果setnx返回1就说明获取到锁，如果0就说明获取锁失败。</p>
+<h4 id="2-1-2-Redis实现分布式锁潜在问题"><a href="#2-1-2-Redis实现分布式锁潜在问题" class="headerlink" title="2.1.2 Redis实现分布式锁潜在问题"></a>2.1.2 Redis实现分布式锁潜在问题</h4><p>主要问题就是<strong>超时</strong>，例如当业务执行时间大于key的过期时间就可能产生并发问题，同时也可能将其他线程持有的锁误删。</p>
+<h4 id="2-1-2-超时问题解决方案"><a href="#2-1-2-超时问题解决方案" class="headerlink" title="2.1.2 超时问题解决方案"></a>2.1.2 超时问题解决方案</h4><p>解决方案就是<strong>自动续期</strong>，当线程成功获得锁后就开启一个WatchDog监听当前线程，如果key超时之前不能完成业务逻辑那就将key的过期时间延长，同时如果持有锁的服务宕机就不自动续期，让Redis将key删除，当然这个功能已经有现成的实现方式了，就是<strong>Redisson</strong>。</p>
+<h4 id="2-1-3-利用Redisson实现Redis分布式锁"><a href="#2-1-3-利用Redisson实现Redis分布式锁" class="headerlink" title="2.1.3 利用Redisson实现Redis分布式锁"></a>2.1.3 利用Redisson实现Redis分布式锁</h4><p>首先引入Redisson依赖</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;!-- https:<span class="comment">//mvnrepository.com/artifact/org.redisson/redisson --&gt;</span></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.redisson&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;redisson&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">3.15</span><span class="number">.1</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>实现方式</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> RedissonClient redissonClient;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">    	<span class="comment">//添加Redis配置信息</span></span><br><span class="line">        Config config = <span class="keyword">new</span> Config();</span><br><span class="line">        config.useSingleServer().setAddress(<span class="string">&quot;redis://127.0.0.1:6379&quot;</span>);</span><br><span class="line">        redissonClient = Redisson.create(config);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread myThread1 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread2 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread3 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread4 = <span class="keyword">new</span> MyThread();</span><br><span class="line"></span><br><span class="line">        myThread1.start();</span><br><span class="line">        myThread2.start();</span><br><span class="line">        myThread3.start();</span><br><span class="line">        myThread4.start();</span><br><span class="line"></span><br><span class="line">        myThread1.join();</span><br><span class="line">        myThread2.join();</span><br><span class="line">        myThread3.join();</span><br><span class="line">        myThread4.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        	<span class="comment">//初始化锁对象</span></span><br><span class="line">            RLock watchDogLock = redissonClient.getLock(<span class="string">&quot;watchDogLock&quot;</span>);</span><br><span class="line">            <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">            	<span class="comment">//利用Redisson的API成功获取锁时Redisson会自动启动WatchDog监听当前线程，底层实现是通过Lua脚本。</span></span><br><span class="line">                <span class="keyword">boolean</span> success = watchDogLock.tryLock();</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 是否成功获取锁：&quot;</span> + success);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (success) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 开始执行业务逻辑&quot;</span>);</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                        System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 业务执行成功，进行解锁&quot;</span>);</span><br><span class="line">                        watchDogLock.unlock();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 获取锁失败&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-2-Zookeeper实现分布式锁"><a href="#2-2-Zookeeper实现分布式锁" class="headerlink" title="2.2 Zookeeper实现分布式锁"></a>2.2 Zookeeper实现分布式锁</h3><h4 id="2-2-1-Zookeeper实现分布式锁原理"><a href="#2-2-1-Zookeeper实现分布式锁原理" class="headerlink" title="2.2.1  Zookeeper实现分布式锁原理"></a>2.2.1  Zookeeper实现分布式锁原理</h4><ol>
+<li><strong>数据结构</strong>：Zookeeper内部维护一个树形的数据结构，用户可以根据其提供的Api创建或者删除节点，并且Zookeeper会为每个节点生成一个不会重复并且根据创建顺序由小到大排列的序号。</li>
+<li><strong>永久节点和临时节点</strong>：永久节点除非手动删除，不然不会自动删除；临时节点会在客户端断开一段时间后自动删除，如果客户端没有断开链接，或者没有手动删除就会一直存在，同时永久节点下面可以创建临时节点，但是临时节点下面不能创建永久节点。</li>
+<li><strong>Watch机制</strong>：子节点可以在上一个节点创建一个监听器，同时传入一个回调方法，当前一个节点改变时（例如，删除，更新）会收到通知，并且执行回调方法。</li>
+</ol>
+<p>就是因为临时节点的特性，所以Zookeeper不会遇到和Redis相同的问题，如果客户端运行正常运行就不会删除临时节点，也就不会释放锁，如果客户端宕机那临时节点就会在客户端断开一段时间后自动删除。</p>
+<h4 id="2-2-2-Zookeeper分布式锁工作流程"><a href="#2-2-2-Zookeeper分布式锁工作流程" class="headerlink" title="2.2.2 Zookeeper分布式锁工作流程"></a>2.2.2 Zookeeper分布式锁工作流程</h4><ol>
+<li>当需要对资源进行加锁时，实际上就是在父节点之下创建一个临时顺序节点。</li>
+<li>客户端A来对资源加锁，首先判断当前创建的节点是否为最小节点，如果是，那么加锁成功，后续加锁线程阻塞等待。</li>
+<li>此时，客户端B也来尝试加锁，由于客户端A已经加锁成功，所以客户端B发现自己的节点并不是最小节点，就会去取到上一个节点，并且对上一节点注册监听。</li>
+<li>当客户端A操作完成，释放锁的操作就是删除这个节点，这样就可以触发监听事件，客户端B就会得到通知，同样，客户端B判断自己是否为最小节点，如果是，那么则加锁成功。</li>
+</ol>
+<h4 id="2-2-3-代码示例"><a href="#2-2-3-代码示例" class="headerlink" title="2.2.3 代码示例"></a>2.2.3 代码示例</h4><p>代码使用了Curator包，这个包封装了底层Zookeeper的操作，使用起来更加方便，可以有效减少样板代码。</p>
+<p>首先引入依赖</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;!-- https:<span class="comment">//mvnrepository.com/artifact/org.apache.curator/curator-recipes --&gt;</span></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.curator&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;curator-recipes&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">5.1</span><span class="number">.0</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>代码示例</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> CuratorFramework ZK_CLIENT;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">    	<span class="comment">//初始化Zookeeper配置</span></span><br><span class="line">        String zkServerAddress = <span class="string">&quot;127.0.0.1:12181&quot;</span>;</span><br><span class="line">        ExponentialBackoffRetry retryPolicy = <span class="keyword">new</span> ExponentialBackoffRetry(<span class="number">1000</span>, <span class="number">3</span>, <span class="number">5000</span>);</span><br><span class="line">        ZK_CLIENT = CuratorFrameworkFactory.builder()</span><br><span class="line">                .connectString(zkServerAddress)</span><br><span class="line">                .sessionTimeoutMs(<span class="number">5000</span>)</span><br><span class="line">                .connectionTimeoutMs(<span class="number">5000</span>)</span><br><span class="line">                .retryPolicy(retryPolicy)</span><br><span class="line">                .build();</span><br><span class="line">        ZK_CLIENT.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String LOCK_PATH = <span class="string">&quot;/myLock&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//创建锁对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> InterProcessMutex LOCK = <span class="keyword">new</span> InterProcessMutex(ZK_CLIENT, LOCK_PATH);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread myThread1 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread2 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread3 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread4 = <span class="keyword">new</span> MyThread();</span><br><span class="line"></span><br><span class="line">        myThread1.start();</span><br><span class="line">        myThread2.start();</span><br><span class="line">        myThread3.start();</span><br><span class="line">        myThread4.start();</span><br><span class="line"></span><br><span class="line">        myThread1.join();</span><br><span class="line">        myThread2.join();</span><br><span class="line">        myThread3.join();</span><br><span class="line">        myThread4.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                	<span class="comment">//加锁</span></span><br><span class="line">                    LOCK.acquire();</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 获取到锁&quot;</span>);</span><br><span class="line">                    Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 释放锁&quot;</span>);</span><br><span class="line">                        <span class="comment">//解锁</span></span><br><span class="line">                        LOCK.release();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-总结"><a href="#3-总结" class="headerlink" title="3 总结"></a>3 总结</h2><p>Redis和Zookeeper都能够实现分布式锁，但是他们之间有相同点和不同点，使用的时候需要根据需求来选择。<br><strong>相同点</strong>：由于工具封装的都比较好，实现起来都很简单。</p>
+<p><strong>不同点</strong>：</p>
+<ol>
+<li><strong>可靠性</strong>：Zookeeper可靠性高于Redis，因为Zookeeper的实现方式而言，本身就是保证数据一致性的，可靠性更高，而Redis不是数据强一致性的，某些极端场景下还是可能会存在问题。</li>
+<li><strong>性能</strong>：Redis性能比Zookeeper好，因为Zookeeper需要频繁创建和删除节点，性能略低。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>分布式</tag>
+        <tag>多线程</tag>
       </tags>
   </entry>
   <entry>
@@ -514,164 +514,6 @@
       </categories>
       <tags>
         <tag>Git</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java内存区域</title>
-    <url>/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/</url>
-    <content><![CDATA[<h2 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h2><h3 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h3><ul>
-<li>当前线程所执行的字节码的行号指示器，用来选取下一条需要执行的字节码指令</li>
-<li>线程私有</li>
-<li>唯一一个不会出现OOM的区域</li>
-</ul>
-<span id="more"></span>
-
-<h3 id="虚拟机栈"><a href="#虚拟机栈" class="headerlink" title="虚拟机栈"></a>虚拟机栈</h3><ul>
-<li><p>线程私有</p>
-</li>
-<li><p>每个方法执行时都会创建对应的栈帧入栈，执行完毕后出栈，栈帧用于存储局部变量表、操作数栈、动态连接、方法出口等信息</p>
-</li>
-<li><p>局部变量表</p>
-<ul>
-<li>用来存储基本数据类型、对象引用等信息</li>
-</ul>
-</li>
-</ul>
-<h3 id="本地方法栈"><a href="#本地方法栈" class="headerlink" title="本地方法栈"></a>本地方法栈</h3><ul>
-<li>线程私有</li>
-<li>虚拟机使用到的本地（Native)方法服务（可以是C、C++等语言提供的服务）</li>
-</ul>
-<h3 id="java堆"><a href="#java堆" class="headerlink" title="java堆"></a>java堆</h3><ul>
-<li><p>线程共享</p>
-</li>
-<li><p>唯一目的就是存放对象实例，是内存中最大的一块</p>
-</li>
-<li><p>拥有常量池（jdk1.7 从永久代移动到堆）</p>
-<ul>
-<li><p>字符串常量池</p>
-</li>
-<li><p>运行时常量池</p>
-<p>运行时常量池是方法区的一部分</p>
-<ul>
-<li>存放编译期生成的各种字面量与符号引用</li>
-</ul>
-</li>
-<li><p>Class常量池</p>
-<p>运行时常量池是在类加载完成之后，将每个class常量池中的符号引用值转存到运行时常量池中，也就是说，每个class都有一个运行时常量池，类在解析之后，将符号引用替换成直接引用，与全局常量池中的引用值保持一致</p>
-<ul>
-<li>静态变量（jdk1.7 从永久代移动到堆 跟Class对象在一起）</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="方法区-元空间"><a href="#方法区-元空间" class="headerlink" title="方法区/元空间"></a>方法区/元空间</h3><p>jdk7以前也被称为永久代，之后永久代的概念被舍弃,并提出元空间的概念。方法区就在元空间上（元空间和永久代都是方法区的具体实现，类似接口和实现类）</p>
-<ul>
-<li><p>线程共享</p>
-</li>
-<li><p>存储已被虚拟机加载的类型信息、即时编译器编译后的代码缓存数据等等（也叫元数据 包括类的方法代码，变量名，方法名，访问权限，返回值等等都是在方法区的）才是存在方法区的【存疑 】）</p>
-</li>
-<li><p>此区域的垃圾回收主要针对常量池和对类型的卸载</p>
-<p>类型卸载：简单来说就是清理加载到内存中的Class 除非是故意设计不然这种情况发生的概率很低，因为Class是由ClassLoader加载进来的 而java虚拟机不会主动放弃ClassLoader 而Class又被ClassLoader引用，所以永远是“可达”的。</p>
-</li>
-</ul>
-<h3 id="直接内存-堆外内存"><a href="#直接内存-堆外内存" class="headerlink" title="直接内存(堆外内存)"></a>直接内存(堆外内存)</h3><ul>
-<li>直接使用物理内存不受到堆大小的限制，但受本地总内存的限制</li>
-<li>优点：提高性能，避免在java堆和native堆来回复制数据</li>
-<li>缺点：如果直接内存发生OOM排查难度较高</li>
-</ul>
-<h2 id="HotSpot虚拟机对象探秘"><a href="#HotSpot虚拟机对象探秘" class="headerlink" title="HotSpot虚拟机对象探秘"></a>HotSpot虚拟机对象探秘</h2><h3 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h3><ul>
-<li><p>1、类加载：先去常量池找类的符号引用并检查是否已加载</p>
-</li>
-<li><p>2、分配内存</p>
-<ul>
-<li><p>分配方法</p>
-<ul>
-<li><p>2.1 指针碰撞</p>
-<ul>
-<li>堆内存规整时使用，已使用和未使用的内存划分到两边，分配内存时指针向空闲空间移动</li>
-</ul>
-</li>
-<li><p>2.2 空间列表</p>
-<ul>
-<li>堆内存不规整时使用，维护一个内存使用情况列表，分配内存时跟据表数据选取内存空间</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>解决并发安全问题</p>
-<ul>
-<li>同步处理，例如CAS</li>
-<li>预先在堆中为每个线程分配一块内存，只有用完后分配新内存的时候再同步处理</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>3、执行构造函数<init>()</p>
-</li>
-</ul>
-<h3 id="对象内存布局"><a href="#对象内存布局" class="headerlink" title="对象内存布局"></a>对象内存布局</h3><ul>
-<li><p>对象头</p>
-<ul>
-<li>1、存储对象自身运行时数据，如哈希码、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等等</li>
-<li>2、类型指针，虚拟机通过这个指针来确定对象是哪个类的实例</li>
-<li>3、如果是数组还有一块区域记录数组长度，因为虚拟机无法通过元数据推断数组的大小</li>
-</ul>
-</li>
-<li><p>实例数据</p>
-<ul>
-<li>对象真正存储的有效信息，即代码中定义的各种类型的字段内容</li>
-</ul>
-</li>
-<li><p>对齐填充</p>
-<ul>
-<li>占位符的作用，因为对象的大小必须是8字节的整数倍，但实例数据可能不是 所以用它来补全</li>
-</ul>
-</li>
-</ul>
-<h3 id="对象的访问定位"><a href="#对象的访问定位" class="headerlink" title="对象的访问定位"></a>对象的访问定位</h3><ul>
-<li><p>句柄访问</p>
-<ul>
-<li><p>Java堆中划分出一块内存做句柄池，局部变量表中存储句柄地址，句柄中存储对象实例数据与类型数据的内存地址</p>
-<ul>
-<li>优点：如果对象被移动指挥改变句柄中的实例数据指针</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>直接指针访问</p>
-<ul>
-<li><p>堆中对象的内存布局需要存储对应类型数据的地址，局部变量表中存储的是对象地址</p>
-<ul>
-<li>优点：速度快，因为节省了一次定位指针的时间开销</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Jvm</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Wireshark 简明教程</title>
-    <url>/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</url>
-    <content><![CDATA[<p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
-<span id="more"></span>
-
-<h2 id="下载wireshark"><a href="#下载wireshark" class="headerlink" title="下载wireshark"></a>下载wireshark</h2><p><a href="https://www.wireshark.org/download.html">wireshark下载地址</a><br>选择Windows Installer (64-bit)，下载成功后一直点next就可以了。<br><img src="https://img-blog.csdnimg.cn/20210507224116599.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>2.1 选择网卡<br>打开软件，界面如下所示，被红框标记起来的就是网卡列表，如果你使用的是无线网就可以选择WLAN。<br><img src="https://img-blog.csdnimg.cn/20210507224420963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.2 开始抓包<br>双击选中目标网卡就会进入到抓包主界面，如图：<br><img src="https://img-blog.csdnimg.cn/20210507224707882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>被红框选中的就是该网卡发送和接受的网络包了，后续会详细讲解如果通过wireshark抓包学习网络。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Wireshark</tag>
-        <tag>网络</tag>
       </tags>
   </entry>
   <entry>
@@ -910,6 +752,23 @@
       </tags>
   </entry>
   <entry>
+    <title>Wireshark 简明教程</title>
+    <url>/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
+<span id="more"></span>
+
+<h2 id="下载wireshark"><a href="#下载wireshark" class="headerlink" title="下载wireshark"></a>下载wireshark</h2><p><a href="https://www.wireshark.org/download.html">wireshark下载地址</a><br>选择Windows Installer (64-bit)，下载成功后一直点next就可以了。<br><img src="https://img-blog.csdnimg.cn/20210507224116599.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>2.1 选择网卡<br>打开软件，界面如下所示，被红框标记起来的就是网卡列表，如果你使用的是无线网就可以选择WLAN。<br><img src="https://img-blog.csdnimg.cn/20210507224420963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.2 开始抓包<br>双击选中目标网卡就会进入到抓包主界面，如图：<br><img src="https://img-blog.csdnimg.cn/20210507224707882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>被红框选中的就是该网卡发送和接受的网络包了，后续会详细讲解如果通过wireshark抓包学习网络。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Wireshark</tag>
+        <tag>网络</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>java高并发程序设计</title>
     <url>/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/</url>
     <content><![CDATA[<p>高并发是 java 开发必备知识，本篇文章整理出在高并发程序设计中常用的工具。</p>
@@ -1132,6 +991,205 @@
       </tags>
   </entry>
   <entry>
+    <title>Java内存区域</title>
+    <url>/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/</url>
+    <content><![CDATA[<h2 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h2><h3 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h3><ul>
+<li>当前线程所执行的字节码的行号指示器，用来选取下一条需要执行的字节码指令</li>
+<li>线程私有</li>
+<li>唯一一个不会出现OOM的区域</li>
+</ul>
+<span id="more"></span>
+
+<h3 id="虚拟机栈"><a href="#虚拟机栈" class="headerlink" title="虚拟机栈"></a>虚拟机栈</h3><ul>
+<li><p>线程私有</p>
+</li>
+<li><p>每个方法执行时都会创建对应的栈帧入栈，执行完毕后出栈，栈帧用于存储局部变量表、操作数栈、动态连接、方法出口等信息</p>
+</li>
+<li><p>局部变量表</p>
+<ul>
+<li>用来存储基本数据类型、对象引用等信息</li>
+</ul>
+</li>
+</ul>
+<h3 id="本地方法栈"><a href="#本地方法栈" class="headerlink" title="本地方法栈"></a>本地方法栈</h3><ul>
+<li>线程私有</li>
+<li>虚拟机使用到的本地（Native)方法服务（可以是C、C++等语言提供的服务）</li>
+</ul>
+<h3 id="java堆"><a href="#java堆" class="headerlink" title="java堆"></a>java堆</h3><ul>
+<li><p>线程共享</p>
+</li>
+<li><p>唯一目的就是存放对象实例，是内存中最大的一块</p>
+</li>
+<li><p>拥有常量池（jdk1.7 从永久代移动到堆）</p>
+<ul>
+<li><p>字符串常量池</p>
+</li>
+<li><p>运行时常量池</p>
+<p>运行时常量池是方法区的一部分</p>
+<ul>
+<li>存放编译期生成的各种字面量与符号引用</li>
+</ul>
+</li>
+<li><p>Class常量池</p>
+<p>运行时常量池是在类加载完成之后，将每个class常量池中的符号引用值转存到运行时常量池中，也就是说，每个class都有一个运行时常量池，类在解析之后，将符号引用替换成直接引用，与全局常量池中的引用值保持一致</p>
+<ul>
+<li>静态变量（jdk1.7 从永久代移动到堆 跟Class对象在一起）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="方法区-元空间"><a href="#方法区-元空间" class="headerlink" title="方法区/元空间"></a>方法区/元空间</h3><p>jdk7以前也被称为永久代，之后永久代的概念被舍弃,并提出元空间的概念。方法区就在元空间上（元空间和永久代都是方法区的具体实现，类似接口和实现类）</p>
+<ul>
+<li><p>线程共享</p>
+</li>
+<li><p>存储已被虚拟机加载的类型信息、即时编译器编译后的代码缓存数据等等（也叫元数据 包括类的方法代码，变量名，方法名，访问权限，返回值等等都是在方法区的）才是存在方法区的【存疑 】）</p>
+</li>
+<li><p>此区域的垃圾回收主要针对常量池和对类型的卸载</p>
+<p>类型卸载：简单来说就是清理加载到内存中的Class 除非是故意设计不然这种情况发生的概率很低，因为Class是由ClassLoader加载进来的 而java虚拟机不会主动放弃ClassLoader 而Class又被ClassLoader引用，所以永远是“可达”的。</p>
+</li>
+</ul>
+<h3 id="直接内存-堆外内存"><a href="#直接内存-堆外内存" class="headerlink" title="直接内存(堆外内存)"></a>直接内存(堆外内存)</h3><ul>
+<li>直接使用物理内存不受到堆大小的限制，但受本地总内存的限制</li>
+<li>优点：提高性能，避免在java堆和native堆来回复制数据</li>
+<li>缺点：如果直接内存发生OOM排查难度较高</li>
+</ul>
+<h2 id="HotSpot虚拟机对象探秘"><a href="#HotSpot虚拟机对象探秘" class="headerlink" title="HotSpot虚拟机对象探秘"></a>HotSpot虚拟机对象探秘</h2><h3 id="对象的创建"><a href="#对象的创建" class="headerlink" title="对象的创建"></a>对象的创建</h3><ul>
+<li><p>1、类加载：先去常量池找类的符号引用并检查是否已加载</p>
+</li>
+<li><p>2、分配内存</p>
+<ul>
+<li><p>分配方法</p>
+<ul>
+<li><p>2.1 指针碰撞</p>
+<ul>
+<li>堆内存规整时使用，已使用和未使用的内存划分到两边，分配内存时指针向空闲空间移动</li>
+</ul>
+</li>
+<li><p>2.2 空间列表</p>
+<ul>
+<li>堆内存不规整时使用，维护一个内存使用情况列表，分配内存时跟据表数据选取内存空间</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>解决并发安全问题</p>
+<ul>
+<li>同步处理，例如CAS</li>
+<li>预先在堆中为每个线程分配一块内存，只有用完后分配新内存的时候再同步处理</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>3、执行构造函数<init>()</p>
+</li>
+</ul>
+<h3 id="对象内存布局"><a href="#对象内存布局" class="headerlink" title="对象内存布局"></a>对象内存布局</h3><ul>
+<li><p>对象头</p>
+<ul>
+<li>1、存储对象自身运行时数据，如哈希码、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等等</li>
+<li>2、类型指针，虚拟机通过这个指针来确定对象是哪个类的实例</li>
+<li>3、如果是数组还有一块区域记录数组长度，因为虚拟机无法通过元数据推断数组的大小</li>
+</ul>
+</li>
+<li><p>实例数据</p>
+<ul>
+<li>对象真正存储的有效信息，即代码中定义的各种类型的字段内容</li>
+</ul>
+</li>
+<li><p>对齐填充</p>
+<ul>
+<li>占位符的作用，因为对象的大小必须是8字节的整数倍，但实例数据可能不是 所以用它来补全</li>
+</ul>
+</li>
+</ul>
+<h3 id="对象的访问定位"><a href="#对象的访问定位" class="headerlink" title="对象的访问定位"></a>对象的访问定位</h3><ul>
+<li><p>句柄访问</p>
+<ul>
+<li><p>Java堆中划分出一块内存做句柄池，局部变量表中存储句柄地址，句柄中存储对象实例数据与类型数据的内存地址</p>
+<ul>
+<li>优点：如果对象被移动指挥改变句柄中的实例数据指针</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>直接指针访问</p>
+<ul>
+<li><p>堆中对象的内存布局需要存储对应类型数据的地址，局部变量表中存储的是对象地址</p>
+<ul>
+<li>优点：速度快，因为节省了一次定位指针的时间开销</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【Mybatis源码解读】jdbc包</title>
+    <url>/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</url>
+    <content><![CDATA[<h2 id="1-jdbc包的作用"><a href="#1-jdbc包的作用" class="headerlink" title="1. jdbc包的作用"></a>1. jdbc包的作用</h2><p>jdbc包作为Mybatis框架的核心包之一可以理解为是<strong>操作Sql的工具包</strong>，因为通过阅读代码观察到这个jdbc包里面的类并没有被Mybatis框架本身引用，而其本身的作用又是对sql的操作，所以当作工具包来理解是没有什么问题的。</p>
+<span id="more"></span>
+
+<h2 id="2-设计思想"><a href="#2-设计思想" class="headerlink" title="2. 设计思想"></a>2. 设计思想</h2><p>利用面向对象的<strong>继承</strong>特性增加功能的<strong>拓展性</strong>。</p>
+<h2 id="3-实现细节"><a href="#3-实现细节" class="headerlink" title="3. 实现细节"></a>3. 实现细节</h2><p>jdbc包里面的类其实很少，去掉过期的和一些辅助类主要的类有三个：<strong>AbstractSQL</strong>、<strong>ScriptRunner</strong>、<strong>SqlRunner</strong>，这里着重介绍<strong>AbstractSQL</strong>类，因为相对于<strong>AbstractSQL</strong>类另外的两个类功能很简单。</p>
+<p><strong>AbstractSQL</strong>的类图:</p>
+<p>可以看出SQL类继承了<strong>AbstractSQL</strong>类，而SafeAppendable 和 SQLStatement 是<strong>AbstractSQL</strong>的内部类，下面逐一介绍。</p>
+<p><img src="https://s2.loli.net/2021/12/05/pJT69AcKPMHEqxf.png" alt="image-20201206170511920"></p>
+<h3 id="SQL类"><a href="#SQL类" class="headerlink" title="SQL类"></a>SQL类</h3><h4 id="3-1-1-简介"><a href="#3-1-1-简介" class="headerlink" title="3.1.1 简介"></a>3.1.1 简介</h4><p>SQL类的实现很简单：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SQL</span> <span class="keyword">extends</span> <span class="title">AbstractSQL</span>&lt;<span class="title">SQL</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> SQL <span class="title">getSelf</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说所有的逻辑实现都写在了它的父类中，那为什么还要SQL类呢？答案就是为了<strong>增加功能的拓展性</strong>，比如你想在生成sql的时候满足一些定制化的需求可以重新创建一个子类继承并拓展它。</p>
+<h4 id="3-1-2-使用"><a href="#3-1-2-使用" class="headerlink" title="3.1.2 使用"></a>3.1.2 使用</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    <span class="meta">@SelectProvider(type = UserProvider.class, method = &quot;queryUsersBySchoolName&quot;)</span></span><br><span class="line">    <span class="function">List&lt;User&gt; <span class="title">queryUsersBySchoolName</span><span class="params">(String schoolName)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserProvider</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">queryUsersBySchoolName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> SQL()</span><br><span class="line">                .SELECT(<span class="string">&quot;*&quot;</span>)</span><br><span class="line">                .FROM(<span class="string">&quot;user&quot;</span>)</span><br><span class="line">                .WHERE(<span class="string">&quot;schoolName = #&#123;schoolName&#125;&quot;</span>)</span><br><span class="line">                .toString();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看出这种方式是直接在每个接口上引入sql，如果项目比较庞大是很难有效管理sql的 ，所以这种使用方式很不常见。</p>
+<h3 id="SafeAppendable"><a href="#SafeAppendable" class="headerlink" title="SafeAppendable"></a>SafeAppendable</h3><h4 id="3-2-1-简介"><a href="#3-2-1-简介" class="headerlink" title="3.2.1 简介"></a>3.2.1 简介</h4><p>看名字就可以了解到这个类里面封装了<strong>拼接</strong>字符的行为，使用了<strong>组合模式</strong>持有了Appendable接口实例的引用，并调用其append方法实现拼接，拼接完成后调用Appendable实例的toString方法获取拼接结果。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SafeAppendable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Appendable a;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> empty = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SafeAppendable</span><span class="params">(Appendable a)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">super</span>();</span><br><span class="line">      <span class="keyword">this</span>.a = a;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SafeAppendable <span class="title">append</span><span class="params">(CharSequence s)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (empty &amp;&amp; s.length() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">          empty = <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        a.append(s);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> empty;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="SQLStatement"><a href="#SQLStatement" class="headerlink" title="SQLStatement"></a>SQLStatement</h3><h4 id="3-3-1-简介"><a href="#3-3-1-简介" class="headerlink" title="3.3.1 简介"></a>3.3.1 简介</h4><p>从下图为此类封装的方法，可以看出此类是拼接sql的主力军。</p>
+<p><img src="https://s2.loli.net/2021/12/05/PtIn4eRMAJwXsVx.png" alt="image-20201206180137582"></p>
+<p>下图这些为此类的属性，从名字可以看出是根据sql关键字进行分类的，存储着相应的值，用来拼接sql时使用。</p>
+<p><img src="https://s2.loli.net/2021/12/05/74HvADUTKCeFadm.png" alt="image-20201206180617860"></p>
+<p>以拼接select为例分析源码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">   <span class="comment">//只接收一个参数就是拼接器，用来拼接字符</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> String <span class="title">selectSQL</span><span class="params">(SafeAppendable builder)</span> </span>&#123;</span><br><span class="line">   <span class="comment">//判断是否需要去重，如果需要就增加 DISTINCT关键字，而select为上图的属性，是一个集合里面存储着相应的值，下面几个参数类似不做赘述，下面会对sqlClause方法做详细解释。</span></span><br><span class="line">     <span class="keyword">if</span> (distinct) &#123;</span><br><span class="line">       sqlClause(builder, <span class="string">&quot;SELECT DISTINCT&quot;</span>, select, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       sqlClause(builder, <span class="string">&quot;SELECT&quot;</span>, select, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     sqlClause(builder, <span class="string">&quot;FROM&quot;</span>, tables, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     <span class="comment">//join语句比较特殊，所以单独创建函数，但是本质也是复用sqlClause函数</span></span><br><span class="line">     joins(builder);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;WHERE&quot;</span>, where, <span class="string">&quot;(&quot;</span>, <span class="string">&quot;)&quot;</span>, <span class="string">&quot; AND &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;GROUP BY&quot;</span>, groupBy, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;HAVING&quot;</span>, having, <span class="string">&quot;(&quot;</span>, <span class="string">&quot;)&quot;</span>, <span class="string">&quot; AND &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;ORDER BY&quot;</span>, orderBy, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     <span class="comment">//利用LIMIT、OFFSET关键字做分页处理</span></span><br><span class="line">     limitingRowsStrategy.appendClause(builder, offset, limit);</span><br><span class="line">     <span class="keyword">return</span> builder.toString();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面是sqlClause 函数的代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//参数一：拼接器；参数二：关键字例如SELECT等等;参数三：sql所需值的集合；参数四和五：参数开始和结束字符 例如where语句需要括号括起来；参数六：参数连接字符例如 AND等等</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">sqlClause</span><span class="params">(SafeAppendable builder, String keyword, List&lt;String&gt; parts, String open, String close,String conjunction)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!parts.isEmpty()) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!builder.isEmpty()) &#123;</span><br><span class="line">      builder.append(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    builder.append(keyword);</span><br><span class="line">    builder.append(<span class="string">&quot; &quot;</span>);</span><br><span class="line">    builder.append(open);</span><br><span class="line">    String last = <span class="string">&quot;________&quot;</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>, n = parts.size(); i &lt; n; i++) &#123;</span><br><span class="line">      String part = parts.get(i);</span><br><span class="line">      <span class="keyword">if</span> (i &gt; <span class="number">0</span> &amp;&amp; !part.equals(AND) &amp;&amp; !part.equals(OR) &amp;&amp; !last.equals(AND) &amp;&amp; !last.equals(OR)) &#123;</span><br><span class="line">        builder.append(conjunction);</span><br><span class="line">      &#125;</span><br><span class="line">      builder.append(part);</span><br><span class="line">      last = part;</span><br><span class="line">    &#125;</span><br><span class="line">    builder.append(close);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="AbstractSQL"><a href="#AbstractSQL" class="headerlink" title="AbstractSQL"></a>AbstractSQL</h3><h4 id="3-4-1-简介"><a href="#3-4-1-简介" class="headerlink" title="3.4.1 简介"></a>3.4.1 简介</h4><p>如果理解了前面三个类的作用那理解此类的作用也就水到渠成了，下面看下此类封装的方法，可以看到所有方法都是以sql语句的关键词命名的</p>
+<p><img src="https://s2.loli.net/2021/12/05/nZctYG87sJqrvmK.png" alt="image-20201207221124727"></p>
+<h4 id="3-4-2-详解"><a href="#3-4-2-详解" class="headerlink" title="3.4.2 详解"></a>3.4.2 详解</h4><p>以SELECT方法为例，当使用如下方法时发生了什么？</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">new</span> SQL()</span><br><span class="line">              .SELECT(<span class="string">&quot;*&quot;</span>)</span><br><span class="line">              .FROM(<span class="string">&quot;user&quot;</span>)</span><br><span class="line">              .WHERE(<span class="string">&quot;schoolName = #&#123;schoolName&#125;&quot;</span>)</span><br><span class="line">              .toString();</span><br></pre></td></tr></table></figure>
+
+<p>当调用AbstractSQL里面封装的方法时其实都将传进来的值存储在了SQLStatement相应关键字的属性中，当最后调用toString方法时就会触发sql的拼接工作，所以可以理解为AbstractSQL是给SQLStatement类做了一层<strong>装饰器</strong>。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">SELECT</span><span class="params">(String columns)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//sql() 方法会返回SQLStatement类的一个实例</span></span><br><span class="line">    <span class="comment">//设置sql类别</span></span><br><span class="line">  sql().statementType = SQLStatement.StatementType.SELECT;</span><br><span class="line">    <span class="comment">//将传入的值存储到SQLStatement类的select属性中</span></span><br><span class="line">  sql().select.add(columns);</span><br><span class="line">    <span class="comment">//返回对象本身</span></span><br><span class="line">  <span class="keyword">return</span> getSelf();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其他关键字方法的调用都是类似的，这里不再赘述，下面介绍一下<strong>如何触发拼接sql的操作</strong>：</p>
+<p>当调用toString方法时就会触发sql拼接操作，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//创建一个字符拼接器</span></span><br><span class="line">  StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    <span class="comment">//调用SQLStatement类的sql方法，此方法会利用StringBuilder拼接sql</span></span><br><span class="line">  sql().sql(sb);</span><br><span class="line">    <span class="comment">//转化为字符串</span></span><br><span class="line">  <span class="keyword">return</span> sb.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//这个方法会根据sql的类型调用相应的拼接方法，而SELECT语句如何拼接的前文已经讲解过，大家可以按照此方法查看一下其他类型sql的拼接过程</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">sql</span><span class="params">(Appendable a)</span> </span>&#123;</span><br><span class="line">  SafeAppendable builder = <span class="keyword">new</span> SafeAppendable(a);</span><br><span class="line">  <span class="keyword">if</span> (statementType == <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  String answer;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">switch</span> (statementType) &#123;</span><br><span class="line">    <span class="keyword">case</span> DELETE:</span><br><span class="line">      answer = deleteSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> INSERT:</span><br><span class="line">      answer = insertSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> SELECT:</span><br><span class="line">      answer = selectSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> UPDATE:</span><br><span class="line">      answer = updateSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      answer = <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> answer;</span><br></pre></td></tr></table></figure>
+
+<p>这里有个细节，为什么AbstractSQL类中的方法都是大写的呢？ 我查阅了相关资料发现这是为了照顾大家写sql时的习惯。</p>
+<p>通过以上知识的学习我们就应该知道 Mybatis 是如何操作 sql 的了。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Mybatis</tag>
+        <tag>源码阅读</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
     <url>/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</url>
     <content><![CDATA[<p>本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章<a href="https://blog.csdn.net/qq_43005544/article/details/116504407">wireshark 简易教程</a></p>
@@ -1290,61 +1348,60 @@
       </tags>
   </entry>
   <entry>
-    <title>【Mybatis源码解读】jdbc包</title>
-    <url>/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</url>
-    <content><![CDATA[<h2 id="1-jdbc包的作用"><a href="#1-jdbc包的作用" class="headerlink" title="1. jdbc包的作用"></a>1. jdbc包的作用</h2><p>jdbc包作为Mybatis框架的核心包之一可以理解为是<strong>操作Sql的工具包</strong>，因为通过阅读代码观察到这个jdbc包里面的类并没有被Mybatis框架本身引用，而其本身的作用又是对sql的操作，所以当作工具包来理解是没有什么问题的。</p>
+    <title>常见的Web应用攻击手段</title>
+    <url>/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</url>
+    <content><![CDATA[<h2 id="1-XSS攻击"><a href="#1-XSS攻击" class="headerlink" title="1.XSS攻击"></a>1.XSS攻击</h2><p>XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。</p>
 <span id="more"></span>
 
-<h2 id="2-设计思想"><a href="#2-设计思想" class="headerlink" title="2. 设计思想"></a>2. 设计思想</h2><p>利用面向对象的<strong>继承</strong>特性增加功能的<strong>拓展性</strong>。</p>
-<h2 id="3-实现细节"><a href="#3-实现细节" class="headerlink" title="3. 实现细节"></a>3. 实现细节</h2><p>jdbc包里面的类其实很少，去掉过期的和一些辅助类主要的类有三个：<strong>AbstractSQL</strong>、<strong>ScriptRunner</strong>、<strong>SqlRunner</strong>，这里着重介绍<strong>AbstractSQL</strong>类，因为相对于<strong>AbstractSQL</strong>类另外的两个类功能很简单。</p>
-<p><strong>AbstractSQL</strong>的类图:</p>
-<p>可以看出SQL类继承了<strong>AbstractSQL</strong>类，而SafeAppendable 和 SQLStatement 是<strong>AbstractSQL</strong>的内部类，下面逐一介绍。</p>
-<p><img src="https://s2.loli.net/2021/12/05/pJT69AcKPMHEqxf.png" alt="image-20201206170511920"></p>
-<h3 id="SQL类"><a href="#SQL类" class="headerlink" title="SQL类"></a>SQL类</h3><h4 id="3-1-1-简介"><a href="#3-1-1-简介" class="headerlink" title="3.1.1 简介"></a>3.1.1 简介</h4><p>SQL类的实现很简单：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SQL</span> <span class="keyword">extends</span> <span class="title">AbstractSQL</span>&lt;<span class="title">SQL</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> SQL <span class="title">getSelf</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>也就是说所有的逻辑实现都写在了它的父类中，那为什么还要SQL类呢？答案就是为了<strong>增加功能的拓展性</strong>，比如你想在生成sql的时候满足一些定制化的需求可以重新创建一个子类继承并拓展它。</p>
-<h4 id="3-1-2-使用"><a href="#3-1-2-使用" class="headerlink" title="3.1.2 使用"></a>3.1.2 使用</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    <span class="meta">@SelectProvider(type = UserProvider.class, method = &quot;queryUsersBySchoolName&quot;)</span></span><br><span class="line">    <span class="function">List&lt;User&gt; <span class="title">queryUsersBySchoolName</span><span class="params">(String schoolName)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserProvider</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">queryUsersBySchoolName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> SQL()</span><br><span class="line">                .SELECT(<span class="string">&quot;*&quot;</span>)</span><br><span class="line">                .FROM(<span class="string">&quot;user&quot;</span>)</span><br><span class="line">                .WHERE(<span class="string">&quot;schoolName = #&#123;schoolName&#125;&quot;</span>)</span><br><span class="line">                .toString();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可以看出这种方式是直接在每个接口上引入sql，如果项目比较庞大是很难有效管理sql的 ，所以这种使用方式很不常见。</p>
-<h3 id="SafeAppendable"><a href="#SafeAppendable" class="headerlink" title="SafeAppendable"></a>SafeAppendable</h3><h4 id="3-2-1-简介"><a href="#3-2-1-简介" class="headerlink" title="3.2.1 简介"></a>3.2.1 简介</h4><p>看名字就可以了解到这个类里面封装了<strong>拼接</strong>字符的行为，使用了<strong>组合模式</strong>持有了Appendable接口实例的引用，并调用其append方法实现拼接，拼接完成后调用Appendable实例的toString方法获取拼接结果。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SafeAppendable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Appendable a;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> empty = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SafeAppendable</span><span class="params">(Appendable a)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">super</span>();</span><br><span class="line">      <span class="keyword">this</span>.a = a;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SafeAppendable <span class="title">append</span><span class="params">(CharSequence s)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (empty &amp;&amp; s.length() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">          empty = <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        a.append(s);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> empty;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="SQLStatement"><a href="#SQLStatement" class="headerlink" title="SQLStatement"></a>SQLStatement</h3><h4 id="3-3-1-简介"><a href="#3-3-1-简介" class="headerlink" title="3.3.1 简介"></a>3.3.1 简介</h4><p>从下图为此类封装的方法，可以看出此类是拼接sql的主力军。</p>
-<p><img src="https://s2.loli.net/2021/12/05/PtIn4eRMAJwXsVx.png" alt="image-20201206180137582"></p>
-<p>下图这些为此类的属性，从名字可以看出是根据sql关键字进行分类的，存储着相应的值，用来拼接sql时使用。</p>
-<p><img src="https://s2.loli.net/2021/12/05/74HvADUTKCeFadm.png" alt="image-20201206180617860"></p>
-<p>以拼接select为例分析源码：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">   <span class="comment">//只接收一个参数就是拼接器，用来拼接字符</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> String <span class="title">selectSQL</span><span class="params">(SafeAppendable builder)</span> </span>&#123;</span><br><span class="line">   <span class="comment">//判断是否需要去重，如果需要就增加 DISTINCT关键字，而select为上图的属性，是一个集合里面存储着相应的值，下面几个参数类似不做赘述，下面会对sqlClause方法做详细解释。</span></span><br><span class="line">     <span class="keyword">if</span> (distinct) &#123;</span><br><span class="line">       sqlClause(builder, <span class="string">&quot;SELECT DISTINCT&quot;</span>, select, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       sqlClause(builder, <span class="string">&quot;SELECT&quot;</span>, select, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     sqlClause(builder, <span class="string">&quot;FROM&quot;</span>, tables, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     <span class="comment">//join语句比较特殊，所以单独创建函数，但是本质也是复用sqlClause函数</span></span><br><span class="line">     joins(builder);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;WHERE&quot;</span>, where, <span class="string">&quot;(&quot;</span>, <span class="string">&quot;)&quot;</span>, <span class="string">&quot; AND &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;GROUP BY&quot;</span>, groupBy, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;HAVING&quot;</span>, having, <span class="string">&quot;(&quot;</span>, <span class="string">&quot;)&quot;</span>, <span class="string">&quot; AND &quot;</span>);</span><br><span class="line">     sqlClause(builder, <span class="string">&quot;ORDER BY&quot;</span>, orderBy, <span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;, &quot;</span>);</span><br><span class="line">     <span class="comment">//利用LIMIT、OFFSET关键字做分页处理</span></span><br><span class="line">     limitingRowsStrategy.appendClause(builder, offset, limit);</span><br><span class="line">     <span class="keyword">return</span> builder.toString();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<p>下面是sqlClause 函数的代码：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//参数一：拼接器；参数二：关键字例如SELECT等等;参数三：sql所需值的集合；参数四和五：参数开始和结束字符 例如where语句需要括号括起来；参数六：参数连接字符例如 AND等等</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">sqlClause</span><span class="params">(SafeAppendable builder, String keyword, List&lt;String&gt; parts, String open, String close,String conjunction)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!parts.isEmpty()) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!builder.isEmpty()) &#123;</span><br><span class="line">      builder.append(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    builder.append(keyword);</span><br><span class="line">    builder.append(<span class="string">&quot; &quot;</span>);</span><br><span class="line">    builder.append(open);</span><br><span class="line">    String last = <span class="string">&quot;________&quot;</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>, n = parts.size(); i &lt; n; i++) &#123;</span><br><span class="line">      String part = parts.get(i);</span><br><span class="line">      <span class="keyword">if</span> (i &gt; <span class="number">0</span> &amp;&amp; !part.equals(AND) &amp;&amp; !part.equals(OR) &amp;&amp; !last.equals(AND) &amp;&amp; !last.equals(OR)) &#123;</span><br><span class="line">        builder.append(conjunction);</span><br><span class="line">      &#125;</span><br><span class="line">      builder.append(part);</span><br><span class="line">      last = part;</span><br><span class="line">    &#125;</span><br><span class="line">    builder.append(close);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="AbstractSQL"><a href="#AbstractSQL" class="headerlink" title="AbstractSQL"></a>AbstractSQL</h3><h4 id="3-4-1-简介"><a href="#3-4-1-简介" class="headerlink" title="3.4.1 简介"></a>3.4.1 简介</h4><p>如果理解了前面三个类的作用那理解此类的作用也就水到渠成了，下面看下此类封装的方法，可以看到所有方法都是以sql语句的关键词命名的</p>
-<p><img src="https://s2.loli.net/2021/12/05/nZctYG87sJqrvmK.png" alt="image-20201207221124727"></p>
-<h4 id="3-4-2-详解"><a href="#3-4-2-详解" class="headerlink" title="3.4.2 详解"></a>3.4.2 详解</h4><p>以SELECT方法为例，当使用如下方法时发生了什么？</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">new</span> SQL()</span><br><span class="line">              .SELECT(<span class="string">&quot;*&quot;</span>)</span><br><span class="line">              .FROM(<span class="string">&quot;user&quot;</span>)</span><br><span class="line">              .WHERE(<span class="string">&quot;schoolName = #&#123;schoolName&#125;&quot;</span>)</span><br><span class="line">              .toString();</span><br></pre></td></tr></table></figure>
-
-<p>当调用AbstractSQL里面封装的方法时其实都将传进来的值存储在了SQLStatement相应关键字的属性中，当最后调用toString方法时就会触发sql的拼接工作，所以可以理解为AbstractSQL是给SQLStatement类做了一层<strong>装饰器</strong>。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">SELECT</span><span class="params">(String columns)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//sql() 方法会返回SQLStatement类的一个实例</span></span><br><span class="line">    <span class="comment">//设置sql类别</span></span><br><span class="line">  sql().statementType = SQLStatement.StatementType.SELECT;</span><br><span class="line">    <span class="comment">//将传入的值存储到SQLStatement类的select属性中</span></span><br><span class="line">  sql().select.add(columns);</span><br><span class="line">    <span class="comment">//返回对象本身</span></span><br><span class="line">  <span class="keyword">return</span> getSelf();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>其他关键字方法的调用都是类似的，这里不再赘述，下面介绍一下<strong>如何触发拼接sql的操作</strong>：</p>
-<p>当调用toString方法时就会触发sql拼接操作，代码如下：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//创建一个字符拼接器</span></span><br><span class="line">  StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    <span class="comment">//调用SQLStatement类的sql方法，此方法会利用StringBuilder拼接sql</span></span><br><span class="line">  sql().sql(sb);</span><br><span class="line">    <span class="comment">//转化为字符串</span></span><br><span class="line">  <span class="keyword">return</span> sb.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//这个方法会根据sql的类型调用相应的拼接方法，而SELECT语句如何拼接的前文已经讲解过，大家可以按照此方法查看一下其他类型sql的拼接过程</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">sql</span><span class="params">(Appendable a)</span> </span>&#123;</span><br><span class="line">  SafeAppendable builder = <span class="keyword">new</span> SafeAppendable(a);</span><br><span class="line">  <span class="keyword">if</span> (statementType == <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  String answer;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">switch</span> (statementType) &#123;</span><br><span class="line">    <span class="keyword">case</span> DELETE:</span><br><span class="line">      answer = deleteSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> INSERT:</span><br><span class="line">      answer = insertSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> SELECT:</span><br><span class="line">      answer = selectSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> UPDATE:</span><br><span class="line">      answer = updateSQL(builder);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      answer = <span class="keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> answer;</span><br></pre></td></tr></table></figure>
-
-<p>这里有个细节，为什么AbstractSQL类中的方法都是大写的呢？ 我查阅了相关资料发现这是为了照顾大家写sql时的习惯。</p>
-<p>通过以上知识的学习我们就应该知道 Mybatis 是如何操作 sql 的了。</p>
+<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><ul>
+<li><p>1.1 反射型</p>
+<p>攻击者诱使用户点击一个嵌入恶意脚本的链接，达到攻击的目的</p>
+</li>
+<li><p>1.2 持久型</p>
+<p>黑客提交含有恶意脚本的请求，保存在被攻击的Web站点的数据库中，用户浏览网页时，恶意脚本被包含在正常页面中，达到攻击的目的</p>
+</li>
+</ul>
+<h3 id="防护手段"><a href="#防护手段" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
+<li><p>1.3消毒</p>
+<p>XSS攻击者一般都是通过在请求中嵌入恶意脚本达到攻击的目的，这些脚本是一般用户输入中不使用的，如果进行过滤和消毒处理，即对某些html危险字符转义就可以让绝大部分攻击失败</p>
+</li>
+<li><p>1.4HttpOnly</p>
+<p>浏览器禁止页面JavaScript访问带有HttpOnly属性的Cookie，可以防止Cookie中的数据被窃取</p>
+</li>
+</ul>
+<h2 id="2-注入攻击"><a href="#2-注入攻击" class="headerlink" title="2.注入攻击"></a>2.注入攻击</h2><h3 id="分类-1"><a href="#分类-1" class="headerlink" title="分类"></a>分类</h3><ul>
+<li><p>2.1 SQL注入攻击</p>
+<p>攻击者在HTTP请求中注入恶意SQL命令（drop table users;），服务器用请求参数构造数据库SQL命令时，恶意SQL被一起构造，并在数据库中执行。</p>
+</li>
+<li><p>2.2 OS注入攻击</p>
+</li>
+</ul>
+<h3 id="防护手段-1"><a href="#防护手段-1" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
+<li><p>2.3 消毒</p>
+<p>通过正则匹配，过滤请求数据中可能注入的SQL</p>
+</li>
+<li><p>2.4 参数绑定</p>
+<p>使用预编译手段，绑定参数是最好的防SQL注入方法。目前许多数据访问层框架，如IBatis，Hibernate等，都实现SQL预编译和参数绑定，攻击者的恶意SQL会被当做SQL的参数，而不是SQL命令被执行。</p>
+</li>
+</ul>
+<h2 id="3-CSRF攻击"><a href="#3-CSRF攻击" class="headerlink" title="3.CSRF攻击"></a>3.CSRF攻击</h2><p>攻击者通过跨站请求，以合法用户的身份进行非法操作，如转账交易、发表评论等；<br>CSRF的主要手法是利用跨站请求，在用户不知情的情况下，以用户的身份伪造请求。其核心是利用了浏览器Cookie或服务器Session策略，盗取用户身份。</p>
+<h3 id="防护手段-2"><a href="#防护手段-2" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
+<li><p>3.1 Token验证</p>
+<p>通过在请求参数中增加随机数的办法来阻止攻击者获得所有请求参数：在页面表单中增加一个随机数作为Token，每次响应页面的Token都不相同，从正常页面提交的请求会包含该Token值，而伪造的请求无法获得该值，服务器检查请求参数中Token的值是否存在并且正确以确定请求提交者是否合法</p>
+</li>
+<li><p>3.2 验证码</p>
+<p>验证码则更加简单有效；<br>请求提交时，需要用户输入验证码，以避免在用户不知情的情况下被攻击者伪造请求。但是输入验证码是一个糟糕的用户体验，所以请在必要时使用，</p>
+</li>
+<li><p>3.3 Referer check</p>
+<p>HTTP请求头的Referer域中记录着请求来源，可通过检查请求来源，验证其是否合法。</p>
+</li>
+</ul>
 ]]></content>
       <categories>
         <category>技术</category>
       </categories>
       <tags>
-        <tag>Mybatis</tag>
-        <tag>源码阅读</tag>
+        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
@@ -1504,60 +1561,27 @@
       </tags>
   </entry>
   <entry>
-    <title>常见的Web应用攻击手段</title>
-    <url>/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</url>
-    <content><![CDATA[<h2 id="1-XSS攻击"><a href="#1-XSS攻击" class="headerlink" title="1.XSS攻击"></a>1.XSS攻击</h2><p>XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。</p>
+    <title>指令详解-操作码</title>
+    <url>/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/</url>
+    <content><![CDATA[<h2 id="定长编码"><a href="#定长编码" class="headerlink" title="定长编码"></a>定长编码</h2><p>每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。<br>优点：计算机的硬件设计简单，朱令译码和执行速度快。<br>缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。<br>适用环境：适用于字长较长的计算机系统，如 32 位及以上。</p>
 <span id="more"></span>
 
-<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><ul>
-<li><p>1.1 反射型</p>
-<p>攻击者诱使用户点击一个嵌入恶意脚本的链接，达到攻击的目的</p>
-</li>
-<li><p>1.2 持久型</p>
-<p>黑客提交含有恶意脚本的请求，保存在被攻击的Web站点的数据库中，用户浏览网页时，恶意脚本被包含在正常页面中，达到攻击的目的</p>
-</li>
-</ul>
-<h3 id="防护手段"><a href="#防护手段" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
-<li><p>1.3消毒</p>
-<p>XSS攻击者一般都是通过在请求中嵌入恶意脚本达到攻击的目的，这些脚本是一般用户输入中不使用的，如果进行过滤和消毒处理，即对某些html危险字符转义就可以让绝大部分攻击失败</p>
-</li>
-<li><p>1.4HttpOnly</p>
-<p>浏览器禁止页面JavaScript访问带有HttpOnly属性的Cookie，可以防止Cookie中的数据被窃取</p>
-</li>
-</ul>
-<h2 id="2-注入攻击"><a href="#2-注入攻击" class="headerlink" title="2.注入攻击"></a>2.注入攻击</h2><h3 id="分类-1"><a href="#分类-1" class="headerlink" title="分类"></a>分类</h3><ul>
-<li><p>2.1 SQL注入攻击</p>
-<p>攻击者在HTTP请求中注入恶意SQL命令（drop table users;），服务器用请求参数构造数据库SQL命令时，恶意SQL被一起构造，并在数据库中执行。</p>
-</li>
-<li><p>2.2 OS注入攻击</p>
-</li>
-</ul>
-<h3 id="防护手段-1"><a href="#防护手段-1" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
-<li><p>2.3 消毒</p>
-<p>通过正则匹配，过滤请求数据中可能注入的SQL</p>
-</li>
-<li><p>2.4 参数绑定</p>
-<p>使用预编译手段，绑定参数是最好的防SQL注入方法。目前许多数据访问层框架，如IBatis，Hibernate等，都实现SQL预编译和参数绑定，攻击者的恶意SQL会被当做SQL的参数，而不是SQL命令被执行。</p>
-</li>
-</ul>
-<h2 id="3-CSRF攻击"><a href="#3-CSRF攻击" class="headerlink" title="3.CSRF攻击"></a>3.CSRF攻击</h2><p>攻击者通过跨站请求，以合法用户的身份进行非法操作，如转账交易、发表评论等；<br>CSRF的主要手法是利用跨站请求，在用户不知情的情况下，以用户的身份伪造请求。其核心是利用了浏览器Cookie或服务器Session策略，盗取用户身份。</p>
-<h3 id="防护手段-2"><a href="#防护手段-2" class="headerlink" title="防护手段"></a>防护手段</h3><ul>
-<li><p>3.1 Token验证</p>
-<p>通过在请求参数中增加随机数的办法来阻止攻击者获得所有请求参数：在页面表单中增加一个随机数作为Token，每次响应页面的Token都不相同，从正常页面提交的请求会包含该Token值，而伪造的请求无法获得该值，服务器检查请求参数中Token的值是否存在并且正确以确定请求提交者是否合法</p>
-</li>
-<li><p>3.2 验证码</p>
-<p>验证码则更加简单有效；<br>请求提交时，需要用户输入验证码，以避免在用户不知情的情况下被攻击者伪造请求。但是输入验证码是一个糟糕的用户体验，所以请在必要时使用，</p>
-</li>
-<li><p>3.3 Referer check</p>
-<p>HTTP请求头的Referer域中记录着请求来源，可通过检查请求来源，验证其是否合法。</p>
-</li>
-</ul>
+<p>如图：无论有几个地址码都不会影响操作码的长度。</p>
+<p><img src="https://s2.loli.net/2022/01/07/XzuvCTyoSpdbh2V.png" alt="image-20220107125003587"></p>
+<h2 id="变长编码"><a href="#变长编码" class="headerlink" title="变长编码"></a>变长编码</h2><p>每条指令的操作码的长度不是固定的，是可变的。之所以有变长编码是因为这会让系统更灵活，可以通过变动操作码的长度来保证地址码长度和指令长度不变。<br>如图：四地址指令和三地址指令的指令长度和地址码的长度是一样的。</p>
+<p><img src="https://s2.loli.net/2022/01/07/EyUX3z4txl7pV5c.png" alt="image-20220107125232359"></p>
+<p>优点：在拥有比较短的指令字长的系统中，既能表示出比较多的指令条数又能尽量满足操作数地址的要求。<br>缺点：计算机的硬件设计复杂，指令译码和执行速度较慢。<br>适用环境：适用于字长较短的计算机系统，如 16 位及以下。</p>
+<h3 id="扩展操作码"><a href="#扩展操作码" class="headerlink" title="扩展操作码"></a>扩展操作码</h3><p>为了保证不同类型指令的地址码和指令的长度不变，我们需要增加操作码的长度，这个操作就是扩展操作码。<br>例如现在有两条指令，一条是四地址指令，一条是三地址指令，下面是他们二进制数据的展示情况（为了把更多精力放在操作码上，地址码用 xxx 来表示）：</p>
+<p><img src="https://s2.loli.net/2022/01/07/O7QdwhIEz4ibgq8.png" alt="image-20220107125708122"></p>
+<p>看到上图的时候是不是还没察觉到问题？那么我们将图简化一下：</p>
+<p><img src="https://s2.loli.net/2022/01/07/AXLxmhVb4iF1nM5.png" alt="image-20220107125837964"></p>
+<p>看出来了吗？就是你无法分清这两条指令那条是三地址指令哪条是四地址指令。所以有了一个规定，短码不能是长码的前缀。<br>这个时候一般会预留出一个拓展窗口，例如减少一条四地址指令，让 1111 作为拓展窗口，让四地址指令的操作码最多取到 1110，这时如果你看到操作码是前四位是 1111 你就知道这个肯定不是四地址指令了，当然其他数量的地址指令通过类似的操作也可以解决这个问题，值得注意的是，拓展窗口不一定是一个，也可以是多个。</p>
 ]]></content>
       <categories>
         <category>技术</category>
       </categories>
       <tags>
-        <tag>架构</tag>
+        <tag>计算机原理</tag>
       </tags>
   </entry>
   <entry>
@@ -1618,35 +1642,6 @@
       </tags>
   </entry>
   <entry>
-    <title>指令详解-地址码</title>
-    <url>/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/</url>
-    <content><![CDATA[<h2 id="指令是什么："><a href="#指令是什么：" class="headerlink" title="指令是什么："></a>指令是什么：</h2><p>可以将指令当做一种编程语言，表现形式为一串二进制码，作用是能让计算机按照指令去工作。</p>
-<p>指令由两部分组成，操作码和地址码，下面我们着重看下<strong>地址码</strong>。</p>
-<span id="more"></span>
-
-<h2 id="操作码（OP）："><a href="#操作码（OP）：" class="headerlink" title="操作码（OP）："></a>操作码（OP）：</h2><p>用于表明这条指令的作用。</p>
-<h2 id="地址码（A）："><a href="#地址码（A）：" class="headerlink" title="地址码（A）："></a>地址码（A）：</h2><p>存储内存地址，用来寻找内存中的数据。</p>
-<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><p>根据地址码的数量进行分类。</p>
-<h4 id="四地址指令"><a href="#四地址指令" class="headerlink" title="四地址指令"></a>四地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/XkvMpVyrgucfNla.png" alt="image-20220106100336187"></p>
-<p>其中A1 第一个操作数的地址、A2 第二个操作数的地址、A3 保存计算结果、A4 下一条待执行指令的地址。<br>公式：（A1）OP （A2）—&gt; A3； A4 指向下一条指令。<br>特点：表意直观，可以明确指出下一条指令的地址，但是长度太大，实际应用中很少采用这种格式。</p>
-<h4 id="三地址指令"><a href="#三地址指令" class="headerlink" title="三地址指令"></a>三地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/e6oJ41ltTj7Kv3y.png" alt="image-20220106100731815"></p>
-<p>其中A1 第一个操作数的地址、A2 第二个操作数的地址、A3 保存计算结果</p>
-<p>公式：（A1）OP （A2）—&gt; A3。<br>这里是没有存储下一条指令的地址，因为指令都是顺序排布的，所以默认下一条指令地址为 （PC）+1 —&gt; PC 。 PC 为程序计数器。<br>特点：指令长度太长，执行一次指令要四次访存，取指令一次，取操作数两次，存结果一次，操作数不会被破坏，因为会用一个单独的地址存储计算结果。</p>
-<h4 id="二地址指令"><a href="#二地址指令" class="headerlink" title="二地址指令"></a>二地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/6pStYCkeoOlqy2u.png" alt="image-20220106101015294"></p>
-<p>用其中一个地址码来保存结果，公式：（A1）OP （A2）—&gt; A1。（PC）+1 —&gt; PC。<br>特点：执行一次指令要四次访存，取指令一次，取操作数两次，存结果一次。执行完成后计算结果会覆盖一个操作数，所以操作数会被破坏。</p>
-<h4 id="一地址指令"><a href="#一地址指令" class="headerlink" title="一地址指令"></a>一地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/rBALognIxNdZEjK.png" alt="image-20220106101121663"></p>
-<p>一般用于累加计算器（Acc），公式：（Acc）OP （A1） —&gt; Acc。（PC）+1 —&gt; PC。<br>特点：执行一次指令只需访存两次，取指令一次，取操作数一次。被操作数和运算结果都放在累加寄存器中，所以对于被操作数的读取和存入都不需要访存。</p>
-<h4 id="零地址指令"><a href="#零地址指令" class="headerlink" title="零地址指令"></a>零地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/EmJ8D2pGORQ4K9n.png" alt="image-20220106101425810"></p>
-<p>特点：一般运用于堆栈计算机中，参与运算的操作数从栈顶弹出，运算后将结果压入堆栈中。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>计算机原理</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>网站典型故障案例</title>
     <url>/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/</url>
     <content><![CDATA[<h2 id="1-写日志也会引发故障"><a href="#1-写日志也会引发故障" class="headerlink" title="1.写日志也会引发故障"></a>1.写日志也会引发故障</h2><h3 id="故障现象"><a href="#故障现象" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用服务器在项目发布后不久就出现报警，硬盘可用空间低于警戒值，并且很快就宕机。登录到线上服务器，发现log文件夹里的文件迅速增加，不断消耗磁盘空间。</p>
@@ -1676,21 +1671,26 @@
       </tags>
   </entry>
   <entry>
-    <title>指令详解-操作码</title>
-    <url>/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/</url>
-    <content><![CDATA[<h2 id="定长编码"><a href="#定长编码" class="headerlink" title="定长编码"></a>定长编码</h2><p>每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。<br>优点：计算机的硬件设计简单，朱令译码和执行速度快。<br>缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。<br>适用环境：适用于字长较长的计算机系统，如 32 位及以上。</p>
+    <title>指令详解-地址码</title>
+    <url>/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/</url>
+    <content><![CDATA[<h2 id="指令是什么："><a href="#指令是什么：" class="headerlink" title="指令是什么："></a>指令是什么：</h2><p>可以将指令当做一种编程语言，表现形式为一串二进制码，作用是能让计算机按照指令去工作。</p>
+<p>指令由两部分组成，操作码和地址码，下面我们着重看下<strong>地址码</strong>。</p>
 <span id="more"></span>
 
-<p>如图：无论有几个地址码都不会影响操作码的长度。</p>
-<p><img src="https://s2.loli.net/2022/01/07/XzuvCTyoSpdbh2V.png" alt="image-20220107125003587"></p>
-<h2 id="变长编码"><a href="#变长编码" class="headerlink" title="变长编码"></a>变长编码</h2><p>每条指令的操作码的长度不是固定的，是可变的。之所以有变长编码是因为这会让系统更灵活，可以通过变动操作码的长度来保证地址码长度和指令长度不变。<br>如图：四地址指令和三地址指令的指令长度和地址码的长度是一样的。</p>
-<p><img src="https://s2.loli.net/2022/01/07/EyUX3z4txl7pV5c.png" alt="image-20220107125232359"></p>
-<p>优点：在拥有比较短的指令字长的系统中，既能表示出比较多的指令条数又能尽量满足操作数地址的要求。<br>缺点：计算机的硬件设计复杂，指令译码和执行速度较慢。<br>适用环境：适用于字长较短的计算机系统，如 16 位及以下。</p>
-<h3 id="扩展操作码"><a href="#扩展操作码" class="headerlink" title="扩展操作码"></a>扩展操作码</h3><p>为了保证不同类型指令的地址码和指令的长度不变，我们需要增加操作码的长度，这个操作就是扩展操作码。<br>例如现在有两条指令，一条是四地址指令，一条是三地址指令，下面是他们二进制数据的展示情况（为了把更多精力放在操作码上，地址码用 xxx 来表示）：</p>
-<p><img src="https://s2.loli.net/2022/01/07/O7QdwhIEz4ibgq8.png" alt="image-20220107125708122"></p>
-<p>看到上图的时候是不是还没察觉到问题？那么我们将图简化一下：</p>
-<p><img src="https://s2.loli.net/2022/01/07/AXLxmhVb4iF1nM5.png" alt="image-20220107125837964"></p>
-<p>看出来了吗？就是你无法分清这两条指令那条是三地址指令哪条是四地址指令。所以有了一个规定，短码不能是长码的前缀。<br>这个时候一般会预留出一个拓展窗口，例如减少一条四地址指令，让 1111 作为拓展窗口，让四地址指令的操作码最多取到 1110，这时如果你看到操作码是前四位是 1111 你就知道这个肯定不是四地址指令了，当然其他数量的地址指令通过类似的操作也可以解决这个问题，值得注意的是，拓展窗口不一定是一个，也可以是多个。</p>
+<h2 id="操作码（OP）："><a href="#操作码（OP）：" class="headerlink" title="操作码（OP）："></a>操作码（OP）：</h2><p>用于表明这条指令的作用。</p>
+<h2 id="地址码（A）："><a href="#地址码（A）：" class="headerlink" title="地址码（A）："></a>地址码（A）：</h2><p>存储内存地址，用来寻找内存中的数据。</p>
+<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><p>根据地址码的数量进行分类。</p>
+<h4 id="四地址指令"><a href="#四地址指令" class="headerlink" title="四地址指令"></a>四地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/XkvMpVyrgucfNla.png" alt="image-20220106100336187"></p>
+<p>其中A1 第一个操作数的地址、A2 第二个操作数的地址、A3 保存计算结果、A4 下一条待执行指令的地址。<br>公式：（A1）OP （A2）—&gt; A3； A4 指向下一条指令。<br>特点：表意直观，可以明确指出下一条指令的地址，但是长度太大，实际应用中很少采用这种格式。</p>
+<h4 id="三地址指令"><a href="#三地址指令" class="headerlink" title="三地址指令"></a>三地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/e6oJ41ltTj7Kv3y.png" alt="image-20220106100731815"></p>
+<p>其中A1 第一个操作数的地址、A2 第二个操作数的地址、A3 保存计算结果</p>
+<p>公式：（A1）OP （A2）—&gt; A3。<br>这里是没有存储下一条指令的地址，因为指令都是顺序排布的，所以默认下一条指令地址为 （PC）+1 —&gt; PC 。 PC 为程序计数器。<br>特点：指令长度太长，执行一次指令要四次访存，取指令一次，取操作数两次，存结果一次，操作数不会被破坏，因为会用一个单独的地址存储计算结果。</p>
+<h4 id="二地址指令"><a href="#二地址指令" class="headerlink" title="二地址指令"></a>二地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/6pStYCkeoOlqy2u.png" alt="image-20220106101015294"></p>
+<p>用其中一个地址码来保存结果，公式：（A1）OP （A2）—&gt; A1。（PC）+1 —&gt; PC。<br>特点：执行一次指令要四次访存，取指令一次，取操作数两次，存结果一次。执行完成后计算结果会覆盖一个操作数，所以操作数会被破坏。</p>
+<h4 id="一地址指令"><a href="#一地址指令" class="headerlink" title="一地址指令"></a>一地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/rBALognIxNdZEjK.png" alt="image-20220106101121663"></p>
+<p>一般用于累加计算器（Acc），公式：（Acc）OP （A1） —&gt; Acc。（PC）+1 —&gt; PC。<br>特点：执行一次指令只需访存两次，取指令一次，取操作数一次。被操作数和运算结果都放在累加寄存器中，所以对于被操作数的读取和存入都不需要访存。</p>
+<h4 id="零地址指令"><a href="#零地址指令" class="headerlink" title="零地址指令"></a>零地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/EmJ8D2pGORQ4K9n.png" alt="image-20220106101425810"></p>
+<p>特点：一般运用于堆栈计算机中，参与运算的操作数从栈顶弹出，运算后将结果压入堆栈中。</p>
 ]]></content>
       <categories>
         <category>技术</category>
@@ -2024,27 +2024,6 @@
       </tags>
   </entry>
   <entry>
-    <title>项目如何分包</title>
-    <url>/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</url>
-    <content><![CDATA[<p>在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。</p>
-<span id="more"></span>
-
-<h2 id="1、按照类型方式划分"><a href="#1、按照类型方式划分" class="headerlink" title="1、按照类型方式划分"></a>1、按照类型方式划分</h2><p>例如将所有的接口放入一个包、Controller类放入一个包等等。</p>
-<p>优点：从类型看更为清晰</p>
-<p>缺点：不利于模块化开发，因为会将同一个功能的多个类分散在不同的包中</p>
-<h2 id="2、按照功能方式划分"><a href="#2、按照功能方式划分" class="headerlink" title="2、按照功能方式划分"></a>2、按照功能方式划分</h2><p>将同一个功能的所有类放在同一个包中。</p>
-<p>优点：高内聚，便于模块化开发</p>
-<p>缺点：同一包内类型混乱</p>
-<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>将功能耦合度高的类按照功能进行划分，而功能耦合度低的或者供多个功能使用的类按照类型进行划分。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>虚拟机类加载机制</title>
     <url>/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/</url>
     <content><![CDATA[<p>java虚拟机把描述类的数据从Class文件加载到内存，并堆数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这个过程被称作虚拟机的类加载机制</p>
@@ -2217,6 +2196,27 @@
       <tags>
         <tag>Jvm</tag>
         <tag>类加载</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>项目如何分包</title>
+    <url>/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</url>
+    <content><![CDATA[<p>在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。</p>
+<span id="more"></span>
+
+<h2 id="1、按照类型方式划分"><a href="#1、按照类型方式划分" class="headerlink" title="1、按照类型方式划分"></a>1、按照类型方式划分</h2><p>例如将所有的接口放入一个包、Controller类放入一个包等等。</p>
+<p>优点：从类型看更为清晰</p>
+<p>缺点：不利于模块化开发，因为会将同一个功能的多个类分散在不同的包中</p>
+<h2 id="2、按照功能方式划分"><a href="#2、按照功能方式划分" class="headerlink" title="2、按照功能方式划分"></a>2、按照功能方式划分</h2><p>将同一个功能的所有类放在同一个包中。</p>
+<p>优点：高内聚，便于模块化开发</p>
+<p>缺点：同一包内类型混乱</p>
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>将功能耦合度高的类按照功能进行划分，而功能耦合度低的或者供多个功能使用的类按照类型进行划分。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
