@@ -21,31 +21,25 @@
     var CONFIG = {"hostname":"biyw.cf","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="数据寻址简单来说就是根据地址码取数据。 指令中通常会增加一个寻址特征字段，这个字段就是告诉操作系统如何取数据的，如图：因为不同寻址方式的实现不同，所以地址码中存储的并不一定是真实的数据地址，所以这里用形式地址代替。  根据寻址特征的不同通常将寻址方式分为以下几类。">
+  <meta name="description" content="什么是表空间表空间是 Mysql 的一个抽象概念，在你新建一个表的时候，Mysql （5.7 + 版本）会为这个表创建一个后缀为 ibd 的文件，这个文件的名字就是表空间，构成表空间的最小单位就是页，所以表空间是实际存储索引和用户数据的地方。因为一个页最多 16k 大小，所以一个表空间拥有页的数量会特别巨大，为了更方便的对页进行管理，Mysql 的作者发明了区的概念。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="指令详解-寻址方式">
-<meta property="og:url" content="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/index.html">
+<meta property="og:title" content="Mysql-InnoDB表空间详解">
+<meta property="og:url" content="https://biyw.cf/Mysql-InnoDB%E8%A1%A8%E7%A9%BA%E9%97%B4%E8%AF%A6%E8%A7%A3/index.html">
 <meta property="og:site_name" content="byw的博客">
-<meta property="og:description" content="数据寻址简单来说就是根据地址码取数据。 指令中通常会增加一个寻址特征字段，这个字段就是告诉操作系统如何取数据的，如图：因为不同寻址方式的实现不同，所以地址码中存储的并不一定是真实的数据地址，所以这里用形式地址代替。  根据寻址特征的不同通常将寻址方式分为以下几类。">
+<meta property="og:description" content="什么是表空间表空间是 Mysql 的一个抽象概念，在你新建一个表的时候，Mysql （5.7 + 版本）会为这个表创建一个后缀为 ibd 的文件，这个文件的名字就是表空间，构成表空间的最小单位就是页，所以表空间是实际存储索引和用户数据的地方。因为一个页最多 16k 大小，所以一个表空间拥有页的数量会特别巨大，为了更方便的对页进行管理，Mysql 的作者发明了区的概念。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://s2.loli.net/2022/01/08/buwDO8aYx3I5npg.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/08/v6yKge7ZaRG1bDd.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/08/KwNxtdfUGmeLM39.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/08/l4BnqWbNGPe51tQ.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/08/8TuMsyR91XzCieU.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/08/UQka8cPq9oByJDz.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/08/k7enaVYZXgcFsOx.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/08/wZb5iAOKRzcMBJt.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/08/N1e3ZTXhdYQ9OBg.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/08/DajzUl8HvnG1JE6.png">
-<meta property="article:published_time" content="2022-01-08T05:50:35.000Z">
-<meta property="article:modified_time" content="2022-01-08T14:41:49.860Z">
+<meta property="og:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203112524580.png">
+<meta property="og:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203115239807.png">
+<meta property="og:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203124353554.png">
+<meta property="og:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203130935197.png">
+<meta property="article:published_time" content="2022-02-03T02:42:51.000Z">
+<meta property="article:modified_time" content="2022-02-03T05:14:54.192Z">
 <meta property="article:author" content="Byw">
-<meta property="article:tag" content="计算机原理">
+<meta property="article:tag" content="Mysql">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://s2.loli.net/2022/01/08/buwDO8aYx3I5npg.png">
+<meta name="twitter:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203112524580.png">
 
-<link rel="canonical" href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/">
+<link rel="canonical" href="https://biyw.cf/Mysql-InnoDB%E8%A1%A8%E7%A9%BA%E9%97%B4%E8%AF%A6%E8%A7%A3/">
 
 
 <script id="page-configurations">
@@ -58,7 +52,7 @@
   };
 </script>
 
-  <title>指令详解-寻址方式 | byw的博客</title>
+  <title>Mysql-InnoDB表空间详解 | byw的博客</title>
   
 
 
@@ -215,7 +209,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/">
+    <link itemprop="mainEntityOfPage" href="https://biyw.cf/Mysql-InnoDB%E8%A1%A8%E7%A9%BA%E9%97%B4%E8%AF%A6%E8%A7%A3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tx.jpg">
@@ -228,7 +222,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          指令详解-寻址方式
+          Mysql-InnoDB表空间详解
         </h1>
 
         <div class="post-meta">
@@ -239,7 +233,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-01-08 13:50:35 / 修改时间：22:41:49" itemprop="dateCreated datePublished" datetime="2022-01-08T13:50:35+08:00">2022-01-08</time>
+              <time title="创建时间：2022-02-03 10:42:51 / 修改时间：13:14:54" itemprop="dateCreated datePublished" datetime="2022-02-03T10:42:51+08:00">2022-02-03</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -264,14 +258,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.3k</span>
+              <span>1.9k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
+              <span>3 分钟</span>
             </span>
 
         </div>
@@ -283,52 +277,38 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="数据寻址"><a href="#数据寻址" class="headerlink" title="数据寻址"></a>数据寻址</h2><p>简单来说就是根据地址码取数据。</p>
-<p>指令中通常会增加一个寻址特征字段，这个字段就是告诉操作系统如何取数据的，如图：因为不同寻址方式的实现不同，所以地址码中存储的并不一定是真实的数据地址，所以这里用形式地址代替。</p>
-<p><img src="https://s2.loli.net/2022/01/08/buwDO8aYx3I5npg.png" alt="image-20220108103344939"></p>
-<p>根据寻址特征的不同通常将寻址方式分为以下几类。</p>
+        <h2 id="什么是表空间"><a href="#什么是表空间" class="headerlink" title="什么是表空间"></a>什么是表空间</h2><p>表空间是 Mysql 的一个抽象概念，在你新建一个表的时候，Mysql （5.7 + 版本）会为这个表创建一个后缀为 ibd 的文件，这个文件的名字就是表空间，构成表空间的最小单位就是页，所以表空间是实际存储索引和用户数据的地方。因为一个页最多 16k 大小，所以一个表空间拥有页的数量会特别巨大，为了更方便的对页进行管理，Mysql 的作者发明了<code>区</code>的概念。</p>
 <span id="more"></span>
 
-<h3 id="立即寻址特征"><a href="#立即寻址特征" class="headerlink" title="立即寻址特征"></a>立即寻址特征</h3><p>定义：地址码存的就是操作数本身。</p>
-<p><img src="https://s2.loli.net/2022/01/08/v6yKge7ZaRG1bDd.png" alt="image-20220108111245946"></p>
-<h3 id="直接寻址特征"><a href="#直接寻址特征" class="headerlink" title="直接寻址特征"></a>直接寻址特征</h3><p>定义：地址码存储的是操作数的内存地址。</p>
-<p><img src="https://s2.loli.net/2022/01/08/KwNxtdfUGmeLM39.png" alt="image-20220108111313336"></p>
-<h3 id="隐含寻址特性"><a href="#隐含寻址特性" class="headerlink" title="隐含寻址特性"></a>隐含寻址特性</h3><p>定义：运算所需的操作数地址并没有都存储在指令中。</p>
-<p>例如，单地址指令中就不是明显地在地址字段中指出第二操作数的地址，而是规定累加器ACC作为第二操作数，指令格式明显指出的仅是第一操作数的地址。因此，累加器ACC对单地址指令格式来说是隐含地址。</p>
-<p><img src="https://s2.loli.net/2022/01/08/l4BnqWbNGPe51tQ.png" alt="image-20220108111457917"></p>
-<h3 id="间接寻址特性"><a href="#间接寻址特性" class="headerlink" title="间接寻址特性"></a>间接寻址特性</h3><p>定义：操作数需要通过其他指令中存储的地址得到。</p>
-<p>如图所示，指令中的形式地址 A 存储着 EA 操作数的地址，通过这个地址才能间接的找到 EA 的操作数。</p>
-<p><img src="https://s2.loli.net/2022/01/08/8TuMsyR91XzCieU.png" alt="image-20220108112320965"></p>
-<p>ps: 间接地址可以有多个，简单说可能需要多次跳转才能找到 EA 这个操作数。</p>
-<h3 id="寄存器间接寻址特征"><a href="#寄存器间接寻址特征" class="headerlink" title="寄存器间接寻址特征"></a>寄存器间接寻址特征</h3><p>定义：地址码中存储着寄存器的编号，指令所需的操作数的地址存储在寄存器中。</p>
-<p>如图 ：需要先根据地址码中的寄存器地址找到寄存器，之后才能根据寄存器中存储的操作数地址找到操作数。</p>
-<p><img src="https://s2.loli.net/2022/01/08/UQka8cPq9oByJDz.png" alt="image-20220108121433750"></p>
-<h3 id="基址寻址特征"><a href="#基址寻址特征" class="headerlink" title="基址寻址特征"></a>基址寻址特征</h3><p>定义：由一个寄存器存储一个基础内存地址，然后指令中的地址码存储着一个基于基础内存地址的偏移量，真实的操作数地址等于基础内存地址加上偏移量。</p>
-<p>如图，需要在指令中维护一个寄存器的地址，寻址的时候先从寄存器中拿到基础内存地址，然后再加上内存地址的偏移量，就可以找到操作数了。</p>
-<p><img src="https://s2.loli.net/2022/01/08/k7enaVYZXgcFsOx.png" alt="image-20220108122536632"></p>
-<p>特点如下：</p>
-<ul>
-<li>可扩大寻址范围（基础内存地址的位数大于形式地址的位数）；</li>
-<li>用户不必考虑自己的程序存于主存的哪一空间区域；</li>
-<li>基础内存地址由操作系统维护，用户只能更改形式地址；</li>
+<h2 id="区"><a href="#区" class="headerlink" title="区"></a>区</h2><p>区的作用就是为了更方便的管理表空间中的页，表空间会被划分成很多连续的区，一个区由 64 个页构成，大小为 1M。256个区被划分为一组，每组的第一个区的前几个页的类型是固定了，为了方便存储一些全局数据，后续会展开讲解。</p>
+<h3 id="区的分类"><a href="#区的分类" class="headerlink" title="区的分类"></a>区的分类</h3><ul>
+<li>空闲的区：表示区内没有存储任何数据。</li>
+<li>有剩余空间的碎片区：已经存有数据，但是还可以继续存储数据的区。</li>
+<li>没有剩余空间的碎片区：已经不能继续存储数据了。</li>
+<li>附属于某个段的区：这个后面详细讲。</li>
 </ul>
-<h3 id="变址寻址特征"><a href="#变址寻址特征" class="headerlink" title="变址寻址特征"></a>变址寻址特征</h3><p>与基址寻址特别相像，最大的不同是内存地址的偏移量是不变的，可变基础内存地址是可变的。</p>
-<p><img src="https://s2.loli.net/2022/01/08/wZb5iAOKRzcMBJt.png" alt="image-20220108123738283"></p>
-<p>特点：</p>
-<ul>
-<li>可扩大寻址范围（基础内存地址的位数大于形式地址的位数）；</li>
-<li>方便处理数组问题和循环程序。例如形式地址 A 为数组的首地址，通过不断改变可变基础地址就能够很容易形成数组中任意数据的地址。</li>
-</ul>
-<h3 id="相对寻址特征"><a href="#相对寻址特征" class="headerlink" title="相对寻址特征"></a>相对寻址特征</h3><p>相对寻址是把程序计数器PC的内容加上指令格式中的形式地址A而形成操作数的有效地址。</p>
-<p><img src="https://s2.loli.net/2022/01/08/N1e3ZTXhdYQ9OBg.png" alt="image-20220108222644952"></p>
-<p>优点：相对寻址的优点是操作数的地址不是固定的，它随着PC的值得变化而变化，并且与指令地址之间总是相差一个固定值，因此便于程序浮动，相对寻址广泛应用于转移指令。</p>
-<h3 id="堆栈寻址特征"><a href="#堆栈寻址特征" class="headerlink" title="堆栈寻址特征"></a>堆栈寻址特征</h3><p>堆栈是存储器（或专用寄存器组）中一块特定的按“先进后出（LIFO）”原则管理的存储区，该存储区中被读、写单元的地址是用特定的寄存器给出的，该寄存器称为堆栈指针（SP）。堆栈可分为硬堆栈和软堆栈两种。</p>
-<p>寄存器堆栈又称为<strong>硬堆栈</strong>。寄存器堆栈的成本比较高，不适合做大容量的堆栈；而从主存中划出一段区域来做堆栈是最合算且最常用的方法，这种堆栈称为<strong>软堆栈</strong>。</p>
-<p>在采用堆栈结构的计算机系统中，大部分指令表面上都表现为为无操作数指令的形式，因为操作数地址都隐含使用了SP。通常情况下，在读写堆栈中的一个单元的前后都伴有自动完成对SP内容的增量或减量操作。</p>
-<p><img src="https://s2.loli.net/2022/01/08/DajzUl8HvnG1JE6.png" alt="image-20220108223757637"></p>
-<h2 id="指令寻址"><a href="#指令寻址" class="headerlink" title="指令寻址"></a>指令寻址</h2><p>执行完当前指令之后，如何寻找下一条指令的地址。</p>
-<h3 id="顺序寻址"><a href="#顺序寻址" class="headerlink" title="顺序寻址"></a>顺序寻址</h3><p>当前指令的地址加一就是下一条指令的地址。</p>
-<h3 id="跳跃寻址"><a href="#跳跃寻址" class="headerlink" title="跳跃寻址"></a>跳跃寻址</h3><p>下一条指令的地址由本条指令的地址码给出。</p>
+<h3 id="存储区的数据结构"><a href="#存储区的数据结构" class="headerlink" title="存储区的数据结构"></a>存储区的数据结构</h3><p>为了方便对区进行操作，Mysql 的作者为其设计了一个特殊的数据结构，名字叫 XDES Entry。总共由四个部分组成，如图：</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203112524580.png" alt="image-20220203112524580" style="zoom:67%;" />
+
+<p>上一节我们说<code>区</code>分了四个种类，所以在写入数据的时候要先写入到<code>有剩余空间的碎片区</code>中，如果已经没有碎片区可以用了，那再去<code>空闲的区</code>申请空间。那现在问题来了，<strong>表空间这么大如何快速找到不同种类的区呢？</strong></p>
+<h3 id="如何快速找到不同种类的区"><a href="#如何快速找到不同种类的区" class="headerlink" title="如何快速找到不同种类的区"></a>如何快速找到不同种类的区</h3><p>答案是利用 XDES Entry 的 List Node 字段，<strong>表空间会利用这个字段形成三个表空间的链表</strong>，这三个链表的类型分别是：Free (空闲的区)、FreeFrag （有空闲的碎片区）、FullFrag （没有空闲的碎片区）。当要写入数据的时候就先找到 FreeFrag 类型的区，如果将这个区的剩余空间都用完了，就将这个区挂载到 FullFrag 链表中，然后从 Free 中拿到一个节点挂载到 FreeFrag 中继续写入数据。链表的样子大概如下图所示：</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203115239807.png" alt="image-20220203115239807" style="zoom:70%;" />
+
+<p><strong>现在问题又来了，如何找到这三种类型的链表呢？</strong> </p>
+<h4 id="如何找到不同类型的链表"><a href="#如何找到不同类型的链表" class="headerlink" title="如何找到不同类型的链表"></a>如何找到不同类型的链表</h4><p>为了解决这个问题，Mysql 的作者设计了名为 LisiBaseNode 的数据结构，这个数据结构存储着链表的<strong>头结点、尾结点和链表总共有多少个节点的信息。</strong>并将 LisiBaseNode <strong>存储在表空间的第一个页中</strong>，这个页的页号为 0 ，类型为 FSP_HDR，也是表空间分组中的第一组的第一个区的第一个页。这样就可以在表空间中快速找到不同类型的区啦~~。</p>
+<h2 id="段"><a href="#段" class="headerlink" title="段"></a>段</h2><p>段是由区和单独的页构成的。<strong>段的主要作用就是为了增加表空间读写数据的性能</strong>，因为表空间可能特别大，所以区与区之间可能距离特别远，当 Mysql 批量操作数据的时候就需要跨越很远的距离去查找数据，这种情况叫做<code>随机 IO</code>这是很慢的，而段的特点是会分配一段连续的内存空间在这段空间内再创建区，这样区与区的距离就不会特别远，可以达到<code>顺序 IO</code>的效果，可以极大的增加数据库的性能。</p>
+<p>我们都知道 B+ 树有叶子节点和非叶子节点的区别，为了进一步增加数据库性能，<strong>就让叶子节点和非叶子节点分别创建各自的段。</strong></p>
+<p><strong>如何区分一个段是属于叶子节点还是非叶子节点的呢？</strong>其实<code>段</code>是由专门的页结构存储的，而这个页的 Page Header 就会标注清楚哪些段是叶子节点的，哪些是非叶子节点的。</p>
+<h3 id="存储段的数据结构"><a href="#存储段的数据结构" class="headerlink" title="存储段的数据结构"></a>存储段的数据结构</h3><p>为了方便对<code>段</code>进行管理，Mysql 的作者设计了一个特殊的数据结构用来存储段的信息，这个数据结构叫做 INODE ENtity ，结构如下图所示：</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203124353554.png" alt="image-20220203124353554" style="zoom:67%;" />
+
+<p>下面对结构进行详细的解释。</p>
+<h4 id="List-Base-Node"><a href="#List-Base-Node" class="headerlink" title="List Base Node"></a>List Base Node</h4><p>为了能够快速分辨哪些段还可以继续写入数据，哪些段已经满了，Mysql 的设计者也对段进行了与区相同的分类，分为 Free(空闲)、NotFull(有一些数据，但是还可以继续写入)、Full(已经完全满了)。同样为了方便快速定位不同类型的链表设计者直接将三种类型链表的 ListBaseNode 节点放在了段的数据结构中。</p>
+<h4 id="Fragement-Array-Entry"><a href="#Fragement-Array-Entry" class="headerlink" title="Fragement Array Entry"></a>Fragement Array Entry</h4><p>你可能有因为，为什么段中还直接保存页呀？不是应该只保存区吗？<strong>这么做是为了更好的利用存储空间</strong>，段默认会分配 1M 大小，如果不够可以继续增加，但是如果你的数据特别少也用 1M 是不是就太浪费空间了呀？所以，设计者们提出了<code>碎片区</code>的概念，这个区内的页可以属于任何段，只有一个段占用的碎片区达到一定大小的时候才会分配一个完整区给这个段，这样可以更高效的利用存储空间。</p>
+<h3 id="INODE-ENtity-存储在什么地方"><a href="#INODE-ENtity-存储在什么地方" class="headerlink" title="INODE ENtity 存储在什么地方"></a>INODE ENtity 存储在什么地方</h3><p> INODE ENtity  也存储在页中，这个页位于表空间第一个分组的第一个区的第三个页中存储着所有 INODE ENtity 的基础信息（也可能是链表，因为有可能一个页无法存储所有段的基础信息）。这个页的类型为 INODE。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>为了方便大家理解，下面用一个图来表示表空间、区分组、区、段这些信息是如何存储的。</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203130935197.png" alt="image-20220203130935197" style="zoom:67%;" />
+
 
     </div>
 
@@ -344,7 +324,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/" title="指令详解-寻址方式">https://biyw.cf/指令详解-寻址方式/</a>
+    <a href="https://biyw.cf/Mysql-InnoDB%E8%A1%A8%E7%A9%BA%E9%97%B4%E8%AF%A6%E8%A7%A3/" title="Mysql-InnoDB表空间详解">https://biyw.cf/Mysql-InnoDB表空间详解/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -355,7 +335,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/" rel="tag"># 计算机原理</a>
+              <a href="/tags/Mysql/" rel="tag"># Mysql</a>
           </div>
 
         
@@ -364,13 +344,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/" rel="prev" title="指令详解-操作码">
-      <i class="fa fa-chevron-left"></i> 指令详解-操作码
+    <a href="/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/" rel="prev" title="Mysql-InnoDB索引详解">
+      <i class="fa fa-chevron-left"></i> Mysql-InnoDB索引详解
     </a></div>
-      <div class="post-nav-item">
-    <a href="/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="next" title="位运算学习笔记">
-      位运算学习笔记 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -430,7 +407,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%AF%BB%E5%9D%80"><span class="nav-number">1.</span> <span class="nav-text">数据寻址</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AB%8B%E5%8D%B3%E5%AF%BB%E5%9D%80%E7%89%B9%E5%BE%81"><span class="nav-number">1.1.</span> <span class="nav-text">立即寻址特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B4%E6%8E%A5%E5%AF%BB%E5%9D%80%E7%89%B9%E5%BE%81"><span class="nav-number">1.2.</span> <span class="nav-text">直接寻址特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%90%E5%90%AB%E5%AF%BB%E5%9D%80%E7%89%B9%E6%80%A7"><span class="nav-number">1.3.</span> <span class="nav-text">隐含寻址特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%B4%E6%8E%A5%E5%AF%BB%E5%9D%80%E7%89%B9%E6%80%A7"><span class="nav-number">1.4.</span> <span class="nav-text">间接寻址特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E9%97%B4%E6%8E%A5%E5%AF%BB%E5%9D%80%E7%89%B9%E5%BE%81"><span class="nav-number">1.5.</span> <span class="nav-text">寄存器间接寻址特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E5%9D%80%E5%AF%BB%E5%9D%80%E7%89%B9%E5%BE%81"><span class="nav-number">1.6.</span> <span class="nav-text">基址寻址特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E5%9D%80%E5%AF%BB%E5%9D%80%E7%89%B9%E5%BE%81"><span class="nav-number">1.7.</span> <span class="nav-text">变址寻址特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%AF%B9%E5%AF%BB%E5%9D%80%E7%89%B9%E5%BE%81"><span class="nav-number">1.8.</span> <span class="nav-text">相对寻址特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%86%E6%A0%88%E5%AF%BB%E5%9D%80%E7%89%B9%E5%BE%81"><span class="nav-number">1.9.</span> <span class="nav-text">堆栈寻址特征</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%87%E4%BB%A4%E5%AF%BB%E5%9D%80"><span class="nav-number">2.</span> <span class="nav-text">指令寻址</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%BA%E5%BA%8F%E5%AF%BB%E5%9D%80"><span class="nav-number">2.1.</span> <span class="nav-text">顺序寻址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%B3%E8%B7%83%E5%AF%BB%E5%9D%80"><span class="nav-number">2.2.</span> <span class="nav-text">跳跃寻址</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%A1%A8%E7%A9%BA%E9%97%B4"><span class="nav-number">1.</span> <span class="nav-text">什么是表空间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8C%BA"><span class="nav-number">2.</span> <span class="nav-text">区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%BA%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">2.1.</span> <span class="nav-text">区的分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E5%8C%BA%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">2.2.</span> <span class="nav-text">存储区的数据结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E6%89%BE%E5%88%B0%E4%B8%8D%E5%90%8C%E7%A7%8D%E7%B1%BB%E7%9A%84%E5%8C%BA"><span class="nav-number">2.3.</span> <span class="nav-text">如何快速找到不同种类的区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%89%BE%E5%88%B0%E4%B8%8D%E5%90%8C%E7%B1%BB%E5%9E%8B%E7%9A%84%E9%93%BE%E8%A1%A8"><span class="nav-number">2.3.1.</span> <span class="nav-text">如何找到不同类型的链表</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AE%B5"><span class="nav-number">3.</span> <span class="nav-text">段</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E6%AE%B5%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">3.1.</span> <span class="nav-text">存储段的数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#List-Base-Node"><span class="nav-number">3.1.1.</span> <span class="nav-text">List Base Node</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Fragement-Array-Entry"><span class="nav-number">3.1.2.</span> <span class="nav-text">Fragement Array Entry</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#INODE-ENtity-%E5%AD%98%E5%82%A8%E5%9C%A8%E4%BB%80%E4%B9%88%E5%9C%B0%E6%96%B9"><span class="nav-number">3.2.</span> <span class="nav-text">INODE ENtity 存储在什么地方</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -594,7 +571,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'blog',
       owner       : 'biyanwen',
       admin       : ['biyanwen'],
-      id          : '773602220cef630380a064fd6b27abdd',
+      id          : 'b7ec4a51a99bed1f7a3e4ecad4cf70fe',
         language: 'zh-CN',
       distractionFreeMode: true
     });

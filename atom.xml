@@ -6,7 +6,7 @@
   <link href="https://biyw.cf/atom.xml" rel="self"/>
   
   <link href="https://biyw.cf/"/>
-  <updated>2022-02-01T11:18:12.404Z</updated>
+  <updated>2022-02-03T05:14:54.192Z</updated>
   <id>https://biyw.cf/</id>
   
   <author>
@@ -15,6 +15,25 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Mysql-InnoDB表空间详解</title>
+    <link href="https://biyw.cf/Mysql-InnoDB%E8%A1%A8%E7%A9%BA%E9%97%B4%E8%AF%A6%E8%A7%A3/"/>
+    <id>https://biyw.cf/Mysql-InnoDB%E8%A1%A8%E7%A9%BA%E9%97%B4%E8%AF%A6%E8%A7%A3/</id>
+    <published>2022-02-03T02:42:51.000Z</published>
+    <updated>2022-02-03T05:14:54.192Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;什么是表空间&quot;&gt;&lt;a href=&quot;#什么是表空间&quot; class=&quot;headerlink&quot; title=&quot;什么是表空间&quot;&gt;&lt;/a&gt;什么是表空间&lt;/h2&gt;&lt;p&gt;表空间是 Mysql 的一个抽象概念，在你新建一个表的时候，Mysql （5.7 + 版本）会为这个表创建一个后缀为 ibd 的文件，这个文件的名字就是表空间，构成表空间的最小单位就是页，所以表空间是实际存储索引和用户数据的地方。因为一个页最多 16k 大小，所以一个表空间拥有页的数量会特别巨大，为了更方便的对页进行管理，Mysql 的作者发明了&lt;code&gt;区&lt;/code&gt;的概念。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Mysql" scheme="https://biyw.cf/tags/Mysql/"/>
+    
+  </entry>
   
   <entry>
     <title>Mysql-InnoDB索引详解</title>
@@ -126,15 +145,14 @@
   </entry>
   
   <entry>
-    <title>指令详解-地址码</title>
-    <link href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/"/>
-    <id>https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/</id>
+    <title>指令详解-操作码</title>
+    <link href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/"/>
+    <id>https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/</id>
     <published>2022-01-08T05:50:35.000Z</published>
-    <updated>2022-01-08T14:43:07.906Z</updated>
+    <updated>2022-01-08T14:42:58.971Z</updated>
     
     
-    <summary type="html">&lt;h2 id=&quot;指令是什么：&quot;&gt;&lt;a href=&quot;#指令是什么：&quot; class=&quot;headerlink&quot; title=&quot;指令是什么：&quot;&gt;&lt;/a&gt;指令是什么：&lt;/h2&gt;&lt;p&gt;可以将指令当做一种编程语言，表现形式为一串二进制码，作用是能让计算机按照指令去工作。&lt;/p&gt;
-&lt;p&gt;指令由两部分组成，操作码和地址码，下面我们着重看下&lt;strong&gt;地址码&lt;/strong&gt;。&lt;/p&gt;</summary>
+    <summary type="html">&lt;h2 id=&quot;定长编码&quot;&gt;&lt;a href=&quot;#定长编码&quot; class=&quot;headerlink&quot; title=&quot;定长编码&quot;&gt;&lt;/a&gt;定长编码&lt;/h2&gt;&lt;p&gt;每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。&lt;br&gt;优点：计算机的硬件设计简单，朱令译码和执行速度快。&lt;br&gt;缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。&lt;br&gt;适用环境：适用于字长较长的计算机系统，如 32 位及以上。&lt;/p&gt;</summary>
     
     
     
@@ -146,14 +164,15 @@
   </entry>
   
   <entry>
-    <title>指令详解-操作码</title>
-    <link href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/"/>
-    <id>https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/</id>
+    <title>指令详解-地址码</title>
+    <link href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/"/>
+    <id>https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/</id>
     <published>2022-01-08T05:50:35.000Z</published>
-    <updated>2022-01-08T14:42:58.971Z</updated>
+    <updated>2022-01-08T14:43:07.906Z</updated>
     
     
-    <summary type="html">&lt;h2 id=&quot;定长编码&quot;&gt;&lt;a href=&quot;#定长编码&quot; class=&quot;headerlink&quot; title=&quot;定长编码&quot;&gt;&lt;/a&gt;定长编码&lt;/h2&gt;&lt;p&gt;每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。&lt;br&gt;优点：计算机的硬件设计简单，朱令译码和执行速度快。&lt;br&gt;缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。&lt;br&gt;适用环境：适用于字长较长的计算机系统，如 32 位及以上。&lt;/p&gt;</summary>
+    <summary type="html">&lt;h2 id=&quot;指令是什么：&quot;&gt;&lt;a href=&quot;#指令是什么：&quot; class=&quot;headerlink&quot; title=&quot;指令是什么：&quot;&gt;&lt;/a&gt;指令是什么：&lt;/h2&gt;&lt;p&gt;可以将指令当做一种编程语言，表现形式为一串二进制码，作用是能让计算机按照指令去工作。&lt;/p&gt;
+&lt;p&gt;指令由两部分组成，操作码和地址码，下面我们着重看下&lt;strong&gt;地址码&lt;/strong&gt;。&lt;/p&gt;</summary>
     
     
     
@@ -445,25 +464,6 @@
     
     
     <summary type="html">&lt;h2 id=&quot;1-Session复制&quot;&gt;&lt;a href=&quot;#1-Session复制&quot; class=&quot;headerlink&quot; title=&quot;1.Session复制&quot;&gt;&lt;/a&gt;1.Session复制&lt;/h2&gt;&lt;p&gt;应用服务器开启Web容器的Session复制功能，在集群中的几台服务器之间同步Session对象，使得每台服务器上都保存所有用户的Session信息，这样任何一台机器宕机都不会导致Session数据的丢失，而服务器使用Session时，也只需要在本机获取即可&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
-    
-    
-    <category term="架构" scheme="https://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>网站的高性能架构</title>
-    <link href="https://biyw.cf/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/"/>
-    <id>https://biyw.cf/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/</id>
-    <published>2021-12-05T06:20:42.235Z</published>
-    <updated>2021-12-16T04:44:41.665Z</updated>
-    
-    
-    <summary type="html">&lt;p&gt;网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。&lt;/p&gt;</summary>
     
     
     
