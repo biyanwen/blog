@@ -2,7 +2,7 @@
 <search>
   <entry>
     <title>Hibernate 实战第二版 中文翻译 事务和并发篇(一)</title>
-    <url>/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E4%BA%8B%E5%8A%A1%E5%92%8C%E5%B9%B6%E5%8F%91%E7%AF%87-%E4%B8%80/</url>
+    <url>/posts/2622ec0e.html</url>
     <content><![CDATA[<p>在这章，我们终于要学习事务相关的知识了：在应用中如何创建工作单元并解决并发问题。（ps: 想了解什么是 <a href="https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/">工作单元</a> 请看这里。）工作单元是一个原子操作。事务可以让你设置工作单元的边界，让其不会受其他工作单元影响。在一个拥有许多用户的应用中，或许会有很多人同时访问这些工作单元的情况。</p>
 <p>在处理并发问题之前，我们首先集中精力了解下最基础的工作单元：数据库和系统事务。你将学会使用 Java 代码定义工作单元和事务划分相关的 API。我们将讨论如何保持隔离，并且用乐观锁和悲观锁控制并发访问。</p>
 <span id="more"></span>
@@ -74,7 +74,7 @@
   </entry>
   <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(三)</title>
-    <url>/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%B8%89/</url>
+    <url>/posts/edd61a92.html</url>
     <content><![CDATA[<h2 id="使用游离态"><a href="#使用游离态" class="headerlink" title="使用游离态"></a>使用游离态</h2><p>如果一个 entity 实例脱离了持久化上下文的管理，我们就称它为游离态。当持久化上下文关闭之后，它就不再提供 id 映射服务。当你使用游离态的 entity 实例时可能会遇到一些问题，所以，一定要保证你明白如何处理游离态实例。</p>
 <span id="more"></span>
 
@@ -155,7 +155,7 @@
   </entry>
   <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(一)</title>
-    <url>/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/</url>
+    <url>/posts/3c14a1db.html</url>
     <content><![CDATA[<h2 id="管理数据"><a href="#管理数据" class="headerlink" title="管理数据"></a>管理数据</h2><h3 id="entity-持久化过程中的生命周期"><a href="#entity-持久化过程中的生命周期" class="headerlink" title="entity 持久化过程中的生命周期"></a>entity 持久化过程中的生命周期</h3><p>因为 JPA 是一种透明的持久化机制，classes 不用关心他们自己的持久化行为，这样在写业务代码时就不需要关心数据是会被持久化还是仅仅保存在内存中。</p>
 <p>应用层在调用方法时真的没必要关心实体的持久化。例如，你在调用Item#calculate-TotalPrice()业务方法时一点也不用关心持久化的事情。任何与持久化有关的应用，无论是否要把内存的数据保存到数据库中都必须使用持久化服务。换句话说，你必须使用 Java Persistence 的接口存储和查询数据。</p>
 <span id="more"></span>
@@ -200,7 +200,7 @@
   </entry>
   <entry>
     <title>Java中byte转int为什么要使用&amp;0xFF</title>
-    <url>/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/</url>
+    <url>/posts/1d17d658.html</url>
     <content><![CDATA[<p>在 Java 中将十六进制 byte 转成 int 时要使用 &amp;0xFF 操作这是为什么呢？这是因为十六进制的范围是 0x00~0x3FF 没有负数，而 int 的取值范围是包含负数的，所以直接将 byte 强转成 int 可能会得到错误的数值。同时操作系统存储的是二进制原码进行补码后的数值, 所以只有通过 &amp;0xFF 操作才能得到正确的数值。</p>
 <span id="more"></span>
 
@@ -233,7 +233,7 @@
   </entry>
   <entry>
     <title>Mysql-InnoDB索引详解</title>
-    <url>/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/</url>
+    <url>/posts/b7cc2c3.html</url>
     <content><![CDATA[<h2 id="索引的作用"><a href="#索引的作用" class="headerlink" title="索引的作用"></a>索引的作用</h2><p><strong>索引的作用就是能够让我们快速的查到想要的数据</strong>。上一篇文章我们介绍了 Mysql 在内存中存储数据的单位<code>页</code>，Mysql 从磁盘加载数据的时候会在内存中创建以<code>页</code>为节点的双向链表，我们已经了解到在<code>页</code>中查找数据可以通过二分查找法快速检索到数据，但是要确定数据在哪个页中就要一个页一个页的查找（如果你对在页中查找数据的过程有疑问，请查看上一篇博客），这个逻辑显然是不合理的，因为 Mysql 是能够存储大量数据的，所以这个双向链表会很长查找速度会很慢。为了解决这个问题，Mysql 的开发者创建了索引这个功能来达到快速查找数据的目的。</p>
 <span id="more"></span>
 
@@ -303,8 +303,51 @@
       </tags>
   </entry>
   <entry>
+    <title>Mysql-InnoDB表空间详解</title>
+    <url>/posts/720913d1.html</url>
+    <content><![CDATA[<h2 id="什么是表空间"><a href="#什么是表空间" class="headerlink" title="什么是表空间"></a>什么是表空间</h2><p>表空间是 Mysql 的一个抽象概念，在你新建一个表的时候，Mysql （5.7 + 版本）会为这个表创建一个后缀为 ibd 的文件，这个文件的名字就是表空间，构成表空间的最小单位就是页，所以表空间是实际存储索引和用户数据的地方。因为一个页最多 16k 大小，所以一个表空间拥有页的数量会特别巨大，为了更方便的对页进行管理，Mysql 的作者发明了<code>区</code>的概念。</p>
+<span id="more"></span>
+
+<h2 id="区"><a href="#区" class="headerlink" title="区"></a>区</h2><p>区的作用就是为了更方便的管理表空间中的页，表空间会被划分成很多连续的区，一个区由 64 个页构成，大小为 1M。256个区被划分为一组，每组的第一个区的前几个页的类型是固定了，为了方便存储一些全局数据，后续会展开讲解。</p>
+<h3 id="区的分类"><a href="#区的分类" class="headerlink" title="区的分类"></a>区的分类</h3><ul>
+<li>空闲的区：表示区内没有存储任何数据。</li>
+<li>有剩余空间的碎片区：已经存有数据，但是还可以继续存储数据的区。</li>
+<li>没有剩余空间的碎片区：已经不能继续存储数据了。</li>
+<li>附属于某个段的区：这个后面详细讲。</li>
+</ul>
+<h3 id="存储区的数据结构"><a href="#存储区的数据结构" class="headerlink" title="存储区的数据结构"></a>存储区的数据结构</h3><p>为了方便对区进行操作，Mysql 的作者为其设计了一个特殊的数据结构，名字叫 XDES Entry。总共由四个部分组成，如图：</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203112524580.png" alt="image-20220203112524580" style="zoom:67%;" />
+
+<p>上一节我们说<code>区</code>分了四个种类，所以在写入数据的时候要先写入到<code>有剩余空间的碎片区</code>中，如果已经没有碎片区可以用了，那再去<code>空闲的区</code>申请空间。那现在问题来了，<strong>表空间这么大如何快速找到不同种类的区呢？</strong></p>
+<h3 id="如何快速找到不同种类的区"><a href="#如何快速找到不同种类的区" class="headerlink" title="如何快速找到不同种类的区"></a>如何快速找到不同种类的区</h3><p>答案是利用 XDES Entry 的 List Node 字段，<strong>表空间会利用这个字段形成三个表空间的链表</strong>，这三个链表的类型分别是：Free (空闲的区)、FreeFrag （有空闲的碎片区）、FullFrag （没有空闲的碎片区）。当要写入数据的时候就先找到 FreeFrag 类型的区，如果将这个区的剩余空间都用完了，就将这个区挂载到 FullFrag 链表中，然后从 Free 中拿到一个节点挂载到 FreeFrag 中继续写入数据。链表的样子大概如下图所示：</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203115239807.png" alt="image-20220203115239807" style="zoom:70%;" />
+
+<p><strong>现在问题又来了，如何找到这三种类型的链表呢？</strong> </p>
+<h4 id="如何找到不同类型的链表"><a href="#如何找到不同类型的链表" class="headerlink" title="如何找到不同类型的链表"></a>如何找到不同类型的链表</h4><p>为了解决这个问题，Mysql 的作者设计了名为 LisiBaseNode 的数据结构，这个数据结构存储着链表的<strong>头结点、尾结点和链表总共有多少个节点的信息。</strong>并将 LisiBaseNode <strong>存储在表空间的第一个页中</strong>，这个页的页号为 0 ，类型为 FSP_HDR，也是表空间分组中的第一组的第一个区的第一个页。这样就可以在表空间中快速找到不同类型的区啦~~。</p>
+<h2 id="段"><a href="#段" class="headerlink" title="段"></a>段</h2><p>段是由区和单独的页构成的。<strong>段的主要作用就是为了增加表空间读写数据的性能</strong>，因为表空间可能特别大，所以区与区之间可能距离特别远，当 Mysql 批量操作数据的时候就需要跨越很远的距离去查找数据，这种情况叫做<code>随机 IO</code>这是很慢的，而段的特点是会分配一段连续的内存空间在这段空间内再创建区，这样区与区的距离就不会特别远，可以达到<code>顺序 IO</code>的效果，可以极大的增加数据库的性能。</p>
+<p>我们都知道 B+ 树有叶子节点和非叶子节点的区别，为了进一步增加数据库性能，<strong>就让叶子节点和非叶子节点分别创建各自的段。</strong></p>
+<p><strong>如何区分一个段是属于叶子节点还是非叶子节点的呢？</strong>其实<code>段</code>是由专门的页结构存储的，而这个页的 Page Header 就会标注清楚哪些段是叶子节点的，哪些是非叶子节点的。</p>
+<h3 id="存储段的数据结构"><a href="#存储段的数据结构" class="headerlink" title="存储段的数据结构"></a>存储段的数据结构</h3><p>为了方便对<code>段</code>进行管理，Mysql 的作者设计了一个特殊的数据结构用来存储段的信息，这个数据结构叫做 INODE ENtity ，结构如下图所示：</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203124353554.png" alt="image-20220203124353554" style="zoom:67%;" />
+
+<p>下面对结构进行详细的解释。</p>
+<h4 id="List-Base-Node"><a href="#List-Base-Node" class="headerlink" title="List Base Node"></a>List Base Node</h4><p>为了能够快速分辨哪些段还可以继续写入数据，哪些段已经满了，Mysql 的设计者也对段进行了与区相同的分类，分为 Free(空闲)、NotFull(有一些数据，但是还可以继续写入)、Full(已经完全满了)。同样为了方便快速定位不同类型的链表设计者直接将三种类型链表的 ListBaseNode 节点放在了段的数据结构中。</p>
+<h4 id="Fragement-Array-Entry"><a href="#Fragement-Array-Entry" class="headerlink" title="Fragement Array Entry"></a>Fragement Array Entry</h4><p>你可能有因为，为什么段中还直接保存页呀？不是应该只保存区吗？<strong>这么做是为了更好的利用存储空间</strong>，段默认会分配 1M 大小，如果不够可以继续增加，但是如果你的数据特别少也用 1M 是不是就太浪费空间了呀？所以，设计者们提出了<code>碎片区</code>的概念，这个区内的页可以属于任何段，只有一个段占用的碎片区达到一定大小的时候才会分配一个完整区给这个段，这样可以更高效的利用存储空间。</p>
+<h3 id="INODE-ENtity-存储在什么地方"><a href="#INODE-ENtity-存储在什么地方" class="headerlink" title="INODE ENtity 存储在什么地方"></a>INODE ENtity 存储在什么地方</h3><p> INODE ENtity  也存储在页中，这个页位于表空间第一个分组的第一个区的第三个页中存储着所有 INODE ENtity 的基础信息（也可能是链表，因为有可能一个页无法存储所有段的基础信息）。这个页的类型为 INODE。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>为了方便大家理解，下面用一个图来表示表空间、区分组、区、段这些信息是如何存储的。</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203130935197.png" alt="image-20220203130935197" style="zoom:67%;" />
+
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Mysql</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Mysql-InnoDB页详解</title>
-    <url>/Mysql-InnoDB%E9%A1%B5%E8%AF%A6%E8%A7%A3/</url>
+    <url>/posts/6d95a3c4.html</url>
     <content><![CDATA[<h2 id="页的作用"><a href="#页的作用" class="headerlink" title="页的作用"></a>页的作用</h2><p>什么是页？页是 Mysql 从磁盘中加载数据的最小单位。页的大小为 16 kb。</p>
 <p>为什么要按页加载数据呢？首先我们都知道磁盘 IO 是比较慢的，如果每查一条数据都要从磁盘中读取数据的话性能是很差的。所以当查询一条数据的时候 Mysql 会从磁盘中将与这条数据相近的数据都加载到内存中，这样可以大幅度提高性能。</p>
 <span id="more"></span>
@@ -359,8 +402,123 @@
       </tags>
   </entry>
   <entry>
+    <title>分布式锁</title>
+    <url>/posts/4eb3381c.html</url>
+    <content><![CDATA[<p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
+<span id="more"></span>
+
+<h2 id="为什么需要分布式锁"><a href="#为什么需要分布式锁" class="headerlink" title="为什么需要分布式锁"></a>为什么需要分布式锁</h2><p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
+<h2 id="2-常用分布式锁"><a href="#2-常用分布式锁" class="headerlink" title="2. 常用分布式锁"></a>2. 常用分布式锁</h2><h3 id="2-1-Redis实现分布式锁"><a href="#2-1-Redis实现分布式锁" class="headerlink" title="2.1 Redis实现分布式锁"></a>2.1 Redis实现分布式锁</h3><h4 id="2-1-1-Redis实现分布式锁原理"><a href="#2-1-1-Redis实现分布式锁原理" class="headerlink" title="2.1.1 Redis实现分布式锁原理"></a>2.1.1 Redis实现分布式锁原理</h4><p>Redis实现分布式锁主要是使用Redis提供的setnx命令，setnx 是『SET if Not eXists』(如果不存在，则 SET)的简写。 命令格式：SETNX key value；使用：只在键 key 不存在的情况下，将键 key 的值设置为 value 。若键 key 已经存在， 则 SETNX 命令不做任何动作。返回值：命令在设置成功时返回 1 ，设置失败时返回 0 ，Redis保证setnx的原子性，所以如果setnx返回1就说明获取到锁，如果0就说明获取锁失败。</p>
+<h4 id="2-1-2-Redis实现分布式锁潜在问题"><a href="#2-1-2-Redis实现分布式锁潜在问题" class="headerlink" title="2.1.2 Redis实现分布式锁潜在问题"></a>2.1.2 Redis实现分布式锁潜在问题</h4><p>主要问题就是<strong>超时</strong>，例如当业务执行时间大于key的过期时间就可能产生并发问题，同时也可能将其他线程持有的锁误删。</p>
+<h4 id="2-1-2-超时问题解决方案"><a href="#2-1-2-超时问题解决方案" class="headerlink" title="2.1.2 超时问题解决方案"></a>2.1.2 超时问题解决方案</h4><p>解决方案就是<strong>自动续期</strong>，当线程成功获得锁后就开启一个WatchDog监听当前线程，如果key超时之前不能完成业务逻辑那就将key的过期时间延长，同时如果持有锁的服务宕机就不自动续期，让Redis将key删除，当然这个功能已经有现成的实现方式了，就是<strong>Redisson</strong>。</p>
+<h4 id="2-1-3-利用Redisson实现Redis分布式锁"><a href="#2-1-3-利用Redisson实现Redis分布式锁" class="headerlink" title="2.1.3 利用Redisson实现Redis分布式锁"></a>2.1.3 利用Redisson实现Redis分布式锁</h4><p>首先引入Redisson依赖</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;!-- https:<span class="comment">//mvnrepository.com/artifact/org.redisson/redisson --&gt;</span></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.redisson&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;redisson&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">3.15</span><span class="number">.1</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>实现方式</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> RedissonClient redissonClient;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">    	<span class="comment">//添加Redis配置信息</span></span><br><span class="line">        Config config = <span class="keyword">new</span> Config();</span><br><span class="line">        config.useSingleServer().setAddress(<span class="string">&quot;redis://127.0.0.1:6379&quot;</span>);</span><br><span class="line">        redissonClient = Redisson.create(config);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread myThread1 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread2 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread3 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread4 = <span class="keyword">new</span> MyThread();</span><br><span class="line"></span><br><span class="line">        myThread1.start();</span><br><span class="line">        myThread2.start();</span><br><span class="line">        myThread3.start();</span><br><span class="line">        myThread4.start();</span><br><span class="line"></span><br><span class="line">        myThread1.join();</span><br><span class="line">        myThread2.join();</span><br><span class="line">        myThread3.join();</span><br><span class="line">        myThread4.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        	<span class="comment">//初始化锁对象</span></span><br><span class="line">            RLock watchDogLock = redissonClient.getLock(<span class="string">&quot;watchDogLock&quot;</span>);</span><br><span class="line">            <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">            	<span class="comment">//利用Redisson的API成功获取锁时Redisson会自动启动WatchDog监听当前线程，底层实现是通过Lua脚本。</span></span><br><span class="line">                <span class="keyword">boolean</span> success = watchDogLock.tryLock();</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 是否成功获取锁：&quot;</span> + success);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (success) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 开始执行业务逻辑&quot;</span>);</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                        System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 业务执行成功，进行解锁&quot;</span>);</span><br><span class="line">                        watchDogLock.unlock();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 获取锁失败&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-2-Zookeeper实现分布式锁"><a href="#2-2-Zookeeper实现分布式锁" class="headerlink" title="2.2 Zookeeper实现分布式锁"></a>2.2 Zookeeper实现分布式锁</h3><h4 id="2-2-1-Zookeeper实现分布式锁原理"><a href="#2-2-1-Zookeeper实现分布式锁原理" class="headerlink" title="2.2.1  Zookeeper实现分布式锁原理"></a>2.2.1  Zookeeper实现分布式锁原理</h4><ol>
+<li><strong>数据结构</strong>：Zookeeper内部维护一个树形的数据结构，用户可以根据其提供的Api创建或者删除节点，并且Zookeeper会为每个节点生成一个不会重复并且根据创建顺序由小到大排列的序号。</li>
+<li><strong>永久节点和临时节点</strong>：永久节点除非手动删除，不然不会自动删除；临时节点会在客户端断开一段时间后自动删除，如果客户端没有断开链接，或者没有手动删除就会一直存在，同时永久节点下面可以创建临时节点，但是临时节点下面不能创建永久节点。</li>
+<li><strong>Watch机制</strong>：子节点可以在上一个节点创建一个监听器，同时传入一个回调方法，当前一个节点改变时（例如，删除，更新）会收到通知，并且执行回调方法。</li>
+</ol>
+<p>就是因为临时节点的特性，所以Zookeeper不会遇到和Redis相同的问题，如果客户端运行正常运行就不会删除临时节点，也就不会释放锁，如果客户端宕机那临时节点就会在客户端断开一段时间后自动删除。</p>
+<h4 id="2-2-2-Zookeeper分布式锁工作流程"><a href="#2-2-2-Zookeeper分布式锁工作流程" class="headerlink" title="2.2.2 Zookeeper分布式锁工作流程"></a>2.2.2 Zookeeper分布式锁工作流程</h4><ol>
+<li>当需要对资源进行加锁时，实际上就是在父节点之下创建一个临时顺序节点。</li>
+<li>客户端A来对资源加锁，首先判断当前创建的节点是否为最小节点，如果是，那么加锁成功，后续加锁线程阻塞等待。</li>
+<li>此时，客户端B也来尝试加锁，由于客户端A已经加锁成功，所以客户端B发现自己的节点并不是最小节点，就会去取到上一个节点，并且对上一节点注册监听。</li>
+<li>当客户端A操作完成，释放锁的操作就是删除这个节点，这样就可以触发监听事件，客户端B就会得到通知，同样，客户端B判断自己是否为最小节点，如果是，那么则加锁成功。</li>
+</ol>
+<h4 id="2-2-3-代码示例"><a href="#2-2-3-代码示例" class="headerlink" title="2.2.3 代码示例"></a>2.2.3 代码示例</h4><p>代码使用了Curator包，这个包封装了底层Zookeeper的操作，使用起来更加方便，可以有效减少样板代码。</p>
+<p>首先引入依赖</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;!-- https:<span class="comment">//mvnrepository.com/artifact/org.apache.curator/curator-recipes --&gt;</span></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.curator&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;curator-recipes&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">5.1</span><span class="number">.0</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<p>代码示例</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> CuratorFramework ZK_CLIENT;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">    	<span class="comment">//初始化Zookeeper配置</span></span><br><span class="line">        String zkServerAddress = <span class="string">&quot;127.0.0.1:12181&quot;</span>;</span><br><span class="line">        ExponentialBackoffRetry retryPolicy = <span class="keyword">new</span> ExponentialBackoffRetry(<span class="number">1000</span>, <span class="number">3</span>, <span class="number">5000</span>);</span><br><span class="line">        ZK_CLIENT = CuratorFrameworkFactory.builder()</span><br><span class="line">                .connectString(zkServerAddress)</span><br><span class="line">                .sessionTimeoutMs(<span class="number">5000</span>)</span><br><span class="line">                .connectionTimeoutMs(<span class="number">5000</span>)</span><br><span class="line">                .retryPolicy(retryPolicy)</span><br><span class="line">                .build();</span><br><span class="line">        ZK_CLIENT.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String LOCK_PATH = <span class="string">&quot;/myLock&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//创建锁对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> InterProcessMutex LOCK = <span class="keyword">new</span> InterProcessMutex(ZK_CLIENT, LOCK_PATH);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread myThread1 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread2 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread3 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread4 = <span class="keyword">new</span> MyThread();</span><br><span class="line"></span><br><span class="line">        myThread1.start();</span><br><span class="line">        myThread2.start();</span><br><span class="line">        myThread3.start();</span><br><span class="line">        myThread4.start();</span><br><span class="line"></span><br><span class="line">        myThread1.join();</span><br><span class="line">        myThread2.join();</span><br><span class="line">        myThread3.join();</span><br><span class="line">        myThread4.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                	<span class="comment">//加锁</span></span><br><span class="line">                    LOCK.acquire();</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 获取到锁&quot;</span>);</span><br><span class="line">                    Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 释放锁&quot;</span>);</span><br><span class="line">                        <span class="comment">//解锁</span></span><br><span class="line">                        LOCK.release();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-总结"><a href="#3-总结" class="headerlink" title="3 总结"></a>3 总结</h2><p>Redis和Zookeeper都能够实现分布式锁，但是他们之间有相同点和不同点，使用的时候需要根据需求来选择。<br><strong>相同点</strong>：由于工具封装的都比较好，实现起来都很简单。</p>
+<p><strong>不同点</strong>：</p>
+<ol>
+<li><strong>可靠性</strong>：Zookeeper可靠性高于Redis，因为Zookeeper的实现方式而言，本身就是保证数据一致性的，可靠性更高，而Redis不是数据强一致性的，某些极端场景下还是可能会存在问题。</li>
+<li><strong>性能</strong>：Redis性能比Zookeeper好，因为Zookeeper需要频繁创建和删除节点，性能略低。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>分布式</tag>
+        <tag>多线程</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Git-submodule 统一配置简明教程</title>
+    <url>/posts/b62a4af1.html</url>
+    <content><![CDATA[<p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
+<p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
+<p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
+<span id="more"></span>
+
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
+<h2 id="为什么选用-git-submodule"><a href="#为什么选用-git-submodule" class="headerlink" title="为什么选用 git-submodule"></a>为什么选用 git-submodule</h2><p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
+<p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
+<h2 id="如果你需要集成-git-submodule-应该如何做"><a href="#如果你需要集成-git-submodule-应该如何做" class="headerlink" title="如果你需要集成  git-submodule 应该如何做"></a>如果你需要集成  git-submodule 应该如何做</h2><h3 id="检查项目中的同名模块"><a href="#检查项目中的同名模块" class="headerlink" title="检查项目中的同名模块"></a>检查项目中的同名模块</h3><p>  git-submodule 是不允许两个或两个以上的模块存在相同名字的情况发生，所以要先做检查。</p>
+<h3 id="使用-git-submodule-添加子模块"><a href="#使用-git-submodule-添加子模块" class="headerlink" title="使用  git-submodule 添加子模块"></a>使用  git-submodule 添加子模块</h3><p>执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule add -b $&#123;分支名字&#125; $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
+
+<p>命令详细解析：</p>
+<ul>
+<li>git ：调用 git 可执行程序；</li>
+<li>submodule add ： 添加  git-submodule 子模块；</li>
+<li>-b ${分支名字}：将子模块的哪个分支作为当前项目的字目录，如果不写默认是主模块；</li>
+<li>${git仓库地址} ：子模块项目地址；</li>
+</ul>
+<p>以现货为例，最终命令如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule add -b prod/dev http://[xxx].git</span><br></pre></td></tr></table></figure>
+
+<h3 id="拉取子模块代码"><a href="#拉取子模块代码" class="headerlink" title="拉取子模块代码"></a>拉取子模块代码</h3><p>当执行完 3.2 步骤之后我们会发现项目中多个一个空文件夹，没错是它空的， submodule add 命令不会直接将代码也拉取下来，第一次需要我们主动些。</p>
+<p>执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule update --init --recursive</span><br></pre></td></tr></table></figure>
+
+<p>执行完这条命令后子模块的代码就被拉取下来了。</p>
+<p>如果之后子模块代码有更新了怎么办？当然再执行一次上面的命令就可以了，不过这样略显麻烦，git 当然不会有这么智障的操作，如果子模块有更新了，我们在主模块使用 <strong>git pull</strong> 也应该可以将最新代码拉取下拉，为此，需要你执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
+
+<p>这样，每次在主模块执行 git pull 的时候，都会去拉取子模块的最新代码。</p>
+<h3 id="切换子模块分支"><a href="#切换子模块分支" class="headerlink" title="切换子模块分支"></a>切换子模块分支</h3><p>这一步是可选的，是否需要这么做需要你看看你的子模块是否成功关联了对应分支。</p>
+<p>可使用如下命令查看：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git status</span><br></pre></td></tr></table></figure>
+
+<p>会显示子模块目前所在分支，如果出现  <strong>HEAD detached from</strong> 等提示语就表示没有成功关联到指定分支，那么你需要按照下面的步骤进行操作。</p>
+<p>这一步可能让你迷惑，什么？在 3.2 步不是已经指定子模块的分支了吗？对没错，你是指定了，但是他只是让主模块保存了指定分支的最后一次提交的 commit id。并没有真正关联到对应模块。</p>
+<p>这个时候就需要你自己切换分支，可执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git checkout xxx</span><br></pre></td></tr></table></figure>
+
+<p>xxx 为要切换分支的名字，当然你用各种 git 图形化工具操作也是一样的。</p>
+<h2 id="如果你要-clone-一个集成了-git-submodule-的项目应该如何做"><a href="#如果你要-clone-一个集成了-git-submodule-的项目应该如何做" class="headerlink" title="如果你要 clone 一个集成了  git-submodule 的项目应该如何做"></a>如果你要 clone 一个集成了  git-submodule 的项目应该如何做</h2><p>推荐使用如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git clone --recurse-submodules $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 clone 的时候加上 –recurse-submodules 参数，这样就会将子模块的内容都拉取下来。</p>
+<p>然后执行 3.4 步骤的操作，选取子模块分支。</p>
+<p>再执行如下命令，保证每次 git pull 的时候都能获取子模块最新代码。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
+
+<h2 id="在子模块上提交代码"><a href="#在子模块上提交代码" class="headerlink" title="在子模块上提交代码"></a>在子模块上提交代码</h2><p>子模块就跟其他 git 项目一样，你是可以直接更改代码并提交的，但是这里有一点需要注意，就是如果你在子模块上提交了代码，那么在主模块上也要提交一次，也就是说<strong>要提交两次代码</strong>，这是至关重要的，如果你没有这么做，有可能会让其他人的子模块无法正常工作。</p>
+<p>例如你在子模块提交代码后，在主模块查看 git 状态时会有如下提示：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">modified:   xxx（模块名） (new commits)</span><br></pre></td></tr></table></figure>
+
+<p>你必须要将这个代码提交到主模块的 git 仓库，这个更改其实是记录着子模块最新提交的 commit id 。用来做版本管理的。</p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>如果想深入了解，可以参考以下文档。</p>
+<p><a href="https://git-scm.com/docs/git-submodule">参数文档</a></p>
+<p><a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">使用文档</a></p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Git</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java内存区域</title>
-    <url>/java%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F/</url>
+    <url>/posts/a7eb5674.html</url>
     <content><![CDATA[<h2 id="运行时数据区域"><a href="#运行时数据区域" class="headerlink" title="运行时数据区域"></a>运行时数据区域</h2><h3 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h3><ul>
 <li>当前线程所执行的字节码的行号指示器，用来选取下一条需要执行的字节码指令</li>
 <li>线程私有</li>
@@ -500,166 +658,8 @@
       </tags>
   </entry>
   <entry>
-    <title>Git-submodule 统一配置简明教程</title>
-    <url>/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</url>
-    <content><![CDATA[<p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
-<p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
-<p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
-<span id="more"></span>
-
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。</p>
-<h2 id="为什么选用-git-submodule"><a href="#为什么选用-git-submodule" class="headerlink" title="为什么选用 git-submodule"></a>为什么选用 git-submodule</h2><p>git-submodule 是 git 提供的一个功能模块， 它允许一个 git 仓库，作为另一个 git 仓库的子目录，并且保持父项目和子项目相互独立。通过这个功能模块我们就可以让多个项目同时使用一个 git 仓库的代码进行开发。由此可以实现配置的统一管理。</p>
-<p>之所以选用 git-submodule 是因为它足够简单，学习成本低；侵入性小，不需要系统做很多更改。但是所有事情都有两面，他也有一些缺点，比如功能单一，不够灵活。虽然它有这些缺点，但是对于使用场景比较单间的项目就足够了，并不是功能越多越好，适合的才是最好的。</p>
-<h2 id="如果你需要集成-git-submodule-应该如何做"><a href="#如果你需要集成-git-submodule-应该如何做" class="headerlink" title="如果你需要集成  git-submodule 应该如何做"></a>如果你需要集成  git-submodule 应该如何做</h2><h3 id="检查项目中的同名模块"><a href="#检查项目中的同名模块" class="headerlink" title="检查项目中的同名模块"></a>检查项目中的同名模块</h3><p>  git-submodule 是不允许两个或两个以上的模块存在相同名字的情况发生，所以要先做检查。</p>
-<h3 id="使用-git-submodule-添加子模块"><a href="#使用-git-submodule-添加子模块" class="headerlink" title="使用  git-submodule 添加子模块"></a>使用  git-submodule 添加子模块</h3><p>执行如下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule add -b $&#123;分支名字&#125; $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
-
-<p>命令详细解析：</p>
-<ul>
-<li>git ：调用 git 可执行程序；</li>
-<li>submodule add ： 添加  git-submodule 子模块；</li>
-<li>-b ${分支名字}：将子模块的哪个分支作为当前项目的字目录，如果不写默认是主模块；</li>
-<li>${git仓库地址} ：子模块项目地址；</li>
-</ul>
-<p>以现货为例，最终命令如下：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule add -b prod/dev http://[xxx].git</span><br></pre></td></tr></table></figure>
-
-<h3 id="拉取子模块代码"><a href="#拉取子模块代码" class="headerlink" title="拉取子模块代码"></a>拉取子模块代码</h3><p>当执行完 3.2 步骤之后我们会发现项目中多个一个空文件夹，没错是它空的， submodule add 命令不会直接将代码也拉取下来，第一次需要我们主动些。</p>
-<p>执行如下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git submodule update --init --recursive</span><br></pre></td></tr></table></figure>
-
-<p>执行完这条命令后子模块的代码就被拉取下来了。</p>
-<p>如果之后子模块代码有更新了怎么办？当然再执行一次上面的命令就可以了，不过这样略显麻烦，git 当然不会有这么智障的操作，如果子模块有更新了，我们在主模块使用 <strong>git pull</strong> 也应该可以将最新代码拉取下拉，为此，需要你执行如下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
-
-<p>这样，每次在主模块执行 git pull 的时候，都会去拉取子模块的最新代码。</p>
-<h3 id="切换子模块分支"><a href="#切换子模块分支" class="headerlink" title="切换子模块分支"></a>切换子模块分支</h3><p>这一步是可选的，是否需要这么做需要你看看你的子模块是否成功关联了对应分支。</p>
-<p>可使用如下命令查看：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git status</span><br></pre></td></tr></table></figure>
-
-<p>会显示子模块目前所在分支，如果出现  <strong>HEAD detached from</strong> 等提示语就表示没有成功关联到指定分支，那么你需要按照下面的步骤进行操作。</p>
-<p>这一步可能让你迷惑，什么？在 3.2 步不是已经指定子模块的分支了吗？对没错，你是指定了，但是他只是让主模块保存了指定分支的最后一次提交的 commit id。并没有真正关联到对应模块。</p>
-<p>这个时候就需要你自己切换分支，可执行如下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git checkout xxx</span><br></pre></td></tr></table></figure>
-
-<p>xxx 为要切换分支的名字，当然你用各种 git 图形化工具操作也是一样的。</p>
-<h2 id="如果你要-clone-一个集成了-git-submodule-的项目应该如何做"><a href="#如果你要-clone-一个集成了-git-submodule-的项目应该如何做" class="headerlink" title="如果你要 clone 一个集成了  git-submodule 的项目应该如何做"></a>如果你要 clone 一个集成了  git-submodule 的项目应该如何做</h2><p>推荐使用如下命令：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git clone --recurse-submodules $&#123;git仓库地址&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在 clone 的时候加上 –recurse-submodules 参数，这样就会将子模块的内容都拉取下来。</p>
-<p>然后执行 3.4 步骤的操作，选取子模块分支。</p>
-<p>再执行如下命令，保证每次 git pull 的时候都能获取子模块最新代码。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git config submodule.recurse true</span><br></pre></td></tr></table></figure>
-
-<h2 id="在子模块上提交代码"><a href="#在子模块上提交代码" class="headerlink" title="在子模块上提交代码"></a>在子模块上提交代码</h2><p>子模块就跟其他 git 项目一样，你是可以直接更改代码并提交的，但是这里有一点需要注意，就是如果你在子模块上提交了代码，那么在主模块上也要提交一次，也就是说<strong>要提交两次代码</strong>，这是至关重要的，如果你没有这么做，有可能会让其他人的子模块无法正常工作。</p>
-<p>例如你在子模块提交代码后，在主模块查看 git 状态时会有如下提示：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">modified:   xxx（模块名） (new commits)</span><br></pre></td></tr></table></figure>
-
-<p>你必须要将这个代码提交到主模块的 git 仓库，这个更改其实是记录着子模块最新提交的 commit id 。用来做版本管理的。</p>
-<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>如果想深入了解，可以参考以下文档。</p>
-<p><a href="https://git-scm.com/docs/git-submodule">参数文档</a></p>
-<p><a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">使用文档</a></p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Git</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Mysql-InnoDB表空间详解</title>
-    <url>/Mysql-InnoDB%E8%A1%A8%E7%A9%BA%E9%97%B4%E8%AF%A6%E8%A7%A3/</url>
-    <content><![CDATA[<h2 id="什么是表空间"><a href="#什么是表空间" class="headerlink" title="什么是表空间"></a>什么是表空间</h2><p>表空间是 Mysql 的一个抽象概念，在你新建一个表的时候，Mysql （5.7 + 版本）会为这个表创建一个后缀为 ibd 的文件，这个文件的名字就是表空间，构成表空间的最小单位就是页，所以表空间是实际存储索引和用户数据的地方。因为一个页最多 16k 大小，所以一个表空间拥有页的数量会特别巨大，为了更方便的对页进行管理，Mysql 的作者发明了<code>区</code>的概念。</p>
-<span id="more"></span>
-
-<h2 id="区"><a href="#区" class="headerlink" title="区"></a>区</h2><p>区的作用就是为了更方便的管理表空间中的页，表空间会被划分成很多连续的区，一个区由 64 个页构成，大小为 1M。256个区被划分为一组，每组的第一个区的前几个页的类型是固定了，为了方便存储一些全局数据，后续会展开讲解。</p>
-<h3 id="区的分类"><a href="#区的分类" class="headerlink" title="区的分类"></a>区的分类</h3><ul>
-<li>空闲的区：表示区内没有存储任何数据。</li>
-<li>有剩余空间的碎片区：已经存有数据，但是还可以继续存储数据的区。</li>
-<li>没有剩余空间的碎片区：已经不能继续存储数据了。</li>
-<li>附属于某个段的区：这个后面详细讲。</li>
-</ul>
-<h3 id="存储区的数据结构"><a href="#存储区的数据结构" class="headerlink" title="存储区的数据结构"></a>存储区的数据结构</h3><p>为了方便对区进行操作，Mysql 的作者为其设计了一个特殊的数据结构，名字叫 XDES Entry。总共由四个部分组成，如图：</p>
-<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203112524580.png" alt="image-20220203112524580" style="zoom:67%;" />
-
-<p>上一节我们说<code>区</code>分了四个种类，所以在写入数据的时候要先写入到<code>有剩余空间的碎片区</code>中，如果已经没有碎片区可以用了，那再去<code>空闲的区</code>申请空间。那现在问题来了，<strong>表空间这么大如何快速找到不同种类的区呢？</strong></p>
-<h3 id="如何快速找到不同种类的区"><a href="#如何快速找到不同种类的区" class="headerlink" title="如何快速找到不同种类的区"></a>如何快速找到不同种类的区</h3><p>答案是利用 XDES Entry 的 List Node 字段，<strong>表空间会利用这个字段形成三个表空间的链表</strong>，这三个链表的类型分别是：Free (空闲的区)、FreeFrag （有空闲的碎片区）、FullFrag （没有空闲的碎片区）。当要写入数据的时候就先找到 FreeFrag 类型的区，如果将这个区的剩余空间都用完了，就将这个区挂载到 FullFrag 链表中，然后从 Free 中拿到一个节点挂载到 FreeFrag 中继续写入数据。链表的样子大概如下图所示：</p>
-<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203115239807.png" alt="image-20220203115239807" style="zoom:70%;" />
-
-<p><strong>现在问题又来了，如何找到这三种类型的链表呢？</strong> </p>
-<h4 id="如何找到不同类型的链表"><a href="#如何找到不同类型的链表" class="headerlink" title="如何找到不同类型的链表"></a>如何找到不同类型的链表</h4><p>为了解决这个问题，Mysql 的作者设计了名为 LisiBaseNode 的数据结构，这个数据结构存储着链表的<strong>头结点、尾结点和链表总共有多少个节点的信息。</strong>并将 LisiBaseNode <strong>存储在表空间的第一个页中</strong>，这个页的页号为 0 ，类型为 FSP_HDR，也是表空间分组中的第一组的第一个区的第一个页。这样就可以在表空间中快速找到不同类型的区啦~~。</p>
-<h2 id="段"><a href="#段" class="headerlink" title="段"></a>段</h2><p>段是由区和单独的页构成的。<strong>段的主要作用就是为了增加表空间读写数据的性能</strong>，因为表空间可能特别大，所以区与区之间可能距离特别远，当 Mysql 批量操作数据的时候就需要跨越很远的距离去查找数据，这种情况叫做<code>随机 IO</code>这是很慢的，而段的特点是会分配一段连续的内存空间在这段空间内再创建区，这样区与区的距离就不会特别远，可以达到<code>顺序 IO</code>的效果，可以极大的增加数据库的性能。</p>
-<p>我们都知道 B+ 树有叶子节点和非叶子节点的区别，为了进一步增加数据库性能，<strong>就让叶子节点和非叶子节点分别创建各自的段。</strong></p>
-<p><strong>如何区分一个段是属于叶子节点还是非叶子节点的呢？</strong>其实<code>段</code>是由专门的页结构存储的，而这个页的 Page Header 就会标注清楚哪些段是叶子节点的，哪些是非叶子节点的。</p>
-<h3 id="存储段的数据结构"><a href="#存储段的数据结构" class="headerlink" title="存储段的数据结构"></a>存储段的数据结构</h3><p>为了方便对<code>段</code>进行管理，Mysql 的作者设计了一个特殊的数据结构用来存储段的信息，这个数据结构叫做 INODE ENtity ，结构如下图所示：</p>
-<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203124353554.png" alt="image-20220203124353554" style="zoom:67%;" />
-
-<p>下面对结构进行详细的解释。</p>
-<h4 id="List-Base-Node"><a href="#List-Base-Node" class="headerlink" title="List Base Node"></a>List Base Node</h4><p>为了能够快速分辨哪些段还可以继续写入数据，哪些段已经满了，Mysql 的设计者也对段进行了与区相同的分类，分为 Free(空闲)、NotFull(有一些数据，但是还可以继续写入)、Full(已经完全满了)。同样为了方便快速定位不同类型的链表设计者直接将三种类型链表的 ListBaseNode 节点放在了段的数据结构中。</p>
-<h4 id="Fragement-Array-Entry"><a href="#Fragement-Array-Entry" class="headerlink" title="Fragement Array Entry"></a>Fragement Array Entry</h4><p>你可能有因为，为什么段中还直接保存页呀？不是应该只保存区吗？<strong>这么做是为了更好的利用存储空间</strong>，段默认会分配 1M 大小，如果不够可以继续增加，但是如果你的数据特别少也用 1M 是不是就太浪费空间了呀？所以，设计者们提出了<code>碎片区</code>的概念，这个区内的页可以属于任何段，只有一个段占用的碎片区达到一定大小的时候才会分配一个完整区给这个段，这样可以更高效的利用存储空间。</p>
-<h3 id="INODE-ENtity-存储在什么地方"><a href="#INODE-ENtity-存储在什么地方" class="headerlink" title="INODE ENtity 存储在什么地方"></a>INODE ENtity 存储在什么地方</h3><p> INODE ENtity  也存储在页中，这个页位于表空间第一个分组的第一个区的第三个页中存储着所有 INODE ENtity 的基础信息（也可能是链表，因为有可能一个页无法存储所有段的基础信息）。这个页的类型为 INODE。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>为了方便大家理解，下面用一个图来表示表空间、区分组、区、段这些信息是如何存储的。</p>
-<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203130935197.png" alt="image-20220203130935197" style="zoom:67%;" />
-
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Mysql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>分布式锁</title>
-    <url>/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/</url>
-    <content><![CDATA[<p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
-<span id="more"></span>
-
-<h2 id="为什么需要分布式锁"><a href="#为什么需要分布式锁" class="headerlink" title="为什么需要分布式锁"></a>为什么需要分布式锁</h2><p>在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。</p>
-<h2 id="2-常用分布式锁"><a href="#2-常用分布式锁" class="headerlink" title="2. 常用分布式锁"></a>2. 常用分布式锁</h2><h3 id="2-1-Redis实现分布式锁"><a href="#2-1-Redis实现分布式锁" class="headerlink" title="2.1 Redis实现分布式锁"></a>2.1 Redis实现分布式锁</h3><h4 id="2-1-1-Redis实现分布式锁原理"><a href="#2-1-1-Redis实现分布式锁原理" class="headerlink" title="2.1.1 Redis实现分布式锁原理"></a>2.1.1 Redis实现分布式锁原理</h4><p>Redis实现分布式锁主要是使用Redis提供的setnx命令，setnx 是『SET if Not eXists』(如果不存在，则 SET)的简写。 命令格式：SETNX key value；使用：只在键 key 不存在的情况下，将键 key 的值设置为 value 。若键 key 已经存在， 则 SETNX 命令不做任何动作。返回值：命令在设置成功时返回 1 ，设置失败时返回 0 ，Redis保证setnx的原子性，所以如果setnx返回1就说明获取到锁，如果0就说明获取锁失败。</p>
-<h4 id="2-1-2-Redis实现分布式锁潜在问题"><a href="#2-1-2-Redis实现分布式锁潜在问题" class="headerlink" title="2.1.2 Redis实现分布式锁潜在问题"></a>2.1.2 Redis实现分布式锁潜在问题</h4><p>主要问题就是<strong>超时</strong>，例如当业务执行时间大于key的过期时间就可能产生并发问题，同时也可能将其他线程持有的锁误删。</p>
-<h4 id="2-1-2-超时问题解决方案"><a href="#2-1-2-超时问题解决方案" class="headerlink" title="2.1.2 超时问题解决方案"></a>2.1.2 超时问题解决方案</h4><p>解决方案就是<strong>自动续期</strong>，当线程成功获得锁后就开启一个WatchDog监听当前线程，如果key超时之前不能完成业务逻辑那就将key的过期时间延长，同时如果持有锁的服务宕机就不自动续期，让Redis将key删除，当然这个功能已经有现成的实现方式了，就是<strong>Redisson</strong>。</p>
-<h4 id="2-1-3-利用Redisson实现Redis分布式锁"><a href="#2-1-3-利用Redisson实现Redis分布式锁" class="headerlink" title="2.1.3 利用Redisson实现Redis分布式锁"></a>2.1.3 利用Redisson实现Redis分布式锁</h4><p>首先引入Redisson依赖</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;!-- https:<span class="comment">//mvnrepository.com/artifact/org.redisson/redisson --&gt;</span></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.redisson&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;redisson&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">3.15</span><span class="number">.1</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
-<p>实现方式</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> RedissonClient redissonClient;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">    	<span class="comment">//添加Redis配置信息</span></span><br><span class="line">        Config config = <span class="keyword">new</span> Config();</span><br><span class="line">        config.useSingleServer().setAddress(<span class="string">&quot;redis://127.0.0.1:6379&quot;</span>);</span><br><span class="line">        redissonClient = Redisson.create(config);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread myThread1 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread2 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread3 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread4 = <span class="keyword">new</span> MyThread();</span><br><span class="line"></span><br><span class="line">        myThread1.start();</span><br><span class="line">        myThread2.start();</span><br><span class="line">        myThread3.start();</span><br><span class="line">        myThread4.start();</span><br><span class="line"></span><br><span class="line">        myThread1.join();</span><br><span class="line">        myThread2.join();</span><br><span class="line">        myThread3.join();</span><br><span class="line">        myThread4.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        	<span class="comment">//初始化锁对象</span></span><br><span class="line">            RLock watchDogLock = redissonClient.getLock(<span class="string">&quot;watchDogLock&quot;</span>);</span><br><span class="line">            <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">            	<span class="comment">//利用Redisson的API成功获取锁时Redisson会自动启动WatchDog监听当前线程，底层实现是通过Lua脚本。</span></span><br><span class="line">                <span class="keyword">boolean</span> success = watchDogLock.tryLock();</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 是否成功获取锁：&quot;</span> + success);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (success) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 开始执行业务逻辑&quot;</span>);</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                        System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 业务执行成功，进行解锁&quot;</span>);</span><br><span class="line">                        watchDogLock.unlock();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 获取锁失败&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="2-2-Zookeeper实现分布式锁"><a href="#2-2-Zookeeper实现分布式锁" class="headerlink" title="2.2 Zookeeper实现分布式锁"></a>2.2 Zookeeper实现分布式锁</h3><h4 id="2-2-1-Zookeeper实现分布式锁原理"><a href="#2-2-1-Zookeeper实现分布式锁原理" class="headerlink" title="2.2.1  Zookeeper实现分布式锁原理"></a>2.2.1  Zookeeper实现分布式锁原理</h4><ol>
-<li><strong>数据结构</strong>：Zookeeper内部维护一个树形的数据结构，用户可以根据其提供的Api创建或者删除节点，并且Zookeeper会为每个节点生成一个不会重复并且根据创建顺序由小到大排列的序号。</li>
-<li><strong>永久节点和临时节点</strong>：永久节点除非手动删除，不然不会自动删除；临时节点会在客户端断开一段时间后自动删除，如果客户端没有断开链接，或者没有手动删除就会一直存在，同时永久节点下面可以创建临时节点，但是临时节点下面不能创建永久节点。</li>
-<li><strong>Watch机制</strong>：子节点可以在上一个节点创建一个监听器，同时传入一个回调方法，当前一个节点改变时（例如，删除，更新）会收到通知，并且执行回调方法。</li>
-</ol>
-<p>就是因为临时节点的特性，所以Zookeeper不会遇到和Redis相同的问题，如果客户端运行正常运行就不会删除临时节点，也就不会释放锁，如果客户端宕机那临时节点就会在客户端断开一段时间后自动删除。</p>
-<h4 id="2-2-2-Zookeeper分布式锁工作流程"><a href="#2-2-2-Zookeeper分布式锁工作流程" class="headerlink" title="2.2.2 Zookeeper分布式锁工作流程"></a>2.2.2 Zookeeper分布式锁工作流程</h4><ol>
-<li>当需要对资源进行加锁时，实际上就是在父节点之下创建一个临时顺序节点。</li>
-<li>客户端A来对资源加锁，首先判断当前创建的节点是否为最小节点，如果是，那么加锁成功，后续加锁线程阻塞等待。</li>
-<li>此时，客户端B也来尝试加锁，由于客户端A已经加锁成功，所以客户端B发现自己的节点并不是最小节点，就会去取到上一个节点，并且对上一节点注册监听。</li>
-<li>当客户端A操作完成，释放锁的操作就是删除这个节点，这样就可以触发监听事件，客户端B就会得到通知，同样，客户端B判断自己是否为最小节点，如果是，那么则加锁成功。</li>
-</ol>
-<h4 id="2-2-3-代码示例"><a href="#2-2-3-代码示例" class="headerlink" title="2.2.3 代码示例"></a>2.2.3 代码示例</h4><p>代码使用了Curator包，这个包封装了底层Zookeeper的操作，使用起来更加方便，可以有效减少样板代码。</p>
-<p>首先引入依赖</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&lt;!-- https:<span class="comment">//mvnrepository.com/artifact/org.apache.curator/curator-recipes --&gt;</span></span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.curator&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;curator-recipes&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;<span class="number">5.1</span><span class="number">.0</span>&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
-<p>代码示例</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> CuratorFramework ZK_CLIENT;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">    	<span class="comment">//初始化Zookeeper配置</span></span><br><span class="line">        String zkServerAddress = <span class="string">&quot;127.0.0.1:12181&quot;</span>;</span><br><span class="line">        ExponentialBackoffRetry retryPolicy = <span class="keyword">new</span> ExponentialBackoffRetry(<span class="number">1000</span>, <span class="number">3</span>, <span class="number">5000</span>);</span><br><span class="line">        ZK_CLIENT = CuratorFrameworkFactory.builder()</span><br><span class="line">                .connectString(zkServerAddress)</span><br><span class="line">                .sessionTimeoutMs(<span class="number">5000</span>)</span><br><span class="line">                .connectionTimeoutMs(<span class="number">5000</span>)</span><br><span class="line">                .retryPolicy(retryPolicy)</span><br><span class="line">                .build();</span><br><span class="line">        ZK_CLIENT.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String LOCK_PATH = <span class="string">&quot;/myLock&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//创建锁对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> InterProcessMutex LOCK = <span class="keyword">new</span> InterProcessMutex(ZK_CLIENT, LOCK_PATH);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        Thread myThread1 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread2 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread3 = <span class="keyword">new</span> MyThread();</span><br><span class="line">        Thread myThread4 = <span class="keyword">new</span> MyThread();</span><br><span class="line"></span><br><span class="line">        myThread1.start();</span><br><span class="line">        myThread2.start();</span><br><span class="line">        myThread3.start();</span><br><span class="line">        myThread4.start();</span><br><span class="line"></span><br><span class="line">        myThread1.join();</span><br><span class="line">        myThread2.join();</span><br><span class="line">        myThread3.join();</span><br><span class="line">        myThread4.join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                	<span class="comment">//加锁</span></span><br><span class="line">                    LOCK.acquire();</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 获取到锁&quot;</span>);</span><br><span class="line">                    Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        System.out.println(Thread.currentThread().getName() + <span class="string">&quot; 释放锁&quot;</span>);</span><br><span class="line">                        <span class="comment">//解锁</span></span><br><span class="line">                        LOCK.release();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="3-总结"><a href="#3-总结" class="headerlink" title="3 总结"></a>3 总结</h2><p>Redis和Zookeeper都能够实现分布式锁，但是他们之间有相同点和不同点，使用的时候需要根据需求来选择。<br><strong>相同点</strong>：由于工具封装的都比较好，实现起来都很简单。</p>
-<p><strong>不同点</strong>：</p>
-<ol>
-<li><strong>可靠性</strong>：Zookeeper可靠性高于Redis，因为Zookeeper的实现方式而言，本身就是保证数据一致性的，可靠性更高，而Redis不是数据强一致性的，某些极端场景下还是可能会存在问题。</li>
-<li><strong>性能</strong>：Redis性能比Zookeeper好，因为Zookeeper需要频繁创建和删除节点，性能略低。</li>
-</ol>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>分布式</tag>
-        <tag>多线程</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Java内存模型与线程</title>
-    <url>/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/</url>
+    <url>/posts/badf9669.html</url>
     <content><![CDATA[<h2 id="Java内存模型"><a href="#Java内存模型" class="headerlink" title="Java内存模型"></a>Java内存模型</h2><p>内存模型一词可以理解为在特定的操作协议下，对特定的内存或高速缓存进行读写访问的过程抽象；<br>在jdk5发布后Java内存模型才终于成熟、完善起来</p>
 <span id="more"></span>
 
@@ -894,7 +894,7 @@
   </entry>
   <entry>
     <title>java高并发程序设计</title>
-    <url>/java%E9%AB%98%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/</url>
+    <url>/posts/dd8d8414.html</url>
     <content><![CDATA[<p>高并发是 java 开发必备知识，本篇文章整理出在高并发程序设计中常用的工具。</p>
 <span id="more"></span>
 
@@ -1115,25 +1115,8 @@
       </tags>
   </entry>
   <entry>
-    <title>Wireshark 简明教程</title>
-    <url>/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</url>
-    <content><![CDATA[<p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
-<span id="more"></span>
-
-<h2 id="下载wireshark"><a href="#下载wireshark" class="headerlink" title="下载wireshark"></a>下载wireshark</h2><p><a href="https://www.wireshark.org/download.html">wireshark下载地址</a><br>选择Windows Installer (64-bit)，下载成功后一直点next就可以了。<br><img src="https://img-blog.csdnimg.cn/20210507224116599.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>2.1 选择网卡<br>打开软件，界面如下所示，被红框标记起来的就是网卡列表，如果你使用的是无线网就可以选择WLAN。<br><img src="https://img-blog.csdnimg.cn/20210507224420963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.2 开始抓包<br>双击选中目标网卡就会进入到抓包主界面，如图：<br><img src="https://img-blog.csdnimg.cn/20210507224707882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>被红框选中的就是该网卡发送和接受的网络包了，后续会详细讲解如果通过wireshark抓包学习网络。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Wireshark</tag>
-        <tag>网络</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>【Mybatis源码解读】jdbc包</title>
-    <url>/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</url>
+    <url>/posts/693eec27.html</url>
     <content><![CDATA[<h2 id="1-jdbc包的作用"><a href="#1-jdbc包的作用" class="headerlink" title="1. jdbc包的作用"></a>1. jdbc包的作用</h2><p>jdbc包作为Mybatis框架的核心包之一可以理解为是<strong>操作Sql的工具包</strong>，因为通过阅读代码观察到这个jdbc包里面的类并没有被Mybatis框架本身引用，而其本身的作用又是对sql的操作，所以当作工具包来理解是没有什么问题的。</p>
 <span id="more"></span>
 
@@ -1190,8 +1173,25 @@
       </tags>
   </entry>
   <entry>
+    <title>Wireshark 简明教程</title>
+    <url>/posts/65f8076a.html</url>
+    <content><![CDATA[<p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
+<span id="more"></span>
+
+<h2 id="下载wireshark"><a href="#下载wireshark" class="headerlink" title="下载wireshark"></a>下载wireshark</h2><p><a href="https://www.wireshark.org/download.html">wireshark下载地址</a><br>选择Windows Installer (64-bit)，下载成功后一直点next就可以了。<br><img src="https://img-blog.csdnimg.cn/20210507224116599.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>2.1 选择网卡<br>打开软件，界面如下所示，被红框标记起来的就是网卡列表，如果你使用的是无线网就可以选择WLAN。<br><img src="https://img-blog.csdnimg.cn/20210507224420963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.2 开始抓包<br>双击选中目标网卡就会进入到抓包主界面，如图：<br><img src="https://img-blog.csdnimg.cn/20210507224707882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>被红框选中的就是该网卡发送和接受的网络包了，后续会详细讲解如果通过wireshark抓包学习网络。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Wireshark</tag>
+        <tag>网络</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
-    <url>/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</url>
+    <url>/posts/b65feaa2.html</url>
     <content><![CDATA[<p>本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章<a href="https://blog.csdn.net/qq_43005544/article/details/116504407">wireshark 简易教程</a></p>
 <span id="more"></span>
 
@@ -1230,8 +1230,126 @@
       </tags>
   </entry>
   <entry>
+    <title>位运算学习笔记</title>
+    <url>/posts/25cb8793.html</url>
+    <content><![CDATA[<h2 id="位运算符"><a href="#位运算符" class="headerlink" title="位运算符"></a>位运算符</h2><h3 id="位逻辑运算符"><a href="#位逻辑运算符" class="headerlink" title="位逻辑运算符"></a>位逻辑运算符</h3><table>
+<thead>
+<tr>
+<th>运算符</th>
+<th>含义</th>
+<th>举例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&amp;</td>
+<td>与</td>
+<td>a &amp; b</td>
+</tr>
+<tr>
+<td>|</td>
+<td>或</td>
+<td>a | b</td>
+</tr>
+<tr>
+<td>~</td>
+<td>取反</td>
+<td>~a</td>
+</tr>
+<tr>
+<td>^</td>
+<td>异或</td>
+<td>a ^ b</td>
+</tr>
+</tbody></table>
+<h4 id="逻辑运算结果集"><a href="#逻辑运算结果集" class="headerlink" title="逻辑运算结果集"></a>逻辑运算结果集</h4><span id="more"></span>
+
+<p>逻辑运算相对简单，下面用一个表格来展示运算逻辑和结果。</p>
+<p>ps： 前两列为 A、B 的取值； A &amp; B 只有两个值都为1的时候结果才唯一；A|B 只要两个中有一个为1结果就为1；A^B 如果两个值不一样时结果为1；~A 取反。</p>
+<table>
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>A&amp;B</th>
+<th>A|B</th>
+<th>A^B</th>
+<th>~A</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<h3 id="位移运算符"><a href="#位移运算符" class="headerlink" title="位移运算符"></a>位移运算符</h3><table>
+<thead>
+<tr>
+<th>运算符</th>
+<th>含义</th>
+<th>举例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&lt;&lt;</td>
+<td>左位移</td>
+<td>a &lt;&lt; 2</td>
+</tr>
+<tr>
+<td>&gt;&gt;</td>
+<td>右位移</td>
+<td>b &gt;&gt; 4</td>
+</tr>
+<tr>
+<td>&gt;&gt;&gt;</td>
+<td>无符号右位移</td>
+<td>x &gt;&gt;&gt;2</td>
+</tr>
+</tbody></table>
+<h4 id="左移运算符"><a href="#左移运算符" class="headerlink" title="左移运算符"></a>左移运算符</h4><p><code>&lt;&lt;</code>  为左移运算符。它的作用是将二进制数字整体向左移动；<strong>在符号位不变的情况</strong>下每左移一位相当于在原有基础上乘以2。</p>
+<p>下图为左移运算的示意图，高位益处则舍弃，低位不够则补零。</p>
+<p><img src="https://s2.loli.net/2022/01/09/v4xuoJ17RNWYXIA.png" alt="image-20220109165615031"></p>
+<h4 id="右移运算符"><a href="#右移运算符" class="headerlink" title="右移运算符"></a>右移运算符</h4><p><code>&gt;&gt;</code> 与左移运算符相反，它的作用是将二进制数字整体向右移动；每次右移相当于原来的数字除以2；右移运算符对正负数有不同的策略，如果是正数，最高位会补 0 ，如果是负数最高位补 1，<strong>这样可以保证正数做完运算还是正数，负数做完运算还是负数</strong>。</p>
+<p><img src="https://s2.loli.net/2022/01/09/OjUpcdlGsDZk8bu.png" alt="image-20220109171054303"></p>
+<h4 id="无符号右移"><a href="#无符号右移" class="headerlink" title="无符号右移"></a>无符号右移</h4><p><code>&gt;&gt;&gt;</code> 为无符号右移运算符。运算逻辑与右移运算符相同，唯一的不同是它只会在最高位补 0，这样可能导致负数变正数；<strong>在符号位不变的情况</strong>下每右移一位相当于在原有基础上除以2。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>计算机原理</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>垃圾收集器与内存分配策略</title>
-    <url>/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%B8%8E%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/</url>
+    <url>/posts/ddb92a08.html</url>
     <content><![CDATA[<h2 id="对象已死？-判断对象是否可以回收"><a href="#对象已死？-判断对象是否可以回收" class="headerlink" title="对象已死？(判断对象是否可以回收)"></a>对象已死？(判断对象是否可以回收)</h2><h3 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h3><ul>
 <li><p>reference类型的数据中存储的数值代表的是另一块内存的起始地址</p>
 <ul>
@@ -1386,207 +1504,8 @@
       </tags>
   </entry>
   <entry>
-    <title>位运算学习笔记</title>
-    <url>/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<h2 id="位运算符"><a href="#位运算符" class="headerlink" title="位运算符"></a>位运算符</h2><h3 id="位逻辑运算符"><a href="#位逻辑运算符" class="headerlink" title="位逻辑运算符"></a>位逻辑运算符</h3><table>
-<thead>
-<tr>
-<th>运算符</th>
-<th>含义</th>
-<th>举例</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>&amp;</td>
-<td>与</td>
-<td>a &amp; b</td>
-</tr>
-<tr>
-<td>|</td>
-<td>或</td>
-<td>a | b</td>
-</tr>
-<tr>
-<td>~</td>
-<td>取反</td>
-<td>~a</td>
-</tr>
-<tr>
-<td>^</td>
-<td>异或</td>
-<td>a ^ b</td>
-</tr>
-</tbody></table>
-<h4 id="逻辑运算结果集"><a href="#逻辑运算结果集" class="headerlink" title="逻辑运算结果集"></a>逻辑运算结果集</h4><span id="more"></span>
-
-<p>逻辑运算相对简单，下面用一个表格来展示运算逻辑和结果。</p>
-<p>ps： 前两列为 A、B 的取值； A &amp; B 只有两个值都为1的时候结果才唯一；A|B 只要两个中有一个为1结果就为1；A^B 如果两个值不一样时结果为1；~A 取反。</p>
-<table>
-<thead>
-<tr>
-<th>A</th>
-<th>B</th>
-<th>A&amp;B</th>
-<th>A|B</th>
-<th>A^B</th>
-<th>~A</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
-</tr>
-<tr>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-</tr>
-<tr>
-<td>0</td>
-<td>1</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-</tr>
-<tr>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-</tr>
-</tbody></table>
-<h3 id="位移运算符"><a href="#位移运算符" class="headerlink" title="位移运算符"></a>位移运算符</h3><table>
-<thead>
-<tr>
-<th>运算符</th>
-<th>含义</th>
-<th>举例</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>&lt;&lt;</td>
-<td>左位移</td>
-<td>a &lt;&lt; 2</td>
-</tr>
-<tr>
-<td>&gt;&gt;</td>
-<td>右位移</td>
-<td>b &gt;&gt; 4</td>
-</tr>
-<tr>
-<td>&gt;&gt;&gt;</td>
-<td>无符号右位移</td>
-<td>x &gt;&gt;&gt;2</td>
-</tr>
-</tbody></table>
-<h4 id="左移运算符"><a href="#左移运算符" class="headerlink" title="左移运算符"></a>左移运算符</h4><p><code>&lt;&lt;</code>  为左移运算符。它的作用是将二进制数字整体向左移动；<strong>在符号位不变的情况</strong>下每左移一位相当于在原有基础上乘以2。</p>
-<p>下图为左移运算的示意图，高位益处则舍弃，低位不够则补零。</p>
-<p><img src="https://s2.loli.net/2022/01/09/v4xuoJ17RNWYXIA.png" alt="image-20220109165615031"></p>
-<h4 id="右移运算符"><a href="#右移运算符" class="headerlink" title="右移运算符"></a>右移运算符</h4><p><code>&gt;&gt;</code> 与左移运算符相反，它的作用是将二进制数字整体向右移动；每次右移相当于原来的数字除以2；右移运算符对正负数有不同的策略，如果是正数，最高位会补 0 ，如果是负数最高位补 1，<strong>这样可以保证正数做完运算还是正数，负数做完运算还是负数</strong>。</p>
-<p><img src="https://s2.loli.net/2022/01/09/OjUpcdlGsDZk8bu.png" alt="image-20220109171054303"></p>
-<h4 id="无符号右移"><a href="#无符号右移" class="headerlink" title="无符号右移"></a>无符号右移</h4><p><code>&gt;&gt;&gt;</code> 为无符号右移运算符。运算逻辑与右移运算符相同，唯一的不同是它只会在最高位补 0，这样可能导致负数变正数；<strong>在符号位不变的情况</strong>下每右移一位相当于在原有基础上除以2。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>计算机原理</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>指令详解-寻址方式</title>
-    <url>/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/</url>
-    <content><![CDATA[<h2 id="数据寻址"><a href="#数据寻址" class="headerlink" title="数据寻址"></a>数据寻址</h2><p>简单来说就是根据地址码取数据。</p>
-<p>指令中通常会增加一个寻址特征字段，这个字段就是告诉操作系统如何取数据的，如图：因为不同寻址方式的实现不同，所以地址码中存储的并不一定是真实的数据地址，所以这里用形式地址代替。</p>
-<p><img src="https://s2.loli.net/2022/01/08/buwDO8aYx3I5npg.png" alt="image-20220108103344939"></p>
-<p>根据寻址特征的不同通常将寻址方式分为以下几类。</p>
-<span id="more"></span>
-
-<h3 id="立即寻址特征"><a href="#立即寻址特征" class="headerlink" title="立即寻址特征"></a>立即寻址特征</h3><p>定义：地址码存的就是操作数本身。</p>
-<p><img src="https://s2.loli.net/2022/01/08/v6yKge7ZaRG1bDd.png" alt="image-20220108111245946"></p>
-<h3 id="直接寻址特征"><a href="#直接寻址特征" class="headerlink" title="直接寻址特征"></a>直接寻址特征</h3><p>定义：地址码存储的是操作数的内存地址。</p>
-<p><img src="https://s2.loli.net/2022/01/08/KwNxtdfUGmeLM39.png" alt="image-20220108111313336"></p>
-<h3 id="隐含寻址特性"><a href="#隐含寻址特性" class="headerlink" title="隐含寻址特性"></a>隐含寻址特性</h3><p>定义：运算所需的操作数地址并没有都存储在指令中。</p>
-<p>例如，单地址指令中就不是明显地在地址字段中指出第二操作数的地址，而是规定累加器ACC作为第二操作数，指令格式明显指出的仅是第一操作数的地址。因此，累加器ACC对单地址指令格式来说是隐含地址。</p>
-<p><img src="https://s2.loli.net/2022/01/08/l4BnqWbNGPe51tQ.png" alt="image-20220108111457917"></p>
-<h3 id="间接寻址特性"><a href="#间接寻址特性" class="headerlink" title="间接寻址特性"></a>间接寻址特性</h3><p>定义：操作数需要通过其他指令中存储的地址得到。</p>
-<p>如图所示，指令中的形式地址 A 存储着 EA 操作数的地址，通过这个地址才能间接的找到 EA 的操作数。</p>
-<p><img src="https://s2.loli.net/2022/01/08/8TuMsyR91XzCieU.png" alt="image-20220108112320965"></p>
-<p>ps: 间接地址可以有多个，简单说可能需要多次跳转才能找到 EA 这个操作数。</p>
-<h3 id="寄存器间接寻址特征"><a href="#寄存器间接寻址特征" class="headerlink" title="寄存器间接寻址特征"></a>寄存器间接寻址特征</h3><p>定义：地址码中存储着寄存器的编号，指令所需的操作数的地址存储在寄存器中。</p>
-<p>如图 ：需要先根据地址码中的寄存器地址找到寄存器，之后才能根据寄存器中存储的操作数地址找到操作数。</p>
-<p><img src="https://s2.loli.net/2022/01/08/UQka8cPq9oByJDz.png" alt="image-20220108121433750"></p>
-<h3 id="基址寻址特征"><a href="#基址寻址特征" class="headerlink" title="基址寻址特征"></a>基址寻址特征</h3><p>定义：由一个寄存器存储一个基础内存地址，然后指令中的地址码存储着一个基于基础内存地址的偏移量，真实的操作数地址等于基础内存地址加上偏移量。</p>
-<p>如图，需要在指令中维护一个寄存器的地址，寻址的时候先从寄存器中拿到基础内存地址，然后再加上内存地址的偏移量，就可以找到操作数了。</p>
-<p><img src="https://s2.loli.net/2022/01/08/k7enaVYZXgcFsOx.png" alt="image-20220108122536632"></p>
-<p>特点如下：</p>
-<ul>
-<li>可扩大寻址范围（基础内存地址的位数大于形式地址的位数）；</li>
-<li>用户不必考虑自己的程序存于主存的哪一空间区域；</li>
-<li>基础内存地址由操作系统维护，用户只能更改形式地址；</li>
-</ul>
-<h3 id="变址寻址特征"><a href="#变址寻址特征" class="headerlink" title="变址寻址特征"></a>变址寻址特征</h3><p>与基址寻址特别相像，最大的不同是内存地址的偏移量是不变的，可变基础内存地址是可变的。</p>
-<p><img src="https://s2.loli.net/2022/01/08/wZb5iAOKRzcMBJt.png" alt="image-20220108123738283"></p>
-<p>特点：</p>
-<ul>
-<li>可扩大寻址范围（基础内存地址的位数大于形式地址的位数）；</li>
-<li>方便处理数组问题和循环程序。例如形式地址 A 为数组的首地址，通过不断改变可变基础地址就能够很容易形成数组中任意数据的地址。</li>
-</ul>
-<h3 id="相对寻址特征"><a href="#相对寻址特征" class="headerlink" title="相对寻址特征"></a>相对寻址特征</h3><p>相对寻址是把程序计数器PC的内容加上指令格式中的形式地址A而形成操作数的有效地址。</p>
-<p><img src="https://s2.loli.net/2022/01/08/N1e3ZTXhdYQ9OBg.png" alt="image-20220108222644952"></p>
-<p>优点：相对寻址的优点是操作数的地址不是固定的，它随着PC的值得变化而变化，并且与指令地址之间总是相差一个固定值，因此便于程序浮动，相对寻址广泛应用于转移指令。</p>
-<h3 id="堆栈寻址特征"><a href="#堆栈寻址特征" class="headerlink" title="堆栈寻址特征"></a>堆栈寻址特征</h3><p>堆栈是存储器（或专用寄存器组）中一块特定的按“先进后出（LIFO）”原则管理的存储区，该存储区中被读、写单元的地址是用特定的寄存器给出的，该寄存器称为堆栈指针（SP）。堆栈可分为硬堆栈和软堆栈两种。</p>
-<p>寄存器堆栈又称为<strong>硬堆栈</strong>。寄存器堆栈的成本比较高，不适合做大容量的堆栈；而从主存中划出一段区域来做堆栈是最合算且最常用的方法，这种堆栈称为<strong>软堆栈</strong>。</p>
-<p>在采用堆栈结构的计算机系统中，大部分指令表面上都表现为为无操作数指令的形式，因为操作数地址都隐含使用了SP。通常情况下，在读写堆栈中的一个单元的前后都伴有自动完成对SP内容的增量或减量操作。</p>
-<p><img src="https://s2.loli.net/2022/01/08/DajzUl8HvnG1JE6.png" alt="image-20220108223757637"></p>
-<h2 id="指令寻址"><a href="#指令寻址" class="headerlink" title="指令寻址"></a>指令寻址</h2><p>执行完当前指令之后，如何寻找下一条指令的地址。</p>
-<h3 id="顺序寻址"><a href="#顺序寻址" class="headerlink" title="顺序寻址"></a>顺序寻址</h3><p>当前指令的地址加一就是下一条指令的地址。</p>
-<h3 id="跳跃寻址"><a href="#跳跃寻址" class="headerlink" title="跳跃寻址"></a>跳跃寻址</h3><p>下一条指令的地址由本条指令的地址码给出。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>计算机原理</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>指令详解-操作码</title>
-    <url>/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/</url>
-    <content><![CDATA[<h2 id="定长编码"><a href="#定长编码" class="headerlink" title="定长编码"></a>定长编码</h2><p>每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。<br>优点：计算机的硬件设计简单，朱令译码和执行速度快。<br>缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。<br>适用环境：适用于字长较长的计算机系统，如 32 位及以上。</p>
-<span id="more"></span>
-
-<p>如图：无论有几个地址码都不会影响操作码的长度。</p>
-<p><img src="https://s2.loli.net/2022/01/07/XzuvCTyoSpdbh2V.png" alt="image-20220107125003587"></p>
-<h2 id="变长编码"><a href="#变长编码" class="headerlink" title="变长编码"></a>变长编码</h2><p>每条指令的操作码的长度不是固定的，是可变的。之所以有变长编码是因为这会让系统更灵活，可以通过变动操作码的长度来保证地址码长度和指令长度不变。<br>如图：四地址指令和三地址指令的指令长度和地址码的长度是一样的。</p>
-<p><img src="https://s2.loli.net/2022/01/07/EyUX3z4txl7pV5c.png" alt="image-20220107125232359"></p>
-<p>优点：在拥有比较短的指令字长的系统中，既能表示出比较多的指令条数又能尽量满足操作数地址的要求。<br>缺点：计算机的硬件设计复杂，指令译码和执行速度较慢。<br>适用环境：适用于字长较短的计算机系统，如 16 位及以下。</p>
-<h3 id="扩展操作码"><a href="#扩展操作码" class="headerlink" title="扩展操作码"></a>扩展操作码</h3><p>为了保证不同类型指令的地址码和指令的长度不变，我们需要增加操作码的长度，这个操作就是扩展操作码。<br>例如现在有两条指令，一条是四地址指令，一条是三地址指令，下面是他们二进制数据的展示情况（为了把更多精力放在操作码上，地址码用 xxx 来表示）：</p>
-<p><img src="https://s2.loli.net/2022/01/07/O7QdwhIEz4ibgq8.png" alt="image-20220107125708122"></p>
-<p>看到上图的时候是不是还没察觉到问题？那么我们将图简化一下：</p>
-<p><img src="https://s2.loli.net/2022/01/07/AXLxmhVb4iF1nM5.png" alt="image-20220107125837964"></p>
-<p>看出来了吗？就是你无法分清这两条指令那条是三地址指令哪条是四地址指令。所以有了一个规定，短码不能是长码的前缀。<br>这个时候一般会预留出一个拓展窗口，例如减少一条四地址指令，让 1111 作为拓展窗口，让四地址指令的操作码最多取到 1110，这时如果你看到操作码是前四位是 1111 你就知道这个肯定不是四地址指令了，当然其他数量的地址指令通过类似的操作也可以解决这个问题，值得注意的是，拓展窗口不一定是一个，也可以是多个。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>计算机原理</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>常见的Web应用攻击手段</title>
-    <url>/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</url>
+    <url>/posts/bd83d0b7.html</url>
     <content><![CDATA[<h2 id="1-XSS攻击"><a href="#1-XSS攻击" class="headerlink" title="1.XSS攻击"></a>1.XSS攻击</h2><p>XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。</p>
 <span id="more"></span>
 
@@ -1642,8 +1561,89 @@
       </tags>
   </entry>
   <entry>
+    <title>指令详解-操作码</title>
+    <url>/posts/94f9446a.html</url>
+    <content><![CDATA[<h2 id="定长编码"><a href="#定长编码" class="headerlink" title="定长编码"></a>定长编码</h2><p>每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。<br>优点：计算机的硬件设计简单，朱令译码和执行速度快。<br>缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。<br>适用环境：适用于字长较长的计算机系统，如 32 位及以上。</p>
+<span id="more"></span>
+
+<p>如图：无论有几个地址码都不会影响操作码的长度。</p>
+<p><img src="https://s2.loli.net/2022/01/07/XzuvCTyoSpdbh2V.png" alt="image-20220107125003587"></p>
+<h2 id="变长编码"><a href="#变长编码" class="headerlink" title="变长编码"></a>变长编码</h2><p>每条指令的操作码的长度不是固定的，是可变的。之所以有变长编码是因为这会让系统更灵活，可以通过变动操作码的长度来保证地址码长度和指令长度不变。<br>如图：四地址指令和三地址指令的指令长度和地址码的长度是一样的。</p>
+<p><img src="https://s2.loli.net/2022/01/07/EyUX3z4txl7pV5c.png" alt="image-20220107125232359"></p>
+<p>优点：在拥有比较短的指令字长的系统中，既能表示出比较多的指令条数又能尽量满足操作数地址的要求。<br>缺点：计算机的硬件设计复杂，指令译码和执行速度较慢。<br>适用环境：适用于字长较短的计算机系统，如 16 位及以下。</p>
+<h3 id="扩展操作码"><a href="#扩展操作码" class="headerlink" title="扩展操作码"></a>扩展操作码</h3><p>为了保证不同类型指令的地址码和指令的长度不变，我们需要增加操作码的长度，这个操作就是扩展操作码。<br>例如现在有两条指令，一条是四地址指令，一条是三地址指令，下面是他们二进制数据的展示情况（为了把更多精力放在操作码上，地址码用 xxx 来表示）：</p>
+<p><img src="https://s2.loli.net/2022/01/07/O7QdwhIEz4ibgq8.png" alt="image-20220107125708122"></p>
+<p>看到上图的时候是不是还没察觉到问题？那么我们将图简化一下：</p>
+<p><img src="https://s2.loli.net/2022/01/07/AXLxmhVb4iF1nM5.png" alt="image-20220107125837964"></p>
+<p>看出来了吗？就是你无法分清这两条指令那条是三地址指令哪条是四地址指令。所以有了一个规定，短码不能是长码的前缀。<br>这个时候一般会预留出一个拓展窗口，例如减少一条四地址指令，让 1111 作为拓展窗口，让四地址指令的操作码最多取到 1110，这时如果你看到操作码是前四位是 1111 你就知道这个肯定不是四地址指令了，当然其他数量的地址指令通过类似的操作也可以解决这个问题，值得注意的是，拓展窗口不一定是一个，也可以是多个。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>计算机原理</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>指令详解-寻址方式</title>
+    <url>/posts/def90db1.html</url>
+    <content><![CDATA[<h2 id="数据寻址"><a href="#数据寻址" class="headerlink" title="数据寻址"></a>数据寻址</h2><p>简单来说就是根据地址码取数据。</p>
+<p>指令中通常会增加一个寻址特征字段，这个字段就是告诉操作系统如何取数据的，如图：因为不同寻址方式的实现不同，所以地址码中存储的并不一定是真实的数据地址，所以这里用形式地址代替。</p>
+<p><img src="https://s2.loli.net/2022/01/08/buwDO8aYx3I5npg.png" alt="image-20220108103344939"></p>
+<p>根据寻址特征的不同通常将寻址方式分为以下几类。</p>
+<span id="more"></span>
+
+<h3 id="立即寻址特征"><a href="#立即寻址特征" class="headerlink" title="立即寻址特征"></a>立即寻址特征</h3><p>定义：地址码存的就是操作数本身。</p>
+<p><img src="https://s2.loli.net/2022/01/08/v6yKge7ZaRG1bDd.png" alt="image-20220108111245946"></p>
+<h3 id="直接寻址特征"><a href="#直接寻址特征" class="headerlink" title="直接寻址特征"></a>直接寻址特征</h3><p>定义：地址码存储的是操作数的内存地址。</p>
+<p><img src="https://s2.loli.net/2022/01/08/KwNxtdfUGmeLM39.png" alt="image-20220108111313336"></p>
+<h3 id="隐含寻址特性"><a href="#隐含寻址特性" class="headerlink" title="隐含寻址特性"></a>隐含寻址特性</h3><p>定义：运算所需的操作数地址并没有都存储在指令中。</p>
+<p>例如，单地址指令中就不是明显地在地址字段中指出第二操作数的地址，而是规定累加器ACC作为第二操作数，指令格式明显指出的仅是第一操作数的地址。因此，累加器ACC对单地址指令格式来说是隐含地址。</p>
+<p><img src="https://s2.loli.net/2022/01/08/l4BnqWbNGPe51tQ.png" alt="image-20220108111457917"></p>
+<h3 id="间接寻址特性"><a href="#间接寻址特性" class="headerlink" title="间接寻址特性"></a>间接寻址特性</h3><p>定义：操作数需要通过其他指令中存储的地址得到。</p>
+<p>如图所示，指令中的形式地址 A 存储着 EA 操作数的地址，通过这个地址才能间接的找到 EA 的操作数。</p>
+<p><img src="https://s2.loli.net/2022/01/08/8TuMsyR91XzCieU.png" alt="image-20220108112320965"></p>
+<p>ps: 间接地址可以有多个，简单说可能需要多次跳转才能找到 EA 这个操作数。</p>
+<h3 id="寄存器间接寻址特征"><a href="#寄存器间接寻址特征" class="headerlink" title="寄存器间接寻址特征"></a>寄存器间接寻址特征</h3><p>定义：地址码中存储着寄存器的编号，指令所需的操作数的地址存储在寄存器中。</p>
+<p>如图 ：需要先根据地址码中的寄存器地址找到寄存器，之后才能根据寄存器中存储的操作数地址找到操作数。</p>
+<p><img src="https://s2.loli.net/2022/01/08/UQka8cPq9oByJDz.png" alt="image-20220108121433750"></p>
+<h3 id="基址寻址特征"><a href="#基址寻址特征" class="headerlink" title="基址寻址特征"></a>基址寻址特征</h3><p>定义：由一个寄存器存储一个基础内存地址，然后指令中的地址码存储着一个基于基础内存地址的偏移量，真实的操作数地址等于基础内存地址加上偏移量。</p>
+<p>如图，需要在指令中维护一个寄存器的地址，寻址的时候先从寄存器中拿到基础内存地址，然后再加上内存地址的偏移量，就可以找到操作数了。</p>
+<p><img src="https://s2.loli.net/2022/01/08/k7enaVYZXgcFsOx.png" alt="image-20220108122536632"></p>
+<p>特点如下：</p>
+<ul>
+<li>可扩大寻址范围（基础内存地址的位数大于形式地址的位数）；</li>
+<li>用户不必考虑自己的程序存于主存的哪一空间区域；</li>
+<li>基础内存地址由操作系统维护，用户只能更改形式地址；</li>
+</ul>
+<h3 id="变址寻址特征"><a href="#变址寻址特征" class="headerlink" title="变址寻址特征"></a>变址寻址特征</h3><p>与基址寻址特别相像，最大的不同是内存地址的偏移量是不变的，可变基础内存地址是可变的。</p>
+<p><img src="https://s2.loli.net/2022/01/08/wZb5iAOKRzcMBJt.png" alt="image-20220108123738283"></p>
+<p>特点：</p>
+<ul>
+<li>可扩大寻址范围（基础内存地址的位数大于形式地址的位数）；</li>
+<li>方便处理数组问题和循环程序。例如形式地址 A 为数组的首地址，通过不断改变可变基础地址就能够很容易形成数组中任意数据的地址。</li>
+</ul>
+<h3 id="相对寻址特征"><a href="#相对寻址特征" class="headerlink" title="相对寻址特征"></a>相对寻址特征</h3><p>相对寻址是把程序计数器PC的内容加上指令格式中的形式地址A而形成操作数的有效地址。</p>
+<p><img src="https://s2.loli.net/2022/01/08/N1e3ZTXhdYQ9OBg.png" alt="image-20220108222644952"></p>
+<p>优点：相对寻址的优点是操作数的地址不是固定的，它随着PC的值得变化而变化，并且与指令地址之间总是相差一个固定值，因此便于程序浮动，相对寻址广泛应用于转移指令。</p>
+<h3 id="堆栈寻址特征"><a href="#堆栈寻址特征" class="headerlink" title="堆栈寻址特征"></a>堆栈寻址特征</h3><p>堆栈是存储器（或专用寄存器组）中一块特定的按“先进后出（LIFO）”原则管理的存储区，该存储区中被读、写单元的地址是用特定的寄存器给出的，该寄存器称为堆栈指针（SP）。堆栈可分为硬堆栈和软堆栈两种。</p>
+<p>寄存器堆栈又称为<strong>硬堆栈</strong>。寄存器堆栈的成本比较高，不适合做大容量的堆栈；而从主存中划出一段区域来做堆栈是最合算且最常用的方法，这种堆栈称为<strong>软堆栈</strong>。</p>
+<p>在采用堆栈结构的计算机系统中，大部分指令表面上都表现为为无操作数指令的形式，因为操作数地址都隐含使用了SP。通常情况下，在读写堆栈中的一个单元的前后都伴有自动完成对SP内容的增量或减量操作。</p>
+<p><img src="https://s2.loli.net/2022/01/08/DajzUl8HvnG1JE6.png" alt="image-20220108223757637"></p>
+<h2 id="指令寻址"><a href="#指令寻址" class="headerlink" title="指令寻址"></a>指令寻址</h2><p>执行完当前指令之后，如何寻找下一条指令的地址。</p>
+<h3 id="顺序寻址"><a href="#顺序寻址" class="headerlink" title="顺序寻址"></a>顺序寻址</h3><p>当前指令的地址加一就是下一条指令的地址。</p>
+<h3 id="跳跃寻址"><a href="#跳跃寻址" class="headerlink" title="跳跃寻址"></a>跳跃寻址</h3><p>下一条指令的地址由本条指令的地址码给出。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>计算机原理</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>指令详解-地址码</title>
-    <url>/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/</url>
+    <url>/posts/adb2ba17.html</url>
     <content><![CDATA[<h2 id="指令是什么："><a href="#指令是什么：" class="headerlink" title="指令是什么："></a>指令是什么：</h2><p>可以将指令当做一种编程语言，表现形式为一串二进制码，作用是能让计算机按照指令去工作。</p>
 <p>指令由两部分组成，操作码和地址码，下面我们着重看下<strong>地址码</strong>。</p>
 <span id="more"></span>
@@ -1672,7 +1672,7 @@
   </entry>
   <entry>
     <title>网站典型故障案例</title>
-    <url>/%E7%BD%91%E7%AB%99%E5%85%B8%E5%9E%8B%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B/</url>
+    <url>/posts/269fd615.html</url>
     <content><![CDATA[<h2 id="1-写日志也会引发故障"><a href="#1-写日志也会引发故障" class="headerlink" title="1.写日志也会引发故障"></a>1.写日志也会引发故障</h2><h3 id="故障现象"><a href="#故障现象" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用服务器在项目发布后不久就出现报警，硬盘可用空间低于警戒值，并且很快就宕机。登录到线上服务器，发现log文件夹里的文件迅速增加，不断消耗磁盘空间。</p>
 <span id="more"></span>
 
@@ -1700,96 +1700,8 @@
       </tags>
   </entry>
   <entry>
-    <title>网站的高性能架构</title>
-    <url>/%E7%BD%91%E7%AB%99%E7%9A%84%E9%AB%98%E6%80%A7%E8%83%BD%E6%9E%B6%E6%9E%84/</url>
-    <content><![CDATA[<p>网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。</p>
-<span id="more"></span>
-
-<h2 id="1-网站性能测试"><a href="#1-网站性能测试" class="headerlink" title="1. 网站性能测试"></a>1. 网站性能测试</h2><p>性能测试是性能优化的前提和基础，也是性能优化结果的检查和度量标准。不同视角下的网站性能有不同的标准，也有不同的优化手段。</p>
-<h3 id="1-1不同视角下的网站性能"><a href="#1-1不同视角下的网站性能" class="headerlink" title="1.1不同视角下的网站性能"></a>1.1不同视角下的网站性能</h3><ul>
-<li><p>1.1.1 用户视角的网站性能</p>
-<p>从用户角度，网站性能就是用户在浏览器上直观感受到的网站响应速度快还是慢</p>
-<ul>
-<li><p>优化手段：</p>
-<p>使用一些前端架构优化手段，通过优化页面HTML式样、利用浏览器端的并发和异步特性、调整浏览器缓存策略、使用CDN服务、反向代理等手段，使浏览器尽快地显示用户感兴趣的内容、尽可能近地获取页面内容，即使不优化应用程序和架构，也可以很大程度地改善用户视角下的网站性能</p>
-</li>
-</ul>
-</li>
-<li><p>1.1.2 开发人员视角的网站性能</p>
-<p>开发人员关注的主要是应用程序本身及其相关子系统的性能，包括响应延迟、系统吞吐量、并发处理能力、系统稳定性等技术指标。</p>
-<ul>
-<li><p>优化手段：</p>
-<p>使用缓存加速数据读取，使用集群提高吞吐能力，使用异步消息加快请求响应及实现削峰，使用代码优化手段改善程序性能。</p>
-</li>
-</ul>
-</li>
-<li><p>1.1.3 运维人员视角的网站性能</p>
-<p>运维人员更关注基础设施性能和资源利用率，如网络运营商的带宽能力、服务器硬件的配置、数据中心网络架构、服务器和网络带宽的资源利用率等</p>
-<ul>
-<li><p>优化手段</p>
-<p>建设优化骨干网、使用高性价比定制服务器、利用虚拟化技术优化资源利用等</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="1-2-性能测试指标"><a href="#1-2-性能测试指标" class="headerlink" title="1.2 性能测试指标"></a>1.2 性能测试指标</h3><p>不同视角下有不同的性能标准，不同的标准有不同的性能测试指标，从开发和测试人员的视角，网站性能测试的主要指标有响应时间、并发数、吞吐量、性能计数器等</p>
-<ul>
-<li><p>1.2.1 响应时间</p>
-<p>指应用执行一个操作需要的时间，包括从发出请求开始到收到最后响应数据所需要的时间</p>
-</li>
-<li><p>1.2.2 并发数</p>
-<p>指系统能够同时处理请求的数目，这个数字也反映了系统的负载特性。</p>
-</li>
-<li><p>1.2.3 吞吐量</p>
-<p>单位时间内系统处理的请求数量，体现系统的整体处理能力</p>
-</li>
-<li><p>1.2.4 性能计数器</p>
-<p>它是描述服务器或操作系统性能的一些数据指标。包括SystemLoad、对象与线程数、内存使用、CPU使用、磁盘与网络I/O等指标。这些指标也是系统监控的重要参数，对这些指标设置报警阈值，当监控系统发现性能计数器超过阈值时，就向运维和开发人员报警，及时发现处理系统异常。</p>
-</li>
-</ul>
-<h3 id="1-3-性能测试方法"><a href="#1-3-性能测试方法" class="headerlink" title="1.3 性能测试方法"></a>1.3 性能测试方法</h3><p>性能测试是一个总称，具体可细分为性能测试、负载测试、压力测试、稳定性测试。</p>
-<h2 id="2-Web前端性能优化"><a href="#2-Web前端性能优化" class="headerlink" title="2. Web前端性能优化"></a>2. Web前端性能优化</h2><h3 id="2-1-浏览器访问优化"><a href="#2-1-浏览器访问优化" class="headerlink" title="2.1 浏览器访问优化"></a>2.1 浏览器访问优化</h3><ul>
-<li><p>2.1.1 减少http请求</p>
-<ul>
-<li><p>2.1.1.1 为什么</p>
-<p>HTTP协议是无状态的应用层协议，意味着每次HTTP请求都需要建立通信链路、进行数据传输，而在服务器端，每个HTTP都需要启动独立的线程去处理</p>
-</li>
-<li><p>2.1.1.2 怎么办</p>
-<p>合并CSS、合并JavaScript、合并图片，这样一次请求就可以获取多个需要的文件</p>
-</li>
-</ul>
-</li>
-<li><p>2.1.2 使用浏览器缓存</p>
-<p>将更新的频率都低，而访问平凡的文件缓存在浏览器中，可以极好地改善性能</p>
-</li>
-<li><p>2.1.3 启用压缩</p>
-<p>在服务器端对文件进行压缩，在浏览器端对文件解压缩，可有效减少通信传输的数据量。有利就有弊，压缩对服务器和浏览器产生一定的压力，在通信带宽良好，而服务器资源不足的情况下要权衡考虑。</p>
-</li>
-<li><p>2.1.4 CSS放在页面最上面、JavaScript放在页面最下面</p>
-<p>浏览器会在下载完全部CSS之后才对整个页面进行渲染，因此最好的做法是将CSS放在页面最上面，让浏览器尽快下载CSS。JavaScript则相反，浏览器在加载JavaScript后立即执行，有可能会阻塞整个页面，造成页面显示缓慢，因此JavaScript最好放在页面最下面。</p>
-</li>
-<li><p>2.1.5 减少Cookie传输</p>
-<p>Cookie包含在每次请求和响应中，太大的Cookie会严重影响数据传输</p>
-</li>
-<li><p>2.1.5 CDN加速</p>
-<p>CDN（Content Distribute Network，内容分发网络）的本质仍然是一个缓存，而且将数据缓存在离用户最近的地方，使用户以最快速度获取数据</p>
-</li>
-<li><p>2.1.6 反向代理</p>
-<p>1、可以缓存静态内容，加快web访问；<br>2、保护网站安全，相当于在Web服务器和可能的网络攻击之间建立了一个屏障。</p>
-</li>
-</ul>
-<h2 id="3-应用服务器性能优化"><a href="#3-应用服务器性能优化" class="headerlink" title="3. 应用服务器性能优化"></a>3. 应用服务器性能优化</h2><p>优化手段主要有缓存、集群、异步等。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>网站架构模式</title>
-    <url>/%E7%BD%91%E7%AB%99%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%BC%8F/</url>
+    <url>/posts/15dd4f.html</url>
     <content><![CDATA[<p>大型互联网公司为了实现网站的高性能、高可用、易伸缩、可扩展、安全等各种技术架构目标，提出了很多解决方案，而这些方案又被更多网站重复使用，从而逐渐形成大型网站架构模式，下面对常见的模式进行总结。</p>
 <span id="more"></span>
 
@@ -1897,8 +1809,184 @@
       </tags>
   </entry>
   <entry>
+    <title>网站的高性能架构</title>
+    <url>/posts/7b9932ab.html</url>
+    <content><![CDATA[<p>网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。</p>
+<span id="more"></span>
+
+<h2 id="1-网站性能测试"><a href="#1-网站性能测试" class="headerlink" title="1. 网站性能测试"></a>1. 网站性能测试</h2><p>性能测试是性能优化的前提和基础，也是性能优化结果的检查和度量标准。不同视角下的网站性能有不同的标准，也有不同的优化手段。</p>
+<h3 id="1-1不同视角下的网站性能"><a href="#1-1不同视角下的网站性能" class="headerlink" title="1.1不同视角下的网站性能"></a>1.1不同视角下的网站性能</h3><ul>
+<li><p>1.1.1 用户视角的网站性能</p>
+<p>从用户角度，网站性能就是用户在浏览器上直观感受到的网站响应速度快还是慢</p>
+<ul>
+<li><p>优化手段：</p>
+<p>使用一些前端架构优化手段，通过优化页面HTML式样、利用浏览器端的并发和异步特性、调整浏览器缓存策略、使用CDN服务、反向代理等手段，使浏览器尽快地显示用户感兴趣的内容、尽可能近地获取页面内容，即使不优化应用程序和架构，也可以很大程度地改善用户视角下的网站性能</p>
+</li>
+</ul>
+</li>
+<li><p>1.1.2 开发人员视角的网站性能</p>
+<p>开发人员关注的主要是应用程序本身及其相关子系统的性能，包括响应延迟、系统吞吐量、并发处理能力、系统稳定性等技术指标。</p>
+<ul>
+<li><p>优化手段：</p>
+<p>使用缓存加速数据读取，使用集群提高吞吐能力，使用异步消息加快请求响应及实现削峰，使用代码优化手段改善程序性能。</p>
+</li>
+</ul>
+</li>
+<li><p>1.1.3 运维人员视角的网站性能</p>
+<p>运维人员更关注基础设施性能和资源利用率，如网络运营商的带宽能力、服务器硬件的配置、数据中心网络架构、服务器和网络带宽的资源利用率等</p>
+<ul>
+<li><p>优化手段</p>
+<p>建设优化骨干网、使用高性价比定制服务器、利用虚拟化技术优化资源利用等</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-2-性能测试指标"><a href="#1-2-性能测试指标" class="headerlink" title="1.2 性能测试指标"></a>1.2 性能测试指标</h3><p>不同视角下有不同的性能标准，不同的标准有不同的性能测试指标，从开发和测试人员的视角，网站性能测试的主要指标有响应时间、并发数、吞吐量、性能计数器等</p>
+<ul>
+<li><p>1.2.1 响应时间</p>
+<p>指应用执行一个操作需要的时间，包括从发出请求开始到收到最后响应数据所需要的时间</p>
+</li>
+<li><p>1.2.2 并发数</p>
+<p>指系统能够同时处理请求的数目，这个数字也反映了系统的负载特性。</p>
+</li>
+<li><p>1.2.3 吞吐量</p>
+<p>单位时间内系统处理的请求数量，体现系统的整体处理能力</p>
+</li>
+<li><p>1.2.4 性能计数器</p>
+<p>它是描述服务器或操作系统性能的一些数据指标。包括SystemLoad、对象与线程数、内存使用、CPU使用、磁盘与网络I/O等指标。这些指标也是系统监控的重要参数，对这些指标设置报警阈值，当监控系统发现性能计数器超过阈值时，就向运维和开发人员报警，及时发现处理系统异常。</p>
+</li>
+</ul>
+<h3 id="1-3-性能测试方法"><a href="#1-3-性能测试方法" class="headerlink" title="1.3 性能测试方法"></a>1.3 性能测试方法</h3><p>性能测试是一个总称，具体可细分为性能测试、负载测试、压力测试、稳定性测试。</p>
+<h2 id="2-Web前端性能优化"><a href="#2-Web前端性能优化" class="headerlink" title="2. Web前端性能优化"></a>2. Web前端性能优化</h2><h3 id="2-1-浏览器访问优化"><a href="#2-1-浏览器访问优化" class="headerlink" title="2.1 浏览器访问优化"></a>2.1 浏览器访问优化</h3><ul>
+<li><p>2.1.1 减少http请求</p>
+<ul>
+<li><p>2.1.1.1 为什么</p>
+<p>HTTP协议是无状态的应用层协议，意味着每次HTTP请求都需要建立通信链路、进行数据传输，而在服务器端，每个HTTP都需要启动独立的线程去处理</p>
+</li>
+<li><p>2.1.1.2 怎么办</p>
+<p>合并CSS、合并JavaScript、合并图片，这样一次请求就可以获取多个需要的文件</p>
+</li>
+</ul>
+</li>
+<li><p>2.1.2 使用浏览器缓存</p>
+<p>将更新的频率都低，而访问平凡的文件缓存在浏览器中，可以极好地改善性能</p>
+</li>
+<li><p>2.1.3 启用压缩</p>
+<p>在服务器端对文件进行压缩，在浏览器端对文件解压缩，可有效减少通信传输的数据量。有利就有弊，压缩对服务器和浏览器产生一定的压力，在通信带宽良好，而服务器资源不足的情况下要权衡考虑。</p>
+</li>
+<li><p>2.1.4 CSS放在页面最上面、JavaScript放在页面最下面</p>
+<p>浏览器会在下载完全部CSS之后才对整个页面进行渲染，因此最好的做法是将CSS放在页面最上面，让浏览器尽快下载CSS。JavaScript则相反，浏览器在加载JavaScript后立即执行，有可能会阻塞整个页面，造成页面显示缓慢，因此JavaScript最好放在页面最下面。</p>
+</li>
+<li><p>2.1.5 减少Cookie传输</p>
+<p>Cookie包含在每次请求和响应中，太大的Cookie会严重影响数据传输</p>
+</li>
+<li><p>2.1.5 CDN加速</p>
+<p>CDN（Content Distribute Network，内容分发网络）的本质仍然是一个缓存，而且将数据缓存在离用户最近的地方，使用户以最快速度获取数据</p>
+</li>
+<li><p>2.1.6 反向代理</p>
+<p>1、可以缓存静态内容，加快web访问；<br>2、保护网站安全，相当于在Web服务器和可能的网络攻击之间建立了一个屏障。</p>
+</li>
+</ul>
+<h2 id="3-应用服务器性能优化"><a href="#3-应用服务器性能优化" class="headerlink" title="3. 应用服务器性能优化"></a>3. 应用服务器性能优化</h2><p>优化手段主要有缓存、集群、异步等。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>虚拟机字节码执行引擎</title>
+    <url>/posts/4cd43d51.html</url>
+    <content><![CDATA[<p>虚拟机字节码执行引擎是java虚拟机核心组成部分之一，所有java虚拟机的执行引擎输入、输出都是一致的：输入的是字节码二进制流，处理过程是字节码解析执行的等效过程，输出的是执行结果。</p>
+<span id="more"></span>
+
+<h2 id="运行时栈帧结构"><a href="#运行时栈帧结构" class="headerlink" title="运行时栈帧结构"></a>运行时栈帧结构</h2><p>java虚拟机以方法作为最基本的执行单元，栈帧则是用于支持虚拟机进行方法调用和方法执行背后的数据结构，它也是虚拟机运行时数据区中的虚拟机栈的栈元素。栈帧存储了方法的局部变量表、操作数栈、动态连接和方法返回地址等信息，栈帧需要分配多少内存编译期已经确定，并不会收到程序运行期变量数据的影响；以java程序的角度来看，同一时刻、同一线程里面，在调用堆栈的所有方法都同时处于执行状态，但在活动线程中，只有位于栈顶的方法才是在运行的，被称为当前栈帧，执行引擎所运行的字节码执行都只针对当前栈帧进行操作。</p>
+<h3 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h3><p>是一组变量值的存储空间，属于线程私有，用于存放方法参数和方法内部定义的局部变量，在java程序被编译为class文件时就在方法的Code属性的max_locals数据项中确定了该方法所需分配的局部变量表的最大容量，它以变量槽为最小单位，它允许变量槽的长度可以随着处理器、操作系统或虚拟机实现的不同而发生变化</p>
+<ul>
+<li><p>工作机制</p>
+<ul>
+<li>当一个方法被调用时，java虚拟机会使用局部变量表来完成参数值到参数变量的传递过程，即实参到形参的传递。如果执行的是实例方法，那局部变量表的第0位索引的变量槽默认是用于传递方法所属对象实例的引用，可以用this表示，其余参数按照顺序排列，而且局部变量表是可以重用的</li>
+</ul>
+</li>
+</ul>
+<h3 id="操作数栈"><a href="#操作数栈" class="headerlink" title="操作数栈"></a>操作数栈</h3><p>常被称为操作栈，是一个后入先出栈，它的最大深度在编译的时候已经确定</p>
+<ul>
+<li><p>工作机制</p>
+<ul>
+<li>当一个方法刚刚执行的时候，这个方法的操作数栈是空的，在方法的执行过程中会有各种字节码执行往操作数栈中写入和提取内容（入栈出栈的元素是局部变量表中的局部变量）</li>
+</ul>
+</li>
+</ul>
+<h3 id="栈帧信息"><a href="#栈帧信息" class="headerlink" title="栈帧信息"></a>栈帧信息</h3><ul>
+<li><p>动态链接</p>
+<p>每个栈帧都包含一个指向运行时常量池中该栈帧所属方法的引用，持有这个过程是为了支持方法调用过程中的动态连接（就是将符号引用转为直接引用）</p>
+</li>
+<li><p>方法返回地址</p>
+<p>方法退出之后都必须返回到最初方法被调用时的位置</p>
+</li>
+<li><p>附加信息</p>
+<p>可以返回一些java虚拟机没有描述的信息</p>
+</li>
+</ul>
+<h2 id="方法调用"><a href="#方法调用" class="headerlink" title="方法调用"></a>方法调用</h2><p>方法调用并不等于方法中的代码被执行，方法调用阶段唯一的任务就是确定被调用方法的版本（即调用哪一个方法），暂时还未涉及方法内部的具体运行过程</p>
+<h3 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h3><p>所有方法调用的目标方法在Class文件中都是一个常量池中的符号引用，在类加载的解析阶段，会将一部分符号引用转化为直接引用，前提是方法在程序真正运行之前就有一个可确定的调用版本，并且在运行期不可改变，这类方法的调用被称为解析；符合“编译期可知，运行期不可变”要求的方法主要静包括态方法和私有方法，这两类都不可能重写出其他版本</p>
+<ul>
+<li><p>非虚方法</p>
+<p>私有方法、实例构造器、静态方法、父类方法，被final修饰的方法 这5中方法调用会在类加载的时候就可以把符号引用解析为该方法的直接引用。这些方法统称为“非虚方法”</p>
+<ul>
+<li><p>解析调用</p>
+<ul>
+<li>是个静态过程，在编译期就完全确定，在类加载阶段就会将符号引用转变为直接引用</li>
+</ul>
+</li>
+<li><p>分派调用</p>
+<ul>
+<li><p>静态分派</p>
+<ul>
+<li>主要表现为重载，虚拟机在重载时是通过参数的静态类型而不是实际类型作为判定依据的</li>
+</ul>
+</li>
+<li><p>动态分派</p>
+<ul>
+<li>主要表现为重写，在运行期间根据实际类型确定方法执行版本的分派过程叫做动态分派</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="动态类型语言支持"><a href="#动态类型语言支持" class="headerlink" title="动态类型语言支持"></a>动态类型语言支持</h2><h3 id="动态类型语言"><a href="#动态类型语言" class="headerlink" title="动态类型语言"></a>动态类型语言</h3><p>类型检查的主体过程是在运行期而不是编译期进行的</p>
+<h3 id="java-lang-invoke包"><a href="#java-lang-invoke包" class="headerlink" title="java.lang.invoke包"></a>java.lang.invoke包</h3><p>主要目的是在之前单纯依靠符号引用来确定调用的目标方法这条路外提供一种新的动态确定目标方法的机制，称为方法句柄</p>
+<ul>
+<li><p>方法句柄和反射的区别</p>
+<ul>
+<li>1、反射是在模拟java代码层次的方法调用，方法句柄是在模拟字节码层次的方法调用</li>
+<li>2、反射是重量级的，方法句柄是轻量级的</li>
+<li>3、方法句柄可以享受虚拟机的优化策略，因为它是模拟字节码层面的方法调用</li>
+</ul>
+</li>
+</ul>
+<h2 id="基于栈的字节码解释执行引擎"><a href="#基于栈的字节码解释执行引擎" class="headerlink" title="基于栈的字节码解释执行引擎"></a>基于栈的字节码解释执行引擎</h2><p>主要功能是配合虚拟机执行方法里面的字节码指令的</p>
+<h3 id="解释执行"><a href="#解释执行" class="headerlink" title="解释执行"></a>解释执行</h3><p>java现在已经不能单纯归类于解释执行或者是编译执行，因为两者都有</p>
+<h3 id="基于栈的指令集与基于寄存器的指令集"><a href="#基于栈的指令集与基于寄存器的指令集" class="headerlink" title="基于栈的指令集与基于寄存器的指令集"></a>基于栈的指令集与基于寄存器的指令集</h3><p>javac编译器输出的字节码指令流是一种基于栈的指令集架构</p>
+<ul>
+<li>栈：优点： 1、可移植，因为寄存器由硬件直接提供，程序直接依赖这些硬件寄存器则不可避免的受硬件的约束；2、代码相对更紧凑、编译器实现更加简单。缺点：1、理论上执行速度相对慢一些</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Jvm</tag>
+        <tag>字节码</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>虚拟机类加载机制</title>
-    <url>/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/</url>
+    <url>/posts/cdffca23.html</url>
     <content><![CDATA[<p>java虚拟机把描述类的数据从Class文件加载到内存，并堆数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这个过程被称作虚拟机的类加载机制</p>
 <span id="more"></span>
 
@@ -2072,96 +2160,8 @@
       </tags>
   </entry>
   <entry>
-    <title>虚拟机字节码执行引擎</title>
-    <url>/%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/</url>
-    <content><![CDATA[<p>虚拟机字节码执行引擎是java虚拟机核心组成部分之一，所有java虚拟机的执行引擎输入、输出都是一致的：输入的是字节码二进制流，处理过程是字节码解析执行的等效过程，输出的是执行结果。</p>
-<span id="more"></span>
-
-<h2 id="运行时栈帧结构"><a href="#运行时栈帧结构" class="headerlink" title="运行时栈帧结构"></a>运行时栈帧结构</h2><p>java虚拟机以方法作为最基本的执行单元，栈帧则是用于支持虚拟机进行方法调用和方法执行背后的数据结构，它也是虚拟机运行时数据区中的虚拟机栈的栈元素。栈帧存储了方法的局部变量表、操作数栈、动态连接和方法返回地址等信息，栈帧需要分配多少内存编译期已经确定，并不会收到程序运行期变量数据的影响；以java程序的角度来看，同一时刻、同一线程里面，在调用堆栈的所有方法都同时处于执行状态，但在活动线程中，只有位于栈顶的方法才是在运行的，被称为当前栈帧，执行引擎所运行的字节码执行都只针对当前栈帧进行操作。</p>
-<h3 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h3><p>是一组变量值的存储空间，属于线程私有，用于存放方法参数和方法内部定义的局部变量，在java程序被编译为class文件时就在方法的Code属性的max_locals数据项中确定了该方法所需分配的局部变量表的最大容量，它以变量槽为最小单位，它允许变量槽的长度可以随着处理器、操作系统或虚拟机实现的不同而发生变化</p>
-<ul>
-<li><p>工作机制</p>
-<ul>
-<li>当一个方法被调用时，java虚拟机会使用局部变量表来完成参数值到参数变量的传递过程，即实参到形参的传递。如果执行的是实例方法，那局部变量表的第0位索引的变量槽默认是用于传递方法所属对象实例的引用，可以用this表示，其余参数按照顺序排列，而且局部变量表是可以重用的</li>
-</ul>
-</li>
-</ul>
-<h3 id="操作数栈"><a href="#操作数栈" class="headerlink" title="操作数栈"></a>操作数栈</h3><p>常被称为操作栈，是一个后入先出栈，它的最大深度在编译的时候已经确定</p>
-<ul>
-<li><p>工作机制</p>
-<ul>
-<li>当一个方法刚刚执行的时候，这个方法的操作数栈是空的，在方法的执行过程中会有各种字节码执行往操作数栈中写入和提取内容（入栈出栈的元素是局部变量表中的局部变量）</li>
-</ul>
-</li>
-</ul>
-<h3 id="栈帧信息"><a href="#栈帧信息" class="headerlink" title="栈帧信息"></a>栈帧信息</h3><ul>
-<li><p>动态链接</p>
-<p>每个栈帧都包含一个指向运行时常量池中该栈帧所属方法的引用，持有这个过程是为了支持方法调用过程中的动态连接（就是将符号引用转为直接引用）</p>
-</li>
-<li><p>方法返回地址</p>
-<p>方法退出之后都必须返回到最初方法被调用时的位置</p>
-</li>
-<li><p>附加信息</p>
-<p>可以返回一些java虚拟机没有描述的信息</p>
-</li>
-</ul>
-<h2 id="方法调用"><a href="#方法调用" class="headerlink" title="方法调用"></a>方法调用</h2><p>方法调用并不等于方法中的代码被执行，方法调用阶段唯一的任务就是确定被调用方法的版本（即调用哪一个方法），暂时还未涉及方法内部的具体运行过程</p>
-<h3 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h3><p>所有方法调用的目标方法在Class文件中都是一个常量池中的符号引用，在类加载的解析阶段，会将一部分符号引用转化为直接引用，前提是方法在程序真正运行之前就有一个可确定的调用版本，并且在运行期不可改变，这类方法的调用被称为解析；符合“编译期可知，运行期不可变”要求的方法主要静包括态方法和私有方法，这两类都不可能重写出其他版本</p>
-<ul>
-<li><p>非虚方法</p>
-<p>私有方法、实例构造器、静态方法、父类方法，被final修饰的方法 这5中方法调用会在类加载的时候就可以把符号引用解析为该方法的直接引用。这些方法统称为“非虚方法”</p>
-<ul>
-<li><p>解析调用</p>
-<ul>
-<li>是个静态过程，在编译期就完全确定，在类加载阶段就会将符号引用转变为直接引用</li>
-</ul>
-</li>
-<li><p>分派调用</p>
-<ul>
-<li><p>静态分派</p>
-<ul>
-<li>主要表现为重载，虚拟机在重载时是通过参数的静态类型而不是实际类型作为判定依据的</li>
-</ul>
-</li>
-<li><p>动态分派</p>
-<ul>
-<li>主要表现为重写，在运行期间根据实际类型确定方法执行版本的分派过程叫做动态分派</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h2 id="动态类型语言支持"><a href="#动态类型语言支持" class="headerlink" title="动态类型语言支持"></a>动态类型语言支持</h2><h3 id="动态类型语言"><a href="#动态类型语言" class="headerlink" title="动态类型语言"></a>动态类型语言</h3><p>类型检查的主体过程是在运行期而不是编译期进行的</p>
-<h3 id="java-lang-invoke包"><a href="#java-lang-invoke包" class="headerlink" title="java.lang.invoke包"></a>java.lang.invoke包</h3><p>主要目的是在之前单纯依靠符号引用来确定调用的目标方法这条路外提供一种新的动态确定目标方法的机制，称为方法句柄</p>
-<ul>
-<li><p>方法句柄和反射的区别</p>
-<ul>
-<li>1、反射是在模拟java代码层次的方法调用，方法句柄是在模拟字节码层次的方法调用</li>
-<li>2、反射是重量级的，方法句柄是轻量级的</li>
-<li>3、方法句柄可以享受虚拟机的优化策略，因为它是模拟字节码层面的方法调用</li>
-</ul>
-</li>
-</ul>
-<h2 id="基于栈的字节码解释执行引擎"><a href="#基于栈的字节码解释执行引擎" class="headerlink" title="基于栈的字节码解释执行引擎"></a>基于栈的字节码解释执行引擎</h2><p>主要功能是配合虚拟机执行方法里面的字节码指令的</p>
-<h3 id="解释执行"><a href="#解释执行" class="headerlink" title="解释执行"></a>解释执行</h3><p>java现在已经不能单纯归类于解释执行或者是编译执行，因为两者都有</p>
-<h3 id="基于栈的指令集与基于寄存器的指令集"><a href="#基于栈的指令集与基于寄存器的指令集" class="headerlink" title="基于栈的指令集与基于寄存器的指令集"></a>基于栈的指令集与基于寄存器的指令集</h3><p>javac编译器输出的字节码指令流是一种基于栈的指令集架构</p>
-<ul>
-<li>栈：优点： 1、可移植，因为寄存器由硬件直接提供，程序直接依赖这些硬件寄存器则不可避免的受硬件的约束；2、代码相对更紧凑、编译器实现更加简单。缺点：1、理论上执行速度相对慢一些</li>
-</ul>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Jvm</tag>
-        <tag>字节码</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>集群环境下如何管理Session</title>
-    <url>/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</url>
+    <url>/posts/56231c3b.html</url>
     <content><![CDATA[<h2 id="1-Session复制"><a href="#1-Session复制" class="headerlink" title="1.Session复制"></a>1.Session复制</h2><p>应用服务器开启Web容器的Session复制功能，在集群中的几台服务器之间同步Session对象，使得每台服务器上都保存所有用户的Session信息，这样任何一台机器宕机都不会导致Session数据的丢失，而服务器使用Session时，也只需要在本机获取即可</p>
 <span id="more"></span>
 
@@ -2200,7 +2200,7 @@
   </entry>
   <entry>
     <title>项目如何分包</title>
-    <url>/%E9%A1%B9%E7%9B%AE%E5%A6%82%E4%BD%95%E5%88%86%E5%8C%85/</url>
+    <url>/posts/772be079.html</url>
     <content><![CDATA[<p>在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。</p>
 <span id="more"></span>
 
@@ -2221,7 +2221,7 @@
   </entry>
   <entry>
     <title>CountDownLatch，CyclicBarrier，Semaphore及AQS介绍</title>
-    <url>/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/</url>
+    <url>/posts/a33de4ce.html</url>
     <content><![CDATA[<h2 id="CountDownLatch"><a href="#CountDownLatch" class="headerlink" title="CountDownLatch"></a>CountDownLatch</h2><h3 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h3><p>CountDownLatch适用于在多线程的场景需要等待所有子线程全部执行完毕之后再做操作的场景。</p>
 <span id="more"></span>
 
@@ -2304,7 +2304,7 @@
   </entry>
   <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(二)</title>
-    <url>/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/</url>
+    <url>/posts/93253ab9.html</url>
     <content><![CDATA[<h2 id="EntityManager-接口"><a href="#EntityManager-接口" class="headerlink" title="EntityManager 接口"></a>EntityManager 接口</h2><p>任何持久层框架都会提供一个管理持久层的 API。这个 API 一般都会提供基础的增删改查功能，通过它就可以管理持久化上下文。在 Java 持久层框架中，最常使用的接口就是 EntityManager。</p>
 <span id="more"></span>
 

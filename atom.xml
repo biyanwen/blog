@@ -6,7 +6,7 @@
   <link href="https://biyw.cf/atom.xml" rel="self"/>
   
   <link href="https://biyw.cf/"/>
-  <updated>2022-02-03T05:14:54.192Z</updated>
+  <updated>2022-02-03T08:07:12.573Z</updated>
   <id>https://biyw.cf/</id>
   
   <author>
@@ -18,10 +18,10 @@
   
   <entry>
     <title>Mysql-InnoDB表空间详解</title>
-    <link href="https://biyw.cf/Mysql-InnoDB%E8%A1%A8%E7%A9%BA%E9%97%B4%E8%AF%A6%E8%A7%A3/"/>
-    <id>https://biyw.cf/Mysql-InnoDB%E8%A1%A8%E7%A9%BA%E9%97%B4%E8%AF%A6%E8%A7%A3/</id>
+    <link href="https://biyw.cf/posts/720913d1.html"/>
+    <id>https://biyw.cf/posts/720913d1.html</id>
     <published>2022-02-03T02:42:51.000Z</published>
-    <updated>2022-02-03T05:14:54.192Z</updated>
+    <updated>2022-02-03T08:07:12.573Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;什么是表空间&quot;&gt;&lt;a href=&quot;#什么是表空间&quot; class=&quot;headerlink&quot; title=&quot;什么是表空间&quot;&gt;&lt;/a&gt;什么是表空间&lt;/h2&gt;&lt;p&gt;表空间是 Mysql 的一个抽象概念，在你新建一个表的时候，Mysql （5.7 + 版本）会为这个表创建一个后缀为 ibd 的文件，这个文件的名字就是表空间，构成表空间的最小单位就是页，所以表空间是实际存储索引和用户数据的地方。因为一个页最多 16k 大小，所以一个表空间拥有页的数量会特别巨大，为了更方便的对页进行管理，Mysql 的作者发明了&lt;code&gt;区&lt;/code&gt;的概念。&lt;/p&gt;</summary>
@@ -37,10 +37,10 @@
   
   <entry>
     <title>Mysql-InnoDB索引详解</title>
-    <link href="https://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/"/>
-    <id>https://biyw.cf/Mysql-InnoDB%E7%B4%A2%E5%BC%95%E8%AF%A6%E8%A7%A3/</id>
+    <link href="https://biyw.cf/posts/b7cc2c3.html"/>
+    <id>https://biyw.cf/posts/b7cc2c3.html</id>
     <published>2022-02-01T05:54:01.000Z</published>
-    <updated>2022-02-01T11:18:12.404Z</updated>
+    <updated>2022-02-03T08:07:12.571Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;索引的作用&quot;&gt;&lt;a href=&quot;#索引的作用&quot; class=&quot;headerlink&quot; title=&quot;索引的作用&quot;&gt;&lt;/a&gt;索引的作用&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;索引的作用就是能够让我们快速的查到想要的数据&lt;/strong&gt;。上一篇文章我们介绍了 Mysql 在内存中存储数据的单位&lt;code&gt;页&lt;/code&gt;，Mysql 从磁盘加载数据的时候会在内存中创建以&lt;code&gt;页&lt;/code&gt;为节点的双向链表，我们已经了解到在&lt;code&gt;页&lt;/code&gt;中查找数据可以通过二分查找法快速检索到数据，但是要确定数据在哪个页中就要一个页一个页的查找（如果你对在页中查找数据的过程有疑问，请查看上一篇博客），这个逻辑显然是不合理的，因为 Mysql 是能够存储大量数据的，所以这个双向链表会很长查找速度会很慢。为了解决这个问题，Mysql 的开发者创建了索引这个功能来达到快速查找数据的目的。&lt;/p&gt;</summary>
@@ -56,10 +56,10 @@
   
   <entry>
     <title>Mysql-InnoDB页详解</title>
-    <link href="https://biyw.cf/Mysql-InnoDB%E9%A1%B5%E8%AF%A6%E8%A7%A3/"/>
-    <id>https://biyw.cf/Mysql-InnoDB%E9%A1%B5%E8%AF%A6%E8%A7%A3/</id>
+    <link href="https://biyw.cf/posts/6d95a3c4.html"/>
+    <id>https://biyw.cf/posts/6d95a3c4.html</id>
     <published>2022-01-16T05:53:42.000Z</published>
-    <updated>2022-01-31T10:00:50.829Z</updated>
+    <updated>2022-02-03T08:07:12.575Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;页的作用&quot;&gt;&lt;a href=&quot;#页的作用&quot; class=&quot;headerlink&quot; title=&quot;页的作用&quot;&gt;&lt;/a&gt;页的作用&lt;/h2&gt;&lt;p&gt;什么是页？页是 Mysql 从磁盘中加载数据的最小单位。页的大小为 16 kb。&lt;/p&gt;
@@ -76,10 +76,10 @@
   
   <entry>
     <title>位运算学习笔记</title>
-    <link href="https://biyw.cf/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
-    <id>https://biyw.cf/%E4%BD%8D%E8%BF%90%E7%AE%97%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</id>
+    <link href="https://biyw.cf/posts/25cb8793.html"/>
+    <id>https://biyw.cf/posts/25cb8793.html</id>
     <published>2022-01-09T08:13:18.000Z</published>
-    <updated>2022-01-09T09:22:45.208Z</updated>
+    <updated>2022-02-03T08:07:12.590Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;位运算符&quot;&gt;&lt;a href=&quot;#位运算符&quot; class=&quot;headerlink&quot; title=&quot;位运算符&quot;&gt;&lt;/a&gt;位运算符&lt;/h2&gt;&lt;h3 id=&quot;位逻辑运算符&quot;&gt;&lt;a href=&quot;#位逻辑运算符&quot; class=&quot;headerlink&quot; title=&quot;位逻辑运算符&quot;&gt;&lt;/a&gt;位逻辑运算符&lt;/h3&gt;&lt;table&gt;
@@ -123,11 +123,30 @@
   </entry>
   
   <entry>
-    <title>指令详解-寻址方式</title>
-    <link href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/"/>
-    <id>https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/</id>
+    <title>指令详解-操作码</title>
+    <link href="https://biyw.cf/posts/94f9446a.html"/>
+    <id>https://biyw.cf/posts/94f9446a.html</id>
     <published>2022-01-08T05:50:35.000Z</published>
-    <updated>2022-01-08T14:41:49.860Z</updated>
+    <updated>2022-02-03T08:07:12.598Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;定长编码&quot;&gt;&lt;a href=&quot;#定长编码&quot; class=&quot;headerlink&quot; title=&quot;定长编码&quot;&gt;&lt;/a&gt;定长编码&lt;/h2&gt;&lt;p&gt;每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。&lt;br&gt;优点：计算机的硬件设计简单，朱令译码和执行速度快。&lt;br&gt;缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。&lt;br&gt;适用环境：适用于字长较长的计算机系统，如 32 位及以上。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="计算机原理" scheme="https://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>指令详解-寻址方式</title>
+    <link href="https://biyw.cf/posts/def90db1.html"/>
+    <id>https://biyw.cf/posts/def90db1.html</id>
+    <published>2022-01-08T05:50:35.000Z</published>
+    <updated>2022-02-03T08:07:12.596Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;数据寻址&quot;&gt;&lt;a href=&quot;#数据寻址&quot; class=&quot;headerlink&quot; title=&quot;数据寻址&quot;&gt;&lt;/a&gt;数据寻址&lt;/h2&gt;&lt;p&gt;简单来说就是根据地址码取数据。&lt;/p&gt;
@@ -145,30 +164,11 @@
   </entry>
   
   <entry>
-    <title>指令详解-操作码</title>
-    <link href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/"/>
-    <id>https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3-%E6%93%8D%E4%BD%9C%E7%A0%81/</id>
-    <published>2022-01-08T05:50:35.000Z</published>
-    <updated>2022-01-08T14:42:58.971Z</updated>
-    
-    
-    <summary type="html">&lt;h2 id=&quot;定长编码&quot;&gt;&lt;a href=&quot;#定长编码&quot; class=&quot;headerlink&quot; title=&quot;定长编码&quot;&gt;&lt;/a&gt;定长编码&lt;/h2&gt;&lt;p&gt;每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。&lt;br&gt;优点：计算机的硬件设计简单，朱令译码和执行速度快。&lt;br&gt;缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。&lt;br&gt;适用环境：适用于字长较长的计算机系统，如 32 位及以上。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
-    
-    
-    <category term="计算机原理" scheme="https://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
-    
-  </entry>
-  
-  <entry>
     <title>指令详解-地址码</title>
-    <link href="https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/"/>
-    <id>https://biyw.cf/%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3_%E5%9C%B0%E5%9D%80%E7%A0%81/</id>
+    <link href="https://biyw.cf/posts/adb2ba17.html"/>
+    <id>https://biyw.cf/posts/adb2ba17.html</id>
     <published>2022-01-08T05:50:35.000Z</published>
-    <updated>2022-01-08T14:43:07.906Z</updated>
+    <updated>2022-02-03T08:07:12.600Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;指令是什么：&quot;&gt;&lt;a href=&quot;#指令是什么：&quot; class=&quot;headerlink&quot; title=&quot;指令是什么：&quot;&gt;&lt;/a&gt;指令是什么：&lt;/h2&gt;&lt;p&gt;可以将指令当做一种编程语言，表现形式为一串二进制码，作用是能让计算机按照指令去工作。&lt;/p&gt;
@@ -185,10 +185,10 @@
   
   <entry>
     <title>Java中byte转int为什么要使用&amp;0xFF</title>
-    <link href="https://biyw.cf/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/"/>
-    <id>https://biyw.cf/Java%E4%B8%ADbyte%E8%BD%ACint%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-0xFF/</id>
+    <link href="https://biyw.cf/posts/1d17d658.html"/>
+    <id>https://biyw.cf/posts/1d17d658.html</id>
     <published>2022-01-03T05:50:35.000Z</published>
-    <updated>2022-01-03T09:02:25.529Z</updated>
+    <updated>2022-02-03T08:07:12.568Z</updated>
     
     
     <summary type="html">&lt;p&gt;在 Java 中将十六进制 byte 转成 int 时要使用 &amp;amp;0xFF 操作这是为什么呢？这是因为十六进制的范围是 0x00~0x3FF 没有负数，而 int 的取值范围是包含负数的，所以直接将 byte 强转成 int 可能会得到错误的数值。同时操作系统存储的是二进制原码进行补码后的数值, 所以只有通过 &amp;amp;0xFF 操作才能得到正确的数值。&lt;/p&gt;</summary>
@@ -206,10 +206,10 @@
   
   <entry>
     <title>Hibernate 实战第二版 中文翻译 事务和并发篇(一)</title>
-    <link href="https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E4%BA%8B%E5%8A%A1%E5%92%8C%E5%B9%B6%E5%8F%91%E7%AF%87-%E4%B8%80/"/>
-    <id>https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E4%BA%8B%E5%8A%A1%E5%92%8C%E5%B9%B6%E5%8F%91%E7%AF%87-%E4%B8%80/</id>
+    <link href="https://biyw.cf/posts/2622ec0e.html"/>
+    <id>https://biyw.cf/posts/2622ec0e.html</id>
     <published>2021-12-24T08:20:01.000Z</published>
-    <updated>2021-12-26T10:51:41.014Z</updated>
+    <updated>2022-02-03T08:07:12.557Z</updated>
     
     
     <summary type="html">&lt;p&gt;在这章，我们终于要学习事务相关的知识了：在应用中如何创建工作单元并解决并发问题。（ps: 想了解什么是 &lt;a href=&quot;https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/&quot;&gt;工作单元&lt;/a&gt; 请看这里。）工作单元是一个原子操作。事务可以让你设置工作单元的边界，让其不会受其他工作单元影响。在一个拥有许多用户的应用中，或许会有很多人同时访问这些工作单元的情况。&lt;/p&gt;
@@ -232,10 +232,10 @@
   
   <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(三)</title>
-    <link href="https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%B8%89/"/>
-    <id>https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%B8%89/</id>
+    <link href="https://biyw.cf/posts/edd61a92.html"/>
+    <id>https://biyw.cf/posts/edd61a92.html</id>
     <published>2021-12-19T14:05:23.000Z</published>
-    <updated>2021-12-24T07:47:51.780Z</updated>
+    <updated>2022-02-03T08:07:12.570Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;使用游离态&quot;&gt;&lt;a href=&quot;#使用游离态&quot; class=&quot;headerlink&quot; title=&quot;使用游离态&quot;&gt;&lt;/a&gt;使用游离态&lt;/h2&gt;&lt;p&gt;如果一个 entity 实例脱离了持久化上下文的管理，我们就称它为游离态。当持久化上下文关闭之后，它就不再提供 id 映射服务。当你使用游离态的 entity 实例时可能会遇到一些问题，所以，一定要保证你明白如何处理游离态实例。&lt;/p&gt;</summary>
@@ -257,10 +257,10 @@
   
   <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(二)</title>
-    <link href="https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/"/>
-    <id>https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/</id>
+    <link href="https://biyw.cf/posts/93253ab9.html"/>
+    <id>https://biyw.cf/posts/93253ab9.html</id>
     <published>2021-12-12T13:56:51.000Z</published>
-    <updated>2021-12-25T09:05:25.676Z</updated>
+    <updated>2022-02-03T08:07:12.613Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;EntityManager-接口&quot;&gt;&lt;a href=&quot;#EntityManager-接口&quot; class=&quot;headerlink&quot; title=&quot;EntityManager 接口&quot;&gt;&lt;/a&gt;EntityManager 接口&lt;/h2&gt;&lt;p&gt;任何持久层框架都会提供一个管理持久层的 API。这个 API 一般都会提供基础的增删改查功能，通过它就可以管理持久化上下文。在 Java 持久层框架中，最常使用的接口就是 EntityManager。&lt;/p&gt;</summary>
@@ -282,10 +282,10 @@
   
   <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(一)</title>
-    <link href="https://biyw.cf/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/"/>
-    <id>https://biyw.cf/Hibernate_%E5%AE%9E%E6%88%98_%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%861/</id>
+    <link href="https://biyw.cf/posts/3c14a1db.html"/>
+    <id>https://biyw.cf/posts/3c14a1db.html</id>
     <published>2021-12-12T13:33:45.567Z</published>
-    <updated>2021-12-19T12:58:50.995Z</updated>
+    <updated>2022-02-03T08:07:12.563Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;管理数据&quot;&gt;&lt;a href=&quot;#管理数据&quot; class=&quot;headerlink&quot; title=&quot;管理数据&quot;&gt;&lt;/a&gt;管理数据&lt;/h2&gt;&lt;h3 id=&quot;entity-持久化过程中的生命周期&quot;&gt;&lt;a href=&quot;#entity-持久化过程中的生命周期&quot; class=&quot;headerlink&quot; title=&quot;entity 持久化过程中的生命周期&quot;&gt;&lt;/a&gt;entity 持久化过程中的生命周期&lt;/h3&gt;&lt;p&gt;因为 JPA 是一种透明的持久化机制，classes 不用关心他们自己的持久化行为，这样在写业务代码时就不需要关心数据是会被持久化还是仅仅保存在内存中。&lt;/p&gt;
@@ -308,10 +308,10 @@
   
   <entry>
     <title>CountDownLatch，CyclicBarrier，Semaphore及AQS介绍</title>
-    <link href="https://biyw.cf/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/"/>
-    <id>https://biyw.cf/CountDownLatch%EF%BC%8CCyclicBarrier%EF%BC%8CSemaphore%E5%8F%8AAQS%E4%BB%8B%E7%BB%8D/</id>
+    <link href="https://biyw.cf/posts/a33de4ce.html"/>
+    <id>https://biyw.cf/posts/a33de4ce.html</id>
     <published>2021-12-05T07:10:31.558Z</published>
-    <updated>2021-12-16T04:39:34.433Z</updated>
+    <updated>2022-02-03T08:07:12.615Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;CountDownLatch&quot;&gt;&lt;a href=&quot;#CountDownLatch&quot; class=&quot;headerlink&quot; title=&quot;CountDownLatch&quot;&gt;&lt;/a&gt;CountDownLatch&lt;/h2&gt;&lt;h3 id=&quot;使用场景&quot;&gt;&lt;a href=&quot;#使用场景&quot; class=&quot;headerlink&quot; title=&quot;使用场景&quot;&gt;&lt;/a&gt;使用场景&lt;/h3&gt;&lt;p&gt;CountDownLatch适用于在多线程的场景需要等待所有子线程全部执行完毕之后再做操作的场景。&lt;/p&gt;</summary>
@@ -331,10 +331,10 @@
   
   <entry>
     <title>分布式锁</title>
-    <link href="https://biyw.cf/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/"/>
-    <id>https://biyw.cf/Redis%E5%92%8CZookeeper%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F/</id>
+    <link href="https://biyw.cf/posts/4eb3381c.html"/>
+    <id>https://biyw.cf/posts/4eb3381c.html</id>
     <published>2021-12-05T06:57:16.379Z</published>
-    <updated>2021-12-16T04:40:53.454Z</updated>
+    <updated>2022-02-03T08:07:12.577Z</updated>
     
     
     <summary type="html">&lt;p&gt;在传统单机部署的情况下，可以使用Java并发处理相关的API(如ReentrantLcok或synchronized)进行互斥控制。 但是在分布式系统后，由于分布式系统多线程、多进程并且分布在不同机器上，这将使原单机并发控制锁策略失效，为了解决这个问题就需要一种跨JVM的互斥机制来控制共享资源的访问，这就是分布式锁的由来。 当多个进程不在同一个系统中，就需要用分布式锁控制多个进程对资源的访问。&lt;/p&gt;</summary>
@@ -354,10 +354,10 @@
   
   <entry>
     <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
-    <link href="https://biyw.cf/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/"/>
-    <id>https://biyw.cf/%E3%80%90%E9%80%9A%E8%BF%87%E6%8A%93%E5%8C%85%E5%AD%A6%E7%BD%91%E7%BB%9C%E3%80%91TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E4%B8%8E%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B/</id>
+    <link href="https://biyw.cf/posts/b65feaa2.html"/>
+    <id>https://biyw.cf/posts/b65feaa2.html</id>
     <published>2021-12-05T06:47:29.126Z</published>
-    <updated>2021-12-16T04:43:03.222Z</updated>
+    <updated>2022-02-03T08:07:12.593Z</updated>
     
     
     <summary type="html">&lt;p&gt;本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章&lt;a href=&quot;https://blog.csdn.net/qq_43005544/article/details/116504407&quot;&gt;wireshark 简易教程&lt;/a&gt;&lt;/p&gt;</summary>
@@ -375,10 +375,10 @@
   
   <entry>
     <title>Wireshark 简明教程</title>
-    <link href="https://biyw.cf/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/"/>
-    <id>https://biyw.cf/wireshark%E7%AE%80%E6%98%93%E6%95%99%E7%A8%8B/</id>
+    <link href="https://biyw.cf/posts/65f8076a.html"/>
+    <id>https://biyw.cf/posts/65f8076a.html</id>
     <published>2021-12-05T06:42:55.422Z</published>
-    <updated>2021-12-16T04:43:41.419Z</updated>
+    <updated>2022-02-03T08:07:12.584Z</updated>
     
     
     <summary type="html">&lt;p&gt;Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。&lt;/p&gt;</summary>
@@ -396,10 +396,10 @@
   
   <entry>
     <title>Git-submodule 统一配置简明教程</title>
-    <link href="https://biyw.cf/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/"/>
-    <id>https://biyw.cf/git-submodule%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E7%AE%80%E6%98%8E%E6%95%99%E7%A8%8B/</id>
+    <link href="https://biyw.cf/posts/b62a4af1.html"/>
+    <id>https://biyw.cf/posts/b62a4af1.html</id>
     <published>2021-12-05T06:41:25.950Z</published>
-    <updated>2021-12-16T04:42:13.195Z</updated>
+    <updated>2022-02-03T08:07:12.579Z</updated>
     
     
     <summary type="html">&lt;p&gt;随着公司的不断发展，为了提高系统的容灾能力以及功能模块的复用程度，不断有更多的项目引入了微服务的概念，但是随着业务复杂度不断的上升，拆分模块的数量也越来越多，统一管理众多模块的配置文件的需求就应运而生。&lt;/p&gt;
@@ -417,10 +417,10 @@
   
   <entry>
     <title>【Mybatis源码解读】jdbc包</title>
-    <link href="https://biyw.cf/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/"/>
-    <id>https://biyw.cf/%E3%80%90Mybatis%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%E3%80%91jdbc%E5%8C%85/</id>
+    <link href="https://biyw.cf/posts/693eec27.html"/>
+    <id>https://biyw.cf/posts/693eec27.html</id>
     <published>2021-12-05T06:30:01.964Z</published>
-    <updated>2021-12-16T04:45:24.272Z</updated>
+    <updated>2022-02-03T08:07:12.587Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;1-jdbc包的作用&quot;&gt;&lt;a href=&quot;#1-jdbc包的作用&quot; class=&quot;headerlink&quot; title=&quot;1. jdbc包的作用&quot;&gt;&lt;/a&gt;1. jdbc包的作用&lt;/h2&gt;&lt;p&gt;jdbc包作为Mybatis框架的核心包之一可以理解为是&lt;strong&gt;操作Sql的工具包&lt;/strong&gt;，因为通过阅读代码观察到这个jdbc包里面的类并没有被Mybatis框架本身引用，而其本身的作用又是对sql的操作，所以当作工具包来理解是没有什么问题的。&lt;/p&gt;</summary>
@@ -438,10 +438,10 @@
   
   <entry>
     <title>常见的Web应用攻击手段</title>
-    <link href="https://biyw.cf/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/"/>
-    <id>https://biyw.cf/%E5%B8%B8%E8%A7%81%E7%9A%84Web%E5%BA%94%E7%94%A8%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5/</id>
+    <link href="https://biyw.cf/posts/bd83d0b7.html"/>
+    <id>https://biyw.cf/posts/bd83d0b7.html</id>
     <published>2021-12-05T06:24:20.623Z</published>
-    <updated>2021-12-16T04:45:49.346Z</updated>
+    <updated>2022-02-03T08:07:12.589Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;1-XSS攻击&quot;&gt;&lt;a href=&quot;#1-XSS攻击&quot; class=&quot;headerlink&quot; title=&quot;1.XSS攻击&quot;&gt;&lt;/a&gt;1.XSS攻击&lt;/h2&gt;&lt;p&gt;XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。&lt;/p&gt;</summary>
@@ -457,10 +457,10 @@
   
   <entry>
     <title>集群环境下如何管理Session</title>
-    <link href="https://biyw.cf/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/"/>
-    <id>https://biyw.cf/%E9%9B%86%E7%BE%A4%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86Session/</id>
+    <link href="https://biyw.cf/posts/56231c3b.html"/>
+    <id>https://biyw.cf/posts/56231c3b.html</id>
     <published>2021-12-05T06:21:36.434Z</published>
-    <updated>2021-12-16T04:44:57.671Z</updated>
+    <updated>2022-02-03T08:07:12.611Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;1-Session复制&quot;&gt;&lt;a href=&quot;#1-Session复制&quot; class=&quot;headerlink&quot; title=&quot;1.Session复制&quot;&gt;&lt;/a&gt;1.Session复制&lt;/h2&gt;&lt;p&gt;应用服务器开启Web容器的Session复制功能，在集群中的几台服务器之间同步Session对象，使得每台服务器上都保存所有用户的Session信息，这样任何一台机器宕机都不会导致Session数据的丢失，而服务器使用Session时，也只需要在本机获取即可&lt;/p&gt;</summary>
