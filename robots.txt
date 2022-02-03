@@ -1,2 +1,4 @@
-Sitemap: https://biyw.cf/sitemap.xml
 User-agent: *
+Allow: /
+
+Sitemap: https://biyw.cf/sitemap.xml
