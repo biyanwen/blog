@@ -6,7 +6,7 @@
   <link href="https://biyw.cf/atom.xml" rel="self"/>
   
   <link href="https://biyw.cf/"/>
-  <updated>2022-02-03T08:07:12.573Z</updated>
+  <updated>2022-02-04T08:33:05.783Z</updated>
   <id>https://biyw.cf/</id>
   
   <author>
@@ -15,6 +15,25 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Mysql-InnoDB缓存详解</title>
+    <link href="https://biyw.cf/posts/e7489af5.html"/>
+    <id>https://biyw.cf/posts/e7489af5.html</id>
+    <published>2022-02-04T07:27:16.000Z</published>
+    <updated>2022-02-04T08:33:05.783Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;Mysql 的缓存叫做 Buffer Pool 它的主要作用就是将一些数据存储在内存中，当数据库需要访问的时候直接访问内存中的数据，而不用重新从磁盘中加载，减少磁盘 IO，提高系统运行效率。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="Mysql" scheme="https://biyw.cf/tags/Mysql/"/>
+    
+  </entry>
   
   <entry>
     <title>Mysql-InnoDB表空间详解</title>
@@ -445,25 +464,6 @@
     
     
     <summary type="html">&lt;h2 id=&quot;1-XSS攻击&quot;&gt;&lt;a href=&quot;#1-XSS攻击&quot; class=&quot;headerlink&quot; title=&quot;1.XSS攻击&quot;&gt;&lt;/a&gt;1.XSS攻击&lt;/h2&gt;&lt;p&gt;XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
-    
-    
-    <category term="架构" scheme="https://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>集群环境下如何管理Session</title>
-    <link href="https://biyw.cf/posts/56231c3b.html"/>
-    <id>https://biyw.cf/posts/56231c3b.html</id>
-    <published>2021-12-05T06:21:36.434Z</published>
-    <updated>2022-02-03T08:07:12.611Z</updated>
-    
-    
-    <summary type="html">&lt;h2 id=&quot;1-Session复制&quot;&gt;&lt;a href=&quot;#1-Session复制&quot; class=&quot;headerlink&quot; title=&quot;1.Session复制&quot;&gt;&lt;/a&gt;1.Session复制&lt;/h2&gt;&lt;p&gt;应用服务器开启Web容器的Session复制功能，在集群中的几台服务器之间同步Session对象，使得每台服务器上都保存所有用户的Session信息，这样任何一台机器宕机都不会导致Session数据的丢失，而服务器使用Session时，也只需要在本机获取即可&lt;/p&gt;</summary>
     
     
     
