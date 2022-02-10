@@ -6,7 +6,7 @@
   <link href="https://biyw.cf/atom.xml" rel="self"/>
   
   <link href="https://biyw.cf/"/>
-  <updated>2022-02-04T08:33:05.783Z</updated>
+  <updated>2022-02-10T11:01:57.686Z</updated>
   <id>https://biyw.cf/</id>
   
   <author>
@@ -15,6 +15,26 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>一致性算法-Paxos</title>
+    <link href="https://biyw.cf/posts/8bee0b02.html"/>
+    <id>https://biyw.cf/posts/8bee0b02.html</id>
+    <published>2022-02-09T11:20:44.000Z</published>
+    <updated>2022-02-10T11:01:57.686Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;Paxos-是如何保证一致性的&quot;&gt;&lt;a href=&quot;#Paxos-是如何保证一致性的&quot; class=&quot;headerlink&quot; title=&quot;Paxos 是如何保证一致性的&quot;&gt;&lt;/a&gt;Paxos 是如何保证一致性的&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;答案是通过持久化变化的日志流来保证一致性的。&lt;/strong&gt;你会问这是为什么。这需要你带着这个问题来看下面的示例：&lt;/p&gt;
+&lt;p&gt;如图：我们现在部署了三个节点的集群，分别是 Node 1,Node 2,Node 3。这三个节点中的任何一个节点都可以写入数据，同时任何一个节点被写入数据后都会将数据同步给其他两个节点，现在有三个客户端分别在三个节点写入 a, b, c。问，当查询的时候数据按照哪种顺序排列是正确的？&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="算法" scheme="https://biyw.cf/tags/%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
   
   <entry>
     <title>Mysql-InnoDB缓存详解</title>
@@ -452,25 +472,6 @@
     <category term="Mybatis" scheme="https://biyw.cf/tags/Mybatis/"/>
     
     <category term="源码阅读" scheme="https://biyw.cf/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>常见的Web应用攻击手段</title>
-    <link href="https://biyw.cf/posts/bd83d0b7.html"/>
-    <id>https://biyw.cf/posts/bd83d0b7.html</id>
-    <published>2021-12-05T06:24:20.623Z</published>
-    <updated>2022-02-03T08:07:12.589Z</updated>
-    
-    
-    <summary type="html">&lt;h2 id=&quot;1-XSS攻击&quot;&gt;&lt;a href=&quot;#1-XSS攻击&quot; class=&quot;headerlink&quot; title=&quot;1.XSS攻击&quot;&gt;&lt;/a&gt;1.XSS攻击&lt;/h2&gt;&lt;p&gt;XSS攻击即跨站点脚本攻击（Cross Site Script），指黑客通过篡改网页，注入恶意HTML脚本，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
-    
-    
-    <category term="架构" scheme="https://biyw.cf/tags/%E6%9E%B6%E6%9E%84/"/>
     
   </entry>
   

@@ -2455,4 +2455,51 @@
         <tag>Mysql</tag>
       </tags>
   </entry>
+  <entry>
+    <title>一致性算法-Paxos</title>
+    <url>/posts/8bee0b02.html</url>
+    <content><![CDATA[<h2 id="Paxos-是如何保证一致性的"><a href="#Paxos-是如何保证一致性的" class="headerlink" title="Paxos 是如何保证一致性的"></a>Paxos 是如何保证一致性的</h2><p><strong>答案是通过持久化变化的日志流来保证一致性的。</strong>你会问这是为什么。这需要你带着这个问题来看下面的示例：</p>
+<p>如图：我们现在部署了三个节点的集群，分别是 Node 1,Node 2,Node 3。这三个节点中的任何一个节点都可以写入数据，同时任何一个节点被写入数据后都会将数据同步给其他两个节点，现在有三个客户端分别在三个节点写入 a, b, c。问，当查询的时候数据按照哪种顺序排列是正确的？</p>
+<span id="more"></span>
+
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220209193951005.png" alt="image-20220209193951005"></p>
+<p>答案如下图：<strong>三个节点返回的数据顺序只要是一样的就是正确的，即总共有 6 种正确答案。</strong></p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220209195241655.png" alt="image-20220209195241655"></p>
+<p>每个节点写入数据的时候都会将这个数据写入到日志中，后续写入的数据都以 append 的形式追加到日志中，<strong>所以如果我们保证所有节点的日志是一致的那么就可以达到在并发情况下的一致性需求，同时，如果一个节点宕机了，等它重启后再加载一遍日志后就能将数据恢复也解决了数据丢失的问题。</strong></p>
+<h3 id="如何保证节点的日志是一致的"><a href="#如何保证节点的日志是一致的" class="headerlink" title="如何保证节点的日志是一致的"></a>如何保证节点的日志是一致的</h3><p>首先，我们要明确一点，每个节点的日志在写入的时候都会明确现在写入的是第几个。这样才能保证顺序是一致的。就用上面的例子来说，每个节点的日志都有三个位置，如果 Node 1 的1号位置写入的是 a ，那么其他两个节点就不能写到1号位置了，只能选择 2 号位置或者 3 号位置，如果 2 号位置被占了就再往后推。这样每个节点对于几号位置写入什么数据就都达成了共识，那么最终结果就是每个节点的日志顺序都是一样的。</p>
+<p>这里的关键思想是：虽然每个Node接收到的请求顺序不同，但它们对于日志中1号位置、2号位置、3号位置的认知是一样的，大家一起保证1号位置、2号位置、3号位置存储的数据一样！在例子中可以看到，每个Node在存储日志之前先要问一下其他Node，之后再决定把这条日志写到哪个位置。这里有两个阶段：先问，再做决策，也就是Paxos2PC的原型！</p>
+<p><strong>但是在并发的情况下这个看似简单的问题也会变得特别复杂。</strong>例如，Node1询问后发现1号位置没有被占，因此它打算把 a 传播给Node2和Node3；同一时刻，Node2询问后发现1号位置也没有被占，因此它打算把 b 传播给Node1和Node3；同样，Node3也打算把 c 传播给Node1和Node2。<strong>这样不就冲突了吗？</strong></p>
+<p><strong>为了解决这个问题 Paxos 规定了如下流程：</strong> </p>
+<p>第一，发现1号位置的值被大多数确定了，比如是 c（node3占领了1号位置，Node2跟从了Node3），则Node1就接受这个事实：1号位置不能用了，也得把自己的1号位置赋值成 c 。然后看2号位置能否把 a 存进去。同样地，如果2号也被占领了，就只能把它们的值拿过来填在自己的2号位置。只能再看3号位置是否可行。</p>
+<p>第二，当发现1号位置没有被占，就锁定这个位置，不允许其他Node再占这个位置！除非它的权利更大。</p>
+<p>第三，如果发现1号位置为空，在提交的时候发现1号位置被其他Node占了，就会提交失败，重试，尝试第二个位置，第三个位置……所以，为了让1号位置日志一样，可能要重试好多次，每个节点都会不断重试2PC。这样不断重试2PC，直到最终各方达成一致的过程，就是Paxos协议执行的过程，也就是一个Paxos instance，最终确定一个值。然后不断重复这个过程来确定一系列的值。</p>
+<h4 id="Paxos-算法的执行流程"><a href="#Paxos-算法的执行流程" class="headerlink" title="Paxos 算法的执行流程"></a>Paxos 算法的执行流程</h4><p>基于以上思想，Paxos 最后设计出可落地的执行流程。关于 Paxos 算法的执行流程可以看下这位网友的文章，浅显易懂 <a href="https://www.zhihu.com/question/19787937">Paxos算法的执行流程</a> 这里就不再赘述了。</p>
+<h2 id="算法存在的问题"><a href="#算法存在的问题" class="headerlink" title="算法存在的问题"></a>算法存在的问题</h2><p>读到这里相信大家都对 Paxos 的执行流程有一个大概的印象了，那么这个流程中会引发两个问题：</p>
+<ol>
+<li>存在陷入不断循环的风险：Paxos 是一个“不断循环”的2PC。在P1C或者P2C阶段，算法都可能失败，每次失败就要再重新执行一遍算法流程，在极端情况下可能出现不断循环的情况。</li>
+<li>存在性能问题：每确定一个值，至少需要两次通信（两个阶段，两个网络来回）+ 两次写盘。</li>
+</ol>
+<p>为了解决这两个问题 <strong>Multi Paxos 算法</strong>应运而生。</p>
+<h2 id="Multi-Paxos算法"><a href="#Multi-Paxos算法" class="headerlink" title="Multi Paxos算法"></a>Multi Paxos算法</h2><p>Multi Paxos算法并不是一个全新的算法，它只是在 Paxos 算法的基础上进行了一些改进，接下来我们看下它是如何解决上面两个问题的。</p>
+<h3 id="解决不断循环"><a href="#解决不断循环" class="headerlink" title="解决不断循环"></a>解决不断循环</h3><p>这个问题的本质<strong>是多个客户端写多个机器，会导致并发冲突很高</strong>，所以如果减少并发冲突那就可以解决这个问题了。</p>
+<h4 id="创建一个-Leader"><a href="#创建一个-Leader" class="headerlink" title="创建一个 Leader"></a>创建一个 Leader</h4><p><strong>为了减少并发冲突，可以变多写为单写</strong>，选出一个Leader，其他机器收到写请求，都把写请求转发给Leader；或者让客户端把写请求都发给Leader。这样就可以避免<strong>写并发</strong>了。当然由于网络原因可能产生 <strong>脑裂</strong>，也就是有多个 Leader ，但是即使有多个 Leader 也不会影响数据的正确性，只是增加了发生并发的可能性而已。</p>
+<p>说到这里就可能要说下 Leader 选举的两种常用方法了。</p>
+<h4 id="无租约的-Leader-选举"><a href="#无租约的-Leader-选举" class="headerlink" title="无租约的 Leader 选举"></a>无租约的 Leader 选举</h4><p>选举流程如下：</p>
+<ol>
+<li>每个节点有一个编号，选取编号最大的节点为Leader；</li>
+<li>每个节点周期性地向其他节点发送心跳，假设周期为T ms；</li>
+<li>如果一个节点在最近的2 T ms内还没有收到比自己编号更大的节点发来的心跳，则自己变为Leader；</li>
+<li>如果一个节点不是Leader，则收到请求之后转发给Leader。</li>
+</ol>
+<h4 id="有租约的-Leader-选举"><a href="#有租约的-Leader-选举" class="headerlink" title="有租约的 Leader 选举"></a>有租约的 Leader 选举</h4><p><strong>严格保证任意时刻只能有一个leader</strong>，也就是所谓的“租约”。租约的意思是在一个限定的期限内，某台机器一直是 Leader。即使这个机器宕机，Leader也不能切换。必须等到租期到期之后，才能开始选举新的Leader。这种方式会带来短暂的不可用，但保证了任意时刻只会有一个Leader。</p>
+<h3 id="解决性能问题"><a href="#解决性能问题" class="headerlink" title="解决性能问题"></a>解决性能问题</h3><p>选举出 Leader 之后对 2PC 进行了优化，基本思路是当一个节点被确认为Leader之后，它先广播一次Prepare，一旦超过半数同意 （防止有另一个 Leader ），之后对于收到的每条日志直接执行应用操作。这样就减少了一次询问的流程。</p>
+<p>如果同时还有另一个 Leader 怎么办呢？新的Leader肯定会先发起Prepare，新 Leader 的编号肯定更大。这时旧的 Leader 的广播肯定会失败，旧的 Leader 会自己转变成一个普通的Acceptor，新的Leader把旧的顶替掉了。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>算法</tag>
+      </tags>
+  </entry>
 </search>

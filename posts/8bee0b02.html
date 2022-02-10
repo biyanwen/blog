@@ -21,24 +21,23 @@
     var CONFIG = {"hostname":"biyw.cf","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="在 Java 中将十六进制 byte 转成 int 时要使用 &amp;0xFF 操作这是为什么呢？这是因为十六进制的范围是 0x00~0x3FF 没有负数，而 int 的取值范围是包含负数的，所以直接将 byte 强转成 int 可能会得到错误的数值。同时操作系统存储的是二进制原码进行补码后的数值, 所以只有通过 &amp;0xFF 操作才能得到正确的数值。">
+  <meta name="description" content="Paxos 是如何保证一致性的答案是通过持久化变化的日志流来保证一致性的。你会问这是为什么。这需要你带着这个问题来看下面的示例： 如图：我们现在部署了三个节点的集群，分别是 Node 1,Node 2,Node 3。这三个节点中的任何一个节点都可以写入数据，同时任何一个节点被写入数据后都会将数据同步给其他两个节点，现在有三个客户端分别在三个节点写入 a, b, c。问，当查询的时候数据按照哪种顺序">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Java中byte转int为什么要使用&amp;0xFF">
-<meta property="og:url" content="https://biyw.cf/posts/1d17d658.html">
+<meta property="og:title" content="一致性算法-Paxos">
+<meta property="og:url" content="https://biyw.cf/posts/8bee0b02.html">
 <meta property="og:site_name" content="byw的博客">
-<meta property="og:description" content="在 Java 中将十六进制 byte 转成 int 时要使用 &amp;0xFF 操作这是为什么呢？这是因为十六进制的范围是 0x00~0x3FF 没有负数，而 int 的取值范围是包含负数的，所以直接将 byte 强转成 int 可能会得到错误的数值。同时操作系统存储的是二进制原码进行补码后的数值, 所以只有通过 &amp;0xFF 操作才能得到正确的数值。">
+<meta property="og:description" content="Paxos 是如何保证一致性的答案是通过持久化变化的日志流来保证一致性的。你会问这是为什么。这需要你带着这个问题来看下面的示例： 如图：我们现在部署了三个节点的集群，分别是 Node 1,Node 2,Node 3。这三个节点中的任何一个节点都可以写入数据，同时任何一个节点被写入数据后都会将数据同步给其他两个节点，现在有三个客户端分别在三个节点写入 a, b, c。问，当查询的时候数据按照哪种顺序">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://s2.loli.net/2022/01/03/oAWgmL3xRZ1QODh.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/03/BW45N7Hc2GQogJ8.png">
-<meta property="article:published_time" content="2022-01-03T05:50:35.000Z">
-<meta property="article:modified_time" content="2022-02-03T08:07:12.568Z">
+<meta property="og:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220209193951005.png">
+<meta property="og:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220209195241655.png">
+<meta property="article:published_time" content="2022-02-09T11:20:44.000Z">
+<meta property="article:modified_time" content="2022-02-10T11:01:57.686Z">
 <meta property="article:author" content="Byw">
-<meta property="article:tag" content="Java">
-<meta property="article:tag" content="计算机原理">
+<meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://s2.loli.net/2022/01/03/oAWgmL3xRZ1QODh.png">
+<meta name="twitter:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220209193951005.png">
 
-<link rel="canonical" href="https://biyw.cf/posts/1d17d658.html">
+<link rel="canonical" href="https://biyw.cf/posts/8bee0b02.html">
 
 
 <script id="page-configurations">
@@ -51,7 +50,7 @@
   };
 </script>
 
-  <title>Java中byte转int为什么要使用&0xFF | byw的博客</title>
+  <title>一致性算法-Paxos | byw的博客</title>
   
 
 
@@ -208,7 +207,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://biyw.cf/posts/1d17d658.html">
+    <link itemprop="mainEntityOfPage" href="https://biyw.cf/posts/8bee0b02.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tx.jpg">
@@ -221,7 +220,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Java中byte转int为什么要使用&0xFF
+          一致性算法-Paxos
         </h1>
 
         <div class="post-meta">
@@ -231,14 +230,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2022-01-03 13:50:35" itemprop="dateCreated datePublished" datetime="2022-01-03T13:50:35+08:00">2022-01-03</time>
+              <time title="创建时间：2022-02-09 19:20:44" itemprop="dateCreated datePublished" datetime="2022-02-09T19:20:44+08:00">2022-02-09</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-02-03 16:07:12" itemprop="dateModified" datetime="2022-02-03T16:07:12+08:00">2022-02-03</time>
+                <time title="修改时间：2022-02-10 19:01:57" itemprop="dateModified" datetime="2022-02-10T19:01:57+08:00">2022-02-10</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -263,14 +262,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.2k</span>
+              <span>2.5k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
+              <span>4 分钟</span>
             </span>
 
         </div>
@@ -282,27 +281,42 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>在 Java 中将十六进制 byte 转成 int 时要使用 &amp;0xFF 操作这是为什么呢？这是因为十六进制的范围是 0x00~0x3FF 没有负数，而 int 的取值范围是包含负数的，所以直接将 byte 强转成 int 可能会得到错误的数值。同时操作系统存储的是二进制原码进行补码后的数值, 所以只有通过 &amp;0xFF 操作才能得到正确的数值。</p>
+        <h2 id="Paxos-是如何保证一致性的"><a href="#Paxos-是如何保证一致性的" class="headerlink" title="Paxos 是如何保证一致性的"></a>Paxos 是如何保证一致性的</h2><p><strong>答案是通过持久化变化的日志流来保证一致性的。</strong>你会问这是为什么。这需要你带着这个问题来看下面的示例：</p>
+<p>如图：我们现在部署了三个节点的集群，分别是 Node 1,Node 2,Node 3。这三个节点中的任何一个节点都可以写入数据，同时任何一个节点被写入数据后都会将数据同步给其他两个节点，现在有三个客户端分别在三个节点写入 a, b, c。问，当查询的时候数据按照哪种顺序排列是正确的？</p>
 <span id="more"></span>
 
-<p>至于为什么就要先知道什么是补码。</p>
-<h2 id="补码"><a href="#补码" class="headerlink" title="补码"></a>补码</h2><p>下图以 -7 为例子展示了补码是如何计算的，简单说 -7 在计算机存储的二进制数据其实不是 <code>10000111</code> 而是 <code>11111001</code> 。<strong>但是这个流程值针对负数的，正数无论是反码还是补码都是一样的。</strong></p>
-<p><img src="https://s2.loli.net/2022/01/03/oAWgmL3xRZ1QODh.png" alt="image-20220103151025334"></p>
-<p>ps: 这里补充一个基础知识，原码其实是由两部分组成的，如下图最高位和数值位组成，因为二进制只能存储 0、1所以没有办法用正负号表示数值的正负，所以采用了这种办法。</p>
-<p><img src="https://s2.loli.net/2022/01/03/BW45N7Hc2GQogJ8.png" alt="image-20220103151943112"></p>
-<h2 id="为什么要用补码"><a href="#为什么要用补码" class="headerlink" title="为什么要用补码"></a>为什么要用补码</h2><p>使用补码是为了简化计算机底层的设计。因为我们人可以很清楚的知道最高位是符号位，但是对于计算机基础电路设计来说判别第一位是符号位是非常难和复杂的事情。所以人们为了让实现变得简单就想让符号位也参与运算，并且只保留加法，我们知道减法相当于加上一个负数。</p>
-<p>例如：</p>
-<p><code>1 - 1 = 1 + （ -1） = 0</code></p>
-<h3 id="原码计算"><a href="#原码计算" class="headerlink" title="原码计算"></a>原码计算</h3><p>我们都知道上面的等式是成立的，但是如果用<strong>原码</strong>直接进行运算会得到什么结果呢？</p>
-<p><code>0000 0001 + 1000 0001 = 1000 0010 = -2 </code></p>
-<p>得到了错误的结果。为了解决这个问题创建了反码。</p>
-<h3 id="反码计算"><a href="#反码计算" class="headerlink" title="反码计算"></a>反码计算</h3><p>原码：0000 0001 + 1000 0001 = 反码：0000 0001 + 1111 1110 =  反码：1111 1111  = 原码： 1000 0000 = -0 。</p>
-<p>根据以上等式我们看出来，使用反码进行计算可以得到正确的结果，但是虽然人们可以理解 +0 和 -0 是一样的但是这会引发两个问题 ，一方面为 0 标注正负是没有任何意义的，另一方面会出现 0000 0000 和 1000 0000 两个编码都表示 0 的现象，这会增加计算机设计的复杂度而且没有必要。所以为了解决这个问题 设计出了<strong>补码</strong>。</p>
-<h3 id="补码计算"><a href="#补码计算" class="headerlink" title="补码计算"></a>补码计算</h3><p>原码：0000 0001 + 1000 0001 = 补码：0000 0001 + 1111 1111  =  补码： 0000 0000 = 原码：0000 0000 = 0 。</p>
-<p>这样就解决了所有的问题，可以轻松愉快的带入符号进行计算了。</p>
-<h2 id="amp-0xFF-的作用"><a href="#amp-0xFF-的作用" class="headerlink" title="&amp;0xFF 的作用"></a>&amp;0xFF 的作用</h2><p>主要作用就是保证补码的完整性。</p>
-<p>因为 byte 是一个字节而 int 是四个字节，所以 byte 转 int 需要进行数据扩展。Java 采用的是<strong>符号位扩展</strong>。以 -127 为例：</p>
-<p>-127 的补码为 <code>10000001</code>, 数据扩展之后是 <code>11111111 11111111 11111111 10000001</code> 这个二进制数值明显不对，所以为了得到正确的结果让其和 0xFF 进行与运算将补位的 1 全部换成 0 最后得到 <code>00000000 00000000 00000000 10000001</code> 这个就是我们需要的结果了。</p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220209193951005.png" alt="image-20220209193951005"></p>
+<p>答案如下图：<strong>三个节点返回的数据顺序只要是一样的就是正确的，即总共有 6 种正确答案。</strong></p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220209195241655.png" alt="image-20220209195241655"></p>
+<p>每个节点写入数据的时候都会将这个数据写入到日志中，后续写入的数据都以 append 的形式追加到日志中，<strong>所以如果我们保证所有节点的日志是一致的那么就可以达到在并发情况下的一致性需求，同时，如果一个节点宕机了，等它重启后再加载一遍日志后就能将数据恢复也解决了数据丢失的问题。</strong></p>
+<h3 id="如何保证节点的日志是一致的"><a href="#如何保证节点的日志是一致的" class="headerlink" title="如何保证节点的日志是一致的"></a>如何保证节点的日志是一致的</h3><p>首先，我们要明确一点，每个节点的日志在写入的时候都会明确现在写入的是第几个。这样才能保证顺序是一致的。就用上面的例子来说，每个节点的日志都有三个位置，如果 Node 1 的1号位置写入的是 a ，那么其他两个节点就不能写到1号位置了，只能选择 2 号位置或者 3 号位置，如果 2 号位置被占了就再往后推。这样每个节点对于几号位置写入什么数据就都达成了共识，那么最终结果就是每个节点的日志顺序都是一样的。</p>
+<p>这里的关键思想是：虽然每个Node接收到的请求顺序不同，但它们对于日志中1号位置、2号位置、3号位置的认知是一样的，大家一起保证1号位置、2号位置、3号位置存储的数据一样！在例子中可以看到，每个Node在存储日志之前先要问一下其他Node，之后再决定把这条日志写到哪个位置。这里有两个阶段：先问，再做决策，也就是Paxos2PC的原型！</p>
+<p><strong>但是在并发的情况下这个看似简单的问题也会变得特别复杂。</strong>例如，Node1询问后发现1号位置没有被占，因此它打算把 a 传播给Node2和Node3；同一时刻，Node2询问后发现1号位置也没有被占，因此它打算把 b 传播给Node1和Node3；同样，Node3也打算把 c 传播给Node1和Node2。<strong>这样不就冲突了吗？</strong></p>
+<p><strong>为了解决这个问题 Paxos 规定了如下流程：</strong> </p>
+<p>第一，发现1号位置的值被大多数确定了，比如是 c（node3占领了1号位置，Node2跟从了Node3），则Node1就接受这个事实：1号位置不能用了，也得把自己的1号位置赋值成 c 。然后看2号位置能否把 a 存进去。同样地，如果2号也被占领了，就只能把它们的值拿过来填在自己的2号位置。只能再看3号位置是否可行。</p>
+<p>第二，当发现1号位置没有被占，就锁定这个位置，不允许其他Node再占这个位置！除非它的权利更大。</p>
+<p>第三，如果发现1号位置为空，在提交的时候发现1号位置被其他Node占了，就会提交失败，重试，尝试第二个位置，第三个位置……所以，为了让1号位置日志一样，可能要重试好多次，每个节点都会不断重试2PC。这样不断重试2PC，直到最终各方达成一致的过程，就是Paxos协议执行的过程，也就是一个Paxos instance，最终确定一个值。然后不断重复这个过程来确定一系列的值。</p>
+<h4 id="Paxos-算法的执行流程"><a href="#Paxos-算法的执行流程" class="headerlink" title="Paxos 算法的执行流程"></a>Paxos 算法的执行流程</h4><p>基于以上思想，Paxos 最后设计出可落地的执行流程。关于 Paxos 算法的执行流程可以看下这位网友的文章，浅显易懂 <a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.zhihu.com/question/19787937">Paxos算法的执行流程</a> 这里就不再赘述了。</p>
+<h2 id="算法存在的问题"><a href="#算法存在的问题" class="headerlink" title="算法存在的问题"></a>算法存在的问题</h2><p>读到这里相信大家都对 Paxos 的执行流程有一个大概的印象了，那么这个流程中会引发两个问题：</p>
+<ol>
+<li>存在陷入不断循环的风险：Paxos 是一个“不断循环”的2PC。在P1C或者P2C阶段，算法都可能失败，每次失败就要再重新执行一遍算法流程，在极端情况下可能出现不断循环的情况。</li>
+<li>存在性能问题：每确定一个值，至少需要两次通信（两个阶段，两个网络来回）+ 两次写盘。</li>
+</ol>
+<p>为了解决这两个问题 <strong>Multi Paxos 算法</strong>应运而生。</p>
+<h2 id="Multi-Paxos算法"><a href="#Multi-Paxos算法" class="headerlink" title="Multi Paxos算法"></a>Multi Paxos算法</h2><p>Multi Paxos算法并不是一个全新的算法，它只是在 Paxos 算法的基础上进行了一些改进，接下来我们看下它是如何解决上面两个问题的。</p>
+<h3 id="解决不断循环"><a href="#解决不断循环" class="headerlink" title="解决不断循环"></a>解决不断循环</h3><p>这个问题的本质<strong>是多个客户端写多个机器，会导致并发冲突很高</strong>，所以如果减少并发冲突那就可以解决这个问题了。</p>
+<h4 id="创建一个-Leader"><a href="#创建一个-Leader" class="headerlink" title="创建一个 Leader"></a>创建一个 Leader</h4><p><strong>为了减少并发冲突，可以变多写为单写</strong>，选出一个Leader，其他机器收到写请求，都把写请求转发给Leader；或者让客户端把写请求都发给Leader。这样就可以避免<strong>写并发</strong>了。当然由于网络原因可能产生 <strong>脑裂</strong>，也就是有多个 Leader ，但是即使有多个 Leader 也不会影响数据的正确性，只是增加了发生并发的可能性而已。</p>
+<p>说到这里就可能要说下 Leader 选举的两种常用方法了。</p>
+<h4 id="无租约的-Leader-选举"><a href="#无租约的-Leader-选举" class="headerlink" title="无租约的 Leader 选举"></a>无租约的 Leader 选举</h4><p>选举流程如下：</p>
+<ol>
+<li>每个节点有一个编号，选取编号最大的节点为Leader；</li>
+<li>每个节点周期性地向其他节点发送心跳，假设周期为T ms；</li>
+<li>如果一个节点在最近的2 T ms内还没有收到比自己编号更大的节点发来的心跳，则自己变为Leader；</li>
+<li>如果一个节点不是Leader，则收到请求之后转发给Leader。</li>
+</ol>
+<h4 id="有租约的-Leader-选举"><a href="#有租约的-Leader-选举" class="headerlink" title="有租约的 Leader 选举"></a>有租约的 Leader 选举</h4><p><strong>严格保证任意时刻只能有一个leader</strong>，也就是所谓的“租约”。租约的意思是在一个限定的期限内，某台机器一直是 Leader。即使这个机器宕机，Leader也不能切换。必须等到租期到期之后，才能开始选举新的Leader。这种方式会带来短暂的不可用，但保证了任意时刻只会有一个Leader。</p>
+<h3 id="解决性能问题"><a href="#解决性能问题" class="headerlink" title="解决性能问题"></a>解决性能问题</h3><p>选举出 Leader 之后对 2PC 进行了优化，基本思路是当一个节点被确认为Leader之后，它先广播一次Prepare，一旦超过半数同意 （防止有另一个 Leader ），之后对于收到的每条日志直接执行应用操作。这样就减少了一次询问的流程。</p>
+<p>如果同时还有另一个 Leader 怎么办呢？新的Leader肯定会先发起Prepare，新 Leader 的编号肯定更大。这时旧的 Leader 的广播肯定会失败，旧的 Leader 会自己转变成一个普通的Acceptor，新的Leader把旧的顶替掉了。</p>
 
     </div>
 
@@ -318,7 +332,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://biyw.cf/posts/1d17d658.html" title="Java中byte转int为什么要使用&amp;0xFF">https://biyw.cf/posts/1d17d658.html</a>
+    <a href="https://biyw.cf/posts/8bee0b02.html" title="一致性算法-Paxos">https://biyw.cf/posts/8bee0b02.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener external nofollow noreferrer" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -329,8 +343,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/Java/" rel="tag"># Java</a>
-              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/" rel="tag"># 计算机原理</a>
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
           </div>
 
         
@@ -339,13 +352,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/posts/2622ec0e.html" rel="prev" title="Hibernate 实战第二版 中文翻译 事务和并发篇(一)">
-      <i class="fa fa-chevron-left"></i> Hibernate 实战第二版 中文翻译 事务和并发篇(一)
+    <a href="/posts/e7489af5.html" rel="prev" title="Mysql-InnoDB缓存详解">
+      <i class="fa fa-chevron-left"></i> Mysql-InnoDB缓存详解
     </a></div>
-      <div class="post-nav-item">
-    <a href="/posts/adb2ba17.html" rel="next" title="指令详解-地址码">
-      指令详解-地址码 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -405,7 +415,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%A5%E7%A0%81"><span class="nav-number">1.</span> <span class="nav-text">补码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%94%A8%E8%A1%A5%E7%A0%81"><span class="nav-number">2.</span> <span class="nav-text">为什么要用补码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E7%A0%81%E8%AE%A1%E7%AE%97"><span class="nav-number">2.1.</span> <span class="nav-text">原码计算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E7%A0%81%E8%AE%A1%E7%AE%97"><span class="nav-number">2.2.</span> <span class="nav-text">反码计算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A5%E7%A0%81%E8%AE%A1%E7%AE%97"><span class="nav-number">2.3.</span> <span class="nav-text">补码计算</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#amp-0xFF-%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text">&amp;0xFF 的作用</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Paxos-%E6%98%AF%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84"><span class="nav-number">1.</span> <span class="nav-text">Paxos 是如何保证一致性的</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E8%8A%82%E7%82%B9%E7%9A%84%E6%97%A5%E5%BF%97%E6%98%AF%E4%B8%80%E8%87%B4%E7%9A%84"><span class="nav-number">1.1.</span> <span class="nav-text">如何保证节点的日志是一致的</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Paxos-%E7%AE%97%E6%B3%95%E7%9A%84%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.1.1.</span> <span class="nav-text">Paxos 算法的执行流程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E5%AD%98%E5%9C%A8%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">算法存在的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Multi-Paxos%E7%AE%97%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">Multi Paxos算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E4%B8%8D%E6%96%AD%E5%BE%AA%E7%8E%AF"><span class="nav-number">3.1.</span> <span class="nav-text">解决不断循环</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA-Leader"><span class="nav-number">3.1.1.</span> <span class="nav-text">创建一个 Leader</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E7%A7%9F%E7%BA%A6%E7%9A%84-Leader-%E9%80%89%E4%B8%BE"><span class="nav-number">3.1.2.</span> <span class="nav-text">无租约的 Leader 选举</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%89%E7%A7%9F%E7%BA%A6%E7%9A%84-Leader-%E9%80%89%E4%B8%BE"><span class="nav-number">3.1.3.</span> <span class="nav-text">有租约的 Leader 选举</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98"><span class="nav-number">3.2.</span> <span class="nav-text">解决性能问题</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -569,7 +579,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'blog',
       owner       : 'biyanwen',
       admin       : ['biyanwen'],
-      id          : '73ddc7f5093b698960d82ec7e5f06ed4',
+      id          : '08fd8c2b0bfc2d47e4eb8bc29b104a3a',
         language: 'zh-CN',
       distractionFreeMode: true
     });
