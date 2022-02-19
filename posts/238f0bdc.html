@@ -21,20 +21,20 @@
     var CONFIG = {"hostname":"biyw.cf","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。">
+  <meta name="description" content="Zab 算法出现在 Paxos 之后、Raft 之前，其实 Raft 的很多思路和Zab很像，我们熟知的 Zookeeper 使用的就是 Zab 算法。 与 Raft 相似，Zab 也分为三个阶段，分别是阶段一，选举 Leader；阶段二，同步数据；阶段三，崩溃恢复。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="网站的高性能架构">
-<meta property="og:url" content="https://biyw.cf/posts/7b9932ab.html">
+<meta property="og:title" content="一致性算法-Zab">
+<meta property="og:url" content="https://biyw.cf/posts/238f0bdc.html">
 <meta property="og:site_name" content="byw的博客">
-<meta property="og:description" content="网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。">
+<meta property="og:description" content="Zab 算法出现在 Paxos 之后、Raft 之前，其实 Raft 的很多思路和Zab很像，我们熟知的 Zookeeper 使用的就是 Zab 算法。 与 Raft 相似，Zab 也分为三个阶段，分别是阶段一，选举 Leader；阶段二，同步数据；阶段三，崩溃恢复。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-12-05T06:20:42.235Z">
-<meta property="article:modified_time" content="2022-02-03T08:07:12.604Z">
+<meta property="article:published_time" content="2022-02-19T05:45:00.000Z">
+<meta property="article:modified_time" content="2022-02-19T07:48:07.607Z">
 <meta property="article:author" content="Byw">
-<meta property="article:tag" content="架构">
+<meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://biyw.cf/posts/7b9932ab.html">
+<link rel="canonical" href="https://biyw.cf/posts/238f0bdc.html">
 
 
 <script id="page-configurations">
@@ -47,7 +47,7 @@
   };
 </script>
 
-  <title>网站的高性能架构 | byw的博客</title>
+  <title>一致性算法-Zab | byw的博客</title>
   
 
 
@@ -204,7 +204,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://biyw.cf/posts/7b9932ab.html">
+    <link itemprop="mainEntityOfPage" href="https://biyw.cf/posts/238f0bdc.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tx.jpg">
@@ -217,7 +217,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          网站的高性能架构
+          一致性算法-Zab
         </h1>
 
         <div class="post-meta">
@@ -226,16 +226,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2021-12-05 14:20:42" itemprop="dateCreated datePublished" datetime="2021-12-05T14:20:42+08:00">2021-12-05</time>
+              <time title="创建时间：2022-02-19 13:45:00 / 修改时间：15:48:07" itemprop="dateCreated datePublished" datetime="2022-02-19T13:45:00+08:00">2022-02-19</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-02-03 16:07:12" itemprop="dateModified" datetime="2022-02-03T16:07:12+08:00">2022-02-03</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -259,14 +253,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.7k</span>
+              <span>1.5k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
+              <span>2 分钟</span>
             </span>
 
         </div>
@@ -278,83 +272,26 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>网站性能是客观的指标，可以具体体现到响应时间、吞吐量等技术指标，同时也是主观的感受，而感受则是一种与具体参与者相关的微妙的东西，用户的感受和工程师的感受不同，不同的用户感受也不同。</p>
+        <p>Zab 算法出现在 Paxos 之后、Raft 之前，其实 Raft 的很多思路和Zab很像，我们熟知的 Zookeeper 使用的就是 Zab 算法。</p>
+<p>与 Raft 相似，Zab 也分为三个阶段，分别是阶段一，选举 Leader；阶段二，同步数据；阶段三，崩溃恢复。</p>
 <span id="more"></span>
 
-<h2 id="1-网站性能测试"><a href="#1-网站性能测试" class="headerlink" title="1. 网站性能测试"></a>1. 网站性能测试</h2><p>性能测试是性能优化的前提和基础，也是性能优化结果的检查和度量标准。不同视角下的网站性能有不同的标准，也有不同的优化手段。</p>
-<h3 id="1-1不同视角下的网站性能"><a href="#1-1不同视角下的网站性能" class="headerlink" title="1.1不同视角下的网站性能"></a>1.1不同视角下的网站性能</h3><ul>
-<li><p>1.1.1 用户视角的网站性能</p>
-<p>从用户角度，网站性能就是用户在浏览器上直观感受到的网站响应速度快还是慢</p>
-<ul>
-<li><p>优化手段：</p>
-<p>使用一些前端架构优化手段，通过优化页面HTML式样、利用浏览器端的并发和异步特性、调整浏览器缓存策略、使用CDN服务、反向代理等手段，使浏览器尽快地显示用户感兴趣的内容、尽可能近地获取页面内容，即使不优化应用程序和架构，也可以很大程度地改善用户视角下的网站性能</p>
-</li>
-</ul>
-</li>
-<li><p>1.1.2 开发人员视角的网站性能</p>
-<p>开发人员关注的主要是应用程序本身及其相关子系统的性能，包括响应延迟、系统吞吐量、并发处理能力、系统稳定性等技术指标。</p>
-<ul>
-<li><p>优化手段：</p>
-<p>使用缓存加速数据读取，使用集群提高吞吐能力，使用异步消息加快请求响应及实现削峰，使用代码优化手段改善程序性能。</p>
-</li>
-</ul>
-</li>
-<li><p>1.1.3 运维人员视角的网站性能</p>
-<p>运维人员更关注基础设施性能和资源利用率，如网络运营商的带宽能力、服务器硬件的配置、数据中心网络架构、服务器和网络带宽的资源利用率等</p>
-<ul>
-<li><p>优化手段</p>
-<p>建设优化骨干网、使用高性价比定制服务器、利用虚拟化技术优化资源利用等</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="1-2-性能测试指标"><a href="#1-2-性能测试指标" class="headerlink" title="1.2 性能测试指标"></a>1.2 性能测试指标</h3><p>不同视角下有不同的性能标准，不同的标准有不同的性能测试指标，从开发和测试人员的视角，网站性能测试的主要指标有响应时间、并发数、吞吐量、性能计数器等</p>
-<ul>
-<li><p>1.2.1 响应时间</p>
-<p>指应用执行一个操作需要的时间，包括从发出请求开始到收到最后响应数据所需要的时间</p>
-</li>
-<li><p>1.2.2 并发数</p>
-<p>指系统能够同时处理请求的数目，这个数字也反映了系统的负载特性。</p>
-</li>
-<li><p>1.2.3 吞吐量</p>
-<p>单位时间内系统处理的请求数量，体现系统的整体处理能力</p>
-</li>
-<li><p>1.2.4 性能计数器</p>
-<p>它是描述服务器或操作系统性能的一些数据指标。包括SystemLoad、对象与线程数、内存使用、CPU使用、磁盘与网络I/O等指标。这些指标也是系统监控的重要参数，对这些指标设置报警阈值，当监控系统发现性能计数器超过阈值时，就向运维和开发人员报警，及时发现处理系统异常。</p>
-</li>
-</ul>
-<h3 id="1-3-性能测试方法"><a href="#1-3-性能测试方法" class="headerlink" title="1.3 性能测试方法"></a>1.3 性能测试方法</h3><p>性能测试是一个总称，具体可细分为性能测试、负载测试、压力测试、稳定性测试。</p>
-<h2 id="2-Web前端性能优化"><a href="#2-Web前端性能优化" class="headerlink" title="2. Web前端性能优化"></a>2. Web前端性能优化</h2><h3 id="2-1-浏览器访问优化"><a href="#2-1-浏览器访问优化" class="headerlink" title="2.1 浏览器访问优化"></a>2.1 浏览器访问优化</h3><ul>
-<li><p>2.1.1 减少http请求</p>
-<ul>
-<li><p>2.1.1.1 为什么</p>
-<p>HTTP协议是无状态的应用层协议，意味着每次HTTP请求都需要建立通信链路、进行数据传输，而在服务器端，每个HTTP都需要启动独立的线程去处理</p>
-</li>
-<li><p>2.1.1.2 怎么办</p>
-<p>合并CSS、合并JavaScript、合并图片，这样一次请求就可以获取多个需要的文件</p>
-</li>
-</ul>
-</li>
-<li><p>2.1.2 使用浏览器缓存</p>
-<p>将更新的频率都低，而访问平凡的文件缓存在浏览器中，可以极好地改善性能</p>
-</li>
-<li><p>2.1.3 启用压缩</p>
-<p>在服务器端对文件进行压缩，在浏览器端对文件解压缩，可有效减少通信传输的数据量。有利就有弊，压缩对服务器和浏览器产生一定的压力，在通信带宽良好，而服务器资源不足的情况下要权衡考虑。</p>
-</li>
-<li><p>2.1.4 CSS放在页面最上面、JavaScript放在页面最下面</p>
-<p>浏览器会在下载完全部CSS之后才对整个页面进行渲染，因此最好的做法是将CSS放在页面最上面，让浏览器尽快下载CSS。JavaScript则相反，浏览器在加载JavaScript后立即执行，有可能会阻塞整个页面，造成页面显示缓慢，因此JavaScript最好放在页面最下面。</p>
-</li>
-<li><p>2.1.5 减少Cookie传输</p>
-<p>Cookie包含在每次请求和响应中，太大的Cookie会严重影响数据传输</p>
-</li>
-<li><p>2.1.5 CDN加速</p>
-<p>CDN（Content Distribute Network，内容分发网络）的本质仍然是一个缓存，而且将数据缓存在离用户最近的地方，使用户以最快速度获取数据</p>
-</li>
-<li><p>2.1.6 反向代理</p>
-<p>1、可以缓存静态内容，加快web访问；<br>2、保护网站安全，相当于在Web服务器和可能的网络攻击之间建立了一个屏障。</p>
-</li>
-</ul>
-<h2 id="3-应用服务器性能优化"><a href="#3-应用服务器性能优化" class="headerlink" title="3. 应用服务器性能优化"></a>3. 应用服务器性能优化</h2><p>优化手段主要有缓存、集群、异步等。</p>
+<h2 id="选举-Leader"><a href="#选举-Leader" class="headerlink" title="选举 Leader"></a>选举 Leader</h2><p>Zab 和 Raft 一样，任何一个节点也是有三种状态：Leader、Follower 和Election。Election状态是中间状态，也被称作“Looking”状态，在Raft里面叫作Candidate状态，其实只是名字不同而已。</p>
+<p>但是与 Raft 只有 Leader 向 Follower 发送心跳不同的是 <strong>Zab 的 Follower 也会向 Leader 发送心跳</strong>，Leader 一定时间收不到超过半数的Follower心跳，会切换到Election状态，重新发起选举；反过来，Follower收不到Leader的心跳，就切换到Election状态发起选举；显然，Raft的实现要比Zab简单。</p>
+<p>至于选举方式，Raft选取日志最新的节点作为新的Leader，Zab也类似，<strong>选取zxid最大的节点作为Leader</strong>。如果所有节点的zxid相等，比如整个系统刚初始化的时候，所有节点的zxid都为0。此时，将选取节点编号最大的节点作为Leader（Zookeeper为每个节点配置了一个编号）。</p>
+<p>这里你可能不知道 zxid 是什么，那么下面就来简单讲解一下 zxid。</p>
+<h3 id="zxid"><a href="#zxid" class="headerlink" title="zxid"></a>zxid</h3><p>每次客户端发起写数据请求的时候，zab 都会生成一个全局唯一的事务 ID，用来记录这次请求的相关数据，这个事务 ID 就是 zxid。</p>
+<p>在Raft里面，每条日志都有一个term和index，把这两个拼在一起，就类似于zxid。zxid是一个64位的整数，高32位表示Leader的任期，在Raft里面叫term，这里叫<strong>epoch</strong>；低32位是任期内日志的顺序编号。</p>
+<p>两条日志的新旧比较办法和Raft中两条日志的比较办法类似：</p>
+<ol>
+<li>日志a的epoch大于b的epoch，则日志a的zxid大于b的zxid，日志a比日志b新。</li>
+<li>如果日志a的epoch等于b的epoch，就比较低32为的大小，如果日志a的编号大于日志b的编号，则日志a的zxid大于b的zxid，日志a比日志b新。</li>
+</ol>
+<p>所以在 Leader 选举的时候，如果一个节点的 zxid 大就意味着这个节点存储的数据较多，让它来当 Leader 会减少数据的丢失，更合适。</p>
+<h2 id="同步数据"><a href="#同步数据" class="headerlink" title="同步数据"></a>同步数据</h2><p>这一部分与 Raft 很相似， Leader 选出来后，如果客户端写入了数据，如果该节点不是 Leader 就将请求转发给 Leader ，之后 Leader 就会给所有节点发送同步数据请求，当有半数节点返回成功 zab 就会给客户端返回写入成功的信息，同时再给所有节点发送 commit 消息，只有接到 commit 消息的节点才会将刚才的数据写入到自己的节点中，客户端才可以在 Follower 节点中查询到数据。</p>
+<h2 id="崩溃恢复"><a href="#崩溃恢复" class="headerlink" title="崩溃恢复"></a>崩溃恢复</h2><p>当Leader宕机后，新选出了Leader，其他Follower要切换到新的Leader，从新的Leader同步数据，这个过程也就是<strong>恢复阶段</strong>。在Raft里面恢复阶段很简单，新选出的Leader发出一个空的数据同步请求，也就是复用了数据同步阶段的通信协议。</p>
+<p>在Zab里面用了专门的协议，但思路和Raft也类似，Leader的日志不会动，Follower要与Leader做日志比对，然后可能要进行日志的截断、日志的补齐等操作。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>因为前面已经梳理了 Paxos 和 Raft 算法，而 Zab 算法与其他两个算法都有一定的相似性，所以此篇博客并没有把所有细节都写出来。如果看完之后有些许疑惑可以看下前面博客对 Paxos 和 Raft 算法的介绍。</p>
 
     </div>
 
@@ -370,7 +307,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://biyw.cf/posts/7b9932ab.html" title="网站的高性能架构">https://biyw.cf/posts/7b9932ab.html</a>
+    <a href="https://biyw.cf/posts/238f0bdc.html" title="一致性算法-Zab">https://biyw.cf/posts/238f0bdc.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener external nofollow noreferrer" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -381,7 +318,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
           </div>
 
         
@@ -390,13 +327,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/posts/269fd615.html" rel="prev" title="网站典型故障案例">
-      <i class="fa fa-chevron-left"></i> 网站典型故障案例
+    <a href="/posts/abf4a6b7.html" rel="prev" title="一致性算法-Raft">
+      <i class="fa fa-chevron-left"></i> 一致性算法-Raft
     </a></div>
-      <div class="post-nav-item">
-    <a href="/posts/56231c3b.html" rel="next" title="集群环境下如何管理Session">
-      集群环境下如何管理Session <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -456,7 +390,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E7%BD%91%E7%AB%99%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95"><span class="nav-number">1.</span> <span class="nav-text">1. 网站性能测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1%E4%B8%8D%E5%90%8C%E8%A7%86%E8%A7%92%E4%B8%8B%E7%9A%84%E7%BD%91%E7%AB%99%E6%80%A7%E8%83%BD"><span class="nav-number">1.1.</span> <span class="nav-text">1.1不同视角下的网站性能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E6%8C%87%E6%A0%87"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 性能测试指标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95%E6%96%B9%E6%B3%95"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 性能测试方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Web%E5%89%8D%E7%AB%AF%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">2. Web前端性能优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E6%B5%8F%E8%A7%88%E5%99%A8%E8%AE%BF%E9%97%AE%E4%BC%98%E5%8C%96"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 浏览器访问优化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">3. 应用服务器性能优化</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%89%E4%B8%BE-Leader"><span class="nav-number">1.</span> <span class="nav-text">选举 Leader</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#zxid"><span class="nav-number">1.1.</span> <span class="nav-text">zxid</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E6%95%B0%E6%8D%AE"><span class="nav-number">2.</span> <span class="nav-text">同步数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B4%A9%E6%BA%83%E6%81%A2%E5%A4%8D"><span class="nav-number">3.</span> <span class="nav-text">崩溃恢复</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -620,7 +554,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'blog',
       owner       : 'biyanwen',
       admin       : ['biyanwen'],
-      id          : '54312c9244983a24859b929659acc797',
+      id          : 'b8437c05f3e69da0a5feccfae12a1784',
         language: 'zh-CN',
       distractionFreeMode: true
     });

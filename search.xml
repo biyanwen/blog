@@ -2548,4 +2548,35 @@
         <tag>Hibernate</tag>
       </tags>
   </entry>
+  <entry>
+    <title>一致性算法-Zab</title>
+    <url>/posts/238f0bdc.html</url>
+    <content><![CDATA[<p>Zab 算法出现在 Paxos 之后、Raft 之前，其实 Raft 的很多思路和Zab很像，我们熟知的 Zookeeper 使用的就是 Zab 算法。</p>
+<p>与 Raft 相似，Zab 也分为三个阶段，分别是阶段一，选举 Leader；阶段二，同步数据；阶段三，崩溃恢复。</p>
+<span id="more"></span>
+
+<h2 id="选举-Leader"><a href="#选举-Leader" class="headerlink" title="选举 Leader"></a>选举 Leader</h2><p>Zab 和 Raft 一样，任何一个节点也是有三种状态：Leader、Follower 和Election。Election状态是中间状态，也被称作“Looking”状态，在Raft里面叫作Candidate状态，其实只是名字不同而已。</p>
+<p>但是与 Raft 只有 Leader 向 Follower 发送心跳不同的是 <strong>Zab 的 Follower 也会向 Leader 发送心跳</strong>，Leader 一定时间收不到超过半数的Follower心跳，会切换到Election状态，重新发起选举；反过来，Follower收不到Leader的心跳，就切换到Election状态发起选举；显然，Raft的实现要比Zab简单。</p>
+<p>至于选举方式，Raft选取日志最新的节点作为新的Leader，Zab也类似，<strong>选取zxid最大的节点作为Leader</strong>。如果所有节点的zxid相等，比如整个系统刚初始化的时候，所有节点的zxid都为0。此时，将选取节点编号最大的节点作为Leader（Zookeeper为每个节点配置了一个编号）。</p>
+<p>这里你可能不知道 zxid 是什么，那么下面就来简单讲解一下 zxid。</p>
+<h3 id="zxid"><a href="#zxid" class="headerlink" title="zxid"></a>zxid</h3><p>每次客户端发起写数据请求的时候，zab 都会生成一个全局唯一的事务 ID，用来记录这次请求的相关数据，这个事务 ID 就是 zxid。</p>
+<p>在Raft里面，每条日志都有一个term和index，把这两个拼在一起，就类似于zxid。zxid是一个64位的整数，高32位表示Leader的任期，在Raft里面叫term，这里叫<strong>epoch</strong>；低32位是任期内日志的顺序编号。</p>
+<p>两条日志的新旧比较办法和Raft中两条日志的比较办法类似：</p>
+<ol>
+<li>日志a的epoch大于b的epoch，则日志a的zxid大于b的zxid，日志a比日志b新。</li>
+<li>如果日志a的epoch等于b的epoch，就比较低32为的大小，如果日志a的编号大于日志b的编号，则日志a的zxid大于b的zxid，日志a比日志b新。</li>
+</ol>
+<p>所以在 Leader 选举的时候，如果一个节点的 zxid 大就意味着这个节点存储的数据较多，让它来当 Leader 会减少数据的丢失，更合适。</p>
+<h2 id="同步数据"><a href="#同步数据" class="headerlink" title="同步数据"></a>同步数据</h2><p>这一部分与 Raft 很相似， Leader 选出来后，如果客户端写入了数据，如果该节点不是 Leader 就将请求转发给 Leader ，之后 Leader 就会给所有节点发送同步数据请求，当有半数节点返回成功 zab 就会给客户端返回写入成功的信息，同时再给所有节点发送 commit 消息，只有接到 commit 消息的节点才会将刚才的数据写入到自己的节点中，客户端才可以在 Follower 节点中查询到数据。</p>
+<h2 id="崩溃恢复"><a href="#崩溃恢复" class="headerlink" title="崩溃恢复"></a>崩溃恢复</h2><p>当Leader宕机后，新选出了Leader，其他Follower要切换到新的Leader，从新的Leader同步数据，这个过程也就是<strong>恢复阶段</strong>。在Raft里面恢复阶段很简单，新选出的Leader发出一个空的数据同步请求，也就是复用了数据同步阶段的通信协议。</p>
+<p>在Zab里面用了专门的协议，但思路和Raft也类似，Leader的日志不会动，Follower要与Leader做日志比对，然后可能要进行日志的截断、日志的补齐等操作。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>因为前面已经梳理了 Paxos 和 Raft 算法，而 Zab 算法与其他两个算法都有一定的相似性，所以此篇博客并没有把所有细节都写出来。如果看完之后有些许疑惑可以看下前面博客对 Paxos 和 Raft 算法的介绍。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>算法</tag>
+      </tags>
+  </entry>
 </search>
