@@ -1,78 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Hibernate 实战第二版 中文翻译 事务和并发篇(一)</title>
-    <url>/posts/2622ec0e.html</url>
-    <content><![CDATA[<p>在这章，我们终于要学习事务相关的知识了：在应用中如何创建工作单元并解决并发问题。（ps: 想了解什么是 <a href="https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/">工作单元</a> 请看这里。）工作单元是一个原子操作。事务可以让你设置工作单元的边界，让其不会受其他工作单元影响。在一个拥有许多用户的应用中，或许会有很多人同时访问这些工作单元的情况。</p>
-<p>在处理并发问题之前，我们首先集中精力了解下最基础的工作单元：数据库和系统事务。你将学会使用 Java 代码定义工作单元和事务划分相关的 API。我们将讨论如何保持隔离，并且用乐观锁和悲观锁控制并发访问。</p>
-<span id="more"></span>
-
-<p>最后，我们会看一些在没有事务的情况下访问数据库的特殊案例和 JPA 的特性。</p>
-<h2 id="事务的要素"><a href="#事务的要素" class="headerlink" title="事务的要素"></a>事务的要素</h2><p>在某些场景下应用需要将几件事情一次性做完。例如，当一次拍卖结束后，CaveatEmptor 应用必须执行三个不同的任务：</p>
-<ol>
-<li>寻找拍卖的中标者。</li>
-<li>收取卖方的手续费。</li>
-<li>通知卖方和买方。</li>
-</ol>
-<p>如果因为外部的信用卡系统的问题导致扣款失败会怎样？这个商业需求可能会规定要么所有任务全部成功要么全部失败。因此，可以称这些步骤属于同一个事务或者工作单元。如果其中一个步骤失败了，那么整个工作单元都必须失败。</p>
-<h3 id="ACID-属性"><a href="#ACID-属性" class="headerlink" title="ACID 属性"></a>ACID 属性</h3><p>ACID 是原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）的缩写，代表一个事务中的所有操作都是原子的。此外，事务允许多个用户并发的操作相同的数据，而且不会出现数据不一致的问题。一个正在运行的事务不能访问另一个同时也在运行的事务；他们应该独立的工作。事务中的更改应该是被持久化的，即使在事务完成之后系统崩溃了也不应该有数据丢失。</p>
-<p>另外，你想要事务正确的执行。例如，业务逻辑是应用只能对卖方扣款一次，而不是两次。这个逻辑是合理的，但是你没办法从数据库层面去约束它。因此，事务的正确性只能由应用程序自己保证，而数据库要保证数据的一致性。这些属性一起组成了 ACID 标准。</p>
-<h3 id="数据库与系统事务"><a href="#数据库与系统事务" class="headerlink" title="数据库与系统事务"></a>数据库与系统事务</h3><p>我们之前已经提到过系统和数据库事务了。再回头看下最后提出的那个问题：在一个拍卖功能的事务结束期间，我们或许会在数据库中记录中标金额。之后，在相同的事务中，我们会与一个外部的信用卡系统交互对卖方的账户进行扣款（服务费）。这个事务会横跨多个系统，并且会与很多子事务共同完成这个任务，这些子事务包括但不限于数据库连接的事务、外部扣款系统的事务。</p>
-<p>数据库的事务越短越好，因为它不仅会增加数据库资源的使用，而且在并发访问的情况下独占锁会导致其他访问被阻塞。一般情况下，一批数据操作会使用单独的事务进行控制。</p>
-<p>无论你在事务中执行什么数据库操作，你都必须设置工作单元的边界。你必须开启事务，并且在某个时间点将更改进行提交。无论发生任何异常，你都必须将数据回滚到更改之前的状态。这个过程要依赖于你使用的技术，并且涉及一定程度的人工干预。总之，设置事务的开始和结束这种边界，即可以使用编程式也可以使用声明式。</p>
-<h3 id="JTA"><a href="#JTA" class="headerlink" title="JTA"></a>JTA</h3><p>在 Java SE 中你可以调用 JDBC API 设置事务的边界。你可以通过调用 setAutoCommit(false) 在JDBC 链接上开启一个事务并且在事务结束时调用 commit() 方法。你可以在事务运行的任意时刻调用 rollback() 方法让事务立即回滚。</p>
-<p>在一个需要横跨多个系统对数据进行操作的应用中，有些工作单元可能包含多个事务。在这个场景中，你不能仅仅通过 JDBC 达到原子操作的目的。你需要一个可以在一个系统事务中处理多个事务资源的事务管理器（这里描述的应该是一个分布式事务，这个分布式事务由多个应用的多个事务共同组成）。JTA 标准事务管理器可以对分布式事务进行管理，让你不用关心太多的底层细节。JTA 最主要的 API 是 UserTransaction 接口中的 begin() 方法和 commit() 方法。</p>
-<blockquote>
-<p><strong>关于事务的其他 API</strong></p>
-<p>JTA 提供了一个很好的关于分布式事务系统的抽象。许多开发者仍然以为只能在 Java EE 的应用中使用 JTA。但是，当前有很多高品质独立的 JTA 服务可以使用，例如 Bitronix 和 Atomikos，它们可以被使用在任何 Java 环境中，而且很容易上手。考虑将这些解决方案当做启动 JTA 的数据路连接池。</p>
-<p>你应该尽可能的使用 JTA ，并且要避免使用私有事务 API 例如 org.hibernate.Transaction 或者限制非常多的 javax.persistence.EntityTransaction。这些 API 都会在 JTA 在 EJB运行容器外部还不可用时就会被创建。</p>
-</blockquote>
-<p>在 10.2.1 节我们会再一次学习事务，并且主要学习如何处理异常。下面这些代码展示了发生异常时如何回滚数据。</p>
-<p><img src="https://s2.loli.net/2021/12/25/S6xe14lGWDMI8a7.png" alt="image-20211225234127886"></p>
-<p>这段代码最复杂的地方就是处理异常的部分：我们现在就讨论这部分内容。首先你需要知道事务管理器和 EntityManager 是如何配合使用的。</p>
-<p>EntityManager 是懒加载的，我们在前几章讨论过这个话题，它直到 Sql 必须被执行的时候才会去获取数据库连接。JTA 也是如此：当你没有访问任何事务资源的时候，提交一个空的事务是非常节省资源的。例如，你可以在服务器中这么操作，这样的话，每次请求都不会消耗资源也不会对数据库进行上锁。</p>
-<p>当你创建一个 EntityManager 的时候，它会在当前工作线程中寻找 JTA 事务。如果 EntityManager 找到了这个事务，那么它就会加入这个事务，并且监听事务消息。这就意味着如果你想让上述流程起效，那么你就必须在同一个线程中调用 UserTransaction#begin()  方法和 EntityManagerFactory#createEntityManager() 方法。默认情况下，Hibernate 会像第 10  章所述，会自动提交事务。</p>
-<p>当 EntityManager 在当前线程中无法找到事务时，它就会进入 unsynchronized 模式，在这模式中， JPA 将不会自动提交事务。晚一些我们将会对这种行为进行更深入的讨论；当你在设计很复杂的功能时，这是一个很方便的特性。</p>
-<p>如果一个事务运行的时间太长就会被事务管理器关掉。记住数据库事务要尽可能的短。Bitronix 作为一个 JTA 服务提供者，它的默认超时时间是 60 秒，当前你可以在事务开始前调用 UserTransaction#setTransactionTimeout(). 方法覆盖这个参数。</p>
-<p>我们用前面的代码片段来谈论如何处理异常。</p>
-<h3 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h3><p>如果在调用 EntityManager 时或者事务提交时抛出异常，你必须检查当前系统事务的状态。当异常发生的时候，Hibernate 会让事务进行回滚。这意味着，在这个事务中进行的更改都不会生效。因为是你开启的事务，所以检查事务是否为 STATUS_MARKED_ROLLBACK 状态也是你的工作。如果 Hibernate 回滚失败了那么这个事务仍然会保持 STATUS_ACTIVE 状态。在这个案例中，你也可以调用 UserTransaction#rollback() 去取消执行任何已经发送到数据库的 Sql 语句。</p>
-<p>JPA 的任何操作，包括刷新持久化上下文时都有可能抛出 RuntimeException 异常。但是 UserTransaction#begin(), commit(),  和evenrollback() 方法抛出的是 Exception 异常。 异常在回滚的时候需要进行特殊处理的：你想要捕获这个异常并且将它输出到日志中；否则就会导致回滚失败。你也可以在回滚之后继续将异常往上抛出，这种情况下你可能会有一个拦截器，对异常进行统一处理，例如在屏幕上渲染一些错误信息，或者联系运维团队。在回滚时又出现异常是很难处理的，我们建议将它输出到日志，并且对其进行人工干预。因为回滚失败代表着系统有很多问题。</p>
-<p>Hibaernte 抛出的异常都是 RuntimeException 的子异常，了解它们会对你进行异常处理有很多帮助。</p>
-<ul>
-<li>HibernateException 是很常见的异常。你必须检查这个异常信息，或者通过调用 getCause() 方法获得更多信息。</li>
-<li>JDBCException 一般出现在 Hibernate 与 JDBC 进行交互的时候。这类异常也可能是某些 Sql 导致的，你可以通过调用 getSQL() 方法获取到导致异常发生的 Sql。这个 JDBC 链接抛出的内部异常可以通过调用 getSQLException() 或者 getCause() 方法得到，并且通过调用 getErrorCode() 可以获取数据库特定的异常代码信息。</li>
-<li>JDBCException 及其子类在 Hibernate 中存在一个转换器，可以通过数据库驱动将它转换成更有意义的信息。可以转换的异常有 JDBCConnectionException, SQLGrammarException, LockAcquisitionException,DataException,  和  ConstraintViolationException，主流数据库都为 Hibernate 提供了相应的方言。你也可以通过 SQLExceptionConverterFactory 类为你的数据库或者插件配置自定义的转换器。</li>
-</ul>
-<p>很多开发者看到 Hibernate 对异常有这么详细的类型划分都很高兴。但是这可能让你误入歧途。例如，你或许会为了达到某种校验的目的去捕获 ConstraintViolationException 异常。如果你忘记给 Item#name 属性赋值，同时它对应的数据库字段被设置为 NOT NULL。当你试图去刷新持久化上下文的时候 Hibernate 会抛出异常。这种情况下为什么不能捕获它并且将失败信息（使用自己定义的错误码和描述信息）展示给开发者，让他们改正这个问题？因为这个策略会有两个明显的问题。</p>
-<p>第一，根据数据库抛出的未检查的值来看是什么问题对于一个可拓展的应用来说并不是一个很好的策略。应该在应用层实现一些数据校验工作。第二，异常对于当前工作单元来说是致命的，但是这不应该是让一个应用的使用者去处理它：使用者希望在工作单元内部进行处理。在不了解代码细节的情况下是很难处理的。我们建议你使用细粒度的异常类型去展示致命的异常信息，而不是用于去验证你的猜想。例如，当你捕获 ConstraintViolationException 异常时屏幕展示如下信息：“应用出现了 bug，某人在存储局时没有对数据进行校验，请将这个问题报告给程序员” 对于其他异常信息，你最好在屏幕中生成错误信息。</p>
-<p>这么做对开发者是很有用的，让开发者可以快速判断是应用层出现了问题，还是数据库负载过高（无法获得锁资源）。对于校验，你可以使用 Bean Validation 框架。通过在 entity 上配置一些注解，Hibernate 可以在用户层对数据进行校验，并且可以自动生成 Sql ddl 规则。</p>
-<p>你现在应该知道什么异常应该进行捕获处理了。或许你还有一个问题：你捕获异常后应该做什么，让事务回滚吗？Hibernate 抛出异常是致命的。这意味着你必须关闭当前持久化上下文。你不能继续使用已经抛出异常的 EntityManager。将异常信息输出到屏幕或者日志中，然后让用户使用一个全新的事务和持久化上下文重新开启会话。</p>
-<p>以上所述并不包含所有情况，有些标准异常并不是不可挽回的：</p>
-<ul>
-<li>javax.persistence.NoResultException，这个异常会在 Query 或者 TypedQuery 调用 getSingleResult() 方法但是在数据库找不到对应的数据时被抛出。你可以通过异常处理代码对这个查询进行封装，然后继续使用这个持久化上下文。当前事务不会因为这个异常而进行回滚。</li>
-<li>javax.persistence.NonUniqueResultException，这个异常会在 Query 或者 TypedQuery 调用 getSingleResult() 方法但是数据库放回多条数据时抛出。你可以通过异常处理代码对这个查询进行封装，然后继续使用这个持久化上下文。当前事务不会因为这个异常而进行回滚。</li>
-<li>javax.persistence.QueryTimeoutException，当 Query 或者 TypedQuery 执行太久时抛出。不要让事务回滚。在某些情况下你或许想要再次查询。</li>
-<li>javax.persistence.LockTimeoutException，当无法获取悲观锁时会抛出此异常。或许会发生在与数据库同步数据时候或者通过显式声明锁进行上锁的情况下。事务在这种情况下不回滚，你或许想要再次尝试这个操作。记住，不断重复已经访问数据库失败的操作不会解决问题。</li>
-</ul>
-<p>这个列表中没有包含 javax.persistence.EntityNotFoundException 异常，这个异常会被 EntityManager#getReference()、lock() 和 refresh() 方法抛出。Hibernate 会在你试图访问一个已经从数据库中被删除的数据时抛出此异常。这是一个致命的异常，事务会因此回滚，你必须关闭这个持久化上下文。</p>
-<p>通过编程式进行事务的划分需要使用类似 JTA 的 UserTransaction 接口这样的应用代码才行。但是通过声明式的方式就不需要写多余的代码。</p>
-<h3 id="声明式定义事务"><a href="#声明式定义事务" class="headerlink" title="声明式定义事务"></a>声明式定义事务</h3><p>在 Java EE 中，当你需要一个事务时你可以通过声明的方式获取一个事务。运行环境会负责处理相关的事情。通常情况下你需要在你的组件中配置一些注解，以达到开启事务的目的。</p>
-<p>在 EJB 组件中，你可以使用  @javax.ejb.TransactionAttribute 注解来声明事务的边界。你可以在 18.2.1 中找到相关的代码示例。</p>
-<p>你也可以使用一个较新的注解 @javax.transaction.Transactional 这个注解可以用在任何 Java EE 的应用中。你可以在 19.3.1 节找到相关的示例。</p>
-<p>本章的代码示例可以运行在任意 Java SE 环境中，不需要任何运行容器。从现在开始，你将只能看到编程式的事务划分，直到我们学习 Java EE 的特殊应用例子为止。</p>
-<p>下面让我们学习 ACID 最复杂的功能：如何将正在运行的工作单元相互独立。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-        <category>翻译</category>
-      </categories>
-      <tags>
-        <tag>ORM</tag>
-        <tag>Java</tag>
-        <tag>Hibernate</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(三)</title>
     <url>/posts/edd61a92.html</url>
     <content><![CDATA[<h2 id="使用游离态"><a href="#使用游离态" class="headerlink" title="使用游离态"></a>使用游离态</h2><p>如果一个 entity 实例脱离了持久化上下文的管理，我们就称它为游离态。当持久化上下文关闭之后，它就不再提供 id 映射服务。当你使用游离态的 entity 实例时可能会遇到一些问题，所以，一定要保证你明白如何处理游离态实例。</p>
@@ -154,6 +82,78 @@
       </tags>
   </entry>
   <entry>
+    <title>Hibernate 实战第二版 中文翻译 事务和并发篇(一)</title>
+    <url>/posts/2622ec0e.html</url>
+    <content><![CDATA[<p>在这章，我们终于要学习事务相关的知识了：在应用中如何创建工作单元并解决并发问题。（ps: 想了解什么是 <a href="https://biyw.cf/Hibernate-%E5%AE%9E%E6%88%98%E7%AC%AC%E4%BA%8C%E7%89%88-%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91-%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE%E7%AF%87-%E4%BA%8C/">工作单元</a> 请看这里。）工作单元是一个原子操作。事务可以让你设置工作单元的边界，让其不会受其他工作单元影响。在一个拥有许多用户的应用中，或许会有很多人同时访问这些工作单元的情况。</p>
+<p>在处理并发问题之前，我们首先集中精力了解下最基础的工作单元：数据库和系统事务。你将学会使用 Java 代码定义工作单元和事务划分相关的 API。我们将讨论如何保持隔离，并且用乐观锁和悲观锁控制并发访问。</p>
+<span id="more"></span>
+
+<p>最后，我们会看一些在没有事务的情况下访问数据库的特殊案例和 JPA 的特性。</p>
+<h2 id="事务的要素"><a href="#事务的要素" class="headerlink" title="事务的要素"></a>事务的要素</h2><p>在某些场景下应用需要将几件事情一次性做完。例如，当一次拍卖结束后，CaveatEmptor 应用必须执行三个不同的任务：</p>
+<ol>
+<li>寻找拍卖的中标者。</li>
+<li>收取卖方的手续费。</li>
+<li>通知卖方和买方。</li>
+</ol>
+<p>如果因为外部的信用卡系统的问题导致扣款失败会怎样？这个商业需求可能会规定要么所有任务全部成功要么全部失败。因此，可以称这些步骤属于同一个事务或者工作单元。如果其中一个步骤失败了，那么整个工作单元都必须失败。</p>
+<h3 id="ACID-属性"><a href="#ACID-属性" class="headerlink" title="ACID 属性"></a>ACID 属性</h3><p>ACID 是原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）的缩写，代表一个事务中的所有操作都是原子的。此外，事务允许多个用户并发的操作相同的数据，而且不会出现数据不一致的问题。一个正在运行的事务不能访问另一个同时也在运行的事务；他们应该独立的工作。事务中的更改应该是被持久化的，即使在事务完成之后系统崩溃了也不应该有数据丢失。</p>
+<p>另外，你想要事务正确的执行。例如，业务逻辑是应用只能对卖方扣款一次，而不是两次。这个逻辑是合理的，但是你没办法从数据库层面去约束它。因此，事务的正确性只能由应用程序自己保证，而数据库要保证数据的一致性。这些属性一起组成了 ACID 标准。</p>
+<h3 id="数据库与系统事务"><a href="#数据库与系统事务" class="headerlink" title="数据库与系统事务"></a>数据库与系统事务</h3><p>我们之前已经提到过系统和数据库事务了。再回头看下最后提出的那个问题：在一个拍卖功能的事务结束期间，我们或许会在数据库中记录中标金额。之后，在相同的事务中，我们会与一个外部的信用卡系统交互对卖方的账户进行扣款（服务费）。这个事务会横跨多个系统，并且会与很多子事务共同完成这个任务，这些子事务包括但不限于数据库连接的事务、外部扣款系统的事务。</p>
+<p>数据库的事务越短越好，因为它不仅会增加数据库资源的使用，而且在并发访问的情况下独占锁会导致其他访问被阻塞。一般情况下，一批数据操作会使用单独的事务进行控制。</p>
+<p>无论你在事务中执行什么数据库操作，你都必须设置工作单元的边界。你必须开启事务，并且在某个时间点将更改进行提交。无论发生任何异常，你都必须将数据回滚到更改之前的状态。这个过程要依赖于你使用的技术，并且涉及一定程度的人工干预。总之，设置事务的开始和结束这种边界，即可以使用编程式也可以使用声明式。</p>
+<h3 id="JTA"><a href="#JTA" class="headerlink" title="JTA"></a>JTA</h3><p>在 Java SE 中你可以调用 JDBC API 设置事务的边界。你可以通过调用 setAutoCommit(false) 在JDBC 链接上开启一个事务并且在事务结束时调用 commit() 方法。你可以在事务运行的任意时刻调用 rollback() 方法让事务立即回滚。</p>
+<p>在一个需要横跨多个系统对数据进行操作的应用中，有些工作单元可能包含多个事务。在这个场景中，你不能仅仅通过 JDBC 达到原子操作的目的。你需要一个可以在一个系统事务中处理多个事务资源的事务管理器（这里描述的应该是一个分布式事务，这个分布式事务由多个应用的多个事务共同组成）。JTA 标准事务管理器可以对分布式事务进行管理，让你不用关心太多的底层细节。JTA 最主要的 API 是 UserTransaction 接口中的 begin() 方法和 commit() 方法。</p>
+<blockquote>
+<p><strong>关于事务的其他 API</strong></p>
+<p>JTA 提供了一个很好的关于分布式事务系统的抽象。许多开发者仍然以为只能在 Java EE 的应用中使用 JTA。但是，当前有很多高品质独立的 JTA 服务可以使用，例如 Bitronix 和 Atomikos，它们可以被使用在任何 Java 环境中，而且很容易上手。考虑将这些解决方案当做启动 JTA 的数据路连接池。</p>
+<p>你应该尽可能的使用 JTA ，并且要避免使用私有事务 API 例如 org.hibernate.Transaction 或者限制非常多的 javax.persistence.EntityTransaction。这些 API 都会在 JTA 在 EJB运行容器外部还不可用时就会被创建。</p>
+</blockquote>
+<p>在 10.2.1 节我们会再一次学习事务，并且主要学习如何处理异常。下面这些代码展示了发生异常时如何回滚数据。</p>
+<p><img src="https://s2.loli.net/2021/12/25/S6xe14lGWDMI8a7.png" alt="image-20211225234127886"></p>
+<p>这段代码最复杂的地方就是处理异常的部分：我们现在就讨论这部分内容。首先你需要知道事务管理器和 EntityManager 是如何配合使用的。</p>
+<p>EntityManager 是懒加载的，我们在前几章讨论过这个话题，它直到 Sql 必须被执行的时候才会去获取数据库连接。JTA 也是如此：当你没有访问任何事务资源的时候，提交一个空的事务是非常节省资源的。例如，你可以在服务器中这么操作，这样的话，每次请求都不会消耗资源也不会对数据库进行上锁。</p>
+<p>当你创建一个 EntityManager 的时候，它会在当前工作线程中寻找 JTA 事务。如果 EntityManager 找到了这个事务，那么它就会加入这个事务，并且监听事务消息。这就意味着如果你想让上述流程起效，那么你就必须在同一个线程中调用 UserTransaction#begin()  方法和 EntityManagerFactory#createEntityManager() 方法。默认情况下，Hibernate 会像第 10  章所述，会自动提交事务。</p>
+<p>当 EntityManager 在当前线程中无法找到事务时，它就会进入 unsynchronized 模式，在这模式中， JPA 将不会自动提交事务。晚一些我们将会对这种行为进行更深入的讨论；当你在设计很复杂的功能时，这是一个很方便的特性。</p>
+<p>如果一个事务运行的时间太长就会被事务管理器关掉。记住数据库事务要尽可能的短。Bitronix 作为一个 JTA 服务提供者，它的默认超时时间是 60 秒，当前你可以在事务开始前调用 UserTransaction#setTransactionTimeout(). 方法覆盖这个参数。</p>
+<p>我们用前面的代码片段来谈论如何处理异常。</p>
+<h3 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h3><p>如果在调用 EntityManager 时或者事务提交时抛出异常，你必须检查当前系统事务的状态。当异常发生的时候，Hibernate 会让事务进行回滚。这意味着，在这个事务中进行的更改都不会生效。因为是你开启的事务，所以检查事务是否为 STATUS_MARKED_ROLLBACK 状态也是你的工作。如果 Hibernate 回滚失败了那么这个事务仍然会保持 STATUS_ACTIVE 状态。在这个案例中，你也可以调用 UserTransaction#rollback() 去取消执行任何已经发送到数据库的 Sql 语句。</p>
+<p>JPA 的任何操作，包括刷新持久化上下文时都有可能抛出 RuntimeException 异常。但是 UserTransaction#begin(), commit(),  和evenrollback() 方法抛出的是 Exception 异常。 异常在回滚的时候需要进行特殊处理的：你想要捕获这个异常并且将它输出到日志中；否则就会导致回滚失败。你也可以在回滚之后继续将异常往上抛出，这种情况下你可能会有一个拦截器，对异常进行统一处理，例如在屏幕上渲染一些错误信息，或者联系运维团队。在回滚时又出现异常是很难处理的，我们建议将它输出到日志，并且对其进行人工干预。因为回滚失败代表着系统有很多问题。</p>
+<p>Hibaernte 抛出的异常都是 RuntimeException 的子异常，了解它们会对你进行异常处理有很多帮助。</p>
+<ul>
+<li>HibernateException 是很常见的异常。你必须检查这个异常信息，或者通过调用 getCause() 方法获得更多信息。</li>
+<li>JDBCException 一般出现在 Hibernate 与 JDBC 进行交互的时候。这类异常也可能是某些 Sql 导致的，你可以通过调用 getSQL() 方法获取到导致异常发生的 Sql。这个 JDBC 链接抛出的内部异常可以通过调用 getSQLException() 或者 getCause() 方法得到，并且通过调用 getErrorCode() 可以获取数据库特定的异常代码信息。</li>
+<li>JDBCException 及其子类在 Hibernate 中存在一个转换器，可以通过数据库驱动将它转换成更有意义的信息。可以转换的异常有 JDBCConnectionException, SQLGrammarException, LockAcquisitionException,DataException,  和  ConstraintViolationException，主流数据库都为 Hibernate 提供了相应的方言。你也可以通过 SQLExceptionConverterFactory 类为你的数据库或者插件配置自定义的转换器。</li>
+</ul>
+<p>很多开发者看到 Hibernate 对异常有这么详细的类型划分都很高兴。但是这可能让你误入歧途。例如，你或许会为了达到某种校验的目的去捕获 ConstraintViolationException 异常。如果你忘记给 Item#name 属性赋值，同时它对应的数据库字段被设置为 NOT NULL。当你试图去刷新持久化上下文的时候 Hibernate 会抛出异常。这种情况下为什么不能捕获它并且将失败信息（使用自己定义的错误码和描述信息）展示给开发者，让他们改正这个问题？因为这个策略会有两个明显的问题。</p>
+<p>第一，根据数据库抛出的未检查的值来看是什么问题对于一个可拓展的应用来说并不是一个很好的策略。应该在应用层实现一些数据校验工作。第二，异常对于当前工作单元来说是致命的，但是这不应该是让一个应用的使用者去处理它：使用者希望在工作单元内部进行处理。在不了解代码细节的情况下是很难处理的。我们建议你使用细粒度的异常类型去展示致命的异常信息，而不是用于去验证你的猜想。例如，当你捕获 ConstraintViolationException 异常时屏幕展示如下信息：“应用出现了 bug，某人在存储局时没有对数据进行校验，请将这个问题报告给程序员” 对于其他异常信息，你最好在屏幕中生成错误信息。</p>
+<p>这么做对开发者是很有用的，让开发者可以快速判断是应用层出现了问题，还是数据库负载过高（无法获得锁资源）。对于校验，你可以使用 Bean Validation 框架。通过在 entity 上配置一些注解，Hibernate 可以在用户层对数据进行校验，并且可以自动生成 Sql ddl 规则。</p>
+<p>你现在应该知道什么异常应该进行捕获处理了。或许你还有一个问题：你捕获异常后应该做什么，让事务回滚吗？Hibernate 抛出异常是致命的。这意味着你必须关闭当前持久化上下文。你不能继续使用已经抛出异常的 EntityManager。将异常信息输出到屏幕或者日志中，然后让用户使用一个全新的事务和持久化上下文重新开启会话。</p>
+<p>以上所述并不包含所有情况，有些标准异常并不是不可挽回的：</p>
+<ul>
+<li>javax.persistence.NoResultException，这个异常会在 Query 或者 TypedQuery 调用 getSingleResult() 方法但是在数据库找不到对应的数据时被抛出。你可以通过异常处理代码对这个查询进行封装，然后继续使用这个持久化上下文。当前事务不会因为这个异常而进行回滚。</li>
+<li>javax.persistence.NonUniqueResultException，这个异常会在 Query 或者 TypedQuery 调用 getSingleResult() 方法但是数据库放回多条数据时抛出。你可以通过异常处理代码对这个查询进行封装，然后继续使用这个持久化上下文。当前事务不会因为这个异常而进行回滚。</li>
+<li>javax.persistence.QueryTimeoutException，当 Query 或者 TypedQuery 执行太久时抛出。不要让事务回滚。在某些情况下你或许想要再次查询。</li>
+<li>javax.persistence.LockTimeoutException，当无法获取悲观锁时会抛出此异常。或许会发生在与数据库同步数据时候或者通过显式声明锁进行上锁的情况下。事务在这种情况下不回滚，你或许想要再次尝试这个操作。记住，不断重复已经访问数据库失败的操作不会解决问题。</li>
+</ul>
+<p>这个列表中没有包含 javax.persistence.EntityNotFoundException 异常，这个异常会被 EntityManager#getReference()、lock() 和 refresh() 方法抛出。Hibernate 会在你试图访问一个已经从数据库中被删除的数据时抛出此异常。这是一个致命的异常，事务会因此回滚，你必须关闭这个持久化上下文。</p>
+<p>通过编程式进行事务的划分需要使用类似 JTA 的 UserTransaction 接口这样的应用代码才行。但是通过声明式的方式就不需要写多余的代码。</p>
+<h3 id="声明式定义事务"><a href="#声明式定义事务" class="headerlink" title="声明式定义事务"></a>声明式定义事务</h3><p>在 Java EE 中，当你需要一个事务时你可以通过声明的方式获取一个事务。运行环境会负责处理相关的事情。通常情况下你需要在你的组件中配置一些注解，以达到开启事务的目的。</p>
+<p>在 EJB 组件中，你可以使用  @javax.ejb.TransactionAttribute 注解来声明事务的边界。你可以在 18.2.1 中找到相关的代码示例。</p>
+<p>你也可以使用一个较新的注解 @javax.transaction.Transactional 这个注解可以用在任何 Java EE 的应用中。你可以在 19.3.1 节找到相关的示例。</p>
+<p>本章的代码示例可以运行在任意 Java SE 环境中，不需要任何运行容器。从现在开始，你将只能看到编程式的事务划分，直到我们学习 Java EE 的特殊应用例子为止。</p>
+<p>下面让我们学习 ACID 最复杂的功能：如何将正在运行的工作单元相互独立。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+        <category>翻译</category>
+      </categories>
+      <tags>
+        <tag>ORM</tag>
+        <tag>Java</tag>
+        <tag>Hibernate</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Hibernate 实战第二版 中文翻译 管理数据篇(一)</title>
     <url>/posts/3c14a1db.html</url>
     <content><![CDATA[<h2 id="管理数据"><a href="#管理数据" class="headerlink" title="管理数据"></a>管理数据</h2><h3 id="entity-持久化过程中的生命周期"><a href="#entity-持久化过程中的生命周期" class="headerlink" title="entity 持久化过程中的生命周期"></a>entity 持久化过程中的生命周期</h3><p>因为 JPA 是一种透明的持久化机制，classes 不用关心他们自己的持久化行为，这样在写业务代码时就不需要关心数据是会被持久化还是仅仅保存在内存中。</p>
@@ -196,39 +196,6 @@
         <tag>ORM</tag>
         <tag>Java</tag>
         <tag>Hibernate</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java中byte转int为什么要使用&amp;0xFF</title>
-    <url>/posts/1d17d658.html</url>
-    <content><![CDATA[<p>在 Java 中将十六进制 byte 转成 int 时要使用 &amp;0xFF 操作这是为什么呢？这是因为十六进制的范围是 0x00~0x3FF 没有负数，而 int 的取值范围是包含负数的，所以直接将 byte 强转成 int 可能会得到错误的数值。同时操作系统存储的是二进制原码进行补码后的数值, 所以只有通过 &amp;0xFF 操作才能得到正确的数值。</p>
-<span id="more"></span>
-
-<p>至于为什么就要先知道什么是补码。</p>
-<h2 id="补码"><a href="#补码" class="headerlink" title="补码"></a>补码</h2><p>下图以 -7 为例子展示了补码是如何计算的，简单说 -7 在计算机存储的二进制数据其实不是 <code>10000111</code> 而是 <code>11111001</code> 。<strong>但是这个流程值针对负数的，正数无论是反码还是补码都是一样的。</strong></p>
-<p><img src="https://s2.loli.net/2022/01/03/oAWgmL3xRZ1QODh.png" alt="image-20220103151025334"></p>
-<p>ps: 这里补充一个基础知识，原码其实是由两部分组成的，如下图最高位和数值位组成，因为二进制只能存储 0、1所以没有办法用正负号表示数值的正负，所以采用了这种办法。</p>
-<p><img src="https://s2.loli.net/2022/01/03/BW45N7Hc2GQogJ8.png" alt="image-20220103151943112"></p>
-<h2 id="为什么要用补码"><a href="#为什么要用补码" class="headerlink" title="为什么要用补码"></a>为什么要用补码</h2><p>使用补码是为了简化计算机底层的设计。因为我们人可以很清楚的知道最高位是符号位，但是对于计算机基础电路设计来说判别第一位是符号位是非常难和复杂的事情。所以人们为了让实现变得简单就想让符号位也参与运算，并且只保留加法，我们知道减法相当于加上一个负数。</p>
-<p>例如：</p>
-<p><code>1 - 1 = 1 + （ -1） = 0</code></p>
-<h3 id="原码计算"><a href="#原码计算" class="headerlink" title="原码计算"></a>原码计算</h3><p>我们都知道上面的等式是成立的，但是如果用<strong>原码</strong>直接进行运算会得到什么结果呢？</p>
-<p><code>0000 0001 + 1000 0001 = 1000 0010 = -2 </code></p>
-<p>得到了错误的结果。为了解决这个问题创建了反码。</p>
-<h3 id="反码计算"><a href="#反码计算" class="headerlink" title="反码计算"></a>反码计算</h3><p>原码：0000 0001 + 1000 0001 = 反码：0000 0001 + 1111 1110 =  反码：1111 1111  = 原码： 1000 0000 = -0 。</p>
-<p>根据以上等式我们看出来，使用反码进行计算可以得到正确的结果，但是虽然人们可以理解 +0 和 -0 是一样的但是这会引发两个问题 ，一方面为 0 标注正负是没有任何意义的，另一方面会出现 0000 0000 和 1000 0000 两个编码都表示 0 的现象，这会增加计算机设计的复杂度而且没有必要。所以为了解决这个问题 设计出了<strong>补码</strong>。</p>
-<h3 id="补码计算"><a href="#补码计算" class="headerlink" title="补码计算"></a>补码计算</h3><p>原码：0000 0001 + 1000 0001 = 补码：0000 0001 + 1111 1111  =  补码： 0000 0000 = 原码：0000 0000 = 0 。</p>
-<p>这样就解决了所有的问题，可以轻松愉快的带入符号进行计算了。</p>
-<h2 id="amp-0xFF-的作用"><a href="#amp-0xFF-的作用" class="headerlink" title="&amp;0xFF 的作用"></a>&amp;0xFF 的作用</h2><p>主要作用就是保证补码的完整性。</p>
-<p>因为 byte 是一个字节而 int 是四个字节，所以 byte 转 int 需要进行数据扩展。Java 采用的是<strong>符号位扩展</strong>。以 -127 为例：</p>
-<p>-127 的补码为 <code>10000001</code>, 数据扩展之后是 <code>11111111 11111111 11111111 10000001</code> 这个二进制数值明显不对，所以为了得到正确的结果让其和 0xFF 进行与运算将补位的 1 全部换成 0 最后得到 <code>00000000 00000000 00000000 10000001</code> 这个就是我们需要的结果了。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>计算机原理</tag>
       </tags>
   </entry>
   <entry>
@@ -303,40 +270,28 @@
       </tags>
   </entry>
   <entry>
-    <title>Mysql-InnoDB表空间详解</title>
-    <url>/posts/720913d1.html</url>
-    <content><![CDATA[<h2 id="什么是表空间"><a href="#什么是表空间" class="headerlink" title="什么是表空间"></a>什么是表空间</h2><p>表空间是 Mysql 的一个抽象概念，在你新建一个表的时候，Mysql （5.7 + 版本）会为这个表创建一个后缀为 ibd 的文件，这个文件的名字就是表空间，构成表空间的最小单位就是页，所以表空间是实际存储索引和用户数据的地方。因为一个页最多 16k 大小，所以一个表空间拥有页的数量会特别巨大，为了更方便的对页进行管理，Mysql 的作者发明了<code>区</code>的概念。</p>
+    <title>Mysql-InnoDB缓存详解</title>
+    <url>/posts/e7489af5.html</url>
+    <content><![CDATA[<p>Mysql 的缓存叫做 Buffer Pool 它的主要作用就是将一些数据存储在内存中，当数据库需要访问的时候直接访问内存中的数据，而不用重新从磁盘中加载，减少磁盘 IO，提高系统运行效率。</p>
 <span id="more"></span>
 
-<h2 id="区"><a href="#区" class="headerlink" title="区"></a>区</h2><p>区的作用就是为了更方便的管理表空间中的页，表空间会被划分成很多连续的区，一个区由 64 个页构成，大小为 1M。256个区被划分为一组，每组的第一个区的前几个页的类型是固定了，为了方便存储一些全局数据，后续会展开讲解。</p>
-<h3 id="区的分类"><a href="#区的分类" class="headerlink" title="区的分类"></a>区的分类</h3><ul>
-<li>空闲的区：表示区内没有存储任何数据。</li>
-<li>有剩余空间的碎片区：已经存有数据，但是还可以继续存储数据的区。</li>
-<li>没有剩余空间的碎片区：已经不能继续存储数据了。</li>
-<li>附属于某个段的区：这个后面详细讲。</li>
-</ul>
-<h3 id="存储区的数据结构"><a href="#存储区的数据结构" class="headerlink" title="存储区的数据结构"></a>存储区的数据结构</h3><p>为了方便对区进行操作，Mysql 的作者为其设计了一个特殊的数据结构，名字叫 XDES Entry。总共由四个部分组成，如图：</p>
-<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203112524580.png" alt="image-20220203112524580" style="zoom:67%;" />
-
-<p>上一节我们说<code>区</code>分了四个种类，所以在写入数据的时候要先写入到<code>有剩余空间的碎片区</code>中，如果已经没有碎片区可以用了，那再去<code>空闲的区</code>申请空间。那现在问题来了，<strong>表空间这么大如何快速找到不同种类的区呢？</strong></p>
-<h3 id="如何快速找到不同种类的区"><a href="#如何快速找到不同种类的区" class="headerlink" title="如何快速找到不同种类的区"></a>如何快速找到不同种类的区</h3><p>答案是利用 XDES Entry 的 List Node 字段，<strong>表空间会利用这个字段形成三个表空间的链表</strong>，这三个链表的类型分别是：Free (空闲的区)、FreeFrag （有空闲的碎片区）、FullFrag （没有空闲的碎片区）。当要写入数据的时候就先找到 FreeFrag 类型的区，如果将这个区的剩余空间都用完了，就将这个区挂载到 FullFrag 链表中，然后从 Free 中拿到一个节点挂载到 FreeFrag 中继续写入数据。链表的样子大概如下图所示：</p>
-<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203115239807.png" alt="image-20220203115239807" style="zoom:70%;" />
-
-<p><strong>现在问题又来了，如何找到这三种类型的链表呢？</strong> </p>
-<h4 id="如何找到不同类型的链表"><a href="#如何找到不同类型的链表" class="headerlink" title="如何找到不同类型的链表"></a>如何找到不同类型的链表</h4><p>为了解决这个问题，Mysql 的作者设计了名为 LisiBaseNode 的数据结构，这个数据结构存储着链表的<strong>头结点、尾结点和链表总共有多少个节点的信息。</strong>并将 LisiBaseNode <strong>存储在表空间的第一个页中</strong>，这个页的页号为 0 ，类型为 FSP_HDR，也是表空间分组中的第一组的第一个区的第一个页。这样就可以在表空间中快速找到不同类型的区啦~~。</p>
-<h2 id="段"><a href="#段" class="headerlink" title="段"></a>段</h2><p>段是由区和单独的页构成的。<strong>段的主要作用就是为了增加表空间读写数据的性能</strong>，因为表空间可能特别大，所以区与区之间可能距离特别远，当 Mysql 批量操作数据的时候就需要跨越很远的距离去查找数据，这种情况叫做<code>随机 IO</code>这是很慢的，而段的特点是会分配一段连续的内存空间在这段空间内再创建区，这样区与区的距离就不会特别远，可以达到<code>顺序 IO</code>的效果，可以极大的增加数据库的性能。</p>
-<p>我们都知道 B+ 树有叶子节点和非叶子节点的区别，为了进一步增加数据库性能，<strong>就让叶子节点和非叶子节点分别创建各自的段。</strong></p>
-<p><strong>如何区分一个段是属于叶子节点还是非叶子节点的呢？</strong>其实<code>段</code>是由专门的页结构存储的，而这个页的 Page Header 就会标注清楚哪些段是叶子节点的，哪些是非叶子节点的。</p>
-<h3 id="存储段的数据结构"><a href="#存储段的数据结构" class="headerlink" title="存储段的数据结构"></a>存储段的数据结构</h3><p>为了方便对<code>段</code>进行管理，Mysql 的作者设计了一个特殊的数据结构用来存储段的信息，这个数据结构叫做 INODE ENtity ，结构如下图所示：</p>
-<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203124353554.png" alt="image-20220203124353554" style="zoom:67%;" />
-
-<p>下面对结构进行详细的解释。</p>
-<h4 id="List-Base-Node"><a href="#List-Base-Node" class="headerlink" title="List Base Node"></a>List Base Node</h4><p>为了能够快速分辨哪些段还可以继续写入数据，哪些段已经满了，Mysql 的设计者也对段进行了与区相同的分类，分为 Free(空闲)、NotFull(有一些数据，但是还可以继续写入)、Full(已经完全满了)。同样为了方便快速定位不同类型的链表设计者直接将三种类型链表的 ListBaseNode 节点放在了段的数据结构中。</p>
-<h4 id="Fragement-Array-Entry"><a href="#Fragement-Array-Entry" class="headerlink" title="Fragement Array Entry"></a>Fragement Array Entry</h4><p>你可能有因为，为什么段中还直接保存页呀？不是应该只保存区吗？<strong>这么做是为了更好的利用存储空间</strong>，段默认会分配 1M 大小，如果不够可以继续增加，但是如果你的数据特别少也用 1M 是不是就太浪费空间了呀？所以，设计者们提出了<code>碎片区</code>的概念，这个区内的页可以属于任何段，只有一个段占用的碎片区达到一定大小的时候才会分配一个完整区给这个段，这样可以更高效的利用存储空间。</p>
-<h3 id="INODE-ENtity-存储在什么地方"><a href="#INODE-ENtity-存储在什么地方" class="headerlink" title="INODE ENtity 存储在什么地方"></a>INODE ENtity 存储在什么地方</h3><p> INODE ENtity  也存储在页中，这个页位于表空间第一个分组的第一个区的第三个页中存储着所有 INODE ENtity 的基础信息（也可能是链表，因为有可能一个页无法存储所有段的基础信息）。这个页的类型为 INODE。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>为了方便大家理解，下面用一个图来表示表空间、区分组、区、段这些信息是如何存储的。</p>
-<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203130935197.png" alt="image-20220203130935197" style="zoom:67%;" />
-
+<h2 id="Buffer-Pool-的组成"><a href="#Buffer-Pool-的组成" class="headerlink" title="Buffer Pool 的组成"></a>Buffer Pool 的组成</h2><p>Buffer Pool 由两个部分组成，一个是<strong>数据页</strong>，就是被缓存的数据，数据是以页为单位进行缓存的。另一个叫<strong>控制信息</strong>，控制信息是保留页信息的数据结构，每缓存一个页都会生成对应的控制信息，控制信息包括页所属的表空间、页号、在 Buffer Pool 的地址等等。控制信息和数据页是一一对应的。</p>
+<p>它们在 Buffer Pool 的位置是<strong>控制信息在前，数据页在后</strong>。位置布局如下图所示：</p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220204154312226.png" alt="image-20220204154312226"></p>
+<h2 id="Buffer-Pool-的初始化"><a href="#Buffer-Pool-的初始化" class="headerlink" title="Buffer Pool 的初始化"></a>Buffer Pool 的初始化</h2><p>在 Mysql 启动的时候会向操作系统申请一片连续的内存空间，并且将整个 Buffer Pool 都用空的控制信息和页填满，等需要缓存数据的时候再填充数据（一开始就确定了能放多少个控制信息和页）。</p>
+<h2 id="对数据进行管理"><a href="#对数据进行管理" class="headerlink" title="对数据进行管理"></a>对数据进行管理</h2><p>Buffer Pool 可以特别大，虽然默认才几百兆，但是只要你的内存足够大，可以将它设置为几百G，在这么大的内存空间中，如何知道哪些页是空的呢？要一个一个遍历吗？下面就让我们来看下如何解决这个问题 。</p>
+<h3 id="如何知道哪些页是空的"><a href="#如何知道哪些页是空的" class="headerlink" title="如何知道哪些页是空的"></a>如何知道哪些页是空的</h3><p>其实 Buffer Pool 中设计了一个<strong>双向链表</strong>来解决这个问题。这个链表叫做 free 链表。Buffer Pool 会将空闲页对应的<strong>控制信息</strong>作为一个节点放到链表中。所以缓存数据的流程变为这样，首先从链表头拿到一个节点，通过节点找到空闲页，填充数据后将控制信息节点从链表中移除。</p>
+<h3 id="如何知道要查询的页已经在缓存中了？"><a href="#如何知道要查询的页已经在缓存中了？" class="headerlink" title="如何知道要查询的页已经在缓存中了？"></a>如何知道要查询的页已经在缓存中了？</h3><p><strong>答案是 HashMap</strong> 。我们现在都知道，控制信息中保存着页的许多基础信息，其中有表空间和页号，如果你看过我之前的博客应该就可以知道表空间+页号可以确定唯一的一个页，也可以说是页的唯一索引，所以我们可以用表空间+页号作为 key，数据页作为 value，这样就可以快速判断要查询的页是否已经在缓存中了。</p>
+<h3 id="如何知道哪些缓存中页的数据被修改了？"><a href="#如何知道哪些缓存中页的数据被修改了？" class="headerlink" title="如何知道哪些缓存中页的数据被修改了？"></a>如何知道哪些缓存中页的数据被修改了？</h3><p>我们都知道磁盘读写速度是很慢的，如果每次更改都等同步到磁盘后才算结束那性能会很低。同时 Buffer Pool 中的空间又可能特别大，如果每次先写入缓存然后异步的将所有数据都同步到磁盘中也不太现实。所以要找出一种解决办法，识别出哪些页的数据被修改，然后通过异步的方式将其同步到磁盘中，这样既能保证系统的性能，同时也能保证数据不会丢失。</p>
+<p><strong>答案是链表！</strong>说实话这链表 Mysql 是玩明白了。Mysql 中设计了名为 <strong>flush 的双向链表</strong>。当有页中的数据被更改了，就将其对应的控制信息加入到 flush 链表中，之后再异步的更新到磁盘中。</p>
+<h3 id="内存不够了怎么办？"><a href="#内存不够了怎么办？" class="headerlink" title="内存不够了怎么办？"></a>内存不够了怎么办？</h3><p>Mysql 使用的是 <strong>LRU 内存淘汰机制</strong>（最近最少使用原则）。创建一个链表，当有页被访问时就将对应的控制信息放到链表的头结点，当要淘汰某些页时从链表末尾进行移除。</p>
+<p><strong>但是这会引发一个问题：劣币驱逐良币。</strong>当触发 <strong>Mysql 预读机制或者遇到全表扫描</strong>的时候，如果这么做会让预读出来的或者全表扫描的数据也都放在链表的头部，因为这部分数据可能特别多，这样有可能导致一些热点数据被挤到链表尾部，在内存不足时会被移除。</p>
+<h4 id="对-LRU-进行分段"><a href="#对-LRU-进行分段" class="headerlink" title="对 LRU 进行分段"></a>对 LRU 进行分段</h4><p><strong>将一个 LRU链表分成两个部分</strong>。一个存储<strong>热数据</strong>，一个存储<strong>冷数据</strong>。</p>
+<h5 id="Mysql-预读机制"><a href="#Mysql-预读机制" class="headerlink" title="Mysql 预读机制"></a>Mysql 预读机制</h5><p>通过 Mysql 预读机制获得的数据刚开始都加入到<strong>冷数据部分中</strong>，如果被访问一次就将这个数据移动到热数据链表中。</p>
+<h5 id="全表扫描"><a href="#全表扫描" class="headerlink" title="全表扫描"></a>全表扫描</h5><p><strong>全表扫描的特点是放到冷数据链表中后会被短时间内多次访问</strong>（比如有两个筛选条件，将符合第一个条件的数据筛选出来后再用第二个条件进行筛选，这样就导致多次访问）。这时就不会将数据转移到热数据链表中，会在控制信息中记录访问时间，如果间隔大于一定范围才会移动到热数据链表中。就是为了防止全表扫描短时间频繁访问后就再也不用的特点。</p>
+<h4 id="LRU-方案性能问题"><a href="#LRU-方案性能问题" class="headerlink" title="LRU 方案性能问题"></a>LRU 方案性能问题</h4><p>热数据访问特别频繁，总是将其移动到链表头部效率很低，怎么办？</p>
+<p>解决方案是：热数据链表前 1/4 的数据被访问时不会将其移动到链表头部，因为其“够热”，这样就能减少对链表的操作，提高性能。</p>
+<h2 id="提高缓存读写性能"><a href="#提高缓存读写性能" class="headerlink" title="提高缓存读写性能"></a>提高缓存读写性能</h2><p><strong>创建多个 Buffer Pool 实例</strong>，建议 1G 以上时使用。因为处理链表等工作都需要加锁。多个实例可以提高并发处理能力.</p>
 ]]></content>
       <categories>
         <category>技术</category>
@@ -393,6 +348,82 @@
 
 <p>当然 Page Header 中不只存储着校验码，它还存储着一些其他的状态信息，例如本页中存储了多少条记录，第一条记录的内存地址，总共有多少个槽等等这些信息。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我在学习页的相关知识时也在网上看了很多同类型的博客，他们都有一个共同的问题就是大量罗列参数。好像学习页就是要记住每一个参数一样，我对此有不同的观点，如果你看到这里你可能会发现，我并没有把参数都罗列出来然后一个一个解释，甚至很多参数我都没有介绍，因为我们真正要学的不是参数，而是它的设计思想，比如如何优化链表查询，如何验证数据是否完整等等，而具体的参数你可以在需要的时候在网上查一下就好了，没必要死记硬背，这样反而让学习别的枯燥、痛苦。毕竟写代码也不是闭卷考试对吧。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java中byte转int为什么要使用&amp;0xFF</title>
+    <url>/posts/1d17d658.html</url>
+    <content><![CDATA[<p>在 Java 中将十六进制 byte 转成 int 时要使用 &amp;0xFF 操作这是为什么呢？这是因为十六进制的范围是 0x00~0x3FF 没有负数，而 int 的取值范围是包含负数的，所以直接将 byte 强转成 int 可能会得到错误的数值。同时操作系统存储的是二进制原码进行补码后的数值, 所以只有通过 &amp;0xFF 操作才能得到正确的数值。</p>
+<span id="more"></span>
+
+<p>至于为什么就要先知道什么是补码。</p>
+<h2 id="补码"><a href="#补码" class="headerlink" title="补码"></a>补码</h2><p>下图以 -7 为例子展示了补码是如何计算的，简单说 -7 在计算机存储的二进制数据其实不是 <code>10000111</code> 而是 <code>11111001</code> 。<strong>但是这个流程值针对负数的，正数无论是反码还是补码都是一样的。</strong></p>
+<p><img src="https://s2.loli.net/2022/01/03/oAWgmL3xRZ1QODh.png" alt="image-20220103151025334"></p>
+<p>ps: 这里补充一个基础知识，原码其实是由两部分组成的，如下图最高位和数值位组成，因为二进制只能存储 0、1所以没有办法用正负号表示数值的正负，所以采用了这种办法。</p>
+<p><img src="https://s2.loli.net/2022/01/03/BW45N7Hc2GQogJ8.png" alt="image-20220103151943112"></p>
+<h2 id="为什么要用补码"><a href="#为什么要用补码" class="headerlink" title="为什么要用补码"></a>为什么要用补码</h2><p>使用补码是为了简化计算机底层的设计。因为我们人可以很清楚的知道最高位是符号位，但是对于计算机基础电路设计来说判别第一位是符号位是非常难和复杂的事情。所以人们为了让实现变得简单就想让符号位也参与运算，并且只保留加法，我们知道减法相当于加上一个负数。</p>
+<p>例如：</p>
+<p><code>1 - 1 = 1 + （ -1） = 0</code></p>
+<h3 id="原码计算"><a href="#原码计算" class="headerlink" title="原码计算"></a>原码计算</h3><p>我们都知道上面的等式是成立的，但是如果用<strong>原码</strong>直接进行运算会得到什么结果呢？</p>
+<p><code>0000 0001 + 1000 0001 = 1000 0010 = -2 </code></p>
+<p>得到了错误的结果。为了解决这个问题创建了反码。</p>
+<h3 id="反码计算"><a href="#反码计算" class="headerlink" title="反码计算"></a>反码计算</h3><p>原码：0000 0001 + 1000 0001 = 反码：0000 0001 + 1111 1110 =  反码：1111 1111  = 原码： 1000 0000 = -0 。</p>
+<p>根据以上等式我们看出来，使用反码进行计算可以得到正确的结果，但是虽然人们可以理解 +0 和 -0 是一样的但是这会引发两个问题 ，一方面为 0 标注正负是没有任何意义的，另一方面会出现 0000 0000 和 1000 0000 两个编码都表示 0 的现象，这会增加计算机设计的复杂度而且没有必要。所以为了解决这个问题 设计出了<strong>补码</strong>。</p>
+<h3 id="补码计算"><a href="#补码计算" class="headerlink" title="补码计算"></a>补码计算</h3><p>原码：0000 0001 + 1000 0001 = 补码：0000 0001 + 1111 1111  =  补码： 0000 0000 = 原码：0000 0000 = 0 。</p>
+<p>这样就解决了所有的问题，可以轻松愉快的带入符号进行计算了。</p>
+<h2 id="amp-0xFF-的作用"><a href="#amp-0xFF-的作用" class="headerlink" title="&amp;0xFF 的作用"></a>&amp;0xFF 的作用</h2><p>主要作用就是保证补码的完整性。</p>
+<p>因为 byte 是一个字节而 int 是四个字节，所以 byte 转 int 需要进行数据扩展。Java 采用的是<strong>符号位扩展</strong>。以 -127 为例：</p>
+<p>-127 的补码为 <code>10000001</code>, 数据扩展之后是 <code>11111111 11111111 11111111 10000001</code> 这个二进制数值明显不对，所以为了得到正确的结果让其和 0xFF 进行与运算将补位的 1 全部换成 0 最后得到 <code>00000000 00000000 00000000 10000001</code> 这个就是我们需要的结果了。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>计算机原理</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Mysql-InnoDB表空间详解</title>
+    <url>/posts/720913d1.html</url>
+    <content><![CDATA[<h2 id="什么是表空间"><a href="#什么是表空间" class="headerlink" title="什么是表空间"></a>什么是表空间</h2><p>表空间是 Mysql 的一个抽象概念，在你新建一个表的时候，Mysql （5.7 + 版本）会为这个表创建一个后缀为 ibd 的文件，这个文件的名字就是表空间，构成表空间的最小单位就是页，所以表空间是实际存储索引和用户数据的地方。因为一个页最多 16k 大小，所以一个表空间拥有页的数量会特别巨大，为了更方便的对页进行管理，Mysql 的作者发明了<code>区</code>的概念。</p>
+<span id="more"></span>
+
+<h2 id="区"><a href="#区" class="headerlink" title="区"></a>区</h2><p>区的作用就是为了更方便的管理表空间中的页，表空间会被划分成很多连续的区，一个区由 64 个页构成，大小为 1M。256个区被划分为一组，每组的第一个区的前几个页的类型是固定了，为了方便存储一些全局数据，后续会展开讲解。</p>
+<h3 id="区的分类"><a href="#区的分类" class="headerlink" title="区的分类"></a>区的分类</h3><ul>
+<li>空闲的区：表示区内没有存储任何数据。</li>
+<li>有剩余空间的碎片区：已经存有数据，但是还可以继续存储数据的区。</li>
+<li>没有剩余空间的碎片区：已经不能继续存储数据了。</li>
+<li>附属于某个段的区：这个后面详细讲。</li>
+</ul>
+<h3 id="存储区的数据结构"><a href="#存储区的数据结构" class="headerlink" title="存储区的数据结构"></a>存储区的数据结构</h3><p>为了方便对区进行操作，Mysql 的作者为其设计了一个特殊的数据结构，名字叫 XDES Entry。总共由四个部分组成，如图：</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203112524580.png" alt="image-20220203112524580" style="zoom:67%;" />
+
+<p>上一节我们说<code>区</code>分了四个种类，所以在写入数据的时候要先写入到<code>有剩余空间的碎片区</code>中，如果已经没有碎片区可以用了，那再去<code>空闲的区</code>申请空间。那现在问题来了，<strong>表空间这么大如何快速找到不同种类的区呢？</strong></p>
+<h3 id="如何快速找到不同种类的区"><a href="#如何快速找到不同种类的区" class="headerlink" title="如何快速找到不同种类的区"></a>如何快速找到不同种类的区</h3><p>答案是利用 XDES Entry 的 List Node 字段，<strong>表空间会利用这个字段形成三个表空间的链表</strong>，这三个链表的类型分别是：Free (空闲的区)、FreeFrag （有空闲的碎片区）、FullFrag （没有空闲的碎片区）。当要写入数据的时候就先找到 FreeFrag 类型的区，如果将这个区的剩余空间都用完了，就将这个区挂载到 FullFrag 链表中，然后从 Free 中拿到一个节点挂载到 FreeFrag 中继续写入数据。链表的样子大概如下图所示：</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203115239807.png" alt="image-20220203115239807" style="zoom:70%;" />
+
+<p><strong>现在问题又来了，如何找到这三种类型的链表呢？</strong> </p>
+<h4 id="如何找到不同类型的链表"><a href="#如何找到不同类型的链表" class="headerlink" title="如何找到不同类型的链表"></a>如何找到不同类型的链表</h4><p>为了解决这个问题，Mysql 的作者设计了名为 LisiBaseNode 的数据结构，这个数据结构存储着链表的<strong>头结点、尾结点和链表总共有多少个节点的信息。</strong>并将 LisiBaseNode <strong>存储在表空间的第一个页中</strong>，这个页的页号为 0 ，类型为 FSP_HDR，也是表空间分组中的第一组的第一个区的第一个页。这样就可以在表空间中快速找到不同类型的区啦~~。</p>
+<h2 id="段"><a href="#段" class="headerlink" title="段"></a>段</h2><p>段是由区和单独的页构成的。<strong>段的主要作用就是为了增加表空间读写数据的性能</strong>，因为表空间可能特别大，所以区与区之间可能距离特别远，当 Mysql 批量操作数据的时候就需要跨越很远的距离去查找数据，这种情况叫做<code>随机 IO</code>这是很慢的，而段的特点是会分配一段连续的内存空间在这段空间内再创建区，这样区与区的距离就不会特别远，可以达到<code>顺序 IO</code>的效果，可以极大的增加数据库的性能。</p>
+<p>我们都知道 B+ 树有叶子节点和非叶子节点的区别，为了进一步增加数据库性能，<strong>就让叶子节点和非叶子节点分别创建各自的段。</strong></p>
+<p><strong>如何区分一个段是属于叶子节点还是非叶子节点的呢？</strong>其实<code>段</code>是由专门的页结构存储的，而这个页的 Page Header 就会标注清楚哪些段是叶子节点的，哪些是非叶子节点的。</p>
+<h3 id="存储段的数据结构"><a href="#存储段的数据结构" class="headerlink" title="存储段的数据结构"></a>存储段的数据结构</h3><p>为了方便对<code>段</code>进行管理，Mysql 的作者设计了一个特殊的数据结构用来存储段的信息，这个数据结构叫做 INODE ENtity ，结构如下图所示：</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203124353554.png" alt="image-20220203124353554" style="zoom:67%;" />
+
+<p>下面对结构进行详细的解释。</p>
+<h4 id="List-Base-Node"><a href="#List-Base-Node" class="headerlink" title="List Base Node"></a>List Base Node</h4><p>为了能够快速分辨哪些段还可以继续写入数据，哪些段已经满了，Mysql 的设计者也对段进行了与区相同的分类，分为 Free(空闲)、NotFull(有一些数据，但是还可以继续写入)、Full(已经完全满了)。同样为了方便快速定位不同类型的链表设计者直接将三种类型链表的 ListBaseNode 节点放在了段的数据结构中。</p>
+<h4 id="Fragement-Array-Entry"><a href="#Fragement-Array-Entry" class="headerlink" title="Fragement Array Entry"></a>Fragement Array Entry</h4><p>你可能有因为，为什么段中还直接保存页呀？不是应该只保存区吗？<strong>这么做是为了更好的利用存储空间</strong>，段默认会分配 1M 大小，如果不够可以继续增加，但是如果你的数据特别少也用 1M 是不是就太浪费空间了呀？所以，设计者们提出了<code>碎片区</code>的概念，这个区内的页可以属于任何段，只有一个段占用的碎片区达到一定大小的时候才会分配一个完整区给这个段，这样可以更高效的利用存储空间。</p>
+<h3 id="INODE-ENtity-存储在什么地方"><a href="#INODE-ENtity-存储在什么地方" class="headerlink" title="INODE ENtity 存储在什么地方"></a>INODE ENtity 存储在什么地方</h3><p> INODE ENtity  也存储在页中，这个页位于表空间第一个分组的第一个区的第三个页中存储着所有 INODE ENtity 的基础信息（也可能是链表，因为有可能一个页无法存储所有段的基础信息）。这个页的类型为 INODE。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>为了方便大家理解，下面用一个图来表示表空间、区分组、区、段这些信息是如何存储的。</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220203130935197.png" alt="image-20220203130935197" style="zoom:67%;" />
+
 ]]></content>
       <categories>
         <category>技术</category>
@@ -514,6 +545,23 @@
       </categories>
       <tags>
         <tag>Git</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Wireshark 简明教程</title>
+    <url>/posts/65f8076a.html</url>
+    <content><![CDATA[<p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
+<span id="more"></span>
+
+<h2 id="下载wireshark"><a href="#下载wireshark" class="headerlink" title="下载wireshark"></a>下载wireshark</h2><p><a href="https://www.wireshark.org/download.html">wireshark下载地址</a><br>选择Windows Installer (64-bit)，下载成功后一直点next就可以了。<br><img src="https://img-blog.csdnimg.cn/20210507224116599.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>2.1 选择网卡<br>打开软件，界面如下所示，被红框标记起来的就是网卡列表，如果你使用的是无线网就可以选择WLAN。<br><img src="https://img-blog.csdnimg.cn/20210507224420963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.2 开始抓包<br>双击选中目标网卡就会进入到抓包主界面，如图：<br><img src="https://img-blog.csdnimg.cn/20210507224707882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>被红框选中的就是该网卡发送和接受的网络包了，后续会详细讲解如果通过wireshark抓包学习网络。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Wireshark</tag>
+        <tag>网络</tag>
       </tags>
   </entry>
   <entry>
@@ -1173,23 +1221,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Wireshark 简明教程</title>
-    <url>/posts/65f8076a.html</url>
-    <content><![CDATA[<p>Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。</p>
-<span id="more"></span>
-
-<h2 id="下载wireshark"><a href="#下载wireshark" class="headerlink" title="下载wireshark"></a>下载wireshark</h2><p><a href="https://www.wireshark.org/download.html">wireshark下载地址</a><br>选择Windows Installer (64-bit)，下载成功后一直点next就可以了。<br><img src="https://img-blog.csdnimg.cn/20210507224116599.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
-<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>2.1 选择网卡<br>打开软件，界面如下所示，被红框标记起来的就是网卡列表，如果你使用的是无线网就可以选择WLAN。<br><img src="https://img-blog.csdnimg.cn/20210507224420963.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2.2 开始抓包<br>双击选中目标网卡就会进入到抓包主界面，如图：<br><img src="https://img-blog.csdnimg.cn/20210507224707882.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMDA1NTQ0,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>被红框选中的就是该网卡发送和接受的网络包了，后续会详细讲解如果通过wireshark抓包学习网络。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Wireshark</tag>
-        <tag>网络</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
     <url>/posts/b65feaa2.html</url>
     <content><![CDATA[<p>本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章<a href="https://blog.csdn.net/qq_43005544/article/details/116504407">wireshark 简易教程</a></p>
@@ -1227,6 +1258,99 @@
       <tags>
         <tag>Wireshark</tag>
         <tag>网络</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>一致性算法-Paxos</title>
+    <url>/posts/8bee0b02.html</url>
+    <content><![CDATA[<h2 id="Paxos-是如何保证一致性的"><a href="#Paxos-是如何保证一致性的" class="headerlink" title="Paxos 是如何保证一致性的"></a>Paxos 是如何保证一致性的</h2><p><strong>答案是通过持久化变化的日志流来保证一致性的。</strong>你会问这是为什么。这需要你带着这个问题来看下面的示例：</p>
+<p>如图：我们现在部署了三个节点的集群，分别是 Node 1,Node 2,Node 3。这三个节点中的任何一个节点都可以写入数据，同时任何一个节点被写入数据后都会将数据同步给其他两个节点，现在有三个客户端分别在三个节点写入 a, b, c。问，当查询的时候数据按照哪种顺序排列是正确的？</p>
+<span id="more"></span>
+
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220209193951005.png" alt="image-20220209193951005"></p>
+<p>答案如下图：<strong>三个节点返回的数据顺序只要是一样的就是正确的，即总共有 6 种正确答案。</strong></p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220209195241655.png" alt="image-20220209195241655"></p>
+<p>每个节点写入数据的时候都会将这个数据写入到日志中，后续写入的数据都以 append 的形式追加到日志中，<strong>所以如果我们保证所有节点的日志是一致的那么就可以达到在并发情况下的一致性需求，同时，如果一个节点宕机了，等它重启后再加载一遍日志后就能将数据恢复也解决了数据丢失的问题。</strong></p>
+<h3 id="如何保证节点的日志是一致的"><a href="#如何保证节点的日志是一致的" class="headerlink" title="如何保证节点的日志是一致的"></a>如何保证节点的日志是一致的</h3><p>首先，我们要明确一点，每个节点的日志在写入的时候都会明确现在写入的是第几个。这样才能保证顺序是一致的。就用上面的例子来说，每个节点的日志都有三个位置，如果 Node 1 的1号位置写入的是 a ，那么其他两个节点就不能写到1号位置了，只能选择 2 号位置或者 3 号位置，如果 2 号位置被占了就再往后推。这样每个节点对于几号位置写入什么数据就都达成了共识，那么最终结果就是每个节点的日志顺序都是一样的。</p>
+<p>这里的关键思想是：虽然每个Node接收到的请求顺序不同，但它们对于日志中1号位置、2号位置、3号位置的认知是一样的，大家一起保证1号位置、2号位置、3号位置存储的数据一样！在例子中可以看到，每个Node在存储日志之前先要问一下其他Node，之后再决定把这条日志写到哪个位置。这里有两个阶段：先问，再做决策，也就是Paxos2PC的原型！</p>
+<p><strong>但是在并发的情况下这个看似简单的问题也会变得特别复杂。</strong>例如，Node1询问后发现1号位置没有被占，因此它打算把 a 传播给Node2和Node3；同一时刻，Node2询问后发现1号位置也没有被占，因此它打算把 b 传播给Node1和Node3；同样，Node3也打算把 c 传播给Node1和Node2。<strong>这样不就冲突了吗？</strong></p>
+<p><strong>为了解决这个问题 Paxos 规定了如下流程：</strong> </p>
+<p>第一，发现1号位置的值被大多数确定了，比如是 c（node3占领了1号位置，Node2跟从了Node3），则Node1就接受这个事实：1号位置不能用了，也得把自己的1号位置赋值成 c 。然后看2号位置能否把 a 存进去。同样地，如果2号也被占领了，就只能把它们的值拿过来填在自己的2号位置。只能再看3号位置是否可行。</p>
+<p>第二，当发现1号位置没有被占，就锁定这个位置，不允许其他Node再占这个位置！除非它的权利更大。</p>
+<p>第三，如果发现1号位置为空，在提交的时候发现1号位置被其他Node占了，就会提交失败，重试，尝试第二个位置，第三个位置……所以，为了让1号位置日志一样，可能要重试好多次，每个节点都会不断重试2PC。这样不断重试2PC，直到最终各方达成一致的过程，就是Paxos协议执行的过程，也就是一个Paxos instance，最终确定一个值。然后不断重复这个过程来确定一系列的值。</p>
+<h4 id="Paxos-算法的执行流程"><a href="#Paxos-算法的执行流程" class="headerlink" title="Paxos 算法的执行流程"></a>Paxos 算法的执行流程</h4><p>基于以上思想，Paxos 最后设计出可落地的执行流程。关于 Paxos 算法的执行流程可以看下这位网友的文章，浅显易懂 <a href="https://www.zhihu.com/question/19787937">Paxos算法的执行流程</a> 这里就不再赘述了。</p>
+<h2 id="算法存在的问题"><a href="#算法存在的问题" class="headerlink" title="算法存在的问题"></a>算法存在的问题</h2><p>读到这里相信大家都对 Paxos 的执行流程有一个大概的印象了，那么这个流程中会引发两个问题：</p>
+<ol>
+<li>存在陷入不断循环的风险：Paxos 是一个“不断循环”的2PC。在P1C或者P2C阶段，算法都可能失败，每次失败就要再重新执行一遍算法流程，在极端情况下可能出现不断循环的情况。</li>
+<li>存在性能问题：每确定一个值，至少需要两次通信（两个阶段，两个网络来回）+ 两次写盘。</li>
+</ol>
+<p>为了解决这两个问题 <strong>Multi Paxos 算法</strong>应运而生。</p>
+<h2 id="Multi-Paxos算法"><a href="#Multi-Paxos算法" class="headerlink" title="Multi Paxos算法"></a>Multi Paxos算法</h2><p>Multi Paxos算法并不是一个全新的算法，它只是在 Paxos 算法的基础上进行了一些改进，接下来我们看下它是如何解决上面两个问题的。</p>
+<h3 id="解决不断循环"><a href="#解决不断循环" class="headerlink" title="解决不断循环"></a>解决不断循环</h3><p>这个问题的本质<strong>是多个客户端写多个机器，会导致并发冲突很高</strong>，所以如果减少并发冲突那就可以解决这个问题了。</p>
+<h4 id="创建一个-Leader"><a href="#创建一个-Leader" class="headerlink" title="创建一个 Leader"></a>创建一个 Leader</h4><p><strong>为了减少并发冲突，可以变多写为单写</strong>，选出一个Leader，其他机器收到写请求，都把写请求转发给Leader；或者让客户端把写请求都发给Leader。这样就可以避免<strong>写并发</strong>了。当然由于网络原因可能产生 <strong>脑裂</strong>，也就是有多个 Leader ，但是即使有多个 Leader 也不会影响数据的正确性，只是增加了发生并发的可能性而已。</p>
+<p>说到这里就可能要说下 Leader 选举的两种常用方法了。</p>
+<h4 id="无租约的-Leader-选举"><a href="#无租约的-Leader-选举" class="headerlink" title="无租约的 Leader 选举"></a>无租约的 Leader 选举</h4><p>选举流程如下：</p>
+<ol>
+<li>每个节点有一个编号，选取编号最大的节点为Leader；</li>
+<li>每个节点周期性地向其他节点发送心跳，假设周期为T ms；</li>
+<li>如果一个节点在最近的2 T ms内还没有收到比自己编号更大的节点发来的心跳，则自己变为Leader；</li>
+<li>如果一个节点不是Leader，则收到请求之后转发给Leader。</li>
+</ol>
+<h4 id="有租约的-Leader-选举"><a href="#有租约的-Leader-选举" class="headerlink" title="有租约的 Leader 选举"></a>有租约的 Leader 选举</h4><p><strong>严格保证任意时刻只能有一个leader</strong>，也就是所谓的“租约”。租约的意思是在一个限定的期限内，某台机器一直是 Leader。即使这个机器宕机，Leader也不能切换。必须等到租期到期之后，才能开始选举新的Leader。这种方式会带来短暂的不可用，但保证了任意时刻只会有一个Leader。</p>
+<h3 id="解决性能问题"><a href="#解决性能问题" class="headerlink" title="解决性能问题"></a>解决性能问题</h3><p>选举出 Leader 之后对 2PC 进行了优化，基本思路是当一个节点被确认为Leader之后，它先广播一次Prepare，一旦超过半数同意 （防止有另一个 Leader ），之后对于收到的每条日志直接执行应用操作。这样就减少了一次询问的流程。</p>
+<p>如果同时还有另一个 Leader 怎么办呢？新的Leader肯定会先发起Prepare，新 Leader 的编号肯定更大。这时旧的 Leader 的广播肯定会失败，旧的 Leader 会自己转变成一个普通的Acceptor，新的Leader把旧的顶替掉了。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>算法</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>一致性算法-Raft</title>
+    <url>/posts/abf4a6b7.html</url>
+    <content><![CDATA[<p>Paxos 算法虽然在一段时间内已经成了一致性算法的代名词。但是它也是出了名的艰深晦涩，并且当时基于 Paxos 的成熟工程少之又少。在这种情况下就有人设计了 Raft 算法，Raft 算法将”可理解性”放在了第一位。下面就让我们看下 Raft 算法的运行流程。</p>
+<span id="more"></span>
+
+<p>Raft 算法总共有三个阶段：阶段一，选举 Leader；阶段二，同步数据；阶段三，崩溃恢复。下面详细讲述这三个阶段。</p>
+<h2 id="选举-Leader"><a href="#选举-Leader" class="headerlink" title="选举 Leader"></a>选举 Leader</h2><p>任何一个节点有且仅有三种状态：Leader、Follower、Candidate。Candidate是一个中间状态，是正在选举中，选举结束后要么切换到 Leader，要么切换到Follower。</p>
+<ol>
+<li>初始时，所有机器处于Follower状态，等待Leader的心跳消息（一个机器成为Leader之后，会周期性地给其他Follower发心跳）。很显然，此时没有Leader，所以收不到心跳消息。</li>
+<li>当Follower在给定的时间（比如2000ms）内收不到Leader的消息，就会认为Leader宕机，也就是选举超时。然后，随机睡眠0～1000ms之间的一个值（为了避免大家同时发起选举），把自己切换成Candidate状态，发起选举，每个节点都会维护一个编号起个名字叫 term，term从 1 开始递增，选举的时候如果对方的 term 大于自己的那么就同意它当选 Leader 。</li>
+<li>选举结束，自己变成Leader或者Follower。</li>
+<li>对于Leader，发现有更新的Leader存在，自己主动退位，变成Follower。</li>
+</ol>
+<p>关于第四点你可能有些疑问，为什么会有多个 Leader 的情况？这是可能是因为网络抖动导致网络分区形成了 <strong>脑裂</strong> 的问题。<strong>因为 Raft 算法与 Paxos 不同，Raft 规定，同一时间同一个网络分区内只能有一个 Leader 。</strong>那如何判断哪个 Leader 是比较新的呢？这个时候就要了解下 Raft 是如何存储数据的了。</p>
+<h3 id="Raft-如何存储数据"><a href="#Raft-如何存储数据" class="headerlink" title="Raft 如何存储数据"></a>Raft 如何存储数据</h3><p>下图就是 Raft 算法需要存储的数据，各个字段的意义如下：</p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220218070635344.png" alt="image-20220218070635344"></p>
+<h4 id="term"><a href="#term" class="headerlink" title="term"></a>term</h4><p>term 是指写入日志的Leader所在的“任期”, 比如说第一个被选为 Leader 节点，它的 term 就是1，当它宕机了，选出了第二个 Leader 节点，那这个节点的 term 就是 2，term 是递增的。 每当 Leader 向 Follower 同步数据时就会携带着自己的 term ，这样 Follower 就可以记录当前这个数据是第几任 Leader 发过来的。</p>
+<p><strong>意义：</strong> <strong>可以解决Leader的“脑裂”问题。</strong>假设现在因为网络分区导致整个集群中同时存在两个 Leader ，一个是旧的，一个是新的，旧的 Leader 的 term  = 4，新的 term = 5。当网络分区的情况消失时两个 Leader 就会相遇，这时新、老Leader都会向Follower发送数据。但当老的Leader向其他所有Follower发送数据时，Follower发现它发过来的日志里面term=4，就知道它是过期的Leader，就会拒绝执行写入操作，同时会反馈给老的Leader说，你已经过期了！老的Leader知道自己过期了，会自动退位，变成Follower。从而解决了“脑裂”问题，使得任何一个时刻，只可能有一个Leader有效！</p>
+<p><strong>如何保证 Leader 的 term 永远是最大的？</strong>term并不是存放在一个中央存储里面，而是每个节点都保存了一个term的值。因为网络延迟问题，某些节点上面term的值可能是过期的。假设当前term的真实有效值是5，但是某些节点上面term的值没有来得及更新，其term=4。这时term=4 的节点被选为Leader了，那不就出问题了吗？答案是不可能出现这个情况。因为选举的时候是要多数派（超过半数的节点）同意的，意味着在多数派里面一定有一个节点保存了最新的term的值。而在选举的时候，是选日志最新的节点作为Leader。所以，如果一个节点的term=4（过期的），就不可能被选为Leader。如果一个节点被选为了Leader，其term值一定是当前最大的，也就是最新的。</p>
+<h4 id="index"><a href="#index" class="headerlink" title="index"></a>index</h4><p>这个字段就很好理解了，就是消息的索引，也是自增的。</p>
+<h4 id="content"><a href="#content" class="headerlink" title="content"></a>content</h4><p>这个字段就是用来存储真实数据的。</p>
+<h4 id="commitIndex"><a href="#commitIndex" class="headerlink" title="commitIndex"></a>commitIndex</h4><p>一旦一条日志被认定是“commit”，这条日志将不能被改变，不能被删除！很显然，任何一条日志要么是commit状态，要么是uncommit状态（暂时还不确定，可能过一会儿就变成了commit状态）。</p>
+<p>日志的commit设计<strong>应用了一个类似TCP协议中的技巧</strong>，可称为递增式的commit。假设commitIndex=7，表示不仅index=7的日志是commit状态，所有index＜7的日志也都是commit状态。</p>
+<p>这会带来两个好处：</p>
+<ol>
+<li>维护一个全局变量commitIndex即可。不需要为每条日志都维护一个 commit 或 uncommit 状态。</li>
+<li>提高性能。Follower不需要逐条日志地反馈Leader，哪一条commit了，则哪一条uncommit。</li>
+</ol>
+<h2 id="同步数据"><a href="#同步数据" class="headerlink" title="同步数据"></a>同步数据</h2><p>Leader成功选举出来后，接下来进入第二个阶段，正常的数据同步阶段。当客户端向节点写入数据的时候，如果写入数据的节点不是 Leader 节点，那么该节点就会把这个请求转发给 Leader 去执行。Leader 会先在自己的节点记录这个数据，然后再将数据发送给所有节点，如果有半数节点都返回成功，那么 Leader 就会返回给客户端写入数据成功的信息。</p>
+<p>在这个过程中有两个关键的“日志一致性”保证，保证Leader和Follower日志序列完全一模一样：</p>
+<ol>
+<li>对于两个日志序列里面的两条日志，如果其index和term都相同，则日志的内容必定相同。</li>
+<li>对于两个日志序列，如果在index=M处的日志相同，则在M之前的所有日志也都完全相同。</li>
+</ol>
+<p>所以，如果 Follower 发现自己的日志中，某个index位置和Leader发过来的不一样，则删除index之后的所有日志，然后从index的位置同步接下来的日志。</p>
+<h2 id="崩溃恢复"><a href="#崩溃恢复" class="headerlink" title="崩溃恢复"></a>崩溃恢复</h2><p>当Leader宕机之后，选出了新的Leader，其他的Follower要切换到新的Leader。</p>
+<p>Follower是被动的，其并不会主动发现有新的Leader上台了；而是新的Leader上台之后，会马上给所有的 Follower 发一个同步数据的请求，只不过这个请求没有包含客户端数据，只是为了同步 term ，这样每个Follower都会将自己的term更新到最新的term。这样旧的Leader即使活过来了，也没有机会再写入日志。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>算法</tag>
       </tags>
   </entry>
   <entry>
@@ -1561,30 +1685,6 @@
       </tags>
   </entry>
   <entry>
-    <title>指令详解-操作码</title>
-    <url>/posts/94f9446a.html</url>
-    <content><![CDATA[<h2 id="定长编码"><a href="#定长编码" class="headerlink" title="定长编码"></a>定长编码</h2><p>每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。<br>优点：计算机的硬件设计简单，朱令译码和执行速度快。<br>缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。<br>适用环境：适用于字长较长的计算机系统，如 32 位及以上。</p>
-<span id="more"></span>
-
-<p>如图：无论有几个地址码都不会影响操作码的长度。</p>
-<p><img src="https://s2.loli.net/2022/01/07/XzuvCTyoSpdbh2V.png" alt="image-20220107125003587"></p>
-<h2 id="变长编码"><a href="#变长编码" class="headerlink" title="变长编码"></a>变长编码</h2><p>每条指令的操作码的长度不是固定的，是可变的。之所以有变长编码是因为这会让系统更灵活，可以通过变动操作码的长度来保证地址码长度和指令长度不变。<br>如图：四地址指令和三地址指令的指令长度和地址码的长度是一样的。</p>
-<p><img src="https://s2.loli.net/2022/01/07/EyUX3z4txl7pV5c.png" alt="image-20220107125232359"></p>
-<p>优点：在拥有比较短的指令字长的系统中，既能表示出比较多的指令条数又能尽量满足操作数地址的要求。<br>缺点：计算机的硬件设计复杂，指令译码和执行速度较慢。<br>适用环境：适用于字长较短的计算机系统，如 16 位及以下。</p>
-<h3 id="扩展操作码"><a href="#扩展操作码" class="headerlink" title="扩展操作码"></a>扩展操作码</h3><p>为了保证不同类型指令的地址码和指令的长度不变，我们需要增加操作码的长度，这个操作就是扩展操作码。<br>例如现在有两条指令，一条是四地址指令，一条是三地址指令，下面是他们二进制数据的展示情况（为了把更多精力放在操作码上，地址码用 xxx 来表示）：</p>
-<p><img src="https://s2.loli.net/2022/01/07/O7QdwhIEz4ibgq8.png" alt="image-20220107125708122"></p>
-<p>看到上图的时候是不是还没察觉到问题？那么我们将图简化一下：</p>
-<p><img src="https://s2.loli.net/2022/01/07/AXLxmhVb4iF1nM5.png" alt="image-20220107125837964"></p>
-<p>看出来了吗？就是你无法分清这两条指令那条是三地址指令哪条是四地址指令。所以有了一个规定，短码不能是长码的前缀。<br>这个时候一般会预留出一个拓展窗口，例如减少一条四地址指令，让 1111 作为拓展窗口，让四地址指令的操作码最多取到 1110，这时如果你看到操作码是前四位是 1111 你就知道这个肯定不是四地址指令了，当然其他数量的地址指令通过类似的操作也可以解决这个问题，值得注意的是，拓展窗口不一定是一个，也可以是多个。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>计算机原理</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>指令详解-寻址方式</title>
     <url>/posts/def90db1.html</url>
     <content><![CDATA[<h2 id="数据寻址"><a href="#数据寻址" class="headerlink" title="数据寻址"></a>数据寻址</h2><p>简单来说就是根据地址码取数据。</p>
@@ -1662,6 +1762,30 @@
 <p>一般用于累加计算器（Acc），公式：（Acc）OP （A1） —&gt; Acc。（PC）+1 —&gt; PC。<br>特点：执行一次指令只需访存两次，取指令一次，取操作数一次。被操作数和运算结果都放在累加寄存器中，所以对于被操作数的读取和存入都不需要访存。</p>
 <h4 id="零地址指令"><a href="#零地址指令" class="headerlink" title="零地址指令"></a>零地址指令</h4><p><img src="https://s2.loli.net/2022/01/06/EmJ8D2pGORQ4K9n.png" alt="image-20220106101425810"></p>
 <p>特点：一般运用于堆栈计算机中，参与运算的操作数从栈顶弹出，运算后将结果压入堆栈中。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>计算机原理</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>指令详解-操作码</title>
+    <url>/posts/94f9446a.html</url>
+    <content><![CDATA[<h2 id="定长编码"><a href="#定长编码" class="headerlink" title="定长编码"></a>定长编码</h2><p>每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。<br>优点：计算机的硬件设计简单，朱令译码和执行速度快。<br>缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。<br>适用环境：适用于字长较长的计算机系统，如 32 位及以上。</p>
+<span id="more"></span>
+
+<p>如图：无论有几个地址码都不会影响操作码的长度。</p>
+<p><img src="https://s2.loli.net/2022/01/07/XzuvCTyoSpdbh2V.png" alt="image-20220107125003587"></p>
+<h2 id="变长编码"><a href="#变长编码" class="headerlink" title="变长编码"></a>变长编码</h2><p>每条指令的操作码的长度不是固定的，是可变的。之所以有变长编码是因为这会让系统更灵活，可以通过变动操作码的长度来保证地址码长度和指令长度不变。<br>如图：四地址指令和三地址指令的指令长度和地址码的长度是一样的。</p>
+<p><img src="https://s2.loli.net/2022/01/07/EyUX3z4txl7pV5c.png" alt="image-20220107125232359"></p>
+<p>优点：在拥有比较短的指令字长的系统中，既能表示出比较多的指令条数又能尽量满足操作数地址的要求。<br>缺点：计算机的硬件设计复杂，指令译码和执行速度较慢。<br>适用环境：适用于字长较短的计算机系统，如 16 位及以下。</p>
+<h3 id="扩展操作码"><a href="#扩展操作码" class="headerlink" title="扩展操作码"></a>扩展操作码</h3><p>为了保证不同类型指令的地址码和指令的长度不变，我们需要增加操作码的长度，这个操作就是扩展操作码。<br>例如现在有两条指令，一条是四地址指令，一条是三地址指令，下面是他们二进制数据的展示情况（为了把更多精力放在操作码上，地址码用 xxx 来表示）：</p>
+<p><img src="https://s2.loli.net/2022/01/07/O7QdwhIEz4ibgq8.png" alt="image-20220107125708122"></p>
+<p>看到上图的时候是不是还没察觉到问题？那么我们将图简化一下：</p>
+<p><img src="https://s2.loli.net/2022/01/07/AXLxmhVb4iF1nM5.png" alt="image-20220107125837964"></p>
+<p>看出来了吗？就是你无法分清这两条指令那条是三地址指令哪条是四地址指令。所以有了一个规定，短码不能是长码的前缀。<br>这个时候一般会预留出一个拓展窗口，例如减少一条四地址指令，让 1111 作为拓展窗口，让四地址指令的操作码最多取到 1110，这时如果你看到操作码是前四位是 1111 你就知道这个肯定不是四地址指令了，当然其他数量的地址指令通过类似的操作也可以解决这个问题，值得注意的是，拓展窗口不一定是一个，也可以是多个。</p>
 ]]></content>
       <categories>
         <category>技术</category>
@@ -1985,6 +2109,66 @@
       </tags>
   </entry>
   <entry>
+    <title>集群环境下如何管理Session</title>
+    <url>/posts/56231c3b.html</url>
+    <content><![CDATA[<h2 id="1-Session复制"><a href="#1-Session复制" class="headerlink" title="1.Session复制"></a>1.Session复制</h2><p>应用服务器开启Web容器的Session复制功能，在集群中的几台服务器之间同步Session对象，使得每台服务器上都保存所有用户的Session信息，这样任何一台机器宕机都不会导致Session数据的丢失，而服务器使用Session时，也只需要在本机获取即可</p>
+<span id="more"></span>
+
+<h3 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>1.方案简单</li>
+<li>2.获取Session速度块</li>
+</ul>
+<h3 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li><p>1.只能在集群规模较小的情况下使用</p>
+<p>如果集群规模大，会导致大量复制Session，会占用网络和服务器大量资源；<br>并且如果出现大量用户同时访问服务的情况可能会出现内存不够用的问题</p>
+</li>
+</ul>
+<h2 id="2-Session绑定"><a href="#2-Session绑定" class="headerlink" title="2.Session绑定"></a>2.Session绑定</h2><p>即Session绑定在某台特定服务器上，保证Session总能在这台服务器上获取。这种方法又被称作会话黏滞，负载均衡服务器总是将来源于同一IP的请求分发到同一台服务器上（也可以根据Cookie信息将同一个用户的请求总是分发到同一台服务器上，当然这时负载均衡服务器必须工作在HTTP协议层上）</p>
+<h3 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li><p>不具备高可用的特性</p>
+<p>如果绑定Session的服务器宕机了就会造成Session丢失</p>
+</li>
+</ul>
+<h2 id="3-利用Cookie记录Session"><a href="#3-利用Cookie记录Session" class="headerlink" title="3.利用Cookie记录Session"></a>3.利用Cookie记录Session</h2><p>将Session记录在Cookie中，每次请求服务器的时候，将Session放在请求中发送给服务器，服务器处理完请求后再将修改过的Session响应给客户端。</p>
+<h3 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>简单易用，可用性高，支持应用服务器的线性伸缩</li>
+</ul>
+<h3 id="缺点：-2"><a href="#缺点：-2" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li>1.信息记录有限，因为Cookie有大小限制</li>
+<li>2.影响性能，每次请求响应都需要传输Cookie</li>
+<li>3.受用户行为影响，如果用户关闭Cookie，访问就会不正常</li>
+</ul>
+<h2 id="4-Session服务器"><a href="#4-Session服务器" class="headerlink" title="4.Session服务器"></a>4.Session服务器</h2><p>可用性高、伸缩性好、性能也不错，对信息大小又没有限制的服务器集群Session管理方案。<br>利用独立部署的Session服务器（集群）统一管理Session，应用服务器每次读写Session时，都访问Session服务器。<br>这种解决方案事实上是将应用服务器的状态分离。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>项目如何分包</title>
+    <url>/posts/772be079.html</url>
+    <content><![CDATA[<p>在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。</p>
+<span id="more"></span>
+
+<h2 id="1、按照类型方式划分"><a href="#1、按照类型方式划分" class="headerlink" title="1、按照类型方式划分"></a>1、按照类型方式划分</h2><p>例如将所有的接口放入一个包、Controller类放入一个包等等。</p>
+<p>优点：从类型看更为清晰</p>
+<p>缺点：不利于模块化开发，因为会将同一个功能的多个类分散在不同的包中</p>
+<h2 id="2、按照功能方式划分"><a href="#2、按照功能方式划分" class="headerlink" title="2、按照功能方式划分"></a>2、按照功能方式划分</h2><p>将同一个功能的所有类放在同一个包中。</p>
+<p>优点：高内聚，便于模块化开发</p>
+<p>缺点：同一包内类型混乱</p>
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>将功能耦合度高的类按照功能进行划分，而功能耦合度低的或者供多个功能使用的类按照类型进行划分。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>架构</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>虚拟机类加载机制</title>
     <url>/posts/cdffca23.html</url>
     <content><![CDATA[<p>java虚拟机把描述类的数据从Class文件加载到内存，并堆数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这个过程被称作虚拟机的类加载机制</p>
@@ -2157,66 +2341,6 @@
       <tags>
         <tag>Jvm</tag>
         <tag>类加载</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>集群环境下如何管理Session</title>
-    <url>/posts/56231c3b.html</url>
-    <content><![CDATA[<h2 id="1-Session复制"><a href="#1-Session复制" class="headerlink" title="1.Session复制"></a>1.Session复制</h2><p>应用服务器开启Web容器的Session复制功能，在集群中的几台服务器之间同步Session对象，使得每台服务器上都保存所有用户的Session信息，这样任何一台机器宕机都不会导致Session数据的丢失，而服务器使用Session时，也只需要在本机获取即可</p>
-<span id="more"></span>
-
-<h3 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h3><ul>
-<li>1.方案简单</li>
-<li>2.获取Session速度块</li>
-</ul>
-<h3 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h3><ul>
-<li><p>1.只能在集群规模较小的情况下使用</p>
-<p>如果集群规模大，会导致大量复制Session，会占用网络和服务器大量资源；<br>并且如果出现大量用户同时访问服务的情况可能会出现内存不够用的问题</p>
-</li>
-</ul>
-<h2 id="2-Session绑定"><a href="#2-Session绑定" class="headerlink" title="2.Session绑定"></a>2.Session绑定</h2><p>即Session绑定在某台特定服务器上，保证Session总能在这台服务器上获取。这种方法又被称作会话黏滞，负载均衡服务器总是将来源于同一IP的请求分发到同一台服务器上（也可以根据Cookie信息将同一个用户的请求总是分发到同一台服务器上，当然这时负载均衡服务器必须工作在HTTP协议层上）</p>
-<h3 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h3><ul>
-<li><p>不具备高可用的特性</p>
-<p>如果绑定Session的服务器宕机了就会造成Session丢失</p>
-</li>
-</ul>
-<h2 id="3-利用Cookie记录Session"><a href="#3-利用Cookie记录Session" class="headerlink" title="3.利用Cookie记录Session"></a>3.利用Cookie记录Session</h2><p>将Session记录在Cookie中，每次请求服务器的时候，将Session放在请求中发送给服务器，服务器处理完请求后再将修改过的Session响应给客户端。</p>
-<h3 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h3><ul>
-<li>简单易用，可用性高，支持应用服务器的线性伸缩</li>
-</ul>
-<h3 id="缺点：-2"><a href="#缺点：-2" class="headerlink" title="缺点："></a>缺点：</h3><ul>
-<li>1.信息记录有限，因为Cookie有大小限制</li>
-<li>2.影响性能，每次请求响应都需要传输Cookie</li>
-<li>3.受用户行为影响，如果用户关闭Cookie，访问就会不正常</li>
-</ul>
-<h2 id="4-Session服务器"><a href="#4-Session服务器" class="headerlink" title="4.Session服务器"></a>4.Session服务器</h2><p>可用性高、伸缩性好、性能也不错，对信息大小又没有限制的服务器集群Session管理方案。<br>利用独立部署的Session服务器（集群）统一管理Session，应用服务器每次读写Session时，都访问Session服务器。<br>这种解决方案事实上是将应用服务器的状态分离。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>项目如何分包</title>
-    <url>/posts/772be079.html</url>
-    <content><![CDATA[<p>在做项目的时候我经常思考如何分包更合理，按照目前常规的分包方式，大致可以分为以下几类：controller层、service层、dao层以及各种 helper、utils 等等，但是仅仅这样的分包方式并不能达到高内聚低耦合的目标，经常将一个完整的功能拆的稀碎，想要了解一个完整的功能要多次跳转，成本较高。所以我根据工作经验总结了下项目如何分包更合理。</p>
-<span id="more"></span>
-
-<h2 id="1、按照类型方式划分"><a href="#1、按照类型方式划分" class="headerlink" title="1、按照类型方式划分"></a>1、按照类型方式划分</h2><p>例如将所有的接口放入一个包、Controller类放入一个包等等。</p>
-<p>优点：从类型看更为清晰</p>
-<p>缺点：不利于模块化开发，因为会将同一个功能的多个类分散在不同的包中</p>
-<h2 id="2、按照功能方式划分"><a href="#2、按照功能方式划分" class="headerlink" title="2、按照功能方式划分"></a>2、按照功能方式划分</h2><p>将同一个功能的所有类放在同一个包中。</p>
-<p>优点：高内聚，便于模块化开发</p>
-<p>缺点：同一包内类型混乱</p>
-<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><p>将功能耦合度高的类按照功能进行划分，而功能耦合度低的或者供多个功能使用的类按照类型进行划分。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
@@ -2422,84 +2546,6 @@
         <tag>ORM</tag>
         <tag>Java</tag>
         <tag>Hibernate</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Mysql-InnoDB缓存详解</title>
-    <url>/posts/e7489af5.html</url>
-    <content><![CDATA[<p>Mysql 的缓存叫做 Buffer Pool 它的主要作用就是将一些数据存储在内存中，当数据库需要访问的时候直接访问内存中的数据，而不用重新从磁盘中加载，减少磁盘 IO，提高系统运行效率。</p>
-<span id="more"></span>
-
-<h2 id="Buffer-Pool-的组成"><a href="#Buffer-Pool-的组成" class="headerlink" title="Buffer Pool 的组成"></a>Buffer Pool 的组成</h2><p>Buffer Pool 由两个部分组成，一个是<strong>数据页</strong>，就是被缓存的数据，数据是以页为单位进行缓存的。另一个叫<strong>控制信息</strong>，控制信息是保留页信息的数据结构，每缓存一个页都会生成对应的控制信息，控制信息包括页所属的表空间、页号、在 Buffer Pool 的地址等等。控制信息和数据页是一一对应的。</p>
-<p>它们在 Buffer Pool 的位置是<strong>控制信息在前，数据页在后</strong>。位置布局如下图所示：</p>
-<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220204154312226.png" alt="image-20220204154312226"></p>
-<h2 id="Buffer-Pool-的初始化"><a href="#Buffer-Pool-的初始化" class="headerlink" title="Buffer Pool 的初始化"></a>Buffer Pool 的初始化</h2><p>在 Mysql 启动的时候会向操作系统申请一片连续的内存空间，并且将整个 Buffer Pool 都用空的控制信息和页填满，等需要缓存数据的时候再填充数据（一开始就确定了能放多少个控制信息和页）。</p>
-<h2 id="对数据进行管理"><a href="#对数据进行管理" class="headerlink" title="对数据进行管理"></a>对数据进行管理</h2><p>Buffer Pool 可以特别大，虽然默认才几百兆，但是只要你的内存足够大，可以将它设置为几百G，在这么大的内存空间中，如何知道哪些页是空的呢？要一个一个遍历吗？下面就让我们来看下如何解决这个问题 。</p>
-<h3 id="如何知道哪些页是空的"><a href="#如何知道哪些页是空的" class="headerlink" title="如何知道哪些页是空的"></a>如何知道哪些页是空的</h3><p>其实 Buffer Pool 中设计了一个<strong>双向链表</strong>来解决这个问题。这个链表叫做 free 链表。Buffer Pool 会将空闲页对应的<strong>控制信息</strong>作为一个节点放到链表中。所以缓存数据的流程变为这样，首先从链表头拿到一个节点，通过节点找到空闲页，填充数据后将控制信息节点从链表中移除。</p>
-<h3 id="如何知道要查询的页已经在缓存中了？"><a href="#如何知道要查询的页已经在缓存中了？" class="headerlink" title="如何知道要查询的页已经在缓存中了？"></a>如何知道要查询的页已经在缓存中了？</h3><p><strong>答案是 HashMap</strong> 。我们现在都知道，控制信息中保存着页的许多基础信息，其中有表空间和页号，如果你看过我之前的博客应该就可以知道表空间+页号可以确定唯一的一个页，也可以说是页的唯一索引，所以我们可以用表空间+页号作为 key，数据页作为 value，这样就可以快速判断要查询的页是否已经在缓存中了。</p>
-<h3 id="如何知道哪些缓存中页的数据被修改了？"><a href="#如何知道哪些缓存中页的数据被修改了？" class="headerlink" title="如何知道哪些缓存中页的数据被修改了？"></a>如何知道哪些缓存中页的数据被修改了？</h3><p>我们都知道磁盘读写速度是很慢的，如果每次更改都等同步到磁盘后才算结束那性能会很低。同时 Buffer Pool 中的空间又可能特别大，如果每次先写入缓存然后异步的将所有数据都同步到磁盘中也不太现实。所以要找出一种解决办法，识别出哪些页的数据被修改，然后通过异步的方式将其同步到磁盘中，这样既能保证系统的性能，同时也能保证数据不会丢失。</p>
-<p><strong>答案是链表！</strong>说实话这链表 Mysql 是玩明白了。Mysql 中设计了名为 <strong>flush 的双向链表</strong>。当有页中的数据被更改了，就将其对应的控制信息加入到 flush 链表中，之后再异步的更新到磁盘中。</p>
-<h3 id="内存不够了怎么办？"><a href="#内存不够了怎么办？" class="headerlink" title="内存不够了怎么办？"></a>内存不够了怎么办？</h3><p>Mysql 使用的是 <strong>LRU 内存淘汰机制</strong>（最近最少使用原则）。创建一个链表，当有页被访问时就将对应的控制信息放到链表的头结点，当要淘汰某些页时从链表末尾进行移除。</p>
-<p><strong>但是这会引发一个问题：劣币驱逐良币。</strong>当触发 <strong>Mysql 预读机制或者遇到全表扫描</strong>的时候，如果这么做会让预读出来的或者全表扫描的数据也都放在链表的头部，因为这部分数据可能特别多，这样有可能导致一些热点数据被挤到链表尾部，在内存不足时会被移除。</p>
-<h4 id="对-LRU-进行分段"><a href="#对-LRU-进行分段" class="headerlink" title="对 LRU 进行分段"></a>对 LRU 进行分段</h4><p><strong>将一个 LRU链表分成两个部分</strong>。一个存储<strong>热数据</strong>，一个存储<strong>冷数据</strong>。</p>
-<h5 id="Mysql-预读机制"><a href="#Mysql-预读机制" class="headerlink" title="Mysql 预读机制"></a>Mysql 预读机制</h5><p>通过 Mysql 预读机制获得的数据刚开始都加入到<strong>冷数据部分中</strong>，如果被访问一次就将这个数据移动到热数据链表中。</p>
-<h5 id="全表扫描"><a href="#全表扫描" class="headerlink" title="全表扫描"></a>全表扫描</h5><p><strong>全表扫描的特点是放到冷数据链表中后会被短时间内多次访问</strong>（比如有两个筛选条件，将符合第一个条件的数据筛选出来后再用第二个条件进行筛选，这样就导致多次访问）。这时就不会将数据转移到热数据链表中，会在控制信息中记录访问时间，如果间隔大于一定范围才会移动到热数据链表中。就是为了防止全表扫描短时间频繁访问后就再也不用的特点。</p>
-<h4 id="LRU-方案性能问题"><a href="#LRU-方案性能问题" class="headerlink" title="LRU 方案性能问题"></a>LRU 方案性能问题</h4><p>热数据访问特别频繁，总是将其移动到链表头部效率很低，怎么办？</p>
-<p>解决方案是：热数据链表前 1/4 的数据被访问时不会将其移动到链表头部，因为其“够热”，这样就能减少对链表的操作，提高性能。</p>
-<h2 id="提高缓存读写性能"><a href="#提高缓存读写性能" class="headerlink" title="提高缓存读写性能"></a>提高缓存读写性能</h2><p><strong>创建多个 Buffer Pool 实例</strong>，建议 1G 以上时使用。因为处理链表等工作都需要加锁。多个实例可以提高并发处理能力.</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>Mysql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>一致性算法-Paxos</title>
-    <url>/posts/8bee0b02.html</url>
-    <content><![CDATA[<h2 id="Paxos-是如何保证一致性的"><a href="#Paxos-是如何保证一致性的" class="headerlink" title="Paxos 是如何保证一致性的"></a>Paxos 是如何保证一致性的</h2><p><strong>答案是通过持久化变化的日志流来保证一致性的。</strong>你会问这是为什么。这需要你带着这个问题来看下面的示例：</p>
-<p>如图：我们现在部署了三个节点的集群，分别是 Node 1,Node 2,Node 3。这三个节点中的任何一个节点都可以写入数据，同时任何一个节点被写入数据后都会将数据同步给其他两个节点，现在有三个客户端分别在三个节点写入 a, b, c。问，当查询的时候数据按照哪种顺序排列是正确的？</p>
-<span id="more"></span>
-
-<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220209193951005.png" alt="image-20220209193951005"></p>
-<p>答案如下图：<strong>三个节点返回的数据顺序只要是一样的就是正确的，即总共有 6 种正确答案。</strong></p>
-<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220209195241655.png" alt="image-20220209195241655"></p>
-<p>每个节点写入数据的时候都会将这个数据写入到日志中，后续写入的数据都以 append 的形式追加到日志中，<strong>所以如果我们保证所有节点的日志是一致的那么就可以达到在并发情况下的一致性需求，同时，如果一个节点宕机了，等它重启后再加载一遍日志后就能将数据恢复也解决了数据丢失的问题。</strong></p>
-<h3 id="如何保证节点的日志是一致的"><a href="#如何保证节点的日志是一致的" class="headerlink" title="如何保证节点的日志是一致的"></a>如何保证节点的日志是一致的</h3><p>首先，我们要明确一点，每个节点的日志在写入的时候都会明确现在写入的是第几个。这样才能保证顺序是一致的。就用上面的例子来说，每个节点的日志都有三个位置，如果 Node 1 的1号位置写入的是 a ，那么其他两个节点就不能写到1号位置了，只能选择 2 号位置或者 3 号位置，如果 2 号位置被占了就再往后推。这样每个节点对于几号位置写入什么数据就都达成了共识，那么最终结果就是每个节点的日志顺序都是一样的。</p>
-<p>这里的关键思想是：虽然每个Node接收到的请求顺序不同，但它们对于日志中1号位置、2号位置、3号位置的认知是一样的，大家一起保证1号位置、2号位置、3号位置存储的数据一样！在例子中可以看到，每个Node在存储日志之前先要问一下其他Node，之后再决定把这条日志写到哪个位置。这里有两个阶段：先问，再做决策，也就是Paxos2PC的原型！</p>
-<p><strong>但是在并发的情况下这个看似简单的问题也会变得特别复杂。</strong>例如，Node1询问后发现1号位置没有被占，因此它打算把 a 传播给Node2和Node3；同一时刻，Node2询问后发现1号位置也没有被占，因此它打算把 b 传播给Node1和Node3；同样，Node3也打算把 c 传播给Node1和Node2。<strong>这样不就冲突了吗？</strong></p>
-<p><strong>为了解决这个问题 Paxos 规定了如下流程：</strong> </p>
-<p>第一，发现1号位置的值被大多数确定了，比如是 c（node3占领了1号位置，Node2跟从了Node3），则Node1就接受这个事实：1号位置不能用了，也得把自己的1号位置赋值成 c 。然后看2号位置能否把 a 存进去。同样地，如果2号也被占领了，就只能把它们的值拿过来填在自己的2号位置。只能再看3号位置是否可行。</p>
-<p>第二，当发现1号位置没有被占，就锁定这个位置，不允许其他Node再占这个位置！除非它的权利更大。</p>
-<p>第三，如果发现1号位置为空，在提交的时候发现1号位置被其他Node占了，就会提交失败，重试，尝试第二个位置，第三个位置……所以，为了让1号位置日志一样，可能要重试好多次，每个节点都会不断重试2PC。这样不断重试2PC，直到最终各方达成一致的过程，就是Paxos协议执行的过程，也就是一个Paxos instance，最终确定一个值。然后不断重复这个过程来确定一系列的值。</p>
-<h4 id="Paxos-算法的执行流程"><a href="#Paxos-算法的执行流程" class="headerlink" title="Paxos 算法的执行流程"></a>Paxos 算法的执行流程</h4><p>基于以上思想，Paxos 最后设计出可落地的执行流程。关于 Paxos 算法的执行流程可以看下这位网友的文章，浅显易懂 <a href="https://www.zhihu.com/question/19787937">Paxos算法的执行流程</a> 这里就不再赘述了。</p>
-<h2 id="算法存在的问题"><a href="#算法存在的问题" class="headerlink" title="算法存在的问题"></a>算法存在的问题</h2><p>读到这里相信大家都对 Paxos 的执行流程有一个大概的印象了，那么这个流程中会引发两个问题：</p>
-<ol>
-<li>存在陷入不断循环的风险：Paxos 是一个“不断循环”的2PC。在P1C或者P2C阶段，算法都可能失败，每次失败就要再重新执行一遍算法流程，在极端情况下可能出现不断循环的情况。</li>
-<li>存在性能问题：每确定一个值，至少需要两次通信（两个阶段，两个网络来回）+ 两次写盘。</li>
-</ol>
-<p>为了解决这两个问题 <strong>Multi Paxos 算法</strong>应运而生。</p>
-<h2 id="Multi-Paxos算法"><a href="#Multi-Paxos算法" class="headerlink" title="Multi Paxos算法"></a>Multi Paxos算法</h2><p>Multi Paxos算法并不是一个全新的算法，它只是在 Paxos 算法的基础上进行了一些改进，接下来我们看下它是如何解决上面两个问题的。</p>
-<h3 id="解决不断循环"><a href="#解决不断循环" class="headerlink" title="解决不断循环"></a>解决不断循环</h3><p>这个问题的本质<strong>是多个客户端写多个机器，会导致并发冲突很高</strong>，所以如果减少并发冲突那就可以解决这个问题了。</p>
-<h4 id="创建一个-Leader"><a href="#创建一个-Leader" class="headerlink" title="创建一个 Leader"></a>创建一个 Leader</h4><p><strong>为了减少并发冲突，可以变多写为单写</strong>，选出一个Leader，其他机器收到写请求，都把写请求转发给Leader；或者让客户端把写请求都发给Leader。这样就可以避免<strong>写并发</strong>了。当然由于网络原因可能产生 <strong>脑裂</strong>，也就是有多个 Leader ，但是即使有多个 Leader 也不会影响数据的正确性，只是增加了发生并发的可能性而已。</p>
-<p>说到这里就可能要说下 Leader 选举的两种常用方法了。</p>
-<h4 id="无租约的-Leader-选举"><a href="#无租约的-Leader-选举" class="headerlink" title="无租约的 Leader 选举"></a>无租约的 Leader 选举</h4><p>选举流程如下：</p>
-<ol>
-<li>每个节点有一个编号，选取编号最大的节点为Leader；</li>
-<li>每个节点周期性地向其他节点发送心跳，假设周期为T ms；</li>
-<li>如果一个节点在最近的2 T ms内还没有收到比自己编号更大的节点发来的心跳，则自己变为Leader；</li>
-<li>如果一个节点不是Leader，则收到请求之后转发给Leader。</li>
-</ol>
-<h4 id="有租约的-Leader-选举"><a href="#有租约的-Leader-选举" class="headerlink" title="有租约的 Leader 选举"></a>有租约的 Leader 选举</h4><p><strong>严格保证任意时刻只能有一个leader</strong>，也就是所谓的“租约”。租约的意思是在一个限定的期限内，某台机器一直是 Leader。即使这个机器宕机，Leader也不能切换。必须等到租期到期之后，才能开始选举新的Leader。这种方式会带来短暂的不可用，但保证了任意时刻只会有一个Leader。</p>
-<h3 id="解决性能问题"><a href="#解决性能问题" class="headerlink" title="解决性能问题"></a>解决性能问题</h3><p>选举出 Leader 之后对 2PC 进行了优化，基本思路是当一个节点被确认为Leader之后，它先广播一次Prepare，一旦超过半数同意 （防止有另一个 Leader ），之后对于收到的每条日志直接执行应用操作。这样就减少了一次询问的流程。</p>
-<p>如果同时还有另一个 Leader 怎么办呢？新的Leader肯定会先发起Prepare，新 Leader 的编号肯定更大。这时旧的 Leader 的广播肯定会失败，旧的 Leader 会自己转变成一个普通的Acceptor，新的Leader把旧的顶替掉了。</p>
-]]></content>
-      <categories>
-        <category>技术</category>
-      </categories>
-      <tags>
-        <tag>算法</tag>
       </tags>
   </entry>
 </search>

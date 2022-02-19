@@ -21,21 +21,22 @@
     var CONFIG = {"hostname":"biyw.cf","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="1.写日志也会引发故障故障现象某应用服务器在项目发布后不久就出现报警，硬盘可用空间低于警戒值，并且很快就宕机。登录到线上服务器，发现log文件夹里的文件迅速增加，不断消耗磁盘空间。">
+  <meta name="description" content="Paxos 算法虽然在一段时间内已经成了一致性算法的代名词。但是它也是出了名的艰深晦涩，并且当时基于 Paxos 的成熟工程少之又少。在这种情况下就有人设计了 Raft 算法，Raft 算法将”可理解性”放在了第一位。下面就让我们看下 Raft 算法的运行流程。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="网站典型故障案例">
-<meta property="og:url" content="https://biyw.cf/posts/269fd615.html">
+<meta property="og:title" content="一致性算法-Raft">
+<meta property="og:url" content="https://biyw.cf/posts/abf4a6b7.html">
 <meta property="og:site_name" content="byw的博客">
-<meta property="og:description" content="1.写日志也会引发故障故障现象某应用服务器在项目发布后不久就出现报警，硬盘可用空间低于警戒值，并且很快就宕机。登录到线上服务器，发现log文件夹里的文件迅速增加，不断消耗磁盘空间。">
+<meta property="og:description" content="Paxos 算法虽然在一段时间内已经成了一致性算法的代名词。但是它也是出了名的艰深晦涩，并且当时基于 Paxos 的成熟工程少之又少。在这种情况下就有人设计了 Raft 算法，Raft 算法将”可理解性”放在了第一位。下面就让我们看下 Raft 算法的运行流程。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-12-05T06:18:51.996Z">
-<meta property="article:modified_time" content="2022-02-03T08:07:12.602Z">
+<meta property="og:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220218070635344.png">
+<meta property="article:published_time" content="2022-02-15T05:01:16.000Z">
+<meta property="article:modified_time" content="2022-02-19T03:08:53.389Z">
 <meta property="article:author" content="Byw">
-<meta property="article:tag" content="架构">
-<meta property="article:tag" content="问题记录">
+<meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220218070635344.png">
 
-<link rel="canonical" href="https://biyw.cf/posts/269fd615.html">
+<link rel="canonical" href="https://biyw.cf/posts/abf4a6b7.html">
 
 
 <script id="page-configurations">
@@ -48,7 +49,7 @@
   };
 </script>
 
-  <title>网站典型故障案例 | byw的博客</title>
+  <title>一致性算法-Raft | byw的博客</title>
   
 
 
@@ -205,7 +206,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://biyw.cf/posts/269fd615.html">
+    <link itemprop="mainEntityOfPage" href="https://biyw.cf/posts/abf4a6b7.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tx.jpg">
@@ -218,7 +219,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          网站典型故障案例
+          一致性算法-Raft
         </h1>
 
         <div class="post-meta">
@@ -228,14 +229,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2021-12-05 14:18:51" itemprop="dateCreated datePublished" datetime="2021-12-05T14:18:51+08:00">2021-12-05</time>
+              <time title="创建时间：2022-02-15 13:01:16" itemprop="dateCreated datePublished" datetime="2022-02-15T13:01:16+08:00">2022-02-15</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-02-03 16:07:12" itemprop="dateModified" datetime="2022-02-03T16:07:12+08:00">2022-02-03</time>
+                <time title="修改时间：2022-02-19 11:08:53" itemprop="dateModified" datetime="2022-02-19T11:08:53+08:00">2022-02-19</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -260,14 +261,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.5k</span>
+              <span>2.6k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
+              <span>4 分钟</span>
             </span>
 
         </div>
@@ -279,23 +280,41 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="1-写日志也会引发故障"><a href="#1-写日志也会引发故障" class="headerlink" title="1.写日志也会引发故障"></a>1.写日志也会引发故障</h2><h3 id="故障现象"><a href="#故障现象" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用服务器在项目发布后不久就出现报警，硬盘可用空间低于警戒值，并且很快就宕机。登录到线上服务器，发现log文件夹里的文件迅速增加，不断消耗磁盘空间。</p>
+        <p>Paxos 算法虽然在一段时间内已经成了一致性算法的代名词。但是它也是出了名的艰深晦涩，并且当时基于 Paxos 的成熟工程少之又少。在这种情况下就有人设计了 Raft 算法，Raft 算法将”可理解性”放在了第一位。下面就让我们看下 Raft 算法的运行流程。</p>
 <span id="more"></span>
 
-<h3 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h3><p>部署完系统后硬盘还剩余几十个G，正常情况下这些磁盘空间足够了，但是该应用的开发人员将l o g输出的level全局配置为Debug。这样一次简单的Web请求就会产生大量的log文件输出，在高并发的用户请求下，很快就消耗完不多的磁盘空间</p>
-<h3 id="经验教训"><a href="#经验教训" class="headerlink" title="经验教训"></a>经验教训</h3><p>应用程序自己的日志输出配置和第三方组件日志输出要分别配置。<br>检查log配置文件，日志输出级别至少为Warn，并且检查log输出代码调用，调用级别要符合其真实日志级别。<br>有些开源的第三方组件也会不恰当地输出太多的Error日志，需要关闭这些第三方库的日志输出，至于哪些第三方库有问题，只有在遇到问题时才知道。</p>
-<h2 id="2-高并发访问数据库引发的故障"><a href="#2-高并发访问数据库引发的故障" class="headerlink" title="2.高并发访问数据库引发的故障"></a>2.高并发访问数据库引发的故障</h2><h3 id="故障现象-1"><a href="#故障现象-1" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用发布后，数据库Load居高不下，远超过正常水平，持续报警。</p>
-<h3 id="原因分析-1"><a href="#原因分析-1" class="headerlink" title="原因分析"></a>原因分析</h3><p>查数据库，发现报警是因为某条SQL引起的，这条SQL是一条简单的有索引的数据查询，不应该引发报警。继续检查，发现这条SQL执行频率非常高，远远超过正常水平。追查这条SQL，发现被网站首页应用调用，首页是被访问最频繁的网页，这条SQL被首页调用，也就被频繁执行了。</p>
-<h3 id="经验教训-1"><a href="#经验教训-1" class="headerlink" title="经验教训"></a>经验教训</h3><p>首页不应该访问数据库，首页需要的数据可以从缓存服务器或者搜索引擎服务器获取。<br>首页最好是静态的。</p>
-<h2 id="3-高并发情况下锁引发的故障"><a href="#3-高并发情况下锁引发的故障" class="headerlink" title="3.高并发情况下锁引发的故障"></a>3.高并发情况下锁引发的故障</h2><h3 id="故障现象-2"><a href="#故障现象-2" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用服务器不定时地因为响应超时而报警，但是很快又超时解除，恢复正常，如此反复，让运维人员非常苦恼。</p>
-<h3 id="原因分析-2"><a href="#原因分析-2" class="headerlink" title="原因分析"></a>原因分析</h3><p>程序中某个单例对象（singleton object）中多处使用了synchronized（this），由于this对象只有一个，所有的并发请求都要排队获得这唯一的一把锁。一般情况下，都是一些简单操作，获得锁，迅速完成操作，释放锁，不会引起线程排队。但是某个需要远程调用的操作也被加了synchronized（this），这个操作只是偶尔会被执行，但是每次执行都需要较长的时间才能完成，这段时间锁被占用，所有的用户线程都要等待，响应超时，这个操作执行完后释放锁，其他线程迅速执行，超时解除。</p>
-<h3 id="经验教训-2"><a href="#经验教训-2" class="headerlink" title="经验教训"></a>经验教训</h3><p>使用锁操作要谨慎</p>
-<h2 id="4-缓存引发的故障"><a href="#4-缓存引发的故障" class="headerlink" title="4.缓存引发的故障"></a>4.缓存引发的故障</h2><h3 id="故障现象-3"><a href="#故障现象-3" class="headerlink" title="故障现象"></a>故障现象</h3><p>没有新应用发布，但是数据库服务器突然Load飙升，并很快失去响应。DBA将数据库访问切换到备机，Load也很快飙升，并失去响应。最终引发网站全部瘫痪</p>
-<h3 id="原因分析-3"><a href="#原因分析-3" class="headerlink" title="原因分析"></a>原因分析</h3><p>缓存服务器在网站服务器集群中的地位一直比较低，服务器配置和管理级别都比其他服务器要低一些。人们都认为缓存是改善性能的手段，丢失一些缓存也没什么问题，有时候关闭一两台缓存服务器也确实对应用没有明显影响，所以长期疏于管理缓存服务器。结果这次一个缺乏经验的工程师关闭了缓存服务器集群中全部的十几台Memcached服务器，导致了网站全部瘫痪的重大事故</p>
-<h3 id="经验教训-3"><a href="#经验教训-3" class="headerlink" title="经验教训"></a>经验教训</h3><p>当缓存已经不仅仅是改善性能，而是成为网站架构不可或缺的一部分时，对缓存的管理就需要提高到和其他服务器一样的级别</p>
-<h2 id="5-大文件读写独占磁盘引发的故障"><a href="#5-大文件读写独占磁盘引发的故障" class="headerlink" title="5.大文件读写独占磁盘引发的故障"></a>5.大文件读写独占磁盘引发的故障</h2><h3 id="故障现象-4"><a href="#故障现象-4" class="headerlink" title="故障现象"></a>故障现象</h3><p>某应用主要功能是管理用户图片，接到部分用户投诉，表示上传图片非常慢，原来只需要一两秒，现在需要几十秒，有时等半天结果浏览器显示服务器超时</p>
-<h3 id="原因分析-4"><a href="#原因分析-4" class="headerlink" title="原因分析"></a>原因分析</h3><p>图片需要使用存储，最有可能出错的地方是存储服务器。检查存储服务器，发现大部分文件只有几百KB，而有几个文件非常大，有数百兆，读写这些大文件一次需要几十秒，这段时间，磁盘基本被这个文件操作独占，导致其他用户的文件操作缓慢。</p>
-<h3 id="经验教训-4"><a href="#经验教训-4" class="headerlink" title="经验教训"></a>经验教训</h3><p>存储的使用需要根据不同文件类型和用途进行管理，图片都是小文件，应该使用专用的存储服务器，不能和大文件共用存储。批处理用的大文件可以使用其他类型的分布式文件系统。</p>
+<p>Raft 算法总共有三个阶段：阶段一，选举 Leader；阶段二，同步数据；阶段三，崩溃恢复。下面详细讲述这三个阶段。</p>
+<h2 id="选举-Leader"><a href="#选举-Leader" class="headerlink" title="选举 Leader"></a>选举 Leader</h2><p>任何一个节点有且仅有三种状态：Leader、Follower、Candidate。Candidate是一个中间状态，是正在选举中，选举结束后要么切换到 Leader，要么切换到Follower。</p>
+<ol>
+<li>初始时，所有机器处于Follower状态，等待Leader的心跳消息（一个机器成为Leader之后，会周期性地给其他Follower发心跳）。很显然，此时没有Leader，所以收不到心跳消息。</li>
+<li>当Follower在给定的时间（比如2000ms）内收不到Leader的消息，就会认为Leader宕机，也就是选举超时。然后，随机睡眠0～1000ms之间的一个值（为了避免大家同时发起选举），把自己切换成Candidate状态，发起选举，每个节点都会维护一个编号起个名字叫 term，term从 1 开始递增，选举的时候如果对方的 term 大于自己的那么就同意它当选 Leader 。</li>
+<li>选举结束，自己变成Leader或者Follower。</li>
+<li>对于Leader，发现有更新的Leader存在，自己主动退位，变成Follower。</li>
+</ol>
+<p>关于第四点你可能有些疑问，为什么会有多个 Leader 的情况？这是可能是因为网络抖动导致网络分区形成了 <strong>脑裂</strong> 的问题。<strong>因为 Raft 算法与 Paxos 不同，Raft 规定，同一时间同一个网络分区内只能有一个 Leader 。</strong>那如何判断哪个 Leader 是比较新的呢？这个时候就要了解下 Raft 是如何存储数据的了。</p>
+<h3 id="Raft-如何存储数据"><a href="#Raft-如何存储数据" class="headerlink" title="Raft 如何存储数据"></a>Raft 如何存储数据</h3><p>下图就是 Raft 算法需要存储的数据，各个字段的意义如下：</p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220218070635344.png" alt="image-20220218070635344"></p>
+<h4 id="term"><a href="#term" class="headerlink" title="term"></a>term</h4><p>term 是指写入日志的Leader所在的“任期”, 比如说第一个被选为 Leader 节点，它的 term 就是1，当它宕机了，选出了第二个 Leader 节点，那这个节点的 term 就是 2，term 是递增的。 每当 Leader 向 Follower 同步数据时就会携带着自己的 term ，这样 Follower 就可以记录当前这个数据是第几任 Leader 发过来的。</p>
+<p><strong>意义：</strong> <strong>可以解决Leader的“脑裂”问题。</strong>假设现在因为网络分区导致整个集群中同时存在两个 Leader ，一个是旧的，一个是新的，旧的 Leader 的 term  = 4，新的 term = 5。当网络分区的情况消失时两个 Leader 就会相遇，这时新、老Leader都会向Follower发送数据。但当老的Leader向其他所有Follower发送数据时，Follower发现它发过来的日志里面term=4，就知道它是过期的Leader，就会拒绝执行写入操作，同时会反馈给老的Leader说，你已经过期了！老的Leader知道自己过期了，会自动退位，变成Follower。从而解决了“脑裂”问题，使得任何一个时刻，只可能有一个Leader有效！</p>
+<p><strong>如何保证 Leader 的 term 永远是最大的？</strong>term并不是存放在一个中央存储里面，而是每个节点都保存了一个term的值。因为网络延迟问题，某些节点上面term的值可能是过期的。假设当前term的真实有效值是5，但是某些节点上面term的值没有来得及更新，其term=4。这时term=4 的节点被选为Leader了，那不就出问题了吗？答案是不可能出现这个情况。因为选举的时候是要多数派（超过半数的节点）同意的，意味着在多数派里面一定有一个节点保存了最新的term的值。而在选举的时候，是选日志最新的节点作为Leader。所以，如果一个节点的term=4（过期的），就不可能被选为Leader。如果一个节点被选为了Leader，其term值一定是当前最大的，也就是最新的。</p>
+<h4 id="index"><a href="#index" class="headerlink" title="index"></a>index</h4><p>这个字段就很好理解了，就是消息的索引，也是自增的。</p>
+<h4 id="content"><a href="#content" class="headerlink" title="content"></a>content</h4><p>这个字段就是用来存储真实数据的。</p>
+<h4 id="commitIndex"><a href="#commitIndex" class="headerlink" title="commitIndex"></a>commitIndex</h4><p>一旦一条日志被认定是“commit”，这条日志将不能被改变，不能被删除！很显然，任何一条日志要么是commit状态，要么是uncommit状态（暂时还不确定，可能过一会儿就变成了commit状态）。</p>
+<p>日志的commit设计<strong>应用了一个类似TCP协议中的技巧</strong>，可称为递增式的commit。假设commitIndex=7，表示不仅index=7的日志是commit状态，所有index＜7的日志也都是commit状态。</p>
+<p>这会带来两个好处：</p>
+<ol>
+<li>维护一个全局变量commitIndex即可。不需要为每条日志都维护一个 commit 或 uncommit 状态。</li>
+<li>提高性能。Follower不需要逐条日志地反馈Leader，哪一条commit了，则哪一条uncommit。</li>
+</ol>
+<h2 id="同步数据"><a href="#同步数据" class="headerlink" title="同步数据"></a>同步数据</h2><p>Leader成功选举出来后，接下来进入第二个阶段，正常的数据同步阶段。当客户端向节点写入数据的时候，如果写入数据的节点不是 Leader 节点，那么该节点就会把这个请求转发给 Leader 去执行。Leader 会先在自己的节点记录这个数据，然后再将数据发送给所有节点，如果有半数节点都返回成功，那么 Leader 就会返回给客户端写入数据成功的信息。</p>
+<p>在这个过程中有两个关键的“日志一致性”保证，保证Leader和Follower日志序列完全一模一样：</p>
+<ol>
+<li>对于两个日志序列里面的两条日志，如果其index和term都相同，则日志的内容必定相同。</li>
+<li>对于两个日志序列，如果在index=M处的日志相同，则在M之前的所有日志也都完全相同。</li>
+</ol>
+<p>所以，如果 Follower 发现自己的日志中，某个index位置和Leader发过来的不一样，则删除index之后的所有日志，然后从index的位置同步接下来的日志。</p>
+<h2 id="崩溃恢复"><a href="#崩溃恢复" class="headerlink" title="崩溃恢复"></a>崩溃恢复</h2><p>当Leader宕机之后，选出了新的Leader，其他的Follower要切换到新的Leader。</p>
+<p>Follower是被动的，其并不会主动发现有新的Leader上台了；而是新的Leader上台之后，会马上给所有的 Follower 发一个同步数据的请求，只不过这个请求没有包含客户端数据，只是为了同步 term ，这样每个Follower都会将自己的term更新到最新的term。这样旧的Leader即使活过来了，也没有机会再写入日志。</p>
 
     </div>
 
@@ -311,7 +330,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://biyw.cf/posts/269fd615.html" title="网站典型故障案例">https://biyw.cf/posts/269fd615.html</a>
+    <a href="https://biyw.cf/posts/abf4a6b7.html" title="一致性算法-Raft">https://biyw.cf/posts/abf4a6b7.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener external nofollow noreferrer" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -322,8 +341,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
-              <a href="/tags/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/" rel="tag"># 问题记录</a>
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
           </div>
 
         
@@ -332,13 +350,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/posts/badf9669.html" rel="prev" title="Java内存模型与线程">
-      <i class="fa fa-chevron-left"></i> Java内存模型与线程
+    <a href="/posts/8bee0b02.html" rel="prev" title="一致性算法-Paxos">
+      <i class="fa fa-chevron-left"></i> 一致性算法-Paxos
     </a></div>
-      <div class="post-nav-item">
-    <a href="/posts/7b9932ab.html" rel="next" title="网站的高性能架构">
-      网站的高性能架构 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -398,7 +413,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%86%99%E6%97%A5%E5%BF%97%E4%B9%9F%E4%BC%9A%E5%BC%95%E5%8F%91%E6%95%85%E9%9A%9C"><span class="nav-number">1.</span> <span class="nav-text">1.写日志也会引发故障</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E7%8E%B0%E8%B1%A1"><span class="nav-number">1.1.</span> <span class="nav-text">故障现象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%9B%A0%E5%88%86%E6%9E%90"><span class="nav-number">1.2.</span> <span class="nav-text">原因分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%8F%E9%AA%8C%E6%95%99%E8%AE%AD"><span class="nav-number">1.3.</span> <span class="nav-text">经验教训</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E9%AB%98%E5%B9%B6%E5%8F%91%E8%AE%BF%E9%97%AE%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BC%95%E5%8F%91%E7%9A%84%E6%95%85%E9%9A%9C"><span class="nav-number">2.</span> <span class="nav-text">2.高并发访问数据库引发的故障</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E7%8E%B0%E8%B1%A1-1"><span class="nav-number">2.1.</span> <span class="nav-text">故障现象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%9B%A0%E5%88%86%E6%9E%90-1"><span class="nav-number">2.2.</span> <span class="nav-text">原因分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%8F%E9%AA%8C%E6%95%99%E8%AE%AD-1"><span class="nav-number">2.3.</span> <span class="nav-text">经验教训</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E9%AB%98%E5%B9%B6%E5%8F%91%E6%83%85%E5%86%B5%E4%B8%8B%E9%94%81%E5%BC%95%E5%8F%91%E7%9A%84%E6%95%85%E9%9A%9C"><span class="nav-number">3.</span> <span class="nav-text">3.高并发情况下锁引发的故障</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E7%8E%B0%E8%B1%A1-2"><span class="nav-number">3.1.</span> <span class="nav-text">故障现象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%9B%A0%E5%88%86%E6%9E%90-2"><span class="nav-number">3.2.</span> <span class="nav-text">原因分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%8F%E9%AA%8C%E6%95%99%E8%AE%AD-2"><span class="nav-number">3.3.</span> <span class="nav-text">经验教训</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E7%BC%93%E5%AD%98%E5%BC%95%E5%8F%91%E7%9A%84%E6%95%85%E9%9A%9C"><span class="nav-number">4.</span> <span class="nav-text">4.缓存引发的故障</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E7%8E%B0%E8%B1%A1-3"><span class="nav-number">4.1.</span> <span class="nav-text">故障现象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%9B%A0%E5%88%86%E6%9E%90-3"><span class="nav-number">4.2.</span> <span class="nav-text">原因分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%8F%E9%AA%8C%E6%95%99%E8%AE%AD-3"><span class="nav-number">4.3.</span> <span class="nav-text">经验教训</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%A4%A7%E6%96%87%E4%BB%B6%E8%AF%BB%E5%86%99%E7%8B%AC%E5%8D%A0%E7%A3%81%E7%9B%98%E5%BC%95%E5%8F%91%E7%9A%84%E6%95%85%E9%9A%9C"><span class="nav-number">5.</span> <span class="nav-text">5.大文件读写独占磁盘引发的故障</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E7%8E%B0%E8%B1%A1-4"><span class="nav-number">5.1.</span> <span class="nav-text">故障现象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%9B%A0%E5%88%86%E6%9E%90-4"><span class="nav-number">5.2.</span> <span class="nav-text">原因分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%8F%E9%AA%8C%E6%95%99%E8%AE%AD-4"><span class="nav-number">5.3.</span> <span class="nav-text">经验教训</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%89%E4%B8%BE-Leader"><span class="nav-number">1.</span> <span class="nav-text">选举 Leader</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Raft-%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E6%95%B0%E6%8D%AE"><span class="nav-number">1.1.</span> <span class="nav-text">Raft 如何存储数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#term"><span class="nav-number">1.1.1.</span> <span class="nav-text">term</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#index"><span class="nav-number">1.1.2.</span> <span class="nav-text">index</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#content"><span class="nav-number">1.1.3.</span> <span class="nav-text">content</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#commitIndex"><span class="nav-number">1.1.4.</span> <span class="nav-text">commitIndex</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E6%95%B0%E6%8D%AE"><span class="nav-number">2.</span> <span class="nav-text">同步数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B4%A9%E6%BA%83%E6%81%A2%E5%A4%8D"><span class="nav-number">3.</span> <span class="nav-text">崩溃恢复</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -562,7 +577,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'blog',
       owner       : 'biyanwen',
       admin       : ['biyanwen'],
-      id          : '3e4666ddf71f3c23787e996ff4b517dd',
+      id          : '5b9d1041754525c4f2cf2feb7e8e9429',
         language: 'zh-CN',
       distractionFreeMode: true
     });

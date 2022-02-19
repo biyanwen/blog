@@ -6,7 +6,7 @@
   <link href="https://biyw.cf/atom.xml" rel="self"/>
   
   <link href="https://biyw.cf/"/>
-  <updated>2022-02-10T11:01:57.686Z</updated>
+  <updated>2022-02-19T03:08:53.389Z</updated>
   <id>https://biyw.cf/</id>
   
   <author>
@@ -15,6 +15,25 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>一致性算法-Raft</title>
+    <link href="https://biyw.cf/posts/abf4a6b7.html"/>
+    <id>https://biyw.cf/posts/abf4a6b7.html</id>
+    <published>2022-02-15T05:01:16.000Z</published>
+    <updated>2022-02-19T03:08:53.389Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;Paxos 算法虽然在一段时间内已经成了一致性算法的代名词。但是它也是出了名的艰深晦涩，并且当时基于 Paxos 的成熟工程少之又少。在这种情况下就有人设计了 Raft 算法，Raft 算法将”可理解性”放在了第一位。下面就让我们看下 Raft 算法的运行流程。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="算法" scheme="https://biyw.cf/tags/%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
   
   <entry>
     <title>一致性算法-Paxos</title>
@@ -162,25 +181,6 @@
   </entry>
   
   <entry>
-    <title>指令详解-操作码</title>
-    <link href="https://biyw.cf/posts/94f9446a.html"/>
-    <id>https://biyw.cf/posts/94f9446a.html</id>
-    <published>2022-01-08T05:50:35.000Z</published>
-    <updated>2022-02-03T08:07:12.598Z</updated>
-    
-    
-    <summary type="html">&lt;h2 id=&quot;定长编码&quot;&gt;&lt;a href=&quot;#定长编码&quot; class=&quot;headerlink&quot; title=&quot;定长编码&quot;&gt;&lt;/a&gt;定长编码&lt;/h2&gt;&lt;p&gt;每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。&lt;br&gt;优点：计算机的硬件设计简单，朱令译码和执行速度快。&lt;br&gt;缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。&lt;br&gt;适用环境：适用于字长较长的计算机系统，如 32 位及以上。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
-    
-    
-    <category term="计算机原理" scheme="https://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
-    
-  </entry>
-  
-  <entry>
     <title>指令详解-寻址方式</title>
     <link href="https://biyw.cf/posts/def90db1.html"/>
     <id>https://biyw.cf/posts/def90db1.html</id>
@@ -212,6 +212,25 @@
     
     <summary type="html">&lt;h2 id=&quot;指令是什么：&quot;&gt;&lt;a href=&quot;#指令是什么：&quot; class=&quot;headerlink&quot; title=&quot;指令是什么：&quot;&gt;&lt;/a&gt;指令是什么：&lt;/h2&gt;&lt;p&gt;可以将指令当做一种编程语言，表现形式为一串二进制码，作用是能让计算机按照指令去工作。&lt;/p&gt;
 &lt;p&gt;指令由两部分组成，操作码和地址码，下面我们着重看下&lt;strong&gt;地址码&lt;/strong&gt;。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="计算机原理" scheme="https://biyw.cf/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8E%9F%E7%90%86/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>指令详解-操作码</title>
+    <link href="https://biyw.cf/posts/94f9446a.html"/>
+    <id>https://biyw.cf/posts/94f9446a.html</id>
+    <published>2022-01-08T05:50:35.000Z</published>
+    <updated>2022-02-03T08:07:12.598Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;定长编码&quot;&gt;&lt;a href=&quot;#定长编码&quot; class=&quot;headerlink&quot; title=&quot;定长编码&quot;&gt;&lt;/a&gt;定长编码&lt;/h2&gt;&lt;p&gt;每条指令的操作码都是固定长度。当操作码是 n 位时，指令最多有 2^n 条。&lt;br&gt;优点：计算机的硬件设计简单，朱令译码和执行速度快。&lt;br&gt;缺点：当指令数量增多、指令字单独为操作码划分出固定的多位后，留给表示操作数地址的位数会严重不足。&lt;br&gt;适用环境：适用于字长较长的计算机系统，如 32 位及以上。&lt;/p&gt;</summary>
     
     
     
@@ -451,27 +470,6 @@
     
     
     <category term="Git" scheme="https://biyw.cf/tags/Git/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>【Mybatis源码解读】jdbc包</title>
-    <link href="https://biyw.cf/posts/693eec27.html"/>
-    <id>https://biyw.cf/posts/693eec27.html</id>
-    <published>2021-12-05T06:30:01.964Z</published>
-    <updated>2022-02-03T08:07:12.587Z</updated>
-    
-    
-    <summary type="html">&lt;h2 id=&quot;1-jdbc包的作用&quot;&gt;&lt;a href=&quot;#1-jdbc包的作用&quot; class=&quot;headerlink&quot; title=&quot;1. jdbc包的作用&quot;&gt;&lt;/a&gt;1. jdbc包的作用&lt;/h2&gt;&lt;p&gt;jdbc包作为Mybatis框架的核心包之一可以理解为是&lt;strong&gt;操作Sql的工具包&lt;/strong&gt;，因为通过阅读代码观察到这个jdbc包里面的类并没有被Mybatis框架本身引用，而其本身的作用又是对sql的操作，所以当作工具包来理解是没有什么问题的。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
-    
-    
-    <category term="Mybatis" scheme="https://biyw.cf/tags/Mybatis/"/>
-    
-    <category term="源码阅读" scheme="https://biyw.cf/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
     
   </entry>
   
