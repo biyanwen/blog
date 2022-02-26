@@ -2579,4 +2579,53 @@
         <tag>算法</tag>
       </tags>
   </entry>
+  <entry>
+    <title>算法-反转链表</title>
+    <url>/posts/cfc6a184.html</url>
+    <content><![CDATA[<p>关于如何反转链表我们直接通过代码进行讲解。</p>
+<p>首先定义节点数据结构：</p>
+<span id="more"></span>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Node</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">int</span> value;</span><br><span class="line">	<span class="keyword">private</span> Node next;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getValue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> value;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setValue</span><span class="params">(<span class="keyword">int</span> value)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.value = value;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> LinkedList.<span class="function">Node <span class="title">getNext</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> next;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setNext</span><span class="params">(Node next)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.next = next;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>递归反转链表代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Node <span class="title">reverseLinkedList</span><span class="params">(Node head)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (head == <span class="keyword">null</span> || head.next == <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> head;</span><br><span class="line">	&#125;</span><br><span class="line">	Node lastNode = reverseLinkedList(head.next);</span><br><span class="line">	head.next.next = head;</span><br><span class="line">	head.next = <span class="keyword">null</span>;</span><br><span class="line">	<span class="keyword">return</span> lastNode;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同时附上<a href="https://github.com/biyanwen/algorithmtest/blob/master/src/test/com/github/biyanwen/LinkedList.java">源码链接</a> 感兴趣的同学可以直接将代码拉下来直接运行。</p>
+<p>如果你不经常写递归的话，看这段代码可能会有些疑惑，为啥递归一下就将链表反转了呢？下面我们详细来看下究竟发生了什么。</p>
+<h2 id="递归的原理"><a href="#递归的原理" class="headerlink" title="递归的原理"></a>递归的原理</h2><p>讲递归之前，<strong>我们首先要先讲下在 Java 中方法是怎么运行的。</strong>首先，Java 中有一个方法栈，每个方法会被转换成栈帧，栈帧里面保存着执行方法所必需的数据，每执行一个方法时就会将方法的栈帧入栈，等方法运行结束后再让方法的栈帧出栈，例如你有如下一段代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		A();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">A</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;这里是 A&quot;</span>);</span><br><span class="line">		B();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">B</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;这里是 B&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果你运行 main 方法，main 方法会调用 A 方法，A 方法会调用 B 方法。而这种方法的调用情况在方法栈中表现如下图所示：</p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220224221233644.png" alt="image-20220224221233644"></p>
+<p>如果你了解了方法是如何执行的，那么应该可以推理出递归方法执行时方法栈的运行流程。例如将上述代码改成如下形式：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		A();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">A</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;这里是 A&quot;</span>);</span><br><span class="line">		A();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果这时你调用 main 方法，那么 A 方法的栈帧会不停的入栈，同时因为没有终止条件的话，那么递归调用将不会停止，如图。</p>
+<p>由于方法栈的高度是有限的，所以如果一直调用下去就会发生栈溢出的问题，所以在写递归时一定要写终止条件！！！</p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220224222149538.png" alt="image-20220224222149538"></p>
+<h2 id="代码解构"><a href="#代码解构" class="headerlink" title="代码解构"></a>代码解构</h2><p>下面将对这段反转链表的代码进行详细讲解。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Node <span class="title">reverseLinkedList</span><span class="params">(Node head)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (head == <span class="keyword">null</span> || head.next == <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> head;</span><br><span class="line">	&#125;</span><br><span class="line">	Node lastNode = reverseLinkedList(head.next);</span><br><span class="line">	head.next.next = head;</span><br><span class="line">	head.next = <span class="keyword">null</span>;</span><br><span class="line">	<span class="keyword">return</span> lastNode;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>第一：终止条件，大家通过上面的讲解都知道递归最重要的就是终止条件。</p>
+<p>如果符合 if 语句的判断逻辑就说明当前节点是空节点，或者最后一个节点，这时就应该停止递归，并将结果返回。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (head == <span class="keyword">null</span> || head.next == <span class="keyword">null</span>) &#123;</span><br><span class="line">	<span class="keyword">return</span> head;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>第二：下面通过画图的形式来为大家讲解代码运行的整个逻辑。</p>
+<p>假设我们现在有一个 5 节点的链表，他们的分别为 1号节点，2号节点，以此类推，同时 1号节点为头结点，它们的反转流程如下图：</p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220226130625718.png" alt="image-20220226130625718"></p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220226130657978.png" alt="image-20220226130657978"></p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220226130721877.png" alt="image-20220226130721877"></p>
+<p>看完上面的流程图相信你已经大致明白递归是如何达到将链表反转的目的。但是你可能还有一个疑问，为什么 head 一直在变，但是 lastNode 却一直不变？</p>
+<p>下面来解答一下：</p>
+<p><strong>为什么 lastNode 一直不变？</strong>因为虽然每个栈帧都接收了这个值，但是并没有改变它，而是直接返回了，所以它才能保持不变。</p>
+<p><strong>为什么 head 一直在变？</strong>因为每个栈帧都保存着自己方法正在引用的 head ，而每个栈帧正在使用的 head 的数值是不一样的。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>算法</tag>
+      </tags>
+  </entry>
 </search>

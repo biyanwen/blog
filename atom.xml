@@ -6,7 +6,7 @@
   <link href="https://biyw.cf/atom.xml" rel="self"/>
   
   <link href="https://biyw.cf/"/>
-  <updated>2022-02-19T07:48:07.607Z</updated>
+  <updated>2022-02-26T05:14:19.344Z</updated>
   <id>https://biyw.cf/</id>
   
   <author>
@@ -17,11 +17,31 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>算法-反转链表</title>
+    <link href="https://biyw.cf/posts/cfc6a184.html"/>
+    <id>https://biyw.cf/posts/cfc6a184.html</id>
+    <published>2022-02-23T14:14:33.000Z</published>
+    <updated>2022-02-26T05:14:19.344Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;关于如何反转链表我们直接通过代码进行讲解。&lt;/p&gt;
+&lt;p&gt;首先定义节点数据结构：&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="算法" scheme="https://biyw.cf/tags/%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
+  
+  <entry>
     <title>一致性算法-Zab</title>
     <link href="https://biyw.cf/posts/238f0bdc.html"/>
     <id>https://biyw.cf/posts/238f0bdc.html</id>
     <published>2022-02-19T05:45:00.000Z</published>
-    <updated>2022-02-19T07:48:07.607Z</updated>
+    <updated>2022-02-19T07:48:14.784Z</updated>
     
     
     <summary type="html">&lt;p&gt;Zab 算法出现在 Paxos 之后、Raft 之前，其实 Raft 的很多思路和Zab很像，我们熟知的 Zookeeper 使用的就是 Zab 算法。&lt;/p&gt;
@@ -439,27 +459,6 @@
     
     
     <summary type="html">&lt;p&gt;本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章&lt;a href=&quot;https://blog.csdn.net/qq_43005544/article/details/116504407&quot;&gt;wireshark 简易教程&lt;/a&gt;&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
-    
-    
-    <category term="Wireshark" scheme="https://biyw.cf/tags/Wireshark/"/>
-    
-    <category term="网络" scheme="https://biyw.cf/tags/%E7%BD%91%E7%BB%9C/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Wireshark 简明教程</title>
-    <link href="https://biyw.cf/posts/65f8076a.html"/>
-    <id>https://biyw.cf/posts/65f8076a.html</id>
-    <published>2021-12-05T06:42:55.422Z</published>
-    <updated>2022-02-03T08:07:12.584Z</updated>
-    
-    
-    <summary type="html">&lt;p&gt;Wireshark 作为一款免费的抓包工具深受工程师们的喜爱，下面就简单介绍一下如何使用。&lt;/p&gt;</summary>
     
     
     
