@@ -2628,4 +2628,55 @@
         <tag>算法</tag>
       </tags>
   </entry>
+  <entry>
+    <title>算法-反转链表指定区间内的节点</title>
+    <url>/posts/e8e9f3f3.html</url>
+    <content><![CDATA[<p>上一篇文章我们介绍了如何反转链表，这篇文章我们主要介绍如何反转指定区间内的节点。</p>
+<p>题目大概是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">题目：反向链接指定区间内的节点 startIndex = 3, endIndex= 5</span><br><span class="line">输入链表： 1 -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 5</span><br><span class="line">返回链表： 1 -&gt; 2 -&gt; 5 -&gt; 4 -&gt; 3</span><br></pre></td></tr></table></figure>
+
+<p>如果你经常在面对问题时一脸懵逼，那么这里介绍一个解决问题的思路，就是<strong>将一个复杂的问题，分解成很多简单的小问题。</strong>将每个小问题都解决了，那么那个复杂的大问题也就解决了。</p>
+<span id="more"></span>
+
+<p>这个算法题可以分解成两个小问题，<strong>第一：如何反转前 n 个节点。第二：在能够反转前 n 个节点的基础上，如何从指定位置开始反转。</strong></p>
+<p>我们现在就来看下第一个小问题：</p>
+<h2 id="如何反转前-n-个节点"><a href="#如何反转前-n-个节点" class="headerlink" title="如何反转前 n 个节点"></a>如何反转前 n 个节点</h2><p>例如现在有一个 5 节点的单向链表，我们要反转前三个，那么当我们执行反转时链表会发生如下变化：</p>
+<p>3 号节点变成新的头结点，1 号节点指向 4 号节点。</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227184048338.png" alt="image-20220227184048338" style="zoom:67%;" />
+
+<p>代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 下一个节点</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> Node nextOneNode;		</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 反向链接列表前 N 个节点</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> head 头</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> n    n</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="doctag">@link</span> Node&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> Node <span class="title">reverseLinkedListBeforeN</span><span class="params">(Node head, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (head == <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (n == <span class="number">1</span>) &#123;</span><br><span class="line">		nextOneNode = head.next;</span><br><span class="line">		<span class="keyword">return</span> head;</span><br><span class="line">	&#125;</span><br><span class="line">	Node lastNode = reverseLinkedListBeforeN(head.next, n - <span class="number">1</span>);</span><br><span class="line">	head.next.next = head;</span><br><span class="line">	head.next = nextOneNode;</span><br><span class="line">	<span class="keyword">return</span> lastNode;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://github.com/biyanwen/algorithmtest/blob/master/src/test/com/github/biyanwen/LinkedList.java">源码地址</a> 感兴趣的同学可以直接将代码拉下来运行一下。</p>
+<p><strong>nextOneNode 变量的作用</strong>：通过上述图片我们知道 1 号节点最后要指向 4 号节点才行，那么我们就需要保存当前正在反转节点的下一个节点，这样我们才能拿到它的引用，所以这里定义了 nextOneNode 变量用来存储这个下一个节点的引用。</p>
+<p><strong>终止条件为什么是 n == 1</strong>：  上一个文章我们介绍了链表的反转，当时的终止条件是 head.next == null ，这个条件是用来判断当前节点是否为最后一个节点的。同理可证，当 n == 1 时，当前节点就是我们要反转的最后一个节点。</p>
+<p><strong>head.next = nextOneNode 的作用</strong>：这段代码与反转链表那节有所不同，反转链表是 head.next = null ，因为它的目的仅仅是将原来的引用切断，而上面指出了，我们需要“1 号节点指向 4 号节点” 所以不仅仅是断开链接这么简单，而是将链接指向当前节点的下一个节点。</p>
+<p>跟上一节文章一样，我们通过对内存进行分析来解构每条代码执行的逻辑。</p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227210721133.png" alt="image-20220227210721133"></p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227212411465.png" alt="image-20220227212411465"></p>
+<p>到这里我们已经能够反转链表的前 n 个节点了。解决了这个问题，我们就看下如何在这个基础上如何从指定位置开始反转。</p>
+<h2 id="如何从指定位置开始反转"><a href="#如何从指定位置开始反转" class="headerlink" title="如何从指定位置开始反转"></a>如何从指定位置开始反转</h2><p>比如说我们现在有个 5 节点链表，我们想反转节点为 2、3、4 那么链表将发生如下变化：</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227213721647.png" alt="image-20220227213721647" style="zoom:67%;" />
+
+<p>如果将 2、3、4 三个节点当成是一个单独的链表，我们是有能力反转它的，而当它们作为链表的一部分时，我们还需要做一些附加工作，就是让这个<strong>反转后的局部链表的头结点和尾结点正确的链接到链表的其他节点。</strong></p>
+<p><strong>而尾结点如何正确的链接到链表的工作我们在“如何反转前 n 个节点”这部分已经做完了</strong>，下面主要处理如何将局部链表的头结点正确的链接到链表中。</p>
+<p>代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 反转链表指定区间的节点</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> head       头节点</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> startIndex 开始索引</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> endIndex   结束索引</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="doctag">@link</span> Node&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Node <span class="title">reverseLinkedListInterval</span><span class="params">(Node head, <span class="keyword">int</span> startIndex, <span class="keyword">int</span> endIndex)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (startIndex == <span class="number">1</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> reverseLinkedListBeforeN(head, endIndex);</span><br><span class="line">	&#125;</span><br><span class="line">	head.next = reverseLinkedListInterval(head.next, startIndex - <span class="number">1</span>, endIndex - <span class="number">1</span>);</span><br><span class="line">	<span class="keyword">return</span> head;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>终止条件 startIndex == 1</strong>: 我们刚才说了，如果是单链表反转前 n 个节点我们早就会了，所以这里就将 startIndex == 1 时的节点当做 head 节点，我们可以叫它<strong>临时 head</strong>，然后从临时 head 开始反转前 n 个节点，然后再将返回的节点正确的放入链表中就可以了。</p>
+<p>因为 reverseLinkedListInterval 返回的是反转后的“局部链表”的临时 head ，所以我们将它放在当前方法栈帧中保存的 head 的 next 中，这样它就成功并且正确的链接到链表中了。</p>
+<p>注意，这里复用了刚才创建的 reverseLinkedListBeforeN 方法。</p>
+<p>下面我们通过对内存进行分析来解构每条代码执行的逻辑。</p>
+<p>此时，startIndex = 2；endIndex = 4；</p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227222607745.png" alt="image-20220227222607745"></p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227222820795.png" alt="image-20220227222820795"></p>
+<p>这样就达到了想要的效果。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>算法</tag>
+      </tags>
+  </entry>
 </search>

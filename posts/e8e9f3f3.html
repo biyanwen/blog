@@ -21,30 +21,27 @@
     var CONFIG = {"hostname":"biyw.cf","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="页的作用什么是页？页是 Mysql 从磁盘中加载数据的最小单位。页的大小为 16 kb。 为什么要按页加载数据呢？首先我们都知道磁盘 IO 是比较慢的，如果每查一条数据都要从磁盘中读取数据的话性能是很差的。所以当查询一条数据的时候 Mysql 会从磁盘中将与这条数据相近的数据都加载到内存中，这样可以大幅度提高性能。">
+  <meta name="description" content="上一篇文章我们介绍了如何反转链表，这篇文章我们主要介绍如何反转指定区间内的节点。 题目大概是这样的： 123题目：反向链接指定区间内的节点 startIndex &#x3D; 3, endIndex&#x3D; 5输入链表： 1 -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 5返回链表： 1 -&gt; 2 -&gt; 5 -&gt; 4 -&gt; 3  如果你经常在面对问题时一脸懵逼，那么这里介绍一">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Mysql-InnoDB页详解">
-<meta property="og:url" content="https://biyw.cf/posts/6d95a3c4.html">
+<meta property="og:title" content="算法-反转链表指定区间内的节点">
+<meta property="og:url" content="https://biyw.cf/posts/e8e9f3f3.html">
 <meta property="og:site_name" content="byw的博客">
-<meta property="og:description" content="页的作用什么是页？页是 Mysql 从磁盘中加载数据的最小单位。页的大小为 16 kb。 为什么要按页加载数据呢？首先我们都知道磁盘 IO 是比较慢的，如果每查一条数据都要从磁盘中读取数据的话性能是很差的。所以当查询一条数据的时候 Mysql 会从磁盘中将与这条数据相近的数据都加载到内存中，这样可以大幅度提高性能。">
+<meta property="og:description" content="上一篇文章我们介绍了如何反转链表，这篇文章我们主要介绍如何反转指定区间内的节点。 题目大概是这样的： 123题目：反向链接指定区间内的节点 startIndex &#x3D; 3, endIndex&#x3D; 5输入链表： 1 -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 5返回链表： 1 -&gt; 2 -&gt; 5 -&gt; 4 -&gt; 3  如果你经常在面对问题时一脸懵逼，那么这里介绍一">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://s2.loli.net/2022/01/16/m2UuVw6TJj3n4DN.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/16/4oQcxBLRvNiXpVn.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/16/qgZujyKwhvsGmVR.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/16/yv8cYiJaUhlwTdR.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/16/TAygI59sGi3tXLE.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/16/jo1xQOkR9t4mcFe.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/16/JmVZt469NpCI52q.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/16/Levo56ZiCRqtMg3.png">
-<meta property="og:image" content="https://s2.loli.net/2022/01/16/LjgPYlQzfkKnqFy.png">
-<meta property="article:published_time" content="2022-01-16T05:53:42.000Z">
-<meta property="article:modified_time" content="2022-02-03T08:07:12.575Z">
+<meta property="og:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227184048338.png">
+<meta property="og:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227210721133.png">
+<meta property="og:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227212411465.png">
+<meta property="og:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227213721647.png">
+<meta property="og:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227222607745.png">
+<meta property="og:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227222820795.png">
+<meta property="article:published_time" content="2022-02-27T09:51:42.000Z">
+<meta property="article:modified_time" content="2022-02-27T14:30:27.327Z">
 <meta property="article:author" content="Byw">
-<meta property="article:tag" content="Mysql">
+<meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://s2.loli.net/2022/01/16/m2UuVw6TJj3n4DN.png">
+<meta name="twitter:image" content="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227184048338.png">
 
-<link rel="canonical" href="https://biyw.cf/posts/6d95a3c4.html">
+<link rel="canonical" href="https://biyw.cf/posts/e8e9f3f3.html">
 
 
 <script id="page-configurations">
@@ -57,7 +54,7 @@
   };
 </script>
 
-  <title>Mysql-InnoDB页详解 | byw的博客</title>
+  <title>算法-反转链表指定区间内的节点 | byw的博客</title>
   
 
 
@@ -214,7 +211,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://biyw.cf/posts/6d95a3c4.html">
+    <link itemprop="mainEntityOfPage" href="https://biyw.cf/posts/e8e9f3f3.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/tx.jpg">
@@ -227,7 +224,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Mysql-InnoDB页详解
+          算法-反转链表指定区间内的节点
         </h1>
 
         <div class="post-meta">
@@ -236,16 +233,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2022-01-16 13:53:42" itemprop="dateCreated datePublished" datetime="2022-01-16T13:53:42+08:00">2022-01-16</time>
+              <time title="创建时间：2022-02-27 17:51:42 / 修改时间：22:30:27" itemprop="dateCreated datePublished" datetime="2022-02-27T17:51:42+08:00">2022-02-27</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-02-03 16:07:12" itemprop="dateModified" datetime="2022-02-03T16:07:12+08:00">2022-02-03</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -269,7 +260,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2.4k</span>
+              <span>2.2k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -288,51 +279,46 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="页的作用"><a href="#页的作用" class="headerlink" title="页的作用"></a>页的作用</h2><p>什么是页？页是 Mysql 从磁盘中加载数据的最小单位。页的大小为 16 kb。</p>
-<p>为什么要按页加载数据呢？首先我们都知道磁盘 IO 是比较慢的，如果每查一条数据都要从磁盘中读取数据的话性能是很差的。所以当查询一条数据的时候 Mysql 会从磁盘中将与这条数据相近的数据都加载到内存中，这样可以大幅度提高性能。</p>
+        <p>上一篇文章我们介绍了如何反转链表，这篇文章我们主要介绍如何反转指定区间内的节点。</p>
+<p>题目大概是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">题目：反向链接指定区间内的节点 startIndex = 3, endIndex= 5</span><br><span class="line">输入链表： 1 -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 5</span><br><span class="line">返回链表： 1 -&gt; 2 -&gt; 5 -&gt; 4 -&gt; 3</span><br></pre></td></tr></table></figure>
+
+<p>如果你经常在面对问题时一脸懵逼，那么这里介绍一个解决问题的思路，就是<strong>将一个复杂的问题，分解成很多简单的小问题。</strong>将每个小问题都解决了，那么那个复杂的大问题也就解决了。</p>
 <span id="more"></span>
 
-<h2 id="页是如何存储数据的"><a href="#页是如何存储数据的" class="headerlink" title="页是如何存储数据的"></a>页是如何存储数据的</h2><p> 页是使用<strong>单链表</strong>来存储数据的，并且数据是按照<strong>主键</strong>从小到大的顺序排列的。同时为了方便管理数据 Mysql 会在页中自动生成两条伪数据 Infimum 和 Supremum。Infimum 代表最小值，比真实数据的最小值要小， Supremum 代表最大值，比真实数据的最大值要大。如图：</p>
-<img src="https://s2.loli.net/2022/01/16/m2UuVw6TJj3n4DN.png" style="zoom:50%;" />
+<p>这个算法题可以分解成两个小问题，<strong>第一：如何反转前 n 个节点。第二：在能够反转前 n 个节点的基础上，如何从指定位置开始反转。</strong></p>
+<p>我们现在就来看下第一个小问题：</p>
+<h2 id="如何反转前-n-个节点"><a href="#如何反转前-n-个节点" class="headerlink" title="如何反转前 n 个节点"></a>如何反转前 n 个节点</h2><p>例如现在有一个 5 节点的单向链表，我们要反转前三个，那么当我们执行反转时链表会发生如下变化：</p>
+<p>3 号节点变成新的头结点，1 号节点指向 4 号节点。</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227184048338.png" alt="image-20220227184048338" style="zoom:67%;" />
 
-<p><strong>下面我们有一个疑问，下一条数据的<code>引用</code>是怎么存储在本条数据中的？</strong></p>
-<p>其实，每条记录主要分为两个部分，一个部分就是用来<strong>记录真实数据的</strong>，另一个部分是用来<strong>记录一些辅助信息的</strong>。如图：</p>
-<img src="https://s2.loli.net/2022/01/16/4oQcxBLRvNiXpVn.png" alt="image-20220116151922425" style="zoom:67%;" />
+<p>代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 下一个节点</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> Node nextOneNode;		</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 反向链接列表前 N 个节点</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> head 头</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> n    n</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="doctag">@link</span> Node&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> Node <span class="title">reverseLinkedListBeforeN</span><span class="params">(Node head, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (head == <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (n == <span class="number">1</span>) &#123;</span><br><span class="line">		nextOneNode = head.next;</span><br><span class="line">		<span class="keyword">return</span> head;</span><br><span class="line">	&#125;</span><br><span class="line">	Node lastNode = reverseLinkedListBeforeN(head.next, n - <span class="number">1</span>);</span><br><span class="line">	head.next.next = head;</span><br><span class="line">	head.next = nextOneNode;</span><br><span class="line">	<span class="keyword">return</span> lastNode;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+<p><a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/biyanwen/algorithmtest/blob/master/src/test/com/github/biyanwen/LinkedList.java">源码地址</a> 感兴趣的同学可以直接将代码拉下来运行一下。</p>
+<p><strong>nextOneNode 变量的作用</strong>：通过上述图片我们知道 1 号节点最后要指向 4 号节点才行，那么我们就需要保存当前正在反转节点的下一个节点，这样我们才能拿到它的引用，所以这里定义了 nextOneNode 变量用来存储这个下一个节点的引用。</p>
+<p><strong>终止条件为什么是 n == 1</strong>：  上一个文章我们介绍了链表的反转，当时的终止条件是 head.next == null ，这个条件是用来判断当前节点是否为最后一个节点的。同理可证，当 n == 1 时，当前节点就是我们要反转的最后一个节点。</p>
+<p><strong>head.next = nextOneNode 的作用</strong>：这段代码与反转链表那节有所不同，反转链表是 head.next = null ，因为它的目的仅仅是将原来的引用切断，而上面指出了，我们需要“1 号节点指向 4 号节点” 所以不仅仅是断开链接这么简单，而是将链接指向当前节点的下一个节点。</p>
+<p>跟上一节文章一样，我们通过对内存进行分析来解构每条代码执行的逻辑。</p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227210721133.png" alt="image-20220227210721133"></p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227212411465.png" alt="image-20220227212411465"></p>
+<p>到这里我们已经能够反转链表的前 n 个节点了。解决了这个问题，我们就看下如何在这个基础上如何从指定位置开始反转。</p>
+<h2 id="如何从指定位置开始反转"><a href="#如何从指定位置开始反转" class="headerlink" title="如何从指定位置开始反转"></a>如何从指定位置开始反转</h2><p>比如说我们现在有个 5 节点链表，我们想反转节点为 2、3、4 那么链表将发生如下变化：</p>
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227213721647.png" alt="image-20220227213721647" style="zoom:67%;" />
 
+<p>如果将 2、3、4 三个节点当成是一个单独的链表，我们是有能力反转它的，而当它们作为链表的一部分时，我们还需要做一些附加工作，就是让这个<strong>反转后的局部链表的头结点和尾结点正确的链接到链表的其他节点。</strong></p>
+<p><strong>而尾结点如何正确的链接到链表的工作我们在“如何反转前 n 个节点”这部分已经做完了</strong>，下面主要处理如何将局部链表的头结点正确的链接到链表中。</p>
+<p>代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 反转链表指定区间的节点</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> head       头节点</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> startIndex 开始索引</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> endIndex   结束索引</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="doctag">@link</span> Node&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Node <span class="title">reverseLinkedListInterval</span><span class="params">(Node head, <span class="keyword">int</span> startIndex, <span class="keyword">int</span> endIndex)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (startIndex == <span class="number">1</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> reverseLinkedListBeforeN(head, endIndex);</span><br><span class="line">	&#125;</span><br><span class="line">	head.next = reverseLinkedListInterval(head.next, startIndex - <span class="number">1</span>, endIndex - <span class="number">1</span>);</span><br><span class="line">	<span class="keyword">return</span> head;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>辅助信息这部分有很多用来记录信息的字段，而用来记录下一条记录的引用的字段叫做 <strong>next_record</strong>。所以数据之间的连接关系可以补充为下图这样：</p>
-<img src="https://s2.loli.net/2022/01/16/qgZujyKwhvsGmVR.png" alt="image-20220116152755131" style="zoom:50%;" />
-
-<p>同时，页中的数据并不是一开始就全部被填充进去的，因为要形成链表所以数据是一条一条插入的，而这个时候就涉及到内存分配的问题了，Mysql 将存储真实数据的部分叫做 <code>User Records</code> 然而 User Records 每次插入数据的时候都需要到 <code>Free Space</code> 去申请，这时 Free Space 会将一部分内存分配给 User Records 让其存储数据，当 Free Space 用完时就需要再创建一个页了。</p>
-<p>内存分配流程如下图：</p>
-<img src="https://s2.loli.net/2022/01/16/yv8cYiJaUhlwTdR.png" alt="image-20220116162143889" style="zoom:57%;" />
-
-<p>所以，以我们目前的知识可以知道页的布局如下：</p>
-<img src="https://s2.loli.net/2022/01/16/TAygI59sGi3tXLE.png" alt="image-20220116160339069" style="zoom:60%;" />
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">其实这里我有一个疑问，为什么要设计 Free Space 这个功能呢？就只有 User Records 不行吗？通过 User Records 的剩余空间是否可以插入下一条数据来判断是否需要创建一个新的页不行吗？可惜我还没有找到答案 o(╥﹏╥)o</span><br></pre></td></tr></table></figure>
-
-<p>现在我们都知道页中是通过单链表这种数据结构来存储数据的了，你可能会问，如果数据量很大，链表的查询速度会很慢，Mysql 是如何解决这种问题的呢？</p>
-<h2 id="优化页的查询速度"><a href="#优化页的查询速度" class="headerlink" title="优化页的查询速度"></a>优化页的查询速度</h2><h3 id="Infimum-和-Supremum"><a href="#Infimum-和-Supremum" class="headerlink" title="Infimum 和 Supremum"></a>Infimum 和 Supremum</h3><p>因为页中的数据是按照主键从小到大的顺序排列的，所以我们就能够很快的通过 Supremum 判断出要查找的数据是否在当前页中，如果不在就会直接跳过去下一个页中去查找，</p>
-<p>例如：Supremum 是 10 ，Supremum 是 80，但是你查的数据的 id = 100 ,那明显就不是在这个页中，需要到下一个页中去查找。而页与页的关联关系存储在 <strong>File Header</strong> 中如图：</p>
-<p><img src="https://s2.loli.net/2022/01/16/jo1xQOkR9t4mcFe.png" alt="image-20220116164123006"></p>
-<h3 id="Page-Directory"><a href="#Page-Directory" class="headerlink" title="Page Directory"></a>Page Directory</h3><p>通过以上方法虽然能将查找的数据锁定在一个页中，但是一个页可以存好多数据呀，那查找起来不是也很慢？为了解决这个问题，Mysql 创建了 Page Directory 页目录这个功能，这个功能的主要思想就是将链表中的数据进行分组，每个组最多只存储 8 条数据（这里有个例外，最小记录的分组只会有一条数据），然后按照从大到小的顺序将每个组有多少条记录的信息汇集在一起，然后通过对比主键的大小就可以将目标数据锁定在某个分组中了，因为分组中的数据很少，所以即使是遍历一次也很快，这就解决了链表查询速度慢的问题了。</p>
-<p>详细介绍页目录之前先介绍一下 <code>n_owned</code>这个字段，每条记录的<strong>辅助信息</strong>部分都维护一个 <code>n_owned</code> 字段，这个字段表示当前这个组有多少条数据，Infimum 的 n_owned 总是 1 ，而每组最大值的 n_owned 字段维护着这个组数据的总数目。而 Mysql 会将每个组的最大数据的引用用数组按照分组的顺序统一维护起来，并将数据中的元素称为槽。</p>
-<p>如下图，总共有五条记录，它们被 Mysql 分成两组，<u>最小记录</u> 总是被单独分一组所以它的 n_owned 是 1，剩下的 <u>记录1、2、3 及最大记录</u>四条记录被分为一组，所以第二组的最大值 Supremum 中的 n_owned 的数值是4。</p>
-<img src="https://s2.loli.net/2022/01/16/JmVZt469NpCI52q.png" alt="image-20220116213753322" style="zoom:67%;" />
-
-<p>因为为了方便举例子所以我们目前只有两个分组，实际上分组可能有成千上万甚至更多，当我们要在一个页中查找数据时就可以对页目录用<strong>二分查找法进行查找</strong>，每次取到中间的槽然后根据引用找到对应的数据并用主键进行比较，这样就可以很快的将数据锁定在某个数据分组中，而我们都知道每个组中最多有8条数据，所以即使都遍历一遍也不会很慢。</p>
-<p>到这里我们就又找到了一块拼图，可以将页的结构再完善一下，如图：</p>
-<img src="https://s2.loli.net/2022/01/16/Levo56ZiCRqtMg3.png" alt="image-20220116214517277" style="zoom:67%;" />
-
-<p>说完了数据查询，但是数据库不只是查询数据的，它也可以对数据进行更改，并且将数据同步到磁盘的最小单位也是页，但是如果同步到一半突然断电了怎么办？如果不增加验证的措施可能会录入不完整的数据，下面我们就来看下 Mysql 如何解决这个问题。</p>
-<h2 id="File-Trailer"><a href="#File-Trailer" class="headerlink" title="File Trailer"></a>File Trailer</h2><p>为了检验一个页中的数据是否完整的同步到磁盘中了，Mysql 在每个页中都增加了 File Trailer 部分。在数据开始同步前，Mysql 会针对页数据生成一个校验码，这个校验码在 File Header 和 File Trailer 中各存一份，当一个页的数据同步完成后，数据首部和尾部的校验码如果一致就说明数据同步成功，否则就代表失败。</p>
-<p>我们在页结构中补充上这一部分，如图：</p>
-<img src="https://s2.loli.net/2022/01/16/LjgPYlQzfkKnqFy.png" alt="image-20220116215711976" style="zoom:67%;" />
-
-<p>当然 Page Header 中不只存储着校验码，它还存储着一些其他的状态信息，例如本页中存储了多少条记录，第一条记录的内存地址，总共有多少个槽等等这些信息。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我在学习页的相关知识时也在网上看了很多同类型的博客，他们都有一个共同的问题就是大量罗列参数。好像学习页就是要记住每一个参数一样，我对此有不同的观点，如果你看到这里你可能会发现，我并没有把参数都罗列出来然后一个一个解释，甚至很多参数我都没有介绍，因为我们真正要学的不是参数，而是它的设计思想，比如如何优化链表查询，如何验证数据是否完整等等，而具体的参数你可以在需要的时候在网上查一下就好了，没必要死记硬背，这样反而让学习别的枯燥、痛苦。毕竟写代码也不是闭卷考试对吧。</p>
+<p><strong>终止条件 startIndex == 1</strong>: 我们刚才说了，如果是单链表反转前 n 个节点我们早就会了，所以这里就将 startIndex == 1 时的节点当做 head 节点，我们可以叫它<strong>临时 head</strong>，然后从临时 head 开始反转前 n 个节点，然后再将返回的节点正确的放入链表中就可以了。</p>
+<p>因为 reverseLinkedListInterval 返回的是反转后的“局部链表”的临时 head ，所以我们将它放在当前方法栈帧中保存的 head 的 next 中，这样它就成功并且正确的链接到链表中了。</p>
+<p>注意，这里复用了刚才创建的 reverseLinkedListBeforeN 方法。</p>
+<p>下面我们通过对内存进行分析来解构每条代码执行的逻辑。</p>
+<p>此时，startIndex = 2；endIndex = 4；</p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227222607745.png" alt="image-20220227222607745"></p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227222820795.png" alt="image-20220227222820795"></p>
+<p>这样就达到了想要的效果。</p>
 
     </div>
 
@@ -348,7 +334,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://biyw.cf/posts/6d95a3c4.html" title="Mysql-InnoDB页详解">https://biyw.cf/posts/6d95a3c4.html</a>
+    <a href="https://biyw.cf/posts/e8e9f3f3.html" title="算法-反转链表指定区间内的节点">https://biyw.cf/posts/e8e9f3f3.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener external nofollow noreferrer" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -359,7 +345,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/Mysql/" rel="tag"># Mysql</a>
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
           </div>
 
         
@@ -368,13 +354,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/posts/25cb8793.html" rel="prev" title="位运算学习笔记">
-      <i class="fa fa-chevron-left"></i> 位运算学习笔记
+    <a href="/posts/cfc6a184.html" rel="prev" title="算法-反转链表">
+      <i class="fa fa-chevron-left"></i> 算法-反转链表
     </a></div>
-      <div class="post-nav-item">
-    <a href="/posts/b7cc2c3.html" rel="next" title="Mysql-InnoDB索引详解">
-      Mysql-InnoDB索引详解 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -434,7 +417,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B5%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">页的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B5%E6%98%AF%E5%A6%82%E4%BD%95%E5%AD%98%E5%82%A8%E6%95%B0%E6%8D%AE%E7%9A%84"><span class="nav-number">2.</span> <span class="nav-text">页是如何存储数据的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E9%A1%B5%E7%9A%84%E6%9F%A5%E8%AF%A2%E9%80%9F%E5%BA%A6"><span class="nav-number">3.</span> <span class="nav-text">优化页的查询速度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Infimum-%E5%92%8C-Supremum"><span class="nav-number">3.1.</span> <span class="nav-text">Infimum 和 Supremum</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Page-Directory"><span class="nav-number">3.2.</span> <span class="nav-text">Page Directory</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#File-Trailer"><span class="nav-number">4.</span> <span class="nav-text">File Trailer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%8F%8D%E8%BD%AC%E5%89%8D-n-%E4%B8%AA%E8%8A%82%E7%82%B9"><span class="nav-number">1.</span> <span class="nav-text">如何反转前 n 个节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BB%8E%E6%8C%87%E5%AE%9A%E4%BD%8D%E7%BD%AE%E5%BC%80%E5%A7%8B%E5%8F%8D%E8%BD%AC"><span class="nav-number">2.</span> <span class="nav-text">如何从指定位置开始反转</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -598,7 +581,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'blog',
       owner       : 'biyanwen',
       admin       : ['biyanwen'],
-      id          : '32e8bfb56dc84ecda010673d3dc7579e',
+      id          : '0c8cc407b88a77d508ca045a8d2096d2',
         language: 'zh-CN',
       distractionFreeMode: true
     });

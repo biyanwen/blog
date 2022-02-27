@@ -6,7 +6,7 @@
   <link href="https://biyw.cf/atom.xml" rel="self"/>
   
   <link href="https://biyw.cf/"/>
-  <updated>2022-02-26T05:14:19.344Z</updated>
+  <updated>2022-02-27T14:30:27.327Z</updated>
   <id>https://biyw.cf/</id>
   
   <author>
@@ -17,11 +17,34 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>算法-反转链表指定区间内的节点</title>
+    <link href="https://biyw.cf/posts/e8e9f3f3.html"/>
+    <id>https://biyw.cf/posts/e8e9f3f3.html</id>
+    <published>2022-02-27T09:51:42.000Z</published>
+    <updated>2022-02-27T14:30:27.327Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;上一篇文章我们介绍了如何反转链表，这篇文章我们主要介绍如何反转指定区间内的节点。&lt;/p&gt;
+&lt;p&gt;题目大概是这样的：&lt;/p&gt;
+&lt;figure class=&quot;highlight plaintext&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;题目：反向链接指定区间内的节点 startIndex = 3, endIndex= 5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;输入链表： 1 -&amp;gt; 2 -&amp;gt; 3 -&amp;gt; 4 -&amp;gt; 5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;返回链表： 1 -&amp;gt; 2 -&amp;gt; 5 -&amp;gt; 4 -&amp;gt; 3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;如果你经常在面对问题时一脸懵逼，那么这里介绍一个解决问题的思路，就是&lt;strong&gt;将一个复杂的问题，分解成很多简单的小问题。&lt;/strong&gt;将每个小问题都解决了，那么那个复杂的大问题也就解决了。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
+    
+    
+    <category term="算法" scheme="https://biyw.cf/tags/%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
+  
+  <entry>
     <title>算法-反转链表</title>
     <link href="https://biyw.cf/posts/cfc6a184.html"/>
     <id>https://biyw.cf/posts/cfc6a184.html</id>
     <published>2022-02-23T14:14:33.000Z</published>
-    <updated>2022-02-26T05:14:19.344Z</updated>
+    <updated>2022-02-26T05:14:28.802Z</updated>
     
     
     <summary type="html">&lt;p&gt;关于如何反转链表我们直接通过代码进行讲解。&lt;/p&gt;
@@ -447,27 +470,6 @@
     <category term="分布式" scheme="https://biyw.cf/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
     
     <category term="多线程" scheme="https://biyw.cf/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>【通过抓包学网络】TCP三次握手与四次挥手﻿</title>
-    <link href="https://biyw.cf/posts/b65feaa2.html"/>
-    <id>https://biyw.cf/posts/b65feaa2.html</id>
-    <published>2021-12-05T06:47:29.126Z</published>
-    <updated>2022-02-03T08:07:12.593Z</updated>
-    
-    
-    <summary type="html">&lt;p&gt;本文章是通过wireshark来抓包的，如果你对这个工具不熟悉可以看这篇文章&lt;a href=&quot;https://blog.csdn.net/qq_43005544/article/details/116504407&quot;&gt;wireshark 简易教程&lt;/a&gt;&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="技术" scheme="https://biyw.cf/categories/%E6%8A%80%E6%9C%AF/"/>
-    
-    
-    <category term="Wireshark" scheme="https://biyw.cf/tags/Wireshark/"/>
-    
-    <category term="网络" scheme="https://biyw.cf/tags/%E7%BD%91%E7%BB%9C/"/>
     
   </entry>
   
