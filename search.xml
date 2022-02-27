@@ -2669,7 +2669,7 @@
 <p>下面我们通过对内存进行分析来解构每条代码执行的逻辑。</p>
 <p>此时，startIndex = 2；endIndex = 4；</p>
 <p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227222607745.png" alt="image-20220227222607745"></p>
-<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227222820795.png" alt="image-20220227222820795"></p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220227224240763.png" alt="image-20220227224240763"></p>
 <p>这样就达到了想要的效果。</p>
 ]]></content>
       <categories>
