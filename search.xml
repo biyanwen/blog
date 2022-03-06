@@ -2679,4 +2679,37 @@
         <tag>算法</tag>
       </tags>
   </entry>
+  <entry>
+    <title>算法-K个一组反转链表</title>
+    <url>/posts/8125046d.html</url>
+    <content><![CDATA[<p>我们先来分析一下这个问题，假设我们有一个 5 节点的链表，我们以两个为一组进行转换，那么转换过程会如下图所示，</p>
+<p>这个过程中我们将每组链表当做一个局部链表，并标注出每个局部链表头结点和尾结点的变化过程：</p>
+<span id="more"></span>
+
+<img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220302131339718.png" alt="image-20220302131339718" style="zoom:60%;" />
+
+<p>通过分析这个过程我们得到如下规律：</p>
+<ol>
+<li>每次仅反转两个节点，需要多次反转才能达到目的；</li>
+<li><strong>进行链表反转的条件</strong>：局部链表的节点数量大于2 ；</li>
+<li>每次反转得到的局部链表的头结点会挂载到上一次反转之后得到的局部链表的尾结点上（如果是第一次，那就是整个链表的头结点）；</li>
+</ol>
+<p>根据总结的以上规律，代码实现如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * K 个一组反转链表</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> head 头</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> k    k</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="doctag">@link</span> Node&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Node <span class="title">reverseLinkedListGroupOfK</span><span class="params">(Node head, <span class="keyword">int</span> k)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (head == <span class="keyword">null</span> || head.next == <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> head;</span><br><span class="line">	&#125;</span><br><span class="line">	Node tmpNode = head;</span><br><span class="line">	<span class="comment">// 判断链表是否够长 k</span></span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; k; i++) &#123;</span><br><span class="line">		tmpNode = tmpNode.next;</span><br><span class="line">		<span class="keyword">if</span> (tmpNode == <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> head;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 如果够长就反转以 head 为头结点的前 k 个节点</span></span><br><span class="line">	Node newHead = reverseLinkedListBeforeN(head, k);</span><br><span class="line">	head.next = reverseLinkedListGroupOfK(head.next, k);</span><br><span class="line">	<span class="keyword">return</span> newHead;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 反转链表前 N 个节点</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> head 头</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> n    n</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> &#123;<span class="doctag">@link</span> Node&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> Node <span class="title">reverseLinkedListBeforeN</span><span class="params">(Node head, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (head == <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (n == <span class="number">1</span>) &#123;</span><br><span class="line">		nextOneNode = head.next;</span><br><span class="line">		<span class="keyword">return</span> head;</span><br><span class="line">	&#125;</span><br><span class="line">	Node lastNode = reverseLinkedListBeforeN(head.next, n - <span class="number">1</span>);</span><br><span class="line">	head.next.next = head;</span><br><span class="line">	head.next = nextOneNode;</span><br><span class="line">	<span class="keyword">return</span> lastNode;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关于【反转链表前 N 个节点】我们在【<strong>算法-反转链表指定区间内的节点</strong>】中已经详细的分析过了，所以这里就不再展开讲了。我们按照以前的套路直接来分析一下<strong>K 个一组反转链表</strong>在 Java 中是如何运行的。</p>
+<p>记住我们的条件是：5节点链表，两个一组进行反转。</p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220306211707316.png" alt="image-20220306211707316"></p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220306211746866.png" alt="image-20220306211746866"></p>
+<p><img src="https://gitee.com/biyanwenhante/picture-bed/raw/master/image-20220306211850218.png" alt="image-20220306211850218"></p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>算法</tag>
+      </tags>
+  </entry>
 </search>
